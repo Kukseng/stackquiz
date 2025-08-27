@@ -1,0 +1,16 @@
+{
+  "navbar": {
+    "home": "Home",
+    "explore": "Explore",
+    "live": "Live Quiz",
+    "about": "About Us",
+    "signup": "Sign Up"
+  },
+  "hero": {
+    "engageWith": "Engage with",
+    "organizer": "Organizer",
+    "realTime": "Real-time",
+    "description": "Get participants excited while you host live knowledge-filled quizzes. Question maps and theme them to any subject!",
+    "getStarted": "Get Start"
+  }
+}

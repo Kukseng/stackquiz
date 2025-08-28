@@ -30,7 +30,7 @@ export default function Footer() {
             </div>
             <div>
               <div className="text-xl font-bold">
-                STACK <span className="text-orange-400">QUIZZ</span>
+                STACK <span className="text-yellow">QUIZZ</span>
               </div>
             </div>
           </div>

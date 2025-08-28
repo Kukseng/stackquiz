@@ -32,11 +32,19 @@ export function Navbar() {
   }, []);
 
   return (
-    <header className={`fixed top-0 left-0 right-0 z-50  font-bold w-full px-4 py-4 transition-colors duration-300 ${scrolled ? "bg-[#183DA1]" : "bg-gray-screen-page"}`}>
+    <header
+      className={`fixed top-0 left-0 right-0 z-50 font-bold w-full px-4 py-4 transition-colors duration-300 ${
+        scrolled ? "bg-[#1355b4]/70 backdrop-blur-lg" : "bg-gray-screen-page"
+      }`}
+    >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo_Stack_Quiz-v2.png" alt="logo" className="w-10 h-10 object-contain" />
+          <img
+            src="/logo_Stack_Quiz-v2.png"
+            alt="logo"
+            className="w-10 h-10 object-contain"
+          />
           <span className="hidden md:inline text-2xl font-bold">
             <span className="text-white">STACK</span>
             <span className="text-yellow">QUIZ</span>
@@ -45,10 +53,18 @@ export function Navbar() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-8">
-          {navLinks.map(link => {
+          {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
-              <Link key={link.href} href={link.href} className={`transition-colors ${isActive ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00] hover:underline"}`}>
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`transition-colors ${
+                  isActive
+                    ? "text-[#FFCC00]"
+                    : "text-white hover:text-[#FFCC00] hover:underline"
+                }`}
+              >
                 {link.name}
               </Link>
             );
@@ -58,14 +74,27 @@ export function Navbar() {
         {/* Actions + Mobile Menu Button */}
         <div className="flex items-center gap-4">
           {/* Language toggle */}
-          <button onClick={toggleLanguage} className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-lg">
+          <button
+            onClick={toggleLanguage}
+            className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-lg"
+          >
             {language === "en" ? (
               <>
-                <ReactCountryFlag countryCode="US" svg style={{ width: "1.5em", height: "1.5em" }} /> EN
+                <ReactCountryFlag
+                  countryCode="US"
+                  svg
+                  style={{ width: "1.5em", height: "1.5em" }}
+                />{" "}
+                EN
               </>
             ) : (
               <>
-                <ReactCountryFlag countryCode="KH" svg style={{ width: "1.5em", height: "1.5em" }} /> ខ្មែរ
+                <ReactCountryFlag
+                  countryCode="KH"
+                  svg
+                  style={{ width: "1.5em", height: "1.5em" }}
+                />{" "}
+                ខ្មែរ
               </>
             )}
           </button>
@@ -78,8 +107,15 @@ export function Navbar() {
           </Link>
 
           {/* Mobile menu toggle */}
-          <button className="md:hidden text-white ml-2" onClick={() => setMobileOpen(!mobileOpen)}>
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          <button
+            className="md:hidden text-white ml-2"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>
@@ -87,10 +123,19 @@ export function Navbar() {
       {/* Mobile Nav */}
       {mobileOpen && (
         <nav className="md:hidden bg-gray-screen-page px-4 pt-4 pb-6 space-y-3">
-          {navLinks.map(link => {
+          {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
-              <Link key={link.href} href={link.href} className={`block text-lg transition-colors ${isActive ? "text-[#FFCC00]" : "text-white hover:text-[#FFCC00] hover:underline"}`} onClick={() => setMobileOpen(false)}>
+              <Link
+                key={link.href}
+                href={link.href}
+                className={`block text-lg transition-colors ${
+                  isActive
+                    ? "text-[#FFCC00]"
+                    : "text-white hover:text-[#FFCC00] hover:underline"
+                }`}
+                onClick={() => setMobileOpen(false)}
+              >
                 {link.name}
               </Link>
             );

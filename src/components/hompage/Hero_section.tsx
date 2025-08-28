@@ -41,7 +41,7 @@ export function HeroSection() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="px-4 sm:px-6 md:px-12 lg:px-20 xl:px-36 py-16 sm:py-20 md:py-28 lg:py-36 xl:py-44">
+    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 sm:py-6 md:py-9 lg:py-10 xl:py-11">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Text Content */}
@@ -51,7 +51,7 @@ export function HeroSection() {
             animate={textControls}
             className="text-center lg:text-left"
           >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
+            <h1 className="text-3xl py-7 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
               {t.hero.engageWith}
               <br />
               {t.hero.organizer}

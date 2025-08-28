@@ -64,7 +64,7 @@ export function QuizTypeComponent() {
   }, [inViews, controls]);
 
   return (
-    <section className="px-4 sm:px-6 md:px-12 lg:px-20 xl:px-36 py-16 sm:py-24 md:py-32 lg:py-40">
+    <section className="px-4">
       <h2 className="text-3xl  text-center sm:text-4xl text-underline font-extrabold text-yellow  text-yellow mb-10">
         Question Types
       </h2>

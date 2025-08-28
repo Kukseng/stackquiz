@@ -39,7 +39,7 @@ export function TopPlayersSection() {
   }, [titleInView, winnerInView, secondInView, thirdInView, titleControls, winnerControls, secondControls, thirdControls]);
 
   return (
-    <section className="relative px-4 py-12 sm:py-20 overflow-hidden">
+    <section className="relative px-4  overflow-hidden">
       <div className="relative max-w-5xl mx-auto text-center">
 
         {/* Title */}

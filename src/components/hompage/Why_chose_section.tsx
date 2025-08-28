@@ -54,10 +54,10 @@ export function WhyChooseSection() {
   }, [inViews, controls]);
 
   return (
-    <section className="py-20 glow-pink">
-      <div className="max-w-7xl  mx-auto text-center">
-        <h2 className="text-4xl font-bold text-white mb-4">
-          Why Choose <span className="text-yellow">StackQuizz ?</span>
+    <section className="py-12 glow-pink ">
+      <div className="max-w-7xl  mx-auto text-center ">
+        <h2 className="text-4xl font-bold  text-white mb-4">
+          Why Choose <span className="text-yellow text-underline">STACKQUIZ ?</span>
         </h2>
 
         <div className="grid md:grid-cols-3 gap-8 mt-12">
@@ -67,7 +67,7 @@ export function WhyChooseSection() {
               ref={refs[index]}
               initial={{ opacity: 0, y: 50 }}
               animate={controls[index]}
-              className="relative rounded-2xl p-[3px]  overflow-hidden"
+              className="relative rounded-2xl p-[3px] card-glow  transform transition duration-300 hover:scale-110 overflow-hidden"
             >
               {/* Gradient Border Layer */}
               <div

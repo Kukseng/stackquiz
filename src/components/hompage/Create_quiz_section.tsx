@@ -38,7 +38,7 @@ export default function CreateQuizSection() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <div className="w-full px-4 sm:px-7   md:px-8 lg:px-10 xl:px-12 py-6">
+    <div className="w-full px-4 sm:px-7  md:px-8 lg:px-10 xl:px-12 py-12">
       <motion.div
         className="bg-gray-screen-page  box-radius max-w-3xl w-full flex flex-col lg:flex-row items-center lg:items-stretch p-8 sm:p-4 lg:p-6 gap-3 lg:gap-4 mx-auto"
         initial={{ scale: 1 }}

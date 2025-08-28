@@ -8,6 +8,14 @@ import { useRef, useEffect } from "react";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
+import { StatsSection } from "./State_section";
+import CreateQuizSection from "./Create_quiz_section";
+import { WhyChooseSection } from "./Why_chose_section";
+import { PlatformSection } from "./Plateform_section";
+import { FeedbackQuiz } from "./Feedback_section";
+import { QuizTypeComponent } from "./Type_quiz";
+import { TopPlayersSection } from "./Top_player";
+import { CTASection } from "./Cta_section";
 
 export function HeroSection() {
   const { language } = useLanguage();
@@ -23,18 +31,19 @@ export function HeroSection() {
   const imgInView = useInView(imgRef, { once: false, margin: "-100px" });
 
   useEffect(() => {
-    if (textInView) textControls.start({ opacity: 1, x: 0, transition: { duration: 0.8 } });
+    if (textInView)
+      textControls.start({ opacity: 1, x: 0, transition: { duration: 0.8 } });
     else textControls.start({ opacity: 0, x: -50 });
 
-    if (imgInView) imgControls.start({ opacity: 1, x: 0, scale: 1, transition: { duration: 0.8 } });
+    if (imgInView)
+      imgControls.start({ opacity: 1, x: 0, scale: 1, transition: { duration: 0.8 } });
     else imgControls.start({ opacity: 0, x: 50, scale: 0.95 });
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="py-20 sm:py-32 lg:py-40 px-4 sm:px-8 md:px-16">
+    <section className="px-4 sm:px-6 md:px-12 lg:px-20 xl:px-36 py-16 sm:py-20 md:py-28 lg:py-36 xl:py-44">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
           {/* Text Content */}
           <motion.div
             ref={textRef}
@@ -49,9 +58,9 @@ export function HeroSection() {
               <br />
               <span>{t.hero.realTime}</span>
               <br />
-              <span className="text-yellow underline underline-offset-12 decoration-gray-200">
+              <span className="text-yellow text-underline decoration-gray-200">
                 <TextType
-                  text={["STACKQUIZ",""]}
+                  text={["STACKQUIZ", ""]}
                   typingSpeed={300}
                   pauseDuration={1200}
                   showCursor={true}
@@ -63,6 +72,7 @@ export function HeroSection() {
             <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0">
               {t.hero.description}
             </p>
+
             <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
               {t.hero.getStarted}
             </Button>
@@ -81,9 +91,18 @@ export function HeroSection() {
               className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto"
             />
           </motion.div>
-
         </div>
       </div>
+      {/* <main className="px-4">
+        <StatsSection />
+        <CreateQuizSection />
+        <WhyChooseSection />
+        <PlatformSection />
+        <FeedbackQuiz />
+        <TopPlayersSection />
+        <QuizTypeComponent />
+        <CTASection />
+      </main> */}
     </section>
   );
 }

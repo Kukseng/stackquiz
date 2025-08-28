@@ -19,7 +19,7 @@ export function PlatformSection() {
       imgControls.start({
         opacity: 1,
         y: 0,
-        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.2 }, // delay image
+        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.4 }, 
       });
     } else {
       imgControls.start({ opacity: 0, y: 50 });
@@ -29,7 +29,7 @@ export function PlatformSection() {
       textControls.start({
         opacity: 1,
         y: 0,
-        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.6 }, // text delay after image
+        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.3 }, 
       });
     } else {
       textControls.start({ opacity: 0, y: 50 });
@@ -37,7 +37,7 @@ export function PlatformSection() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="py-16 sm:py-20">
+    <section className="py-12 sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 

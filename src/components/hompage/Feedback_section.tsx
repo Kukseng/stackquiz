@@ -27,11 +27,11 @@ const ReviewCard = ({
   return (
     <figure
       className={cn(
-        "relative h-full  w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
+        "relative h-full py-12  w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
         "border-gray-300 bg-transparent hover:bg-gray-800/10", // subtle hover
       )}
     >
-      <div className="flex  flex-row items-center gap-2">
+      <div className="flex flex-row items-center  gap-2">
         <img className="rounded-full" width="32" height="32" alt="" src={img} />
         <div className="flex flex-col">
           <figcaption className="text-white text-sm font-medium">{name}</figcaption>
@@ -43,7 +43,7 @@ const ReviewCard = ({
   );
 };
 
-export function MarqueeDemo() {
+export function FeedbackQuiz() {
   return (
     <div className="relative max-w-7xl mx-auto flex w-full flex-col items-center justify-center overflow-hidden">
       <Marquee pauseOnHover className="[--duration:20s] gap-4">

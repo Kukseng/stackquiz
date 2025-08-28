@@ -14,94 +14,91 @@ interface QuizType {
 const items: QuizType[] = [
   {
     id: 1,
-    title: "Fill the blank",
-    description: "Choose the correct answer from several options.",
-    color: "bg-purple-500",
+    title: "Fill the Blank",
+    description: "Complete the sentence with the correct answer.",
+    color: "bg-orange-700",
     image: "type_quiz/fill.svg",
   },
   {
     id: 2,
     title: "Multiple Choice",
     description: "Choose the correct answer from several options.",
-    color: "bg-lime-400",
+    color: "bg-green-600",
     image: "type_quiz/multi.svg",
   },
   {
     id: 3,
     title: "True/False",
-    description: "Choose the correct answer from true or false.",
-    color: "bg-purple-500",
+    description: "Decide if the statement is correct or not.",
+    color: "bg-purple-600",
     image: "type_quiz/truefalse.svg",
   },
 ];
 
 export function QuizTypeComponent() {
-  const [active, setActive] = useState(1);
+  const [active, setActive] = useState(0);
 
   const prev = () =>
     setActive((prevIndex) => (prevIndex - 1 + items.length) % items.length);
   const next = () => setActive((prevIndex) => (prevIndex + 1) % items.length);
 
-  // Animation refs and controls
+  // Animation refs
   const refs = items.map(() => useRef<HTMLDivElement>(null));
   const controls = items.map(() => useAnimation());
-  const inViews = refs.map((ref) => useInView(ref, { once: false, margin: "-100px" }));
+  const inViews = refs.map((ref) =>
+    useInView(ref, { once: false, margin: "-100px" })
+  );
 
   useEffect(() => {
     inViews.forEach((inView, idx) => {
       if (inView) {
-        controls[idx].start({ opacity: 1, y: 0, transition: { type: "spring", stiffness: 80, damping: 20, delay: idx * 0.2 } });
+        controls[idx].start({
+          opacity: 1,
+          y: 0,
+          transition: { type: "spring", stiffness: 80, damping: 20, delay: idx * 0.2 },
+        });
       } else {
-        controls[idx].start({ opacity: 0, y: 50 });
+        controls[idx].start({ opacity: 0, y: 40 });
       }
     });
   }, [inViews, controls]);
 
   return (
-    <div className="py-12">
-      <h2 className="text-3xl py-8 text-center sm:text-4xl font-extrabold text-white mb-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]">
+    <section className="px-4 sm:px-6 md:px-12 lg:px-20 xl:px-36 py-16 sm:py-24 md:py-32 lg:py-40">
+      <h2 className="text-3xl  text-center sm:text-4xl text-underline font-extrabold text-yellow  text-yellow mb-10">
         Question Types
       </h2>
 
-      <div className="relative w-full  max-w-4xl mx-auto  flex  items-center justify-center">
+      <div className="relative w-full max-w-5xl mx-auto flex items-center justify-center">
         {/* Cards */}
-        <div className="perspective relative w-full  flex items-center justify-center h-80">
+        <div className="relative w-full glow-pink flex items-center justify-center h-[420px] sm:h-[460px] perspective">
           {items.map((item, index) => {
             const isCenter = index === active;
             const isRight = index === (active + 1) % items.length;
             const isLeft = index === (active - 1 + items.length) % items.length;
 
-            let className =
-              "absolute w-64 h-80 rounded-xl card-glow text-white p-4 transition-all duration-500 transform flex flex-col items-center justify-between";
-
-            if (isCenter) className += " z-20 scale-110"; // center
-            else if (isRight)
-              className +=
-                " translate-x-40 scale-90 rotate-y-[-20deg] opacity-50 z-10"; // right smaller
-            else if (isLeft)
-              className +=
-                " -translate-x-40 scale-90 rotate-y-[20deg] opacity-50 z-10"; // left smaller
-            else className += " scale-80 opacity-0 z-0"; // hidden
-
             return (
               <motion.div
                 key={item.id}
                 ref={refs[index]}
-                initial={{ opacity: 0, y: 50 }}
+                initial={{ opacity: 0, y: 40 }}
                 animate={controls[index]}
-                className={`${className} ${item.color}`}
+                whileHover={{ scale: 1.05 }}
+                className={`absolute w-52 sm:w-56 md:w-60 lg:w-64 h-72 sm:h-80 md:h-96 rounded-xl text-gray-200 p-5 flex flex-col items-center justify-between shadow-lg transition-transform duration-500
+                  ${isCenter ? "z-20 scale-110" : ""}
+                  ${isRight ? "translate-x-32 sm:translate-x-40 scale-90 rotate-y-[-20deg] opacity-50 z-10" : ""}
+                  ${isLeft ? "-translate-x-32 sm:-translate-x-40 scale-90 rotate-y-[20deg] opacity-50 z-10" : ""}
+                  ${!isCenter && !isRight && !isLeft ? "scale-75 opacity-0 z-0" : ""}
+                  ${item.color}`}
               >
-                {/* Image */}
                 <img
                   src={item.image}
                   alt={item.title}
-                  className="w-24 h-24 object-cover rounded-full mx-auto mb-2"
+                  className="w-20 h-20 sm:w-24 sm:h-24 object-contain mx-auto mb-4"
                 />
-
-                {/* Text */}
                 <div className="text-center">
-                  <div className="text-lg font-bold mb-2">{item.title}</div>
-                  <div className="text-sm">{item.description}</div>
+                  <h3 className="text-lg sm:text-xl font-bold mb-2">{item.title}</h3>
+                  <p className="text-sm sm:text-base">{item.description}</p>
                 </div>
               </motion.div>
             );
@@ -111,17 +108,17 @@ export function QuizTypeComponent() {
         {/* Navigation */}
         <button
           onClick={prev}
-          className="absolute left-0 top-1/2 -translate-y-1/2 text-white bg-black/40 p-3 rounded-full hover:bg-black/60"
+          className="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 text-white bg-black/40 p-3 rounded-full hover:bg-black/60 transition"
         >
           <FaArrowLeft size={20} />
         </button>
         <button
           onClick={next}
-          className="absolute right-0 top-1/2 -translate-y-1/2 text-white bg-black/40 p-3 rounded-full hover:bg-black/60"
+          className="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 text-white bg-black/40 p-3 rounded-full hover:bg-black/60 transition"
         >
           <FaArrowRight size={20} />
         </button>
       </div>
-    </div>
+    </section>
   );
 }

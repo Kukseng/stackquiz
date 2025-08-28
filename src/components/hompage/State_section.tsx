@@ -6,9 +6,9 @@ export function StatsSection() {
   ];
 
   return (
-    <section className="relative  w-full py-6 bg-footer glow-pink glowAnim">
+    <section className="relative  w-full  py-12 bg-footer glow-pink glowAnim">
       {/* Content */}
-      <div className="relative max-w-7xl mx-auto z-10 flex items-center justify-center px-4">
+      <div className="relative max-w-7xl mx-auto glow-pink z-10 flex items-center justify-center px-4">
         <div className=" w-full grid md:grid-cols-3 gap-8 text-center">
           {stats.map((stat, index) => (
             <div key={index} className="flex flex-col items-center p-4 transition-transform duration-500 ease-in-out hover:scale-120">

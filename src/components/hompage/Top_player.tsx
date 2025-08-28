@@ -39,7 +39,7 @@ export function TopPlayersSection() {
   }, [titleInView, winnerInView, secondInView, thirdInView, titleControls, winnerControls, secondControls, thirdControls]);
 
   return (
-    <section className="relative px-4 py-16 sm:py-20 overflow-hidden">
+    <section className="relative px-4 py-12 sm:py-20 overflow-hidden">
       <div className="relative max-w-5xl mx-auto text-center">
 
         {/* Title */}
@@ -47,8 +47,7 @@ export function TopPlayersSection() {
           ref={titleRef}
           initial={{ opacity: 0, y: 30 }}
           animate={titleControls}
-          className="text-3xl py-24 sm:text-4xl font-extrabold text-white mb-10 drop-shadow-[0_0_10px_rgba(255,255,255,0.7)]"
-        >
+          className="text-3xl py-24 sm:text-4xl text-underline font-extrabold text-yellow  text-yellow mb-10 ">
           Top Players
         </motion.h2>
 
@@ -59,10 +58,16 @@ export function TopPlayersSection() {
             ref={secondRef}
             initial={{ opacity: 0, y: 50 }}
             animate={secondControls}
-            className="text-center scale-90 card-glow sm:scale-100"
+            className="text-center scale-90 sm:scale-100 hover:scale-110 transition-transform duration-300"
           >
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full border-4 border-cyan-400 bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.9)]">
-              <span className="text-white text-lg sm:text-xl font-bold">V</span>
+              <Image
+                src="avatar.svg"
+                alt="Lina"
+                width={96}
+                height={96}
+                className="rounded-full object-cover"
+              />
               <div className="absolute -bottom-3 left-1/2 -translate-x-1/2 w-7 h-7 sm:w-8 sm:h-8 bg-cyan-500 text-black text-xs sm:text-sm font-extrabold flex items-center justify-center rounded-full border-2 border-white shadow-[0_0_10px_rgba(34,211,238,0.8)]">
                 2
               </div>
@@ -76,14 +81,15 @@ export function TopPlayersSection() {
             ref={winnerRef}
             initial={{ opacity: 0, y: 50 }}
             animate={winnerControls}
-            className="text-center card-glow relative scale-110 sm:scale-125"
+            className="text-center relative scale-110 sm:scale-125 hover:scale-135 transition-transform duration-300"
           >
             {/* Crown */}
             <div className="absolute -top-10 z-20 sm:-top-14 left-1/2 -translate-x-1/2 text-5xl sm:text-7xl drop-shadow-[0_0_20px_rgba(255,215,0,1)]">
-              👑
+              <Image src="crown.svg" alt="crown" width={90} height={80} />
             </div>
             <div className="relative w-28 h-28 sm:w-36 sm:h-36 mx-auto rounded-full border-4 border-yellow-400 bg-purple-900 flex items-center justify-center shadow-[0_0_35px_rgba(255,215,0,1)] animate-pulse">
-              <span className="text-white text-4xl sm:text-5xl font-bold">👤</span>
+              <Image src="avatar.svg" alt="crown" width={90} height={80} />
+            
               <div className="absolute -bottom-3 sm:-bottom-4 left-1/2 -translate-x-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400 text-black text-xs sm:text-base font-extrabold flex items-center justify-center rounded-full border-2 border-white shadow-[0_0_15px_rgba(255,215,0,0.9)]">
                 1
               </div>
@@ -99,11 +105,11 @@ export function TopPlayersSection() {
             ref={thirdRef}
             initial={{ opacity: 0, y: 50 }}
             animate={thirdControls}
-            className="text-center card-glow sm:scale-100"
+            className="text-center sm:scale-100 hover:scale-110 transition-transform duration-300"
           >
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full border-4 border-orange-400 bg-orange-600 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.9)]">
               <Image
-                src="/avatar.png"
+                src="avatar.svg"
                 alt="Lina"
                 width={96}
                 height={96}

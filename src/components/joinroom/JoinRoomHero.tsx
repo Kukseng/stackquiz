@@ -15,13 +15,7 @@ export default function JoinRoomHero() {
   };
 
   return (
-    <div
-      className="relative min-h-dvh overflow-clip cosmic-bg"
-      style={{
-        marginLeft: "calc(var(--padding-x) * -1)",
-        marginRight: "calc(var(--padding-x) * -1)",
-      }}
-    >
+    <div>
       {/* LEFT wavy — bottom-left, tucked under left ring */}
       <img
         src="/wavy.svg"
@@ -29,9 +23,8 @@ export default function JoinRoomHero() {
         aria-hidden
         draggable={false}
         className="
-    pointer-events-none select-none absolute z-0
-    left-[-220px] bottom-[-640px] w-[840px] opacity-80 rotate-z-180
-  "
+          pointer-events-none select-none absolute z-0
+        left-[-220px] bottom-[-340px] w-[540px] opacity-80 rotate-z-180"
       />
 
       {/* RIGHT wavy — just above the right ring (mirrored) */}
@@ -42,33 +35,9 @@ export default function JoinRoomHero() {
         draggable={false}
         className="
           pointer-events-none select-none absolute z-0
-          right-[-100px] bottom-[420px] w-[540px] opacity-80 scale-z-[-1]
+          right-[-110px] bottom-[420px] w-[340px] opacity-80 scale-z-[-1]
         "
       />
-
-      {/* --- Star field --- */}
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 z-0"
-        style={{
-          background: `
-            radial-gradient(1px 1px at 12% 18%, rgba(255,255,255,.95) 98%, transparent) repeat,
-            radial-gradient(1px 1px at 38% 62%, rgba(255,255,255,.85) 98%, transparent) repeat,
-            radial-gradient(2px 2px at 72% 28%, rgba(70, 230, 255, .9) 98%, transparent) repeat,
-            radial-gradient(2px 2px at 30% 78%, rgba(110, 190, 255, .85) 98%, transparent) repeat,
-            radial-gradient(2px 2px at 22% 88%, rgba(255, 180, 95, .9) 98%, transparent) repeat,
-            radial-gradient(2px 2px at 84% 64%, rgba(238, 146, 78, .9) 98%, transparent) repeat
-          `,
-          backgroundSize:
-            "260px 260px, 320px 320px, 520px 520px, 580px 580px, 540px 540px, 600px 600px",
-          opacity: 0.7,
-          maskImage:
-            "radial-gradient(80% 80% at 50% 45%, rgba(0,0,0,1) 65%, rgba(0,0,0,.3) 85%, rgba(0,0,0,0) 100%)",
-          WebkitMaskImage:
-            "radial-gradient(80% 80% at 50% 45%, rgba(0,0,0,1) 65%, rgba(0,0,0,.3) 85%, rgba(0,0,0,0) 100%)",
-        }}
-      />
-
       {/* --- Big circles --- */}
       <img
         src="/circle3d.svg"
@@ -99,8 +68,8 @@ export default function JoinRoomHero() {
               draggable={false}
             />
             <h1 className="text-[32px] md:text-[40px] font-extrabold tracking-[0.3px]">
-              <span className="text-white/95">STACK</span>
-              <span className="ml-1 text-[#FFC821]">QUIZZ</span>
+              <span className="text-white">STACK</span>
+              <span className="ml-1 text-yellow">QUIZZ</span>
             </h1>
           </div>
 

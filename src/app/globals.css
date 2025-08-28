@@ -168,6 +168,56 @@ html{
 .box-radius {
   border-radius: 20px;
 }
+
+/* scale */
+.perspective {
+  perspective: 500px;
+}
+
+.card-glow {
+  transition: transform 0.5s ease, box-shadow 0.5s ease;
+  cursor: pointer;
+}
+
+.card-glow:hover,
+.card-glow:focus {
+  transform: scale(1.1); 
+}
+
+
+
+@keyframes gradient-x {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 4s ease infinite;
+}
+
+.glow-pink {
+    filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.8));
+    animation: glowAnim 2.5s ease-in-out infinite alternate;
+  }
+
+  @keyframes glowAnim {
+    0% {
+      filter: drop-shadow(0 0 12px rgba(54, 183, 179, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 0 20px rgba(21, 81, 178, 0.9));
+    }
+    100% {
+      filter: drop-shadow(0 0 15px rgba(71, 150, 211, 0.7));
+    }
+  }
+
+
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

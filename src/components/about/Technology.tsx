@@ -1,30 +1,86 @@
+"use client";
+import React from "react";
+import Image from "next/image";
+import {
+  SlidingLogoMarquee,
+  SlidingLogoMarqueeItem,
+} from "../ui/SlidingLogoMarquee";
 
 export function TechnologySection() {
   const technologies = [
-    { name: "Next.js", icon: "⚡" },
-    { name: "Node.js", icon: "🟢" },
-    { name: "Microsoft", icon: "🔷" },
-    { name: "GitHub", icon: "🐙" },
-    { name: "React", icon: "⚛️" },
-    { name: "Redis", icon: "🔴" },
-  ]
+    { name: "Redis", image: "/Redis.png" },
+    { name: "PostgreSQL", image: "/postgres.webp" },
+    { name: "Spring Boot", image: "/Springboot.png" },
+    { name: "docker", image: "/docker.webp" },
+    { name: "Next.js", image: "/nextjs.png" },
+    { name: "Blender", image: "/Blender.png" },
+  ];
+
+  const marqueeItems: SlidingLogoMarqueeItem[] = technologies.map(
+    (tech, index) => ({
+      id: index.toString(),
+      content: (
+        <div
+          className="w-50 h-25  mx-3 p-3 
+                     backdrop-blur-xl rounded-xl 
+                     flex items-center justify-center 
+                     transition-all duration-300 cursor-pointer 
+                     hover:scale-105"
+          title={tech.name}
+        >
+          <Image
+            src={tech.image}
+            alt={tech.name}
+            width={240}
+            height={180}
+            className="object-contain drop-shadow-lg"
+          />
+        </div>
+      ),
+    })
+  );
 
   return (
-    <section className="container mx-auto px-4 py-16 text-center">
-      <h2 className="text-4xl font-bold text-white mb-12">
-        Our{" "}
-        <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">Technology</span>
-      </h2>
-      <div className="flex flex-wrap justify-center gap-8">
-        {technologies.map((tech, index) => (
-          <div
-            key={index}
-            className="w-16 h-16 bg-white/10 backdrop-blur-sm rounded-full flex items-center justify-center text-2xl hover:bg-white/20 transition-all duration-300 cursor-pointer"
-          >
-            {tech.icon}
-          </div>
-        ))}
+    <section className="container mx-auto px-6 lg:px-10 lg:py-12">
+      {/* Header with improved spacing */}
+      <div className="text-center mb-8 lg:mb-12">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+    <span className="relative">
+      Our{" "}
+      <span className="text-yellow-400">
+      Technology
+      </span>
+      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
+    </span>
+  </h2>
+       
+      </div>
+
+      {/* Glass Background Wrapper with better spacing */}
+      <div className="relative max-w-7xl  mx-auto">
+        <div className="rounded-2xl md:bg-gradient-to-br from-white/10 to-white/5 
+                        backdrop-blur-xl 
+                        md:shadow-2xl shadow-black/20 ">
+          <SlidingLogoMarquee
+            items={marqueeItems}
+            speed={25}
+            pauseOnHover={true}
+            enableBlur={true}
+            blurIntensity={0.5}
+            height="120px"
+            gap="1.5rem"
+            scale={1}
+            autoPlay={true}
+            backgroundColor="transparent"
+            showControls={false}
+            className="w-full"
+          />
+        </div>
+        
+      
       </div>
     </section>
-  )
+  );
 }
+
+export default TechnologySection;

@@ -5,17 +5,10 @@ import TextType from "../TextType";
 import { useLanguage } from "@/context/LanguageContext";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { useRef, useEffect } from "react";
+import Image from "next/image";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
-import { StatsSection } from "./State_section";
-import CreateQuizSection from "./Create_quiz_section";
-import { WhyChooseSection } from "./Why_chose_section";
-import { PlatformSection } from "./Plateform_section";
-import { FeedbackQuiz } from "./Feedback_section";
-import { QuizTypeComponent } from "./Type_quiz";
-import { TopPlayersSection } from "./Top_player";
-import { CTASection } from "./Cta_section";
 
 export function HeroSection() {
   const { language } = useLanguage();
@@ -85,24 +78,15 @@ export function HeroSection() {
             animate={imgControls}
             className="order-2 lg:order-1 relative w-full h-64 sm:h-80 md:h-96 flex items-center justify-center mt-8 lg:mt-0"
           >
-            <img
-              src="hero.svg"
+            <Image
+              src="/hero.svg"
               alt="People engaging with quiz platform"
-              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto"
+              fill
+              className="object-contain"
             />
           </motion.div>
         </div>
       </div>
-      {/* <main className="px-4">
-        <StatsSection />
-        <CreateQuizSection />
-        <WhyChooseSection />
-        <PlatformSection />
-        <FeedbackQuiz />
-        <TopPlayersSection />
-        <QuizTypeComponent />
-        <CTASection />
-      </main> */}
     </section>
   );
 }

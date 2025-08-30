@@ -1,31 +1,53 @@
+"use client";
 
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 export function EstablishmentSection() {
   return (
-    <section className="container mx-auto px-4 py-16">
-      <div className="flex flex-col lg:flex-row items-center gap-12">
-        <div className="flex-1">
-          <img src="/target-goal-achievement-3d.png" alt="Our Goal Illustration" className="w-full max-w-sm mx-auto" />
-        </div>
-        <div className="flex-1">
-          <h2 className="text-4xl font-bold text-white mb-6">
+    <section className="container mx-auto px-4 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-8">
+      <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
+        {/* Left Side: Image */}
+        <motion.div
+          className="flex-1"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <Image
+            src="/about_svg/aboutus(goal).svg" // image in public folder
+            alt="Our Goal Illustration"
+            width={500} // base width
+            height={500} // base height
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
+          />
+        </motion.div>
+
+        {/* Right Side: Content */}
+        <motion.div
+          className="flex-1 text-center lg:text-left"
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
+          viewport={{ once: true, amount: 0.3 }}
+        >
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             Our{" "}
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">
+            <span className=" text-yellow">
               Establishment
             </span>
           </h2>
-          <h3 className="text-2xl font-semibold text-orange-400 mb-4">Our Goal</h3>
-          <p className="text-gray-300 text-lg leading-relaxed">
+
+          <p className="text-gray-300 text-base sm:text-lg lg:text-2xl leading-relaxed">
             Our platform makes learning fun, social, and
-            <br />
-            accessible by blending education with entertainment.
-            <br />
-            We aim to create an environment where users can
-            <br />
-            start new conversations to keep learners engaged.
+            <br className="hidden sm:block" />
+            accessible by blending game-based quizzes with
+            <br className="hidden sm:block" />
+            real-time competition to keep learners engaged.
           </p>
-        </div>
+        </motion.div>
       </div>
     </section>
-  )
+  );
 }

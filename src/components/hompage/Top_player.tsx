@@ -21,38 +21,36 @@ export function TopPlayersSection() {
   const titleInView = useInView(titleRef, { once: false, margin: "-100px" });
 
   useEffect(() => {
-    // Title
-    if (titleInView) titleControls.start({ opacity: 1, y: 0, transition: { type: "spring", stiffness: 80, damping: 20 } });
-    else titleControls.start({ opacity: 0, y: 30 });
+    // Title animation
+    titleControls.start(titleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 30 });
 
     // Winner (1st)
-    if (winnerInView) winnerControls.start({ opacity: 1, y: 0, transition: { type: "spring", stiffness: 80, damping: 20 } });
-    else winnerControls.start({ opacity: 0, y: 50 });
+    winnerControls.start(winnerInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 });
 
     // 2nd place
-    if (secondInView) secondControls.start({ opacity: 1, y: 0, transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.2 } });
-    else secondControls.start({ opacity: 0, y: 50 });
+    secondControls.start(secondInView ? { opacity: 1, y: 0, transition: { delay: 0.2 } } : { opacity: 0, y: 50 });
 
     // 3rd place
-    if (thirdInView) thirdControls.start({ opacity: 1, y: 0, transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.4 } });
-    else thirdControls.start({ opacity: 0, y: 50 });
+    thirdControls.start(thirdInView ? { opacity: 1, y: 0, transition: { delay: 0.4 } } : { opacity: 0, y: 50 });
   }, [titleInView, winnerInView, secondInView, thirdInView, titleControls, winnerControls, secondControls, thirdControls]);
 
   return (
-    <section className="relative px-4  overflow-hidden">
-      <div className="relative max-w-5xl mx-auto text-center">
-
+    <section className="relative px-4 py-12 overflow-hidden">
+      <div className="relative max-w-5xl  mx-auto text-center">
         {/* Title */}
         <motion.h2
           ref={titleRef}
           initial={{ opacity: 0, y: 30 }}
           animate={titleControls}
-          className="text-3xl py-24 sm:text-4xl text-underline font-extrabold text-yellow  text-yellow mb-10 ">
-          Top Players
+          className="text-2xl sm:text-3xl md:text-4xl py-24 lg:text-5xl font-bold text-white mb-12"
+        >
+          <span className="relative">
+            Top <span className="text-yellow">Players</span>
+            <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
+          </span>
         </motion.h2>
 
         <div className="flex justify-center items-end gap-6 sm:gap-10 lg:gap-16">
-
           {/* 2nd Place */}
           <motion.div
             ref={secondRef}
@@ -62,8 +60,8 @@ export function TopPlayersSection() {
           >
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full border-4 border-cyan-400 bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.9)]">
               <Image
-                src="avatar.svg"
-                alt="Lina"
+                src="/avatar.svg"
+                alt="Vatani"
                 width={96}
                 height={96}
                 className="rounded-full object-cover"
@@ -85,11 +83,10 @@ export function TopPlayersSection() {
           >
             {/* Crown */}
             <div className="absolute -top-10 z-20 sm:-top-14 left-1/2 -translate-x-1/2 text-5xl sm:text-7xl drop-shadow-[0_0_20px_rgba(255,215,0,1)]">
-              <Image src="crown.svg" alt="crown" width={90} height={80} />
+              <Image src="/crown.svg" alt="crown" width={90} height={80} />
             </div>
             <div className="relative w-28 h-28 sm:w-36 sm:h-36 mx-auto rounded-full border-4 border-yellow-400 bg-purple-900 flex items-center justify-center shadow-[0_0_35px_rgba(255,215,0,1)] animate-pulse">
-              <Image src="avatar.svg" alt="crown" width={90} height={80} />
-            
+              <Image src="/avatar.svg" alt="Borey" width={90} height={80} className="rounded-full object-cover" />
               <div className="absolute -bottom-3 sm:-bottom-4 left-1/2 -translate-x-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400 text-black text-xs sm:text-base font-extrabold flex items-center justify-center rounded-full border-2 border-white shadow-[0_0_15px_rgba(255,215,0,0.9)]">
                 1
               </div>
@@ -109,7 +106,7 @@ export function TopPlayersSection() {
           >
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full border-4 border-orange-400 bg-orange-600 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.9)]">
               <Image
-                src="avatar.svg"
+                src="/avatar.svg"
                 alt="Lina"
                 width={96}
                 height={96}

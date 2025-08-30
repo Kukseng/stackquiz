@@ -1,13 +1,43 @@
-import { cn } from "@/lib/utils";
+import { cn } from "@/components/lib/utils";
 import { Marquee } from "@/components/magicui/marquee";
 
 const reviews = [
-  { name: "Dana", username: "@jack", body: "StackQuizz made our class more interactive than ever!", img: "https://avatar.vercel.sh/jack" },
-  { name: "Rita", username: "@jill", body: "I love competing with friends across different subjects.", img: "https://avatar.vercel.sh/jill" },
-  { name: "Bora", username: "@john", body: "Easy to use and super fun for group activities.", img: "https://avatar.vercel.sh/john" },
-  { name: "Janny", username: "@jane", body: "This is amazing. I love it.", img: "https://avatar.vercel.sh/jane" },
-  { name: "Jira", username: "@jenny", body: "Look so cool, need stackquiz to provice all skill.", img: "https://avatar.vercel.sh/jenny" },
-  { name: "Neary", username: "@james", body: "This flatform is give me to funny study.", img: "https://avatar.vercel.sh/james" },
+  {
+    name: "Dana",
+    username: "@jack",
+    body: "StackQuizz made our class more interactive than ever!",
+    img: "https://avatar.vercel.sh/jack",
+  },
+  {
+    name: "Rita",
+    username: "@jill",
+    body: "I love competing with friends across different subjects.",
+    img: "https://avatar.vercel.sh/jill",
+  },
+  {
+    name: "Bora",
+    username: "@john",
+    body: "Easy to use and super fun for group activities.",
+    img: "https://avatar.vercel.sh/john",
+  },
+  {
+    name: "Janny",
+    username: "@jane",
+    body: "This is amazing. I love it.",
+    img: "https://avatar.vercel.sh/jane",
+  },
+  {
+    name: "Jira",
+    username: "@jenny",
+    body: "Look so cool, need stackquiz to provice all skill.",
+    img: "https://avatar.vercel.sh/jenny",
+  },
+  {
+    name: "Neary",
+    username: "@james",
+    body: "This flatform is give me to funny study.",
+    img: "https://avatar.vercel.sh/james",
+  },
 ];
 
 const firstRow = reviews.slice(0, reviews.length / 2);
@@ -28,13 +58,15 @@ const ReviewCard = ({
     <figure
       className={cn(
         "relative h-full py-12  w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
-        "border-gray-300 bg-transparent hover:bg-gray-800/10", // subtle hover
+        "border-gray-300 bg-transparent hover:bg-gray-800/10" // subtle hover
       )}
     >
       <div className="flex flex-row items-center  gap-2">
         <img className="rounded-full" width="32" height="32" alt="" src={img} />
         <div className="flex flex-col">
-          <figcaption className="text-white text-sm font-medium">{name}</figcaption>
+          <figcaption className="text-white text-sm font-medium">
+            {name}
+          </figcaption>
           <p className="text-gray-400 text-xs font-medium">{username}</p>
         </div>
       </div>

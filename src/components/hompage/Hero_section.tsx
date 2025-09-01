@@ -29,7 +29,12 @@ export function HeroSection() {
     else textControls.start({ opacity: 0, x: -50 });
 
     if (imgInView)
-      imgControls.start({ opacity: 1, x: 0, scale: 1, transition: { duration: 0.8 } });
+      imgControls.start({
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        transition: { duration: 0.8 },
+      });
     else imgControls.start({ opacity: 0, x: 50, scale: 0.95 });
   }, [textInView, imgInView, textControls, imgControls]);
 
@@ -81,8 +86,9 @@ export function HeroSection() {
             <Image
               src="/hero.svg"
               alt="People engaging with quiz platform"
-              fill
-              className="object-contain"
+              width={500}
+              height={500}
+              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
             />
           </motion.div>
         </div>

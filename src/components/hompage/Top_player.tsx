@@ -71,7 +71,6 @@ export function TopPlayersSection() {
               </div>
             </div>
             <div className="text-cyan-300 mt-2 sm:mt-3 font-semibold">Vatani</div>
-            <div className="text-gray-400 text-xs sm:text-sm">level 3</div>
           </motion.div>
 
           {/* 1st Place (Winner) */}
@@ -94,7 +93,6 @@ export function TopPlayersSection() {
             <div className="text-yellow-300 mt-3 sm:mt-4 font-extrabold text-base sm:text-lg drop-shadow-[0_0_15px_rgba(255,215,0,0.9)]">
               Borey
             </div>
-            <div className="text-gray-300 text-xs sm:text-sm">level 32</div>
           </motion.div>
 
           {/* 3rd Place */}
@@ -117,7 +115,6 @@ export function TopPlayersSection() {
               </div>
             </div>
             <div className="text-orange-300 mt-2 sm:mt-3 font-semibold">Lina</div>
-            <div className="text-gray-400 text-xs sm:text-sm">level 84</div>
           </motion.div>
         </div>
       </div>

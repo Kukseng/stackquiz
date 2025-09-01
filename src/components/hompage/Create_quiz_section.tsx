@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { useRef, useEffect } from "react";
-
+import Image from "next/image";
 export default function CreateQuizSection() {
   const textRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
@@ -72,10 +72,12 @@ export default function CreateQuizSection() {
           animate={imgControls}
           className="flex-1 flex justify-center lg:justify-end mt-4 lg:mt-0"
         >
-          <img
-            src="quiz.svg"
+          <Image
+            src="/quiz.svg"
             alt="3D character thinking"
-            className="w-80 sm:w-80 md:w-82 lg:w-90 max-w-[90%] sm:max-w-sm md:max-w-md lg:max-w-sm h-auto"
+            width={500}
+            height={500}
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
           />
         </motion.div>
       </motion.div>

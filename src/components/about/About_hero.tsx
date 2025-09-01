@@ -5,8 +5,9 @@ import { motion } from "framer-motion";
 import Image from "next/image";
 
 export function AboutHero() {
+
   return (
-    <section className="container mx-auto px-4 sm:px-8 lg:px-32 py-16 lg:py-20 text-center">
+    <section className="container mx-auto px-4 sm:px-6 lg:px-9 py-20 lg:py-20 text-center">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
 
         {/* Text Section */}

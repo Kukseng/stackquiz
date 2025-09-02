@@ -9,7 +9,6 @@ import { ValuesSection } from "@/components/about/Value";
 import { VisionSection } from "@/components/about/Vision";
 
 
-
 export default function AboutPage() {
   return (
     <div>

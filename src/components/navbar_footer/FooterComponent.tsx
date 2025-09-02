@@ -26,7 +26,7 @@ export default function Footer() {
           </h3>
           <div className="flex items-center justify-center md:justify-start space-x-3">
             <div className="w-12 h-12 flex items-center justify-center">
-              <img src="logo.png" alt="" />
+              <Image src="logo.png" width={45} height={45} alt="logo" />
             </div>
             <div>
               <div className="text-xl font-bold">

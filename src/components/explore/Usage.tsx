@@ -1,14 +1,51 @@
-import React from 'react';
-import { Play } from 'lucide-react';
+"use client";
+
+import React, { useRef, useEffect } from "react";
+import { Play } from "lucide-react";
+import { motion, useAnimation, useInView } from "framer-motion";
 
 const QuizInstructions = () => {
+  // Refs & controls for each card
+  const hostRef = useRef<HTMLDivElement>(null);
+  const hostControls = useAnimation();
+  const hostInView = useInView(hostRef, { once: false, margin: "-100px" });
+
+  const playRef = useRef<HTMLDivElement>(null);
+  const playControls = useAnimation();
+  const playInView = useInView(playRef, { once: false, margin: "-100px" });
+
+  // Animate on scroll
+  useEffect(() => {
+    if (hostInView)
+      hostControls.start({
+        opacity: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0 },
+      });
+    else hostControls.start({ opacity: 0, y: 50 });
+
+    if (playInView)
+      playControls.start({
+        opacity: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.2 },
+      });
+    else playControls.start({ opacity: 0, y: 50 });
+  }, [hostInView, playInView, hostControls, playControls]);
+
   return (
     <div className="p-4 md:p-8">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-          
           {/* How to Host a Template */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden animate-fade-in-up">
+          <motion.div
+            ref={hostRef}
+            initial={{ opacity: 0, y: 50 }}
+            animate={hostControls}
+            whileHover={{ scale: 1.05, boxShadow: "0px 15px 25px rgba(0,0,0,0.2)" }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="bg-white rounded-2xl overflow-hidden cursor-pointer"
+          >
             {/* Orange Header */}
             <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-5">
               <div className="flex items-center gap-3">
@@ -26,7 +63,6 @@ const QuizInstructions = () => {
 
             {/* Steps Content */}
             <div className="p-6 space-y-6">
-              {/* Step 1 */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
@@ -38,12 +74,11 @@ const QuizInstructions = () => {
                     Select Your Template
                   </h3>
                   <p className="text-gray-600 text-sm leading-relaxed">
-                    Choose from saved templates or our website's collection.
+                    Choose from saved templates or our website&apos;s collection.
                   </p>
                 </div>
               </div>
 
-              {/* Step 2 */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
@@ -60,10 +95,17 @@ const QuizInstructions = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
 
           {/* How to Play */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden animate-fade-in-up [animation-delay:120ms]">
+          <motion.div
+            ref={playRef}
+            initial={{ opacity: 0, y: 50 }}
+            animate={playControls}
+            whileHover={{ scale: 1.05, boxShadow: "0px 15px 25px rgba(0,0,0,0.2)" }}
+            transition={{ type: "spring", stiffness: 200, damping: 20 }}
+            className="bg-white rounded-2xl overflow-hidden cursor-pointer"
+          >
             {/* Orange Header */}
             <div className="bg-gradient-to-r from-orange-400 to-orange-500 px-6 py-5">
               <div className="flex items-center gap-3">
@@ -81,7 +123,6 @@ const QuizInstructions = () => {
 
             {/* Steps Content */}
             <div className="p-6 space-y-6">
-              {/* Step 1 */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-blue-500 rounded-full flex items-center justify-center">
@@ -98,7 +139,6 @@ const QuizInstructions = () => {
                 </div>
               </div>
 
-              {/* Step 2 */}
               <div className="flex gap-4">
                 <div className="flex-shrink-0">
                   <div className="w-8 h-8 bg-yellow-500 rounded-full flex items-center justify-center">
@@ -115,7 +155,7 @@ const QuizInstructions = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

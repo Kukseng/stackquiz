@@ -1,16 +1,42 @@
 "use client";
+
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, useAnimation, useInView } from "framer-motion";
+import { useRef, useEffect } from "react";
 
 export default function Banner() {
+  const ref = useRef<HTMLDivElement>(null);
+  const controls = useAnimation();
+  const inView = useInView(ref, { once: false, margin: "-100px" }); // <-- animate every scroll
+
+  useEffect(() => {
+    if (inView) {
+      controls.start({
+        opacity: 1,
+        y: 0,
+        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.1 },
+      });
+    } else {
+      controls.start({
+        opacity: 0,
+        y: 50,
+      });
+    }
+  }, [inView, controls]);
+
   return (
-    <section className="relative w-full h-[300px] md:h-[400px] mt-16 flex items-center justify-center rounded-1xl overflow-hidden">
+    <motion.section
+      ref={ref}
+      initial={{ opacity: 0, y: 50 }}
+      animate={controls}
+      className="relative w-full h-[300px] md:h-[400px] mt-16 flex items-center justify-center rounded-2xl overflow-hidden"
+    >
       {/* Background image */}
       <Image
-        src="explore/hero.png" 
+        src="explore/hero.png"
         alt="explore Banner"
         fill
-        className="object-contain p-[40px] "
+        className="object-contain p-[40px]"
         priority
       />
 
@@ -25,11 +51,11 @@ export default function Banner() {
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
-          className="mt-6 px-6 py-3 rounded-xl bg-gradient-to-r from-yellow-400 to-orange-400 text-red-800 font-semibold shadow-md"
+          className="mt-6  rounded-xl btn-secondary btn-text px-6 py-1 sm:py-1 md:py-2 box-radius text-base sm:text-lg font-semibold shadow-md"
         >
           Play Now
         </motion.button>
       </div>
-    </section>
+    </motion.section>
   );
 }

@@ -1,35 +1,69 @@
+"use client";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
+import { motion } from "framer-motion";
+import Image from "next/image";
 
 export function AboutHero() {
+
   return (
-    <section className="container mx-auto px-4 py-20 text-center">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-12">
-        <div className="flex-1 text-left">
-          <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">
+    <section className="container mx-auto px-4 sm:px-6 lg:px-9 py-20 lg:py-20 text-center">
+      <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
+
+        {/* Text Section */}
+        <motion.div 
+          className="flex-1 text-center lg:text-left"
+          initial={{ opacity: 0, x: -50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.8, ease: "easeOut" }}
+          viewport={{ once: true }}
+        >
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
             Welcome To
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">
-              StackQuizz
-            </span>
+            <span className="text-yellow">STACKQUIZ</span>
             <br />
             About Us
           </h1>
-          <p className="text-xl text-gray-300 mb-8 leading-relaxed">
+          <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-8 leading-relaxed">
             We are passionate about creating fun and interactive
-            <br />
+            <br className="hidden sm:block" />
             quiz experiences that bring people together, test
-            <br />
+            <br className="hidden sm:block" />
             knowledge, and inspire lifelong curiosity.
           </p>
-          <Button className="bg-gradient-to-r from-orange-400 to-yellow-400 hover:from-orange-500 hover:to-yellow-500 text-white px-8 py-3 rounded-full text-lg font-semibold">
-            Get Started
-          </Button>
-        </div>
-        <div className="flex-1">
-          <img src="hh.svg" alt="About Us Illustration" className="w-full max-w-md mx-auto" />
-        </div>
+
+          {/* Animated Button */}
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.9 }}
+            whileInView={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.3, delay: 0.4 }}
+            viewport={{ once: true }}
+          >
+            <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
+              Get Started
+            </Button>
+          </motion.div>
+        </motion.div>
+
+        {/* Image Section */}
+        <motion.div 
+          className="flex-1"
+          initial={{ opacity: 0, x: 50 }}
+          whileInView={{ opacity: 1, x: 0 }}
+          whileHover={{ scale: 1.05, rotate: 2 }}
+          transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
+          viewport={{ once: true }}
+        >
+          <Image
+            src="/about_svg/aboutus.svg"
+            alt="About Us Illustration"
+            width={600}
+            height={400}
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
+          />
+        </motion.div>
       </div>
     </section>
-  )
+  );
 }

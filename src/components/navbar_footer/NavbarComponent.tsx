@@ -1,5 +1,5 @@
 "use client";
-
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -40,11 +40,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img
-            src="/logo_Stack_Quiz-v2.png"
-            alt="logo"
-            className="w-10 h-10 object-contain"
-          />
+          <Image src="/logo_Stack_Quiz-v2.png" width={45} height={45} alt="Logo" />
           <span className="hidden md:inline text-2xl font-bold">
             <span className="text-white">STACK</span>
             <span className="text-yellow">QUIZ</span>
@@ -122,7 +118,7 @@ export function Navbar() {
 
       {/* Mobile Nav */}
       {mobileOpen && (
-        <nav className="md:hidden bg-gray-screen-page px-4 pt-4 pb-6 space-y-3">
+        <nav className="md:hidden bg-gray-screen-page backdrop-blur-lg rounded-sm my-1 px-4 pt-4 pb-6 space-y-3">
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (

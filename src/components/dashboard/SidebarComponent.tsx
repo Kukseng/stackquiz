@@ -30,7 +30,8 @@ export default function SidebarComponent() {
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const isActive = (href) => pathname === href;
+  // ✅ TypeScript fix: explicitly type href
+  const isActive = (href: string): boolean => pathname === href;
 
   return (
     <>
@@ -39,11 +40,7 @@ export default function SidebarComponent() {
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-md"
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
       >
-        {isMobileMenuOpen ? (
-          <X className="h-6 w-6 text-gray-600" />
-        ) : (
-          <Menu className="h-6 w-6 text-gray-600" />
-        )}
+        {isMobileMenuOpen ? <X className="h-6 w-6 text-gray-600" /> : <Menu className="h-6 w-6 text-gray-600" />}
       </button>
 
       {/* Overlay for mobile */}
@@ -67,7 +64,6 @@ export default function SidebarComponent() {
           {/* Logo */}
           <div className="flex items-center gap-2 mb-8 mt-2">
             <div className="relative">
-              {/* Logo icon - 3D stack effect */}
               <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-400 rounded-lg transform rotate-12"></div>
               <div className="absolute -top-1 -left-1 w-8 h-8 bg-gradient-to-br from-orange-400 to-yellow-400 rounded-lg transform -rotate-12"></div>
               <div className="absolute -top-2 -left-2 w-8 h-8 bg-gradient-to-br from-green-400 to-emerald-400 rounded-lg"></div>

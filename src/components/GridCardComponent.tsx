@@ -1,6 +1,4 @@
 "use client";
-import Image from "next/image";
-import { Search } from "lucide-react";
 import React from "react";
 import CardQuizComponent from "./CardQuizComponent"; 
 

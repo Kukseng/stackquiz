@@ -251,7 +251,7 @@ html{
 
   .text-underline {
     text-decoration: underline;
-    text-underline-offset: 12px;
+    text-underline-offset: 18px;
   }
   .text-yellow {
     color: #ffcc00;

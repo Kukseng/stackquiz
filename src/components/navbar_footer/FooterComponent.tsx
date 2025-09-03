@@ -12,7 +12,12 @@ export default function Footer() {
             ORGANIZED AND SPONSORED BY
           </h3>
           <div className="flex items-center justify-center md:justify-start">
-            <Image src="/istad-logo-white.png" width={200} height={150} alt="Logo" />
+            <Image
+              src="/istad-logo-white.png"
+              width={200}
+              height={150}
+              alt="Logo"
+            />
           </div>
           <p className="text-[16px] text-gray-300 leading-relaxed">
             Institute of Science and Technology Advanced Development
@@ -26,7 +31,7 @@ export default function Footer() {
           </h3>
           <div className="flex items-center justify-center md:justify-start space-x-3">
             <div className="w-12 h-12 flex items-center justify-center">
-              <Image src="logo.png" width={45} height={45} alt="logo" />
+              <img src="logo.png" width={45} height={45} alt="logo" />
             </div>
             <div>
               <div className="text-xl font-bold">
@@ -108,11 +113,36 @@ export default function Footer() {
             © 2025 StackQuizz Inc. All rights reserved.
           </div>
           <div className="flex justify-center md:justify-start space-x-2">
-            <Image src="/social_media_icon/fb.svg" width={27} height={28} alt="Facebook" />
-            <Image src="/social_media_icon/github.svg" width={28} height={30} alt="Github" />
-            <Image src="/social_media_icon/twitter.svg" width={34} height={34} alt="Twitter" />
-            <Image src="/social_media_icon/ig.svg" width={34} height={34} alt="Instagram" />
-            <Image src="/social_media_icon/youtube.svg" width={34} height={34} alt="Youtube" />
+            <Image
+              src="/social_media_icon/fb.svg"
+              width={27}
+              height={28}
+              alt="Facebook"
+            />
+            <Image
+              src="/social_media_icon/github.svg"
+              width={28}
+              height={30}
+              alt="Github"
+            />
+            <Image
+              src="/social_media_icon/twitter.svg"
+              width={34}
+              height={34}
+              alt="Twitter"
+            />
+            <Image
+              src="/social_media_icon/ig.svg"
+              width={34}
+              height={34}
+              alt="Instagram"
+            />
+            <Image
+              src="/social_media_icon/youtube.svg"
+              width={34}
+              height={34}
+              alt="Youtube"
+            />
           </div>
         </div>
       </div>

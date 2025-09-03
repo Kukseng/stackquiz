@@ -1,12 +1,20 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 import {
   SlidingLogoMarquee,
   SlidingLogoMarqueeItem,
 } from "../ui/SlidingLogoMarquee";
 
 export function TechnologySection() {
+
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+
   const technologies = [
     { name: "Redis", image: "/Redis.png" },
     { name: "PostgreSQL", image: "/postgres.webp" },
@@ -44,16 +52,13 @@ export function TechnologySection() {
     <section className="container mx-auto px-6 lg:px-10 lg:py-12">
       {/* Header with improved spacing */}
       <div className="text-center mb-30">
-  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-    <span className="relative">
-      Our{" "}
-      <span className="text-yellow">
-        Technology
-      </span>
-      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-    </span>
-  </h2>
-</div>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+          <span className="relative">
+            <span className="text-yellow text-underline">{t.heroAbout.technology}</span>
+          </span>
+        </h2>
+      </div>
+
 
       {/* Glass Background Wrapper with better spacing */}
       <div className="relative max-w-7xl  mx-auto">

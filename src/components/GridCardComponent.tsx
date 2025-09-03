@@ -1,6 +1,9 @@
 "use client";
+<<<<<<< HEAD
 import Image from "next/image";
 import { Search } from "lucide-react";
+=======
+>>>>>>> db42276e9798746104d4e83b41fcf51f7ed9a845
 import React from "react";
 import CardQuizComponent from "./CardQuizComponent"; 
 

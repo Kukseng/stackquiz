@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
-import HeroBannerExplore from './Hero-section'
-import QuizChallenge from './Templates-section'
+import HeroBannerExplore from './hero-section'
+import QuizChallenge from './templates-section'
 import QuizInstructions from './Usage'
 import ReadyTemplates from './Ready_use'
 import CreateDiscoverQuiz from './create-section'

@@ -43,18 +43,17 @@ export function TechnologySection() {
   return (
     <section className="container mx-auto px-6 lg:px-10 lg:py-12">
       {/* Header with improved spacing */}
-      <div className="text-center mb-8 lg:mb-12">
-        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+      <div className="text-center mb-30">
+  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
     <span className="relative">
       Our{" "}
-      <span className="text-yellow-400">
-      Technology
+      <span className="text-yellow">
+        Technology
       </span>
       <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
     </span>
   </h2>
-       
-      </div>
+</div>
 
       {/* Glass Background Wrapper with better spacing */}
       <div className="relative max-w-7xl  mx-auto">

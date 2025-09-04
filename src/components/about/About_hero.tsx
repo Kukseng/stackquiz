@@ -2,10 +2,12 @@
 
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export function AboutHero() {
+
   return (
-    <section className="container mx-auto px-4 sm:px-8 lg:px-32 py-16 lg:py-20 text-center">
+    <section className="container mx-auto px-4 sm:px-6 lg:px-9 py-20 lg:py-20 text-center">
       <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
 
         {/* Text Section */}
@@ -19,9 +21,7 @@ export function AboutHero() {
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
             Welcome To
             <br />
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">
-              StackQuizz
-            </span>
+            <span className="text-yellow">STACKQUIZ</span>
             <br />
             About Us
           </h1>
@@ -37,11 +37,10 @@ export function AboutHero() {
           <motion.div 
             initial={{ opacity: 0, scale: 0.9 }}
             whileInView={{ opacity: 1, scale: 1 }}
-           
             transition={{ duration: 0.3, delay: 0.4 }}
             viewport={{ once: true }}
           >
-            <Button className="bg-gradient-to-r from-orange-400 to-yellow-400  text-white px-6 sm:px-8 py-3 rounded-full text-base sm:text-lg font-semibold">
+            <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
               Get Started
             </Button>
           </motion.div>
@@ -56,13 +55,14 @@ export function AboutHero() {
           transition={{ duration: 0.5, ease: "easeOut", delay: 0.2 }}
           viewport={{ once: true }}
         >
-          <img 
-            src="/about_svg/aboutus.svg" 
-            alt="About Us Illustration" 
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto" 
+          <Image
+            src="/about_svg/aboutus.svg"
+            alt="About Us Illustration"
+            width={600}
+            height={400}
+            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
           />
         </motion.div>
-
       </div>
     </section>
   );

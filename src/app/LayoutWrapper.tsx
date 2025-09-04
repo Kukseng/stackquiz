@@ -9,8 +9,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   const pathname = usePathname();
 
   // hide layout for signup and quiz-builder pages
-  const hideLayout = pathname === "/signup" || pathname === "/quiz-builder";
-
+  const hideLayout = pathname === "/signup" || pathname === "/quiz-builder" || pathname === "/leaderboard"|| pathname === "/again";
   return (
     <>
       {!hideLayout && <Navbar />}

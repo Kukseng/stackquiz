@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export function EstablishmentSection() {
   return (
@@ -14,9 +15,11 @@ export function EstablishmentSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          <img
-            src="/about_svg/aboutus(goal).svg"
+          <Image
+            src="/about_svg/aboutus(goal).svg" // image in public folder
             alt="Our Goal Illustration"
+            width={500} // base width
+            height={500} // base height
             className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
           />
         </motion.div>
@@ -29,20 +32,19 @@ export function EstablishmentSection() {
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             Our{" "}
-            <span className="text-transparent bg-clip-text bg-yellow-400">
+            <span className=" text-yellow">
               Establishment
             </span>
           </h2>
 
           <p className="text-gray-300 text-base sm:text-lg lg:text-2xl leading-relaxed">
-           Our platform makes learning fun, social, and 
+            Our platform makes learning fun, social, and
             <br className="hidden sm:block" />
-           accessible by blending game-based quizzes with 
+            accessible by blending game-based quizzes with
             <br className="hidden sm:block" />
-           real-time competition to keep learners engaged.
-            
+            real-time competition to keep learners engaged.
           </p>
         </motion.div>
       </div>

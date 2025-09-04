@@ -51,14 +51,17 @@ export function ContactSection() {
       </motion.div>
 
       <div className="relative max-w-screen-2xl md:mx-30 px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-20">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
-            <span className="relative">
-              Contact <span className="text-yellow-400">Us</span>
-              <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-            </span>
-          </h2>
-        </div>
+        <div className="text-center mb-30">
+  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+    <span className="relative">
+      Contact{" "}
+      <span className="text-yellow">
+        Us
+      </span>
+      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
+    </span>
+  </h2>
+</div>
 
         <motion.div
           className="flex flex-col md:flex-row gap-6"
@@ -294,8 +297,8 @@ export function ContactSection() {
                 {/* Submit Button */}
                 <motion.button
                   type="submit"
-                  className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white font-semibold rounded-xl px-6 h-11 sm:h-12 shadow-lg hover:opacity-90 w-full sm:w-auto self-center sm:self-start transition-all"
-                  whileHover={{ scale: 1.05 }}
+                  className="btn-secondary btn-text px-6 py-2 sm:py-3 md:py-4 box-radius font-semibold text-base sm:text-lg"
+                  whileHover={{ scale: 0.98 }}
                   whileTap={{ scale: 0.95 }}
                 >
                   Send Message

@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export function MissionSection() {
   return (
@@ -14,9 +15,9 @@ export function MissionSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             Our{" "}
-            <span className="text-transparent bg-clip-text bg-yellow-400">
+            <span className="text-yellow">
               Mission
             </span>
           </h2>
@@ -37,9 +38,11 @@ export function MissionSection() {
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          <img
-            src="about_svg/aboutus(mission).svg"
+          <Image
+            src="/about_svg/aboutus(mission).svg" // must be in /public/about_svg/
             alt="Our Mission Illustration"
+            width={500} // set a base width
+            height={500} // set a base height
             className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
           />
         </motion.div>

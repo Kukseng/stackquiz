@@ -1,6 +1,7 @@
 "use client";
 
 import { motion } from "framer-motion";
+import Image from "next/image";
 
 export function VisionSection() {
   return (
@@ -14,9 +15,11 @@ export function VisionSection() {
           transition={{ duration: 0.8, ease: "easeOut" }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          <img
-            src="about_svg/aboutus(vision).svg"
+          <Image
+            src="/about_svg/aboutus(vision).svg" // Use a leading slash for public folder
             alt="Our Vision Illustration"
+            width={500} // adjust according to your design
+            height={500} // adjust according to your design
             className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
           />
         </motion.div>
@@ -29,9 +32,9 @@ export function VisionSection() {
           transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
           viewport={{ once: true, amount: 0.3 }}
         >
-          <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
+          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
             Our{" "}
-            <span className="text-transparent bg-clip-text bg-yellow-400">
+            <span className="text-yellow">
               Vision
             </span>
           </h2>
@@ -49,4 +52,3 @@ export function VisionSection() {
     </section>
   );
 }
-  

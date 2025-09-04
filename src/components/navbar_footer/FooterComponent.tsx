@@ -1,5 +1,6 @@
 "use client";
 import Image from "next/image";
+import { FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 
 export default function Footer() {
   return (
@@ -12,7 +13,12 @@ export default function Footer() {
             ORGANIZED AND SPONSORED BY
           </h3>
           <div className="flex items-center justify-center md:justify-start">
-            <Image src="/istad-logo-white.png" width={200} height={150} alt="Logo" />
+            <Image
+              src="/istad-logo-white.png"
+              width={200}
+              height={150}
+              alt="Logo"
+            />
           </div>
           <p className="text-[16px] text-gray-300 leading-relaxed">
             Institute of Science and Technology Advanced Development
@@ -74,28 +80,28 @@ export default function Footer() {
         </div>
 
         {/* Contacts */}
-        <div className="space-y-4">
+        <div className="space-y-4 text-center md:text-left">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
             CONTACTS
           </h3>
-          <div className="space-y-2">
+          <div className="space-y-3 text-[16px] flex flex-col items-center md:items-start">
             <a
               href="mailto:info.stackquiz@gmail.com"
-              className="block text-gray-300 hover:text-white transition-colors duration-200"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200"
             >
-              📧 info.stackquiz@gmail.com
+              <FaEnvelope className="text-lg" /> info.stackquiz@gmail.com
             </a>
             <a
               href="tel:+88596458789"
-              className="block text-gray-300 hover:text-white transition-colors duration-200"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200"
             >
-              📞 (+885) 96 458 789
+              <FaPhoneAlt className="text-lg" /> (+885) 96 458 789
             </a>
             <a
               href="tel:+88597458789"
-              className="block text-gray-300 hover:text-white transition-colors duration-200"
+              className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200"
             >
-              📞 (+885) 97 458 789
+              <FaPhoneAlt className="text-lg" /> (+885) 97 458 789
             </a>
           </div>
         </div>
@@ -108,11 +114,36 @@ export default function Footer() {
             © 2025 StackQuizz Inc. All rights reserved.
           </div>
           <div className="flex justify-center md:justify-start space-x-2">
-            <Image src="/social_media_icon/fb.svg" width={27} height={28} alt="Facebook" />
-            <Image src="/social_media_icon/github.svg" width={28} height={30} alt="Github" />
-            <Image src="/social_media_icon/twitter.svg" width={34} height={34} alt="Twitter" />
-            <Image src="/social_media_icon/ig.svg" width={34} height={34} alt="Instagram" />
-            <Image src="/social_media_icon/youtube.svg" width={34} height={34} alt="Youtube" />
+            <Image
+              src="/social_media_icon/fb.svg"
+              width={27}
+              height={28}
+              alt="Facebook"
+            />
+            <Image
+              src="/social_media_icon/github.svg"
+              width={28}
+              height={30}
+              alt="Github"
+            />
+            <Image
+              src="/social_media_icon/twitter.svg"
+              width={34}
+              height={34}
+              alt="Twitter"
+            />
+            <Image
+              src="/social_media_icon/ig.svg"
+              width={34}
+              height={34}
+              alt="Instagram"
+            />
+            <Image
+              src="/social_media_icon/youtube.svg"
+              width={34}
+              height={34}
+              alt="Youtube"
+            />
           </div>
         </div>
       </div>

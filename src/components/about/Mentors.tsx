@@ -7,15 +7,15 @@ const mentors = [
   {
     name: "Sreng Chipor",
     image: "/teacherchipor.png",
-    shineColors: ["#3b82f6", "#eab308", "#ec4899"], 
-    borderColors: "border-blue-400", 
+    shineColors: ["#3b82f6", "#eab308", "#ec4899"],
+    borderColors: "border-blue-400",
     socials: { linkedin: "#", github: "#", instagram: "#" },
   },
   {
     name: "Srorng Sokcheat",
     image: "/teachersokcheat.JPG",
-    shineColors: ["#f97316", "#eab308", "#ec4899"], 
-    borderColors: "border-orange-400", 
+    shineColors: ["#f97316", "#eab308", "#ec4899"],
+    borderColors: "border-orange-400",
     socials: { linkedin: "#", github: "#", instagram: "#" },
   },
 ];
@@ -26,16 +26,24 @@ export function MentorsSection() {
       {/* Add keyframe animations */}
       <style jsx>{`
         @keyframes colorCycle {
-          0% { border-color: var(--color-0); }
-          33.33% { border-color: var(--color-1); }
-          66.66% { border-color: var(--color-2); }
-          100% { border-color: var(--color-0); }
+          0% {
+            border-color: var(--color-0);
+          }
+          33.33% {
+            border-color: var(--color-1);
+          }
+          66.66% {
+            border-color: var(--color-2);
+          }
+          100% {
+            border-color: var(--color-0);
+          }
         }
-        
+
         .animated-border-tr {
           animation: colorCycle 3s linear infinite;
         }
-        
+
         .animated-border-bl {
           animation: colorCycle 3s linear infinite 0.5s;
         }
@@ -48,7 +56,7 @@ export function MentorsSection() {
             top: -1.5rem;
             right: -0.5rem;
           }
-          
+
           .corner-border-bl {
             width: 180px;
             height: 360px;
@@ -56,7 +64,7 @@ export function MentorsSection() {
             left: -0.5rem;
           }
         }
-        
+
         @media (min-width: 641px) and (max-width: 768px) {
           .corner-border-tr {
             width: 160px;
@@ -64,7 +72,7 @@ export function MentorsSection() {
             top: -1.5rem;
             right: -0.5rem;
           }
-          
+
           .corner-border-bl {
             width: 160px;
             height: 320px;
@@ -72,7 +80,7 @@ export function MentorsSection() {
             left: -0.5rem;
           }
         }
-        
+
         @media (min-width: 769px) and (max-width: 1024px) {
           .corner-border-tr {
             width: 180px;
@@ -80,7 +88,7 @@ export function MentorsSection() {
             top: -1.5rem;
             right: 0;
           }
-          
+
           .corner-border-bl {
             width: 180px;
             height: 380px;
@@ -88,7 +96,7 @@ export function MentorsSection() {
             left: 0;
           }
         }
-        
+
         @media (min-width: 1025px) {
           .corner-border-tr {
             width: 220px;
@@ -96,7 +104,7 @@ export function MentorsSection() {
             top: -1.5rem;
             right: 0;
           }
-          
+
           .corner-border-bl {
             width: 220px;
             height: 460px;
@@ -107,14 +115,11 @@ export function MentorsSection() {
       `}</style>
 
       {/* Section title */}
-      <div className="text-center mb-16 sm:mb-20 md:mb-24 lg:mb-28 xl:mb-35 px-4">
-        <h2 className="text-2xl xs:text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-bold text-white leading-tight">
-          <span className="relative inline-block">
-            Our{" "}
-            <span className="text-yellow-400">
-              Mentors
-            </span>
-            <span className="absolute left-0 -bottom-1 w-full h-[2px] sm:h-[3px] md:h-[4px] bg-yellow-400"></span>
+      <div className="text-center mb-30">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+          <span className="relative">
+            Our <span className="text-yellow">Mentors</span>
+            <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
           </span>
         </h2>
       </div>
@@ -133,27 +138,29 @@ export function MentorsSection() {
               scale: 1.02,
               transition: { duration: 0.3 },
             }}
-            style={{
-              "--color-0": mentor.shineColors[0],
-              "--color-1": mentor.shineColors[1],
-              "--color-2": mentor.shineColors[2],
-            } as React.CSSProperties}
+            style={
+              {
+                "--color-0": mentor.shineColors[0],
+                "--color-1": mentor.shineColors[1],
+                "--color-2": mentor.shineColors[2],
+              } as React.CSSProperties
+            }
           >
             {/* Frame around image with animated colors */}
             <div className="relative w-72 h-72 xs:w-80 xs:h-80 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-72 lg:h-72 xl:w-80 xl:h-80 flex items-center justify-center">
               {/* Top-right corner with animated border */}
-              <div 
-                className="absolute corner-border-tr border-t-3 sm:border-t-4 md:border-t-5 border-r-3 sm:border-r-4 md:border-r-5 rounded-tr-xl sm:rounded-tr-2xl animated-border-tr" 
+              <div
+                className="absolute corner-border-tr border-t-3 sm:border-t-4 md:border-t-5 border-r-3 sm:border-r-4 md:border-r-5 rounded-tr-xl sm:rounded-tr-2xl animated-border-tr"
                 style={{
-                  filter: 'drop-shadow(0 0 0px currentColor)',
+                  filter: "drop-shadow(0 0 0px currentColor)",
                 }}
               />
-              
+
               {/* Bottom-left corner with animated border */}
-              <div 
+              <div
                 className="absolute corner-border-bl border-b-3 sm:border-b-4 md:border-b-5 border-l-3 sm:border-l-4 md:border-l-5 rounded-bl-xl sm:rounded-bl-2xl animated-border-bl"
                 style={{
-                  filter: 'drop-shadow(0 0 0px currentColor)',
+                  filter: "drop-shadow(0 0 0px currentColor)",
                 }}
               />
 
@@ -165,7 +172,7 @@ export function MentorsSection() {
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
                 />
-                
+
                 {/* white background to mask inner area */}
                 <div className="relative p-[3px] sm:p-[4px] rounded-full bg-white">
                   <div className="relative w-64 h-64 xs:w-72 xs:h-72 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-64 lg:h-64 xl:w-72 xl:h-72">
@@ -204,7 +211,7 @@ export function MentorsSection() {
                   />
                 </div>
               </a>
-              
+
               <a
                 href={mentor.socials.github}
                 target="_blank"
@@ -221,7 +228,7 @@ export function MentorsSection() {
                   />
                 </div>
               </a>
-              
+
               <a
                 href={mentor.socials.instagram}
                 target="_blank"

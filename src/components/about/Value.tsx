@@ -83,7 +83,7 @@ export const ValuesSection: React.FC = () => {
     <section className="container mx-auto px-4 sm:px-8 lg:px-16 py-20 text-center relative">
       <style>{style}</style>
    <div className="text-center mb-30">
-  <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
     <span className="relative">
       Our{" "}
       <span className="text-yellow-400">

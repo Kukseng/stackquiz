@@ -38,9 +38,9 @@ export function PlatformSection() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="py-12 sm:py-16">
+    <section className="py-12  sm:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-8">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 py-12 lg:grid-cols-2 gap-12 items-center">
           {/* Image */}
           <motion.div
             ref={imgRef}
@@ -53,7 +53,7 @@ export function PlatformSection() {
               alt="People engaging with quiz platform"
               width={500}
               height={500}
-              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
+              className="w-full  max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
             />
           </motion.div>
 

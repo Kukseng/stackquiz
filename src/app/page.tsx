@@ -7,7 +7,9 @@ import { PlatformSection } from "@/components/hompage/Plateform_section";
 import { StatsSection } from "@/components/hompage/State_section";
 import  {TopPlayersSection}  from "@/components/hompage/Top_player";
 import {QuizTypeComponent} from "@/components/hompage/Type_quiz";
+
 import { WhyChooseSection } from "@/components/hompage/Why_chose_section";
+// import CardSwipeDemo from "@/components/hompage/Type_quiz";
 
 export default function HomePage() {
   return (
@@ -21,6 +23,7 @@ export default function HomePage() {
         <FeedbackQuiz />
         <TopPlayersSection />
         <QuizTypeComponent />
+       {/* <CardSwipeDemo/> */}
         <CTASection />
       </main>
     </div>

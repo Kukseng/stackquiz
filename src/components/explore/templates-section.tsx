@@ -134,7 +134,7 @@ const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }
 
 export default function ChallengeGrid() {
   return (
-    <section className="px-4 md:px-10 lg:px-20 mt-8">
+    <section className="max-w-7xl mx-auto px-4 md:px-10 lg:px-20 mt-8">
       {/* Search and filter */}
       <div className="flex flex-col md:flex-row md:items-center md:justify-evenly mb-8 gap-4">
         <div className="relative w-full md:w-1/2">

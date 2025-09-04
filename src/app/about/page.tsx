@@ -7,8 +7,6 @@ import { TeamsSection } from "@/components/about/Team";
 import { TechnologySection } from "@/components/about/Technology";
 import { ValuesSection } from "@/components/about/Value";
 import { VisionSection } from "@/components/about/Vision";
-import  Footer  from "@/components/navbar_footer/FooterComponent";
-import { Navbar } from "@/components/navbar_footer/NavbarComponent";
 
 
 export default function AboutPage() {
@@ -32,7 +30,7 @@ export default function AboutPage() {
         ))}
       </div>
 
-      <Navbar/>
+
       <main className="relative z-10">
         <AboutHero/>
         <TechnologySection/>
@@ -44,7 +42,7 @@ export default function AboutPage() {
         <TeamsSection/>
         <ContactSection/>
       </main>
-      <Footer/>
+  
     </div>
   )
 }

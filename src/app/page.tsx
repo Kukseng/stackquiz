@@ -9,6 +9,8 @@ import  {TopPlayersSection}  from "@/components/hompage/Top_player";
 import {QuizTypeComponent} from "@/components/hompage/Type_quiz";
 import { WhyChooseSection } from "@/components/hompage/Why_chose_section";
 
+
+
 export default function HomePage() {
   return (
     <div>
@@ -26,5 +28,6 @@ export default function HomePage() {
     </div>
   );
 }
+
 
 

@@ -1,4 +1,4 @@
-// layout.tsx (Server Component)
+
 import { DM_Sans } from "next/font/google";
 import LayoutWrapper from "./LayoutWrapper"; // Client Component
 import { LanguageProvider } from "../context/LanguageContext";
@@ -22,3 +22,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </html>
   );
 }
+

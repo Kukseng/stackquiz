@@ -9,6 +9,10 @@ import { ValuesSection } from "@/components/about/Value";
 import { VisionSection } from "@/components/about/Vision";
 
 
+export const metadata = {
+  title: "StackQuizz | About",
+  description: "Engage with organizer real-time StackQuizz. Compete in live quizzes!",
+};
 export default function AboutPage() {
   return (
     <div>

@@ -11,6 +11,10 @@ import {QuizTypeComponent} from "@/components/hompage/Type_quiz";
 import { WhyChooseSection } from "@/components/hompage/Why_chose_section";
 // import CardSwipeDemo from "@/components/hompage/Type_quiz";
 
+export const metadata = {
+  title: "StackQuizz | Home",
+  description: "Engage with organizer real-time StackQuizz. Compete in live quizzes!",
+};
 export default function HomePage() {
   return (
     <div>

@@ -1,15 +1,9 @@
-// layout.tsx (Server Component)
 import { DM_Sans } from "next/font/google";
-import LayoutWrapper from "./LayoutWrapper"; // Client Component
+import LayoutWrapper from "./LayoutWrapper";
 import { LanguageProvider } from "../context/LanguageContext";
 import "./globals.css";
 
 const dmSans = DM_Sans({ subsets: ["latin"], display: "swap", variable: "--font-dm-sans" });
-
-export const metadata = {
-  title: "StackQuizz - Real-time Quiz Platform",
-  description: "Engage with organizer real-time StackQuizz. Compete in live quizzes!",
-};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

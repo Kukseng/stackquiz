@@ -226,7 +226,7 @@ export function MentorsSection() {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <Image
-                    src="/github.png"
+                    src="/github.svg"
                     alt="GitHub"
                     width={32}
                     height={32}

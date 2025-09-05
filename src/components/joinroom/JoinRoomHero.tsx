@@ -71,7 +71,7 @@ export default function JoinRoomHero() {
           {/* Logo + StackQuiz */}
           <div className="mb-7 flex items-center justify-center gap-4">
             <Image
-              src="/logo_Stack_Quiz-v2.png"
+              src="/logo-sq.png"
               alt="StackQuizz Logo"
               className="h-[64px] w-[64px] drop-shadow-[0_8px_16px_rgba(0,0,0,0.25)]"
               draggable={false}

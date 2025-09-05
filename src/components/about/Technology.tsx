@@ -11,7 +11,6 @@ import {
 } from "../ui/SlidingLogoMarquee";
 
 export function TechnologySection() {
-
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
 
@@ -19,7 +18,7 @@ export function TechnologySection() {
     { name: "Redis", image: "/Redis.png" },
     { name: "PostgreSQL", image: "/postgres.webp" },
     { name: "Spring Boot", image: "/Springboot.png" },
-    { name: "docker", image: "/docker.webp" },
+    { name: "Docker", image: "/docker.webp" },
     { name: "Next.js", image: "/nextjs.png" },
     { name: "Blender", image: "/Blender.png" },
   ];
@@ -29,19 +28,18 @@ export function TechnologySection() {
       id: index.toString(),
       content: (
         <div
-          className="w-50 h-25  mx-3 p-3 
-                     backdrop-blur-xl rounded-xl 
-                     flex items-center justify-center 
-                     transition-all duration-300 cursor-pointer 
-                     hover:scale-105"
+          className="w-32 sm:w-36 md:w-40 lg:w-44 h-24 sm:h-28 md:h-32 lg:h-36 
+                     mx-4 p-4  rounded-xl 
+                     flex items-center justify-center transition-transform duration-300
+                     hover:scale-105 cursor-pointer"
           title={tech.name}
         >
           <Image
             src={tech.image}
             alt={tech.name}
-            width={240}
-            height={180}
-            className="object-contain drop-shadow-lg"
+            width={160}
+            height={120}
+            className="object-contain "
           />
         </div>
       ),
@@ -49,9 +47,9 @@ export function TechnologySection() {
   );
 
   return (
-    <section className="container mx-auto px-6 lg:px-10 lg:py-12">
-      {/* Header with improved spacing */}
-      <div className="text-center mb-30">
+    <section className="container mx-auto px-4 sm:px-6 lg:px-10 py-16">
+      {/* Section Header */}
+        <div className="text-center mb-30">
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
           <span className="relative">
             <span className="text-yellow text-underline">{t.heroAbout.technology}</span>
@@ -59,12 +57,10 @@ export function TechnologySection() {
         </h2>
       </div>
 
-
-      {/* Glass Background Wrapper with better spacing */}
-      <div className="relative max-w-7xl  mx-auto">
+      {/* Marquee Wrapper */}
+      <div className="relative max-w-7xl mx-auto">
         <div className="rounded-2xl md:bg-gradient-to-br from-white/10 to-white/5 
-                        backdrop-blur-xl 
-                        md:shadow-2xl shadow-black/20 ">
+                        backdrop-blur-xl md:shadow-2xl shadow-black/20 py-6">
           <SlidingLogoMarquee
             items={marqueeItems}
             speed={25}
@@ -80,8 +76,6 @@ export function TechnologySection() {
             className="w-full"
           />
         </div>
-        
-      
       </div>
     </section>
   );

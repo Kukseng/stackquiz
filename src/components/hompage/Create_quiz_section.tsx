@@ -18,7 +18,7 @@ export default function CreateQuizSection() {
   }, []);
 
   return (
-    <div className="w-full px-2 sm:px-3 md:px-4 lg:px-6 ">
+    <div className="w-full px-2 sm:px-3 md:px-4 lg:px-6">
       <div ref={sectionRef} className="max-w-3xl mx-auto">
         {/* Main Container */}
         <div
@@ -31,19 +31,19 @@ export default function CreateQuizSection() {
         >
           {/* Animated Background Elements */}
           <div className="absolute inset-0 overflow-hidden">
-            <div className="absolute -top-3 -right-3 w-24 h-24 bg-gray-300 bg-opacity-10 rounded-full blur-lg animate-pulse"></div>
+            <div className="absolute -top-3 -right-3 w-24 h-24 bg-blue-400 bg-opacity-10 rounded-full blur-lg animate-pulse"></div>
             <div
-              className="absolute top-1/2 -left-6 w-20 h-20 bg-blue-300 bg-opacity-20 rounded-full blur-md animate-bounce"
+              className="absolute top-1/2 -left-6 w-20 h-20 bg-blue-600 bg-opacity-20 rounded-full blur-md animate-bounce"
               style={{ animationDelay: "1s", animationDuration: "3s" }}
             ></div>
             <div
-              className="absolute bottom-6 right-1/4 w-12 h-12 bg-purple-300 bg-opacity-15 rounded-full blur-sm animate-pulse"
+              className="absolute bottom-6 right-1/4 w-12 h-12 bg-purple-400 bg-opacity-15 rounded-full blur-sm animate-pulse"
               style={{ animationDelay: "2s" }}
             ></div>
           </div>
 
           {/* Content Grid */}
-          <div className="relative grid lg:grid-cols-2  p-4 lg:p-8 items-center">
+          <div className="relative grid lg:grid-cols-2 p-4 lg:p-8 items-center">
             {/* Left Content */}
             <div
               className={`
@@ -71,7 +71,7 @@ export default function CreateQuizSection() {
 
                 <p
                   className={`
-                    text-lg sm:text-xl text-blue-100 font-light leading-relaxed
+                    text-lg sm:text-xl text-gray-300  font-light leading-relaxed
                     transition-all duration-1000 ease-out
                     ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
                   `}
@@ -91,7 +91,7 @@ export default function CreateQuizSection() {
                 `}
                 style={{ transitionDelay: "1000ms" }}
               >
-                <Button className="btn-secondary btn-text px-4 py-2 sm:py-3 rounded-lg font-semibold text-sm sm:text-base">
+                <Button className="btn-secondary box-radius btn-text px-4 py-3 sm:py-3 rounded-lg font-semibold text-sm sm:text-base">
                   Get Started
                 </Button>
               </div>
@@ -108,29 +108,28 @@ export default function CreateQuizSection() {
                 {["No Setup Required", "Real-time Results", "Mobile Friendly"].map((feature, index) => (
                   <div key={feature} className="flex items-center gap-2">
                     <div
-                      className="w-2 h-2 bg-green-400 rounded-full animate-pulse"
+                      className="w-3 h-3 bg-green-400 rounded-full animate-pulse"
                       style={{ animationDelay: `${index * 0.2}s` }}
                     />
-                    <span className="text-xs font-medium">{feature}</span>
+                    <span className="text-sm text-gray-50 font-medium">{feature}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Right Image (with equal padding) */}
-            <div className="flex justify-center mt-3 md:justify-end  ">
-              <div className="flex justify-center md:justify-end ">
-  <Image
-    src="/quiz.svg"
-    alt="People engaging with quiz platform"
-    width={250}
-    height={250}
-    className="object-contain"
-  />
-</div>
+            {/* Right Image (responsive) */}
+            <div className="flex justify-center mt-6 md:justify-end">
+              <div className="w-full max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]">
+                <Image
+                  src="/quiz.svg"
+                  alt="People engaging with quiz platform"
+                  width={500} 
+                  height={500} 
+                  className="w-full h-auto object-contain"
+                />
+              </div>
             </div>
           </div>
-        
         </div>
       </div>
     </div>

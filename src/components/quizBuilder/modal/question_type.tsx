@@ -1,39 +1,45 @@
-
 "use client"
-import { useRouter } from "next/navigation"
-import { useQuizStore } from "../hooks/useQuizbuilder"
 
-export function QuestionTypeModal() {
-  const router = useRouter()
-  const { addQuestion } = useQuizStore()
+interface QuestionTypeModalProps {
+  onClose: () => void
+  addQuestion: (type: string) => void
+}
 
+export function QuestionTypeModal({ onClose, addQuestion }: QuestionTypeModalProps) {
   const questionTypes = [
-    { id: "multiple", label: "Multiple choice", icon: "○" },
+    { id: "multiple", label: "Multiple choice", icon: "●" },
     { id: "truefalse", label: "True/false", icon: "✓" },
     { id: "fillblank", label: "Fill the blank", icon: "___" },
   ]
 
   const handleAddQuestion = (type: string) => {
-    addQuestion(type)
-    router.back()
+    addQuestion(type) // Add question
+    onClose()         // Close modal
   }
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-lg p-6 w-80">
-        <h3 className="text-lg font-medium mb-4">Type of quiz</h3>
-        <div className="space-y-3">
+    // Overlay with blur + semi-transparent background
+    <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
+      <div className="bg-white rounded-xl shadow-xl w-96 p-6 animate-fadeIn">
+        <h3 className="text-xl font-semibold mb-5 text-center">Choose Question Type</h3>
+        <div className="space-y-4">
           {questionTypes.map((type) => (
             <div
               key={type.id}
               onClick={() => handleAddQuestion(type.id)}
-              className="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50"
+              className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 transition-all"
             >
-              <span className="mr-3 text-lg">{type.icon}</span>
-              <span>{type.label}</span>
+              <span className="mr-4 text-2xl">{type.icon}</span>
+              <span className="text-lg font-medium">{type.label}</span>
             </div>
           ))}
         </div>
+        <button
+          onClick={onClose}
+          className="mt-6 w-full py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-medium transition-colors"
+        >
+          Cancel
+        </button>
       </div>
     </div>
   )

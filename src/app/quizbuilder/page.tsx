@@ -1,8 +1,7 @@
-import QuizBuilder from "@/components/quizBuilder/quizbuilder"; 
+"use client"
 
+import { QuizBuilderLayout } from "@/components/quizBuilder/quizbuilderlayout"
 
 export default function QuizBuilderPage() {
-  return (
-      <QuizBuilder />
-  );
+  return <QuizBuilderLayout />
 }

@@ -1,5 +1,4 @@
 "use client"
-
 import { useState } from "react"
 
 interface QuizOption {
@@ -21,6 +20,12 @@ export function useQuizStore() {
   const [questions, setQuestions] = useState<Question[]>([])
   const [activeQuestionId, setActiveQuestionId] = useState<number | null>(null)
 
+  // Modal states
+  const [showDeleteModal, setShowDeleteModal] = useState(false)
+  const [showPublishModal, setShowPublishModal] = useState(false)
+  const [showAddQuestionModal, setShowAddQuestionModal] = useState(false)
+
+  // Add a new question
   const addQuestion = (type: string) => {
     const newQuestion: Question = {
       id: Date.now(),
@@ -29,8 +34,8 @@ export function useQuizStore() {
         type === "multiple"
           ? "CSS stands for"
           : type === "truefalse"
-            ? "src attribute in HTML's img tag specifies the source or location of the image file to be displayed."
-            : "The _____ property in CSS is used to change the text color of an element.",
+          ? "HTML image src attribute specifies image source."
+          : "The _____ property in CSS changes text color.",
       options:
         type === "multiple"
           ? [
@@ -40,13 +45,12 @@ export function useQuizStore() {
               { id: 4, text: "Casecading Style Sheets", correct: true, color: "bg-green-500", icon: "♦" },
             ]
           : type === "truefalse"
-            ? [
-                { id: 1, text: "True", correct: false, color: "bg-red-500" },
-                { id: 2, text: "False", correct: false, color: "bg-green-500" },
-              ]
-            : [{ id: 1, text: "color", correct: true, color: "bg-blue-500" }],
+          ? [
+              { id: 1, text: "True", correct: false, color: "bg-red-500" },
+              { id: 2, text: "False", correct: true, color: "bg-green-500" },
+            ]
+          : [{ id: 1, text: "color", correct: true, color: "bg-blue-500" }],
     }
-
     setQuestions((prev) => [...prev, newQuestion])
     setActiveQuestionId(newQuestion.id)
   }
@@ -54,7 +58,6 @@ export function useQuizStore() {
   const deleteQuestion = (id: number) => {
     const newQuestions = questions.filter((q) => q.id !== id)
     setQuestions(newQuestions)
-
     if (newQuestions.length > 0 && activeQuestionId === id) {
       setActiveQuestionId(newQuestions[0].id)
     } else if (newQuestions.length === 0) {
@@ -73,7 +76,9 @@ export function useQuizStore() {
   }
 
   const updateQuestionText = (questionId: number, newText: string) => {
-    setQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, question: newText } : q)))
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === questionId ? { ...q, question: newText } : q))
+    )
   }
 
   const updateOptionText = (questionId: number, optionId: number, newText: string) => {
@@ -82,11 +87,13 @@ export function useQuizStore() {
         if (q.id === questionId) {
           return {
             ...q,
-            options: q.options.map((opt) => (opt.id === optionId ? { ...opt, text: newText } : opt)),
+            options: q.options.map((opt) =>
+              opt.id === optionId ? { ...opt, text: newText } : opt
+            ),
           }
         }
         return q
-      }),
+      })
     )
   }
 
@@ -98,17 +105,12 @@ export function useQuizStore() {
             ...q,
             options: q.options.map((opt) => ({
               ...opt,
-              correct:
-                opt.id === optionId
-                  ? !opt.correct
-                  : q.type === "truefalse" || q.type === "fillblank"
-                    ? false
-                    : opt.correct,
+              correct: opt.id === optionId ? !opt.correct : q.type === "truefalse" || q.type === "fillblank" ? false : opt.correct,
             })),
           }
         }
         return q
-      }),
+      })
     )
   }
 
@@ -122,5 +124,11 @@ export function useQuizStore() {
     updateQuestionText,
     updateOptionText,
     toggleCorrectAnswer,
+    showDeleteModal,
+    showPublishModal,
+    showAddQuestionModal,
+    setShowDeleteModal,
+    setShowPublishModal,
+    setShowAddQuestionModal,
   }
 }

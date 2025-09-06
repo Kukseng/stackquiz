@@ -29,7 +29,7 @@ export default function Sidebar() {
         {/* Top Section */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 mb-6 border border-slate-700/50">
           <Link
-            href="/find-quiz"
+            href="/leaderboard/library"
             className="w-full flex items-center gap-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium text-lg transition-all duration-200 hover:scale-105 mb-4"
           >
             <Search className="w-6 h-6" />
@@ -37,7 +37,7 @@ export default function Sidebar() {
           </Link>
 
           <Link
-            href="/play-again"
+            href="/leaderboard/playagain"
             className="w-full flex items-center gap-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium text-lg transition-all duration-200 hover:scale-105"
           >
             <RotateCcw className="w-6 h-6" />
@@ -48,7 +48,7 @@ export default function Sidebar() {
         {/* Bottom Section */}
         <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl p-6 border border-slate-700/50">
           <Link
-            href="/podium"
+            href="/leaderboard/poduim"
             className="w-full flex items-center gap-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium text-lg transition-all duration-200 hover:scale-105 mb-4"
           >
             <Trophy className="w-6 h-6" />
@@ -56,7 +56,7 @@ export default function Sidebar() {
           </Link>
 
           <Link
-            href="/summary"
+            href="/leaderboard/summary"
             className="w-full flex items-center gap-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium text-lg transition-all duration-200 hover:scale-105 mb-4"
           >
             <BarChart3 className="w-6 h-6" />
@@ -64,7 +64,7 @@ export default function Sidebar() {
           </Link>
 
           <Link
-            href="/feedback"
+            href="/leaderboard/feedback"
             className="w-full flex items-center gap-4 bg-blue-600 hover:bg-blue-700 text-white px-6 py-4 rounded-xl font-medium text-lg transition-all duration-200 hover:scale-105"
           >
             <MessageSquare className="w-6 h-6" />

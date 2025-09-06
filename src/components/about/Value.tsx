@@ -1,7 +1,11 @@
+"use client"
 // components/ValuesSection.tsx
 import React from "react";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
 
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 interface ValueCardProps {
   title: string;
   description: string;
@@ -58,53 +62,47 @@ const style = `
 `;
 
 export const ValuesSection: React.FC = () => {
-  const values = [
-    {
-      title: "Collaboration",
-      description: "Working together to achieve great results and foster innovation.",
-      gradient: "from-lime-500 via-green-500 to-emerald-600",
-      icon: "/puzzle.png",
-    },
-    {
-      title: "Innovation",
-      description: "Constantly pushing boundaries to create cutting-edge learning experiences.",
-      gradient: "from-green-400 via-blue-400 to-indigo-500",
-      icon: "/rocket.png",
-    },
-    {
-      title: "Continuous Learning",
-      description: "Embracing growth mindset and always striving to improve and evolve.",
-      gradient: "from-purple-400 via-pink-400 to-red-400",
-      icon: "/book.png",
-    },
-  ];
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
 
   return (
     <section className="container mx-auto px-4 sm:px-8 lg:px-16 py-20 text-center relative">
       <style>{style}</style>
-   <div className="text-center mb-30">
-  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-    <span className="relative">
-      Our{" "}
-      <span className="text-yellow-400">
-        Value
-      </span>
-      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-    </span>
-  </h2>
-</div>
+      
+      {/* Title */}
+      <div className="text-center mb-30">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+          <span className="relative">
+            <span className="text-yellow text-underline">{t.heroAbout.value}</span>
+          </span>
+        </h2>
+      </div>
 
+      {/* Values List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-        {values.map((value, index) => (
+        {t.heroAbout.values.map((value, index) => (
           <ValueCard
             key={index}
             title={value.title}
             description={value.description}
-            gradient={value.gradient}
-            icon={value.icon}
+            gradient={
+              index === 0
+                ? "from-lime-500 via-green-500 to-emerald-600"
+                : index === 1
+                ? "from-green-400 via-blue-400 to-indigo-500"
+                : "from-purple-400 via-pink-400 to-red-400"
+            }
+            icon={
+              index === 0
+                ? "/puzzle.png"
+                : index === 1
+                ? "/rocket.png"
+                : "/book.png"
+            }
           />
         ))}
       </div>
     </section>
   );
 };
+

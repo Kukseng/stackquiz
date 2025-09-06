@@ -40,7 +40,7 @@ export function Navbar() {
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo_Stack_Quiz-v2.png" width={45} height={45} alt="Logo" />
+          <Image src="/logo-stackquiz.png" width={45} height={45} alt="Logo" />
           <span className="hidden md:inline text-2xl font-bold">
             <span className="text-white">STACK</span>
             <span className="text-yellow">QUIZ</span>

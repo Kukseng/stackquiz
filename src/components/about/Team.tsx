@@ -2,7 +2,10 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
 
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 const teamMembers = [
   {
     name: "Mom Rotha",
@@ -71,6 +74,9 @@ const teamMembers = [
 ];
 
 export function TeamsSection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+
   return (
     <section className="relative py-20 text-white overflow-hidden">
       {/* Add keyframe animations */}
@@ -101,16 +107,12 @@ export function TeamsSection() {
 
       {/* Section title */}
       <div className="text-center mb-30">
-  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-    <span className="relative">
-      Our{" "}
-      <span className="text-yellow">
-        Team
-      </span>
-      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-    </span>
-  </h2>
-</div>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+          <span className="relative">
+            <span className="text-yellow text-underline">{t.heroAbout.ourTeam}</span>
+          </span>
+        </h2>
+      </div>
 
       {/* Team member cards */}
       <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-35 gap-y-30">

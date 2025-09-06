@@ -12,5 +12,48 @@
     "realTime": "Real-time",
     "description": "Get participants excited while you host live knowledge-filled quizzes. Question maps and theme them to any subject!",
     "getStarted": "Get Start"
+  },
+  "heroAbout": {
+    "welcome": "Welcome To",
+    "aboutUs": "About Us",
+    "weAre": "We are passionate about creating fun and interactive",
+    "quiz": "quiz experiences that bring people together, test",
+    "knowlage": "knowledge that helps you learn and remember longer",
+    "technology": "Our Technology",
+    "mentor": "Our Mentors",
+    "ourTeam": "Our Team",
+
+    "value": "Our Values",
+    "values": [
+      {
+        "title": "Collaboration",
+        "description": "Working together to achieve great results and foster innovation."
+      },
+      {
+        "title": "Innovation",
+        "description": "Constantly pushing boundaries to create cutting-edge learning experiences."
+      },
+      {
+        "title": "Continuous Learning",
+        "description": "Embracing growth mindset and always striving to improve and evolve."
+      }
+    ] 
+  },
+  "contact": {
+    "title": "Contact Us",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "email": "Email",
+    "message": "Message",
+    "placeholder": {
+      "firstName": "Roeurm",
+      "lastName": "Dara",
+      "email": "info123@gmail.com",
+      "message": "Write your message..."
+    },
+    "button": "Send Message",
+    "address": "Khan Toul Kork, Phnom Penh, Cambodia",
+    "phone": "+855 717563743 / 971777544",
+    "emailAddress": "infostackquizz123@gmail.com"
   }
 }

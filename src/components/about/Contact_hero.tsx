@@ -4,7 +4,13 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
+
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 export function ContactSection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -52,16 +58,12 @@ export function ContactSection() {
 
       <div className="relative max-w-screen-2xl md:mx-30 px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-30">
-  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-    <span className="relative">
-      Contact{" "}
-      <span className="text-yellow">
-        Us
-      </span>
-      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-    </span>
-  </h2>
-</div>
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+          <span className="relative">
+            <span className="text-yellow text-underline">{t.contact.title}</span>
+          </span>
+        </h2>
+      </div>
 
         <motion.div
           className="flex flex-col md:flex-row gap-6"
@@ -92,7 +94,7 @@ export function ContactSection() {
 
                 {/* Phone Number */}
                 <p className="text-xs sm:text-sm md:text-base break-words">
-                  Khan Toul Kork,Phnom Penh, Cambodia
+                  Toul Kork,Phnom Penh, Cambodia
                 </p>
               </motion.div>
               <motion.div

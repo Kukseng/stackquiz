@@ -2,6 +2,10 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
+
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 const mentors = [
   {
@@ -21,6 +25,9 @@ const mentors = [
 ];
 
 export function MentorsSection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+
   return (
     <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 text-white overflow-hidden">
       {/* Add keyframe animations */}
@@ -118,8 +125,7 @@ export function MentorsSection() {
       <div className="text-center mb-30">
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
           <span className="relative">
-            Our <span className="text-yellow">Mentors</span>
-            <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
+            <span className="text-yellow text-underline">{t.heroAbout.mentor}</span>
           </span>
         </h2>
       </div>

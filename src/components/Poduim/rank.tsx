@@ -1,177 +1,142 @@
+"use client"
 
 import { Badge } from "@/components/ui/badge"
 import Image from "next/image"
+import { motion } from "framer-motion"
 
 export default function Rank() {
   const leaderboardData = [
-    {
-      name: "Dada",
-      score: 2840,
-      rank: 1,
-      avatar: "/avatar.svg",
-    },
-    {
-      name: "Bobo",
-      score: 1969,
-      rank: 2,
-      avatar: "/avatar.svg",
-    },
-    {
-      name: "Titi",
-      score: 784,
-      rank: 3,
-      avatar: "/avatar.svg",
-    },
+    { name: "Dada", score: 2840, rank: 1, avatar: "/avatar.svg" },
+    { name: "Bobo", score: 1969, rank: 2, avatar: "/avatar.svg" },
+    { name: "Titi", score: 784, rank: 3, avatar: "/avatar.svg" },
   ]
 
-  return (
-   <div 
-  className="relative overflow-hidden h-[780px]" // changed from min-h-[400px] and removed full screen
-  style={{
-    backgroundImage: `url('https://i.pinimg.com/736x/62/4b/ef/624bef905175946c023304856f8494c8.jpg')`,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    backgroundRepeat: "no-repeat",
-    borderRadius: "1rem",
-    boxShadow: "0 4px 30px rgba(0, 0, 0, 0.1)",
-    backdropFilter: "blur(5px)",
-    WebkitBackdropFilter: "blur(5px)",
+  const podiumOrder = [leaderboardData[1], leaderboardData[0], leaderboardData[2]] // 2nd, 1st, 3rd
 
-  }}
->
-      {/* Background decorative elements */}
-      <div className="absolute inset-0">
-        {/* Curved lines pattern */}
-        <div className="absolute top-0 right-0 w-1/3 h-full opacity-30">
-          <svg viewBox="0 0 400 800" className="w-full h-full">
-            <defs>
-              <pattern id="lines" patternUnits="userSpaceOnUse" width="20" height="20">
-                <path d="M0,20 Q10,10 20,20" stroke="white" strokeWidth="1" fill="none" opacity="0.3"/>
-              </pattern>
-            </defs>
-            <rect width="400" height="800" fill="url(#lines)"/>
-          </svg>
+  const podiumVariants = {
+    hidden: { y: 100, opacity: 0 },
+    visible: (i: number) => ({
+      y: 0,
+      opacity: 1,
+      transition: { delay: i * 0.25, type: "spring", stiffness: 120 },
+    }),
+  }
+
+  const sparkleVariants = {
+    animate: {
+      scale: [1, 1.6, 1],
+      opacity: [0.7, 1, 0.7],
+      transition: { repeat: Infinity, duration: 1.5, repeatDelay: 0.2 },
+    },
+  }
+
+  return (
+    <div
+      className="relative overflow-hidden h-[780px] p-6"
+      style={{
+        backgroundImage: "url('/background2.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        borderRadius: "1rem",
+        boxShadow: "0 4px 30px rgba(0,0,0,0.2)",
+        backdropFilter: "blur(6px)",
+        WebkitBackdropFilter: "blur(6px)",
+      }}
+    >
+      {/* Background floating dots */}
+      {Array.from({ length: 100 }).map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute w-1 h-1 bg-white/40 rounded-full"
+          style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
+          animate={{ y: [0, -10, 0], opacity: [0.3, 1, 0.3] }}
+          transition={{ repeat: Infinity, duration: 4, delay: Math.random() * 3 }}
+        />
+      ))}
+
+      {/* Header */}
+      <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 relative">
+            <Image src="/logo.png" alt="Logo" fill className="object-contain" />
+          </div>
+          <h1 className="text-4xl font-black text-white">
+            STACK<span className="text-yellow-400">QUIZZ</span>
+          </h1>
         </div>
-        
-        {/* Dots pattern */}
-        {Array.from({ length: 80 }).map((_, i) => (
-          <div
-            key={i}
-            className="absolute w-1 h-1 bg-white/40 rounded-full"
-            style={{
-              left: `${Math.random() * 100}%`,
-              top: `${Math.random() * 100}%`,
-              animationDelay: `${Math.random() * 3}s`
-            }}
-          />
-        ))}
-        
-        {/* Plus signs */}
-        <div className="absolute top-1/4 left-8 text-cyan-400/60 text-3xl font-bold">+</div>
-        <div className="absolute bottom-1/3 right-12 text-pink-400/60 text-2xl font-bold">+</div>
-        <div className="absolute top-1/2 right-1/4 text-purple-300/60 text-xl font-bold">+</div>
-        <div className="absolute bottom-1/4 left-1/4 text-yellow-400/60 text-2xl font-bold">+</div>
-        
-        {/* Circular decorative elements */}
-        <div className="absolute top-16 left-1/3 w-8 h-8 bg-purple-400/40 rounded-full"></div>
-        <div className="absolute bottom-32 right-1/3 w-6 h-6 bg-pink-400/50 rounded-full"></div>
-        <div className="absolute top-1/3 right-16 w-4 h-4 bg-cyan-400/60 rounded-full"></div>
+        <Badge className="px-6 py-3 text-lg bg-white text-gray-800 rounded-full font-bold shadow-lg">
+          Computer Science
+        </Badge>
       </div>
 
-      <div className="relative z-10 min-h-screen flex flex-col">
-        {/* Header */}
-        <div className="flex items-center justify-between p-8">
-          <div className="flex items-center gap-4">
-            <div className="w-16 h-16 relative">
-           <Image
-              src="/logo.png"
-              alt="Logo"
-              fill
-              className="object-contain"
-            />
-            </div>
-            <h1 className="text-4xl font-black text-white">
-              STACK<span className="text-yellow-400">QUIZZ</span>
-            </h1>
-          </div>
-          <Badge className="px-6 py-3 text-lg bg-white text-gray-800 rounded-full font-bold shadow-lg">
-            Computer Science
-          </Badge>
-        </div>
+      {/* Podiums */}
+      <div className="flex justify-center items-end gap-2  h-[660px]">
+        {podiumOrder.map((player, index) => {
+          const isFirst = player.rank === 1
+          const podiumHeight = isFirst ? 300 : index === 0 ? 200 : 160
+          const podiumPadding = isFirst ? 16 : index === 0 ? 12 : 8
+          const textSize = isFirst ? "text-9xl" : index === 0 ? "text-8xl" : "text-7xl"
+          const scoreSize = isFirst ? "text-4xl" : index === 0 ? "text-3xl" : "text-2xl"
 
-        {/* Leaderboard */}
-        <div className="flex-1 flex items-center justify-center px-8">
-          <div className="relative w-full max-w-4xl">
-            {/* Crown and sparkles for first place */}
-            <div className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-16">
-              <div className="relative">
-                <div className="text-6xl">👑</div>
-                {/* Sparkle dots around crown */}
-                <div className="absolute -top-4 -left-4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse"></div>
-                <div className="absolute -top-2 -right-6 w-2 h-2 bg-yellow-300 rounded-full animate-pulse delay-300"></div>
-                <div className="absolute -bottom-2 -left-6 w-2 h-2 bg-yellow-500 rounded-full animate-pulse delay-700"></div>
-                <div className="absolute -bottom-4 -right-4 w-3 h-3 bg-yellow-400 rounded-full animate-pulse delay-1000"></div>
-                <div className="absolute -top-6 left-1/2 transform -translate-x-1/2 w-2 h-2 bg-yellow-300 rounded-full animate-pulse delay-500"></div>
-              </div>
-            </div>
-            
-            <div className="flex items-end justify-center ">
-              {/* Second Place */}
-              <div className="flex flex-col items-center">
-                <div className="w-30 h-30 bg-white rounded-full p-1 mb-4 shadow-lg">
-                  <img
-                    src={leaderboardData[1].avatar || "/placeholder.svg"}
-                    alt={leaderboardData[1].name}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                </div>
-                <div className="bg-gradient-to-r from-orange-400 to-yellow-500 text-white px-6 py-2 rounded-full font-bold text-lg mb-2 shadow-lg">
-                  {leaderboardData[1].name}
-                </div>
-                <div className="bg-gradient-to-t from-blue-700 to-blue-500 rounded-t-3xl px-16 py-12 text-center shadow-xl min-h-[200px] flex flex-col justify-center">
-                  <div className="text-8xl font-black text-white mb-4">2</div>
-                  <div className="text-3xl font-bold text-white">{leaderboardData[1].score}</div>
-                </div>
-              </div>
+          return (
+            <motion.div
+              key={player.rank}
+              custom={index}
+              initial="hidden"
+              animate="visible"
+              variants={podiumVariants}
+              className="flex flex-col items-center relative"
+            >
+              {/* Avatar with hover effect */}
+              <motion.div
+                className="w-32 h-32 bg-white rounded-full p-1 mb-4 shadow-lg cursor-pointer hover:scale-105 hover:shadow-2xl transition-transform"
+                animate={{ y: [0, -8, 0] }}
+                transition={{ repeat: Infinity, duration: 2, delay: index * 0.3 }}
+              >
+                <img
+                  src={player.avatar || "/placeholder.svg"}
+                  alt={player.name}
+                  className="w-full h-full rounded-full object-cover"
+                />
+              </motion.div>
 
-              {/* First Place */}
-              <div className="flex flex-col items-center relative">
-                <div className="w-35 h-35 bg-white rounded-full p-1 mb-4 shadow-xl">
-                  <img
-                    src={leaderboardData[0].avatar || "/placeholder.svg"}
-                    alt={leaderboardData[0].name}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                </div>
-                <div className="bg-gradient-to-r from-orange-400 to-yellow-500 text-white px-6 py-2 rounded-full font-bold text-xl mb-2 shadow-lg">
-                  {leaderboardData[0].name}
-                </div>
-                <div className="bg-gradient-to-t from-orange-600 to-orange-400 rounded-t-3xl px-20 py-16 text-center shadow-2xl min-h-[280px] flex flex-col justify-center">
-                  <div className="text-9xl font-black text-white mb-4">1</div>
-                  <div className="text-4xl font-bold text-white">{leaderboardData[0].score}</div>
-                </div>
-              </div>
+              {/* Name */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.3 + 0.2 }}
+                className="bg-gradient-to-r from-orange-400 to-yellow-500 text-white px-6 py-2 rounded-full font-bold text-lg mb-2 shadow-lg"
+              >
+                {player.name}
+              </motion.div>
 
-              {/* Third Place */}
-              <div className="flex flex-col items-center">
-                <div className="w-30 h-30 bg-white rounded-full p-1 mb-4 shadow-lg">
-                  <img
-                    src={leaderboardData[2].avatar || "/placeholder.svg"}
-                    alt={leaderboardData[2].name}
-                    className="w-full h-full rounded-full object-cover"
-                  />
-                </div>
-                <div className="bg-gradient-to-r from-orange-400 to-yellow-500 text-white px-6 py-2 rounded-full font-bold text-lg mb-2 shadow-lg">
-                  {leaderboardData[2].name}
-                </div>
-                <div className="bg-gradient-to-t from-blue-600 to-blue-400 rounded-t-3xl px-16 py-8 text-center shadow-xl min-h-[160px] flex flex-col justify-center">
-                  <div className="text-7xl font-black text-white mb-4">3</div>
-                  <div className="text-2xl font-bold text-white">{leaderboardData[2].score}</div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+              {/* Podium */}
+              <motion.div
+                initial={{ scaleY: 0 }}
+                animate={{ scaleY: 1 }}
+                transition={{ delay: index * 0.3 + 0.4, type: "spring", stiffness: 120 }}
+                className={`bg-gradient-to-t ${
+                  isFirst ? "from-orange-600 to-orange-400" : "from-blue-700 to-blue-500"
+                } rounded-t-3xl px-16 py-${podiumPadding} text-center shadow-xl min-h-[${podiumHeight}px] flex flex-col justify-center`}
+              >
+                <div className={`${textSize} font-black text-white mb-4`}>{player.rank}</div>
+                <div className={`${scoreSize} font-bold text-white`}>{player.score}</div>
+              </motion.div>
+
+              {/* Crown for 1st place */}
+              {isFirst && (
+                <motion.div
+                  className="absolute -top-18 text-6xl"
+                  animate={{ rotate: [0, 10, -10, 0] }}
+                  transition={{ repeat: Infinity, duration: 2 }}
+                >
+                  👑
+                 
+                </motion.div>
+              )}
+            </motion.div>
+          )
+        })}
       </div>
     </div>
   )

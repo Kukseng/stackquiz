@@ -63,7 +63,7 @@ export function Again() {
       color: "bg-yellow-500",
       image:
         "https://i.pinimg.com/736x/2c/db/77/2cdb7717db18b51bf43e2e52380fb74f.jpg",
-    }git 
+    }
   ];
 
   return (

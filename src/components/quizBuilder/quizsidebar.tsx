@@ -15,6 +15,20 @@ interface QuizSidebarProps {
 }
 
 export function QuizSidebar({ questions, activeQuestionId, onQuestionSelect, onAddQuestion }: QuizSidebarProps) {
+  // Function to get number of bars based on question type
+  const getBarCount = (type: string) => {
+    switch (type) {
+      case "multiple":
+        return 4
+      case "truefalse":
+        return 2
+      case "fillblank":
+        return 1
+      default:
+        return 3
+    }
+  }
+
   return (
     <div className="w-64 bg-gradient-to-b from-pink-50 to-purple-50 h-screen overflow-y-auto p-4 border-r border-gray-200">
       <div className="space-y-3">
@@ -30,7 +44,7 @@ export function QuizSidebar({ questions, activeQuestionId, onQuestionSelect, onA
           >
             <div className="text-gray-600 text-sm mb-3 font-medium">Question</div>
             <div className="space-y-2">
-              {Array.from({ length: 4 }).map((_, i) => (
+              {Array.from({ length: getBarCount(question.type) }).map((_, i) => (
                 <div key={i} className="h-1.5 bg-gray-300 rounded"></div>
               ))}
             </div>

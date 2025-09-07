@@ -1,5 +1,7 @@
 "use client"
 
+import { FaCircle, FaCheck, FaRegSquare } from "react-icons/fa"
+
 interface QuestionTypeModalProps {
   onClose: () => void
   addQuestion: (type: string) => void
@@ -7,9 +9,9 @@ interface QuestionTypeModalProps {
 
 export function QuestionTypeModal({ onClose, addQuestion }: QuestionTypeModalProps) {
   const questionTypes = [
-    { id: "multiple", label: "Multiple choice", icon: "●" },
-    { id: "truefalse", label: "True/false", icon: "✓" },
-    { id: "fillblank", label: "Fill the blank", icon: "___" },
+    { id: "multiple", label: "Multiple choice", icon: <FaCircle className="w-6 h-6 text-blue-500" /> },
+    { id: "truefalse", label: "True/false", icon: <FaCheck className="w-6 h-6 text-green-500" /> },
+    { id: "fillblank", label: "Fill the blank", icon: <FaRegSquare className="w-6 h-6 text-purple-500" /> },
   ]
 
   const handleAddQuestion = (type: string) => {
@@ -18,7 +20,6 @@ export function QuestionTypeModal({ onClose, addQuestion }: QuestionTypeModalPro
   }
 
   return (
-    // Overlay with blur + semi-transparent background
     <div className="fixed inset-0 flex items-center justify-center z-50 bg-black/50 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-xl w-96 p-6 animate-fadeIn">
         <h3 className="text-xl font-semibold mb-5 text-center">Choose Question Type</h3>
@@ -29,7 +30,7 @@ export function QuestionTypeModal({ onClose, addQuestion }: QuestionTypeModalPro
               onClick={() => handleAddQuestion(type.id)}
               className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 transition-all"
             >
-              <span className="mr-4 text-2xl">{type.icon}</span>
+              <span className="mr-4">{type.icon}</span>
               <span className="text-lg font-medium">{type.label}</span>
             </div>
           ))}

@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
-
+import Link from "next/link";
 export default function CreateQuizSection() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
@@ -18,7 +18,7 @@ export default function CreateQuizSection() {
   }, []);
 
   return (
-    <div className="w-full px-2 sm:px-3 md:px-4 lg:px-6">
+    <div className="w-full px-2  sm:px-3 md:px-4 lg:px-6">
       <div ref={sectionRef} className="max-w-3xl mx-auto">
         {/* Main Container */}
         <div
@@ -36,14 +36,14 @@ export default function CreateQuizSection() {
               className="absolute top-1/2 -left-6 w-20 h-20 bg-blue-600 bg-opacity-20 rounded-full blur-md animate-bounce"
               style={{ animationDelay: "1s", animationDuration: "3s" }}
             ></div>
-            <div
+            <div 
               className="absolute bottom-6 right-1/4 w-12 h-12 bg-purple-400 bg-opacity-15 rounded-full blur-sm animate-pulse"
               style={{ animationDelay: "2s" }}
             ></div>
           </div>
 
           {/* Content Grid */}
-          <div className="relative grid lg:grid-cols-2 p-4 lg:p-8 items-center">
+          <div className="relative grid rounded-2xl md:bg-gradient-to-br from-white/1 to-white/10 lg:grid-cols-2 p-4 lg:p-8 items-center">
             {/* Left Content */}
             <div
               className={`
@@ -86,14 +86,16 @@ export default function CreateQuizSection() {
               {/* CTA Button */}
               <div
                 className={`
-                  transition-all duration-1000 ease-out
+                  transition-all duration-1000 ease-out 
                   ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
                 `}
                 style={{ transitionDelay: "1000ms" }}
               >
+                <Link href="/signup" className="flex items-center gap-2">
                 <Button className="btn-secondary box-radius btn-text px-4 py-3 sm:py-3 rounded-lg font-semibold text-sm sm:text-base">
                   Get Started
                 </Button>
+                </Link>
               </div>
 
               {/* Feature Points */}

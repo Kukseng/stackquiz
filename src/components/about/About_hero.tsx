@@ -5,6 +5,7 @@ import { motion, useAnimation, useInView } from "framer-motion";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRef, useEffect } from "react";
+import Link from "next/link";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
@@ -59,10 +60,11 @@ export function AboutHero() {
               <br className="hidden sm:block" />
               {t.heroAbout.knowlage}
             </p>
-
+            <Link href="/signup" className="flex items-center gap-2">
             <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
               Get Started
             </Button>
+            </Link>
           </motion.div>
 
           {/* Image Content */}

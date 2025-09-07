@@ -10,14 +10,14 @@ import kh from "@/locales/km.json";
 const mentors = [
   {
     name: "Sreng Chipor",
-    image: "/teacherchipor.png",
+    image: "/ourImage/teacherchipor.png",
     shineColors: ["#3b82f6", "#eab308", "#ec4899"],
     borderColors: "border-blue-400",
     socials: { linkedin: "#", github: "#", instagram: "#" },
   },
   {
     name: "Srorng Sokcheat",
-    image: "/teachersokcheat.JPG",
+    image: "/ourImage/teachersokcheat.JPG",
     shineColors: ["#f97316", "#eab308", "#ec4899"],
     borderColors: "border-orange-400",
     socials: { linkedin: "#", github: "#", instagram: "#" },
@@ -226,7 +226,7 @@ export function MentorsSection() {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <Image
-                    src="/github.svg"
+                    src="/social_media_icon/github.svg"
                     alt="GitHub"
                     width={32}
                     height={32}

@@ -15,12 +15,12 @@ export function TechnologySection() {
   const t = language === "en" ? en : kh;
 
   const technologies = [
-    { name: "Redis", image: "/Redis.png" },
-    { name: "PostgreSQL", image: "/postgres.webp" },
-    { name: "Spring Boot", image: "/Springboot.png" },
-    { name: "Docker", image: "/docker.webp" },
-    { name: "Next.js", image: "/nextjs.png" },
-    { name: "Blender", image: "/Blender.png" },
+    { name: "Redis", image: "/technology/redis.png" },
+    { name: "PostgreSQL", image: "/technology/postgres.webp" },
+    { name: "Spring Boot", image: "/technology/spring.png" },
+    { name: "Docker", image: "/technology/docker.webp" },
+    { name: "Next.js", image: "/technology/next.png" },
+    { name: "Blender", image: "/technology/blender.png" },
   ];
 
   const marqueeItems: SlidingLogoMarqueeItem[] = technologies.map(
@@ -28,17 +28,17 @@ export function TechnologySection() {
       id: index.toString(),
       content: (
         <div
-          className="w-32 sm:w-36 md:w-40 lg:w-44 h-24 sm:h-28 md:h-32 lg:h-36 
-                     mx-4 p-4  rounded-xl 
-                     flex items-center justify-center transition-transform duration-300
-                     hover:scale-105 cursor-pointer"
+          className="flex items-center justify-center h-full 
+                   w-40 sm:w-44 md:w-52 lg:w-60
+                   transition-transform duration-300 
+                   hover:scale-110 cursor-pointer"
           title={tech.name}
         >
           <Image
             src={tech.image}
             alt={tech.name}
-            width={160}
-            height={120}
+            width={200}
+            height={200}
             className="object-contain "
           />
         </div>
@@ -49,31 +49,35 @@ export function TechnologySection() {
   return (
     <section className="container mx-auto px-4 sm:px-6 lg:px-10 py-16">
       {/* Section Header */}
-        <div className="text-center mb-30">
+      <div className="text-center mb-30">
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
           <span className="relative">
-            <span className="text-yellow text-underline">{t.heroAbout.technology}</span>
+            <span className="text-yellow text-underline">
+              {t.heroAbout.technology}
+            </span>
           </span>
         </h2>
       </div>
 
       {/* Marquee Wrapper */}
       <div className="relative max-w-7xl mx-auto">
-        <div className="rounded-2xl md:bg-gradient-to-br from-white/10 to-white/5 
-                        backdrop-blur-xl md:shadow-2xl shadow-black/20 py-6">
+        <div
+          className="rounded-2xl bg-gradient-to-br from-blue-900 to-yellow-50
+                        backdrop-blur-3xl md:shadow-2xs shadow-black/20 py-6"
+        >
           <SlidingLogoMarquee
             items={marqueeItems}
             speed={25}
             pauseOnHover={true}
             enableBlur={true}
             blurIntensity={0.5}
-            height="120px"
-            gap="1.5rem"
+            height="180px"
+            gap="2rem"
             scale={1}
             autoPlay={true}
             backgroundColor="transparent"
             showControls={false}
-            className="w-full"
+            className="w-full flex items-center"
           />
         </div>
       </div>

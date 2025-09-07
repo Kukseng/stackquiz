@@ -88,7 +88,7 @@ export function ContactSection() {
                 variants={itemVariants}
               >
                 <Image src="/map.png" alt="Map Icon" width={24} height={24} />
-                <p className="text-sm sm:text-base break-words">Toul Kork, Phnom Penh, Cambodia</p>
+                <p className="text-sm sm:text-base break-words">Tuol Kouk, Phnom Penh, Cambodia</p>
               </motion.div>
 
               {/* Phone */}
@@ -97,7 +97,8 @@ export function ContactSection() {
                 variants={itemVariants}
               >
                 <Image src="/call.png" alt="Call Icon" width={24} height={24} />
-                <p className="text-sm sm:text-base">+855 717563743 / 971777544</p>
+                <p className="text-sm sm:text-base">(+855) 96 458 789 / 97 458 789
+</p>
               </motion.div>
 
               {/* Email */}
@@ -106,7 +107,7 @@ export function ContactSection() {
                 variants={itemVariants}
               >
                 <Image src="/email.png" alt="Email Icon" width={24} height={24} />
-                <p className="text-sm sm:text-base break-all">infostackquizz123@gmail.com</p>
+                <p className="text-sm sm:text-base break-all">info.stackquiz@gmail.com</p>
               </motion.div>
             </CardContent>
 

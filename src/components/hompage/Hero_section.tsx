@@ -6,6 +6,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { useRef, useEffect } from "react";
 import Image from "next/image";
+import Link from "next/link";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
@@ -70,10 +71,11 @@ export function HeroSection() {
             <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0">
               {t.hero.description}
             </p>
-
+            <Link href="/signup" className="flex items-center gap-2">
             <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
               {t.hero.getStarted}
             </Button>
+            </Link>
           </motion.div>
 
           {/* Image */}

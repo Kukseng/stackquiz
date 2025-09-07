@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { QuizSidebar } from "./quizsidebar"
-import { QuizMainContent } from "./quizmaincontent"
-import { QuizHeader } from "./quizheader"
-import { useQuizStore } from "./hooks/useQuizbuilder"
-import { QuestionTypeModal } from "./modal/question_type"
-import DeleteQuestionModal from "./modal/deleteqquestion"
-import PublishModal from "./modal/publice_modal"
+import { useState } from "react";
+import { QuizSidebar } from "./quizsidebar";
+import { QuizMainContent } from "./quizmaincontent";
+import { QuizHeader } from "./quizheader";
+import { useQuizStore, Question } from "./hooks/useQuizbuilder";
+import { QuestionTypeModal } from "./modal/question_type";
+import DeleteQuestionModal from "./modal/deleteqquestion";
+import PublishModal from "./modal/publice_modal";
 
 export function QuizBuilderLayout() {
   const {
@@ -20,18 +20,18 @@ export function QuizBuilderLayout() {
     updateQuestionText,
     updateOptionText,
     toggleCorrectAnswer,
-  } = useQuizStore()
+  } = useQuizStore();
 
-  const [showAddQuestionModal, setShowAddQuestionModal] = useState(false)
-  const [showDeleteModal, setShowDeleteModal] = useState(false)
-  const [showPublishModal, setShowPublishModal] = useState(false)
+  const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   // Handle delete: set next active question
   const handleDelete = (id: number) => {
-    const remaining = questions.filter(q => q.id !== id)
-    deleteQuestion(id)
-    setActiveQuestionId(remaining.length ? remaining[0].id : null)
-  }
+    const remaining = questions.filter((q) => q.id !== id);
+    deleteQuestion(id);
+    setActiveQuestionId(remaining.length ? remaining[0].id : null);
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-gradient-to-br from-pink-50 to-purple-50 relative">
@@ -44,7 +44,7 @@ export function QuizBuilderLayout() {
         onAddQuestion={() => setShowAddQuestionModal(true)}
       />
 
-      <div className="flex w-full ">
+      <div className="flex w-full">
         {/* Sidebar */}
         <QuizSidebar
           questions={questions}
@@ -62,7 +62,6 @@ export function QuizBuilderLayout() {
           onToggleCorrectAnswer={toggleCorrectAnswer}
           onDeleteQuestion={() => setShowDeleteModal(true)}
           onDuplicateQuestion={duplicateQuestion}
-          onAddQuestion={() => setShowAddQuestionModal(true)}
         />
       </div>
 
@@ -91,5 +90,5 @@ export function QuizBuilderLayout() {
         />
       )}
     </div>
-  )
+  );
 }

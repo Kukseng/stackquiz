@@ -1,17 +1,22 @@
-"use client"
+"use client";
 
-import { Badge } from "@/components/ui/badge"
-import Image from "next/image"
-import { motion } from "framer-motion"
+import { Badge } from "@/components/ui/badge";
+import Image from "next/image";
+import { motion } from "framer-motion";
 
 export default function Rank() {
   const leaderboardData = [
     { name: "Dada", score: 2840, rank: 1, avatar: "/avatar.svg" },
     { name: "Bobo", score: 1969, rank: 2, avatar: "/avatar.svg" },
     { name: "Titi", score: 784, rank: 3, avatar: "/avatar.svg" },
-  ]
+  ];
 
-  const podiumOrder = [leaderboardData[1], leaderboardData[0], leaderboardData[2]] // 2nd, 1st, 3rd
+  // order: 2nd, 1st, 3rd
+  const podiumOrder = [
+    leaderboardData[1],
+    leaderboardData[0],
+    leaderboardData[2],
+  ];
 
   const podiumVariants = {
     hidden: { y: 100, opacity: 0 },
@@ -20,21 +25,13 @@ export default function Rank() {
       opacity: 1,
       transition: { delay: i * 0.25, type: "spring", stiffness: 120 },
     }),
-  }
-
-  const sparkleVariants = {
-    animate: {
-      scale: [1, 1.6, 1],
-      opacity: [0.7, 1, 0.7],
-      transition: { repeat: Infinity, duration: 1.5, repeatDelay: 0.2 },
-    },
-  }
+  };
 
   return (
     <div
       className="relative overflow-hidden h-[780px] p-6"
       style={{
-        backgroundImage: "url('/background2.jpg')",
+        backgroundImage: "url('/hey2.jpg')",
         backgroundSize: "cover",
         backgroundPosition: "center",
         borderRadius: "1rem",
@@ -43,20 +40,11 @@ export default function Rank() {
         WebkitBackdropFilter: "blur(6px)",
       }}
     >
-      {/* Background floating dots */}
-      {Array.from({ length: 100 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute w-1 h-1 bg-white/40 rounded-full"
-          style={{ left: `${Math.random() * 100}%`, top: `${Math.random() * 100}%` }}
-          animate={{ y: [0, -10, 0], opacity: [0.3, 1, 0.3] }}
-          transition={{ repeat: Infinity, duration: 4, delay: Math.random() * 3 }}
-        />
-      ))}
+     
 
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-6">
           <div className="w-16 h-16 relative">
             <Image src="/logo.png" alt="Logo" fill className="object-contain" />
           </div>
@@ -70,13 +58,23 @@ export default function Rank() {
       </div>
 
       {/* Podiums */}
-      <div className="flex justify-center items-end gap-2  h-[660px]">
+      <div className="flex justify-center items-end gap-1 h-[660px]">
         {podiumOrder.map((player, index) => {
-          const isFirst = player.rank === 1
-          const podiumHeight = isFirst ? 300 : index === 0 ? 200 : 160
-          const podiumPadding = isFirst ? 16 : index === 0 ? 12 : 8
-          const textSize = isFirst ? "text-9xl" : index === 0 ? "text-8xl" : "text-7xl"
-          const scoreSize = isFirst ? "text-4xl" : index === 0 ? "text-3xl" : "text-2xl"
+          const isFirst = player.rank === 1;
+
+          // podium heights & styles
+          const podiumHeight = isFirst ? 360 : index === 0 ? 240 : 200;
+          const podiumPadding = isFirst ? 20 : index === 0 ? 14 : 10;
+          const textSize = isFirst
+            ? "text-9xl"
+            : index === 0
+            ? "text-7xl"
+            : "text-6xl";
+          const scoreSize = isFirst
+            ? "text-5xl"
+            : index === 0
+            ? "text-3xl"
+            : "text-2xl";
 
           return (
             <motion.div
@@ -91,7 +89,11 @@ export default function Rank() {
               <motion.div
                 className="w-32 h-32 bg-white rounded-full p-1 mb-4 shadow-lg cursor-pointer hover:scale-105 hover:shadow-2xl transition-transform"
                 animate={{ y: [0, -8, 0] }}
-                transition={{ repeat: Infinity, duration: 2, delay: index * 0.3 }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2,
+                  delay: index * 0.3,
+                }}
               >
                 <img
                   src={player.avatar || "/placeholder.svg"}
@@ -114,30 +116,84 @@ export default function Rank() {
               <motion.div
                 initial={{ scaleY: 0 }}
                 animate={{ scaleY: 1 }}
-                transition={{ delay: index * 0.3 + 0.4, type: "spring", stiffness: 120 }}
+                transition={{
+                  delay: index * 0.3 + 0.4,
+                  type: "spring",
+                  stiffness: 120,
+                }}
                 className={`bg-gradient-to-t ${
-                  isFirst ? "from-orange-600 to-orange-400" : "from-blue-700 to-blue-500"
-                } rounded-t-3xl px-16 py-${podiumPadding} text-center shadow-xl min-h-[${podiumHeight}px] flex flex-col justify-center`}
+                  isFirst
+                    ? "from-orange-600 to-orange-400"
+                    : "from-blue-700 to-blue-500"
+                } rounded-t-3xl px-16 text-center shadow-xl flex flex-col justify-center`}
+                style={{
+                  minHeight: `${podiumHeight}px`,
+                  paddingTop: podiumPadding,
+                  paddingBottom: podiumPadding,
+                }}
               >
-                <div className={`${textSize} font-black text-white mb-4`}>{player.rank}</div>
-                <div className={`${scoreSize} font-bold text-white`}>{player.score}</div>
+                <div className={`${textSize} font-black text-white mb-4`}>
+                  {player.rank}
+                </div>
+                <div className={`${scoreSize} font-bold text-white`}>
+                  {player.score}
+                </div>
               </motion.div>
 
-              {/* Crown for 1st place */}
-              {isFirst && (
-                <motion.div
-                  className="absolute -top-18 text-6xl"
-                  animate={{ rotate: [0, 10, -10, 0] }}
-                  transition={{ repeat: Infinity, duration: 2 }}
-                >
-                  👑
-                 
-                </motion.div>
-              )}
+           {/* Crown + Sparkle effects for 1st place */}
+{isFirst && (
+  <>
+    {/* Crown */}
+    <motion.div
+      className="absolute -top-20 text-7xl drop-shadow-[0_0_40px_gold]"
+      animate={{ rotate: [0, 15, -15, 0] }}
+      transition={{ repeat: Infinity, duration: 2 }}
+      style={{
+        textShadow: `
+          0 0 20px gold,
+          0 0 40px gold,
+          0 0 60px orange,
+          0 0 80px yellow,
+          0 0 100px gold
+        `,
+      }}
+    >
+      👑
+    </motion.div>
+
+    {/* Sparkles */}
+    <div className="absolute -top-28 left-1/2 transform -translate-x-1/2 w-32 h-32 pointer-events-none">
+      {[...Array(8)].map((_, i) => (
+        <motion.div
+          key={i}
+          className="absolute bg-yellow-300 rounded-full"
+          style={{
+           
+            top: '50%',
+            left: '50%',
+            boxShadow: '0 0 20px yellow, 0 0 40px gold',
+          }}
+          animate={{
+            x: [0, Math.random() * 40 - 20, 0],
+            y: [0, Math.random() * 40 - 20, 0],
+            opacity: [0, 1, 0],
+            scale: [0.7, 1.2, 0.7],
+          }}
+          transition={{
+            repeat: Infinity,
+            duration: 1.2 + Math.random(),
+            delay: i * 0.15,
+          }}
+        />
+      ))}
+    </div>
+  </>
+)}
+
             </motion.div>
-          )
+          );
         })}
       </div>
     </div>
-  )
+  );
 }

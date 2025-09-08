@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CardQuizComponent from "../CardQuizComponent";
 import { motion } from "framer-motion";
+import Image from "next/image";
+import { Fullscreen } from "lucide-react";
 export function Again() {
   const players = [
     { name: "Boba", rank: 2, score: 85 },
@@ -63,7 +65,7 @@ export function Again() {
       color: "bg-yellow-500",
       image:
         "https://i.pinimg.com/736x/2c/db/77/2cdb7717db18b51bf43e2e52380fb74f.jpg",
-    }
+    },
   ];
 
   return (
@@ -82,53 +84,60 @@ export function Again() {
           <div className="mb-12">
             <div className="flex items-start gap-8">
               {/* Podium Illustration */}
-             {/* Podium Illustration */}
-<div className="relative">
-  <Card className="w-[500px] h-[300px] bg-gradient-to-br from-purple-600 via-pink-500 to-orange-400 border-0 overflow-hidden">
-    <CardContent className="p-8 relative h-full">
-      <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 flex items-end gap-1">
-        {players.map((player, index) => {
-          const isFirst = player.rank === 1;
-          const podiumHeight = isFirst
-            ? 32
-            : player.rank === 2
-            ? 24
-            : 16;
-          const podiumPadding = isFirst ? 6 : 5;
-          const textSize = isFirst ? "text-4xl" : "text-3xl";
+              {/* Podium Illustration */}
+              <div className="relative">
+                <Card className="w-[500px] h-[300px] ">
+                  <Image
+                    src="/Hey2.jpg"
+                    width={800}
+                    height={100}
+                    alt="Card Image"
+                    className="absolute inset-0 h-full object-cover rounded-xl"
+                  />
+                  <CardContent className="p-8 relative h-full">
+                    <div className="absolute -bottom-6 left-1/2 transform -translate-x-1/2 flex items-end gap-1">
+                      {players.map((player, index) => {
+                        const isFirst = player.rank === 1;
+                        const podiumHeight = isFirst
+                          ? 32
+                          : player.rank === 2
+                          ? 24
+                          : 16;
+                        const podiumPadding = isFirst ? 6 : 5;
+                        const textSize = isFirst ? "text-4xl" : "text-3xl";
 
-          return (
-            <motion.div
-              key={player.rank}
-              custom={index}
-              initial="hidden"
-              animate="visible"
-              variants={podiumVariants}
-              className="flex flex-col items-center relative"
-            >
-              {/* Floating animation for the name badge */}
-              <motion.div
-                animate={{ y: [0, -10, 0] }}
-                transition={{
-                  repeat: Infinity,
-                  duration: 2,
-                  delay: index * 0.3,
-                }}
-                className="bg-yellow-400 text-black px-4 py-2 rounded-lg text-lg font-bold mb-2"
-              >
-                {player.name}
-              </motion.div>
+                        return (
+                          <motion.div
+                            key={player.rank}
+                            custom={index}
+                            initial="hidden"
+                            animate="visible"
+                            variants={podiumVariants}
+                            className="flex flex-col items-center relative"
+                          >
+                            {/* Floating animation for the name badge */}
+                            <motion.div
+                              animate={{ y: [0, -10, 0] }}
+                              transition={{
+                                repeat: Infinity,
+                                duration: 2,
+                                delay: index * 0.3,
+                              }}
+                              className="bg-yellow-400 text-black px-4 py-2 rounded-lg text-lg font-bold mb-2"
+                            >
+                              {player.name}
+                            </motion.div>
 
-              {/* Animated Podium */}
-              <motion.div
-                initial={{ scaleY: 0 }}
-                animate={{ scaleY: 1 }}
-                transition={{
-                  delay: index * 0.3 + 0.4,
-                  type: "spring",
-                  stiffness: 120,
-                }}
-                className={`
+                            {/* Animated Podium */}
+                            <motion.div
+                              initial={{ scaleY: 0 }}
+                              animate={{ scaleY: 1 }}
+                              transition={{
+                                delay: index * 0.3 + 0.4,
+                                type: "spring",
+                                stiffness: 120,
+                              }}
+                              className={`
                   w-20 h-${podiumHeight} 
                   ${
                     isFirst
@@ -140,74 +149,72 @@ export function Again() {
                   rounded-t flex items-center justify-center text-white font-bold ${textSize}
                   shadow-xl hover:shadow-2xl transition-shadow cursor-pointer
                 `}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {player.rank}
-              </motion.div>
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {player.rank}
+                            </motion.div>
 
-              {/* Crown for 1st place */}
-              {isFirst && (
-                <motion.div
-                  className="absolute -top-16 text-6xl"
-                  animate={{
-                    rotate: [0, 10, -10, 0],
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{
-                    repeat: Infinity,
-                    duration: 2,
-                    ease: "easeInOut",
-                  }}
-                >
-                  👑
-                </motion.div>
-              )}
+                            {/* Crown for 1st place */}
+                            {isFirst && (
+                              <motion.div
+                                className="absolute -top-16 text-6xl"
+                                animate={{
+                                  rotate: [0, 10, -10, 0],
+                                  scale: [1, 1.1, 1],
+                                }}
+                                transition={{
+                                  repeat: Infinity,
+                                  duration: 2,
+                                  ease: "easeInOut",
+                                }}
+                              >
+                                👑
+                              </motion.div>
+                            )}
 
-              {/* Sparkle effects for winner */}
-              {isFirst && (
-                <>
-                  <motion.div
-                    className="absolute -top-4 -left-4 text-yellow-400 text-2xl"
-                    animate={{
-                      opacity: [0, 1, 0],
-                      scale: [0, 1, 0],
-                      rotate: [0, 180, 360],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 1.5,
-                      delay: 0.5,
-                    }}
-                  >
-                    ✨
-                  </motion.div>
-                  <motion.div
-                    className="absolute -top-8 -right-4 text-yellow-400 text-2xl"
-                    animate={{
-                      opacity: [0, 1, 0],
-                      scale: [0, 1, 0],
-                      rotate: [360, 180, 0],
-                    }}
-                    transition={{
-                      repeat: Infinity,
-                      duration: 1.5,
-                      delay: 1,
-                    }}
-                  >
-                    ✨
-                  </motion.div>
-                </>
-              )}
-            </motion.div>
-          );
-        })}
-      </div>
-    </CardContent>
-  </Card>
-</div>
-
-                 
+                            {/* Sparkle effects for winner */}
+                            {isFirst && (
+                              <>
+                                <motion.div
+                                  className="absolute -top-4 -left-4 text-yellow-400 text-2xl"
+                                  animate={{
+                                    opacity: [0, 1, 0],
+                                    scale: [0, 1, 0],
+                                    rotate: [0, 180, 360],
+                                  }}
+                                  transition={{
+                                    repeat: Infinity,
+                                    duration: 1.5,
+                                    delay: 0.5,
+                                  }}
+                                >
+                                  ✨
+                                </motion.div>
+                                <motion.div
+                                  className="absolute -top-8 -right-4 text-yellow-400 text-2xl"
+                                  animate={{
+                                    opacity: [0, 1, 0],
+                                    scale: [0, 1, 0],
+                                    rotate: [360, 180, 0],
+                                  }}
+                                  transition={{
+                                    repeat: Infinity,
+                                    duration: 1.5,
+                                    delay: 1,
+                                  }}
+                                >
+                                  ✨
+                                </motion.div>
+                              </>
+                            )}
+                          </motion.div>
+                        );
+                      })}
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
 
               {/* Mode Selection */}
               <div className="flex-1">

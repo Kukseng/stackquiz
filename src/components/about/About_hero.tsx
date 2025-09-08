@@ -37,7 +37,7 @@ export function AboutHero() {
     <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-20 sm:pt-36 lg:pt-40">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
+
           {/* Text Content */}
           <motion.div
             ref={textRef}
@@ -60,11 +60,14 @@ export function AboutHero() {
               <br className="hidden sm:block" />
               {t.heroAbout.knowlage}
             </p>
-            <Link href="/signup" className="flex items-center gap-2">
-            <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
-              Get Started
-            </Button>
-            </Link>
+
+            <div className="flex justify-center lg:justify-start">
+              <Link href="/signup">
+                <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
           </motion.div>
 
           {/* Image Content */}

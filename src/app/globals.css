@@ -1,10 +1,8 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
-
-
 :root {
-  --font-dm-sans: 'DM Sans', sans-serif;
+  --font-dm-sans: "DM Sans", sans-serif;
   /* Core colors */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
@@ -103,33 +101,34 @@
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
   @keyframes marquee {
-  from {
-    transform: translateX(0);
+    from {
+      transform: translateX(0);
     }
-  to {
-    transform: translateX(calc(-100% - var(--gap)));
+    to {
+      transform: translateX(calc(-100% - var(--gap)));
     }
   }
   @keyframes marquee-vertical {
-  from {
-    transform: translateY(0);
+    from {
+      transform: translateY(0);
     }
-  to {
-    transform: translateY(calc(-100% - var(--gap)));
+    to {
+      transform: translateY(calc(-100% - var(--gap)));
     }
   }
-  --animate-background-position-spin: background-position-spin 3000ms infinite alternate
-;
+  --animate-background-position-spin: background-position-spin 3000ms infinite
+    alternate;
   @keyframes background-position-spin {
-  0% {
-    background-position: top center;
+    0% {
+      background-position: top center;
     }
-  100% {
-    background-position: bottom center;
+    100% {
+      background-position: bottom center;
     }
-  }}
+  }
+}
 
-html{
+html {
   overflow-x: hidden;
 }
 
@@ -158,10 +157,10 @@ html{
 .bg-footer {
   background-color: #0d3272;
 }
-.font-size{
+.font-size {
   font-size: 20px;
 }
-.font-size-nav{
+.font-size-nav {
   font-size: 18px;
 }
 
@@ -185,10 +184,9 @@ html{
   box-shadow: 0 0 20px rgba(255, 255, 255, 0.7);
 }
 
-
-
 @keyframes gradient-x {
-  0%, 100% {
+  0%,
+  100% {
     background-position: 0% 50%;
   }
   50% {
@@ -201,23 +199,21 @@ html{
 }
 
 .glow-pink {
-    filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.8));
-    animation: glowAnim 2.5s ease-in-out infinite alternate;
+  filter: drop-shadow(0 0 12px rgba(236, 72, 153, 0.8));
+  animation: glowAnim 2.5s ease-in-out infinite alternate;
+}
+
+@keyframes glowAnim {
+  0% {
+    filter: drop-shadow(0 0 12px rgba(54, 183, 179, 0.6));
   }
-
-  @keyframes glowAnim {
-    0% {
-      filter: drop-shadow(0 0 12px rgba(54, 183, 179, 0.6));
-    }
-    50% {
-      filter: drop-shadow(0 0 20px rgba(21, 81, 178, 0.9));
-    }
-    100% {
-      filter: drop-shadow(0 0 15px rgba(71, 150, 211, 0.7));
-    }
+  50% {
+    filter: drop-shadow(0 0 20px rgba(21, 81, 178, 0.9));
   }
-
-
+  100% {
+    filter: drop-shadow(0 0 15px rgba(71, 150, 211, 0.7));
+  }
+}
 
 @layer base {
   * {
@@ -288,9 +284,12 @@ html{
 
   /* Added cosmic utility classes for the space theme */
   .cosmic-bg {
-
-    background: linear-gradient(to bottom, #0D6FCA 0%, #26006F 50%, #4B0384 100%);
-
+    background: linear-gradient(
+      to bottom,
+      #0d6fca 0%,
+      #26006f 50%,
+      #4b0384 100%
+    );
   }
 
   .cosmic-text {
@@ -312,5 +311,4 @@ html{
   .electric-blue {
     color: var(--electric-blue);
   }
-
 }

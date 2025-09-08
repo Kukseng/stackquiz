@@ -67,7 +67,9 @@ export default function CardQuizComponent({
         <p className="text-gray-600 text-sm">{questions} questions</p>
 
         <div className="mt-12 flex items-center justify-between">
-          <span className={`${color} text-white text-xs px-3 py-1 rounded-full`}>
+          <span
+            className={`${color} text-white text-xs px-3 py-1 rounded-full`}
+          >
             {difficulty}
           </span>
 

@@ -17,7 +17,7 @@ const mentors = [
   },
   {
     name: "Srorng Sokcheat",
-    image: "/ourImage/teachersokcheat.JPG",
+    image: "/ourImage/teachersokcheat.jpg",
     shineColors: ["#f97316", "#eab308", "#ec4899"],
     borderColors: "border-orange-400",
     socials: { linkedin: "#", github: "#", instagram: "#" },

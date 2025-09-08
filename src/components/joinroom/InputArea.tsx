@@ -1,4 +1,7 @@
+"use client";
+
 import * as React from "react";
+import Image from "next/image";
 import { Button } from "../ui/button";
 
 type Props = {
@@ -45,12 +48,16 @@ export default function InputArea({
       {/* field + icon */}
       <label className="relative w-full" aria-label={placeholder}>
         {iconSrc ? (
-          <img
-            src={iconSrc}
-            alt={iconAlt}
-            aria-hidden={!iconAlt}
-            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-[28px] w-[28px] opacity-95"
-          />
+          <div className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 h-[28px] w-[28px] opacity-95">
+            <Image
+              src={iconSrc}
+              alt={iconAlt}
+              width={28}
+              height={28}
+              aria-hidden={!iconAlt}
+              className="object-contain"
+            />
+          </div>
         ) : null}
 
         <input

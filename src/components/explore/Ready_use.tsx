@@ -99,7 +99,7 @@ const TemplateCard: React.FC<{ template: Template; index: number }> = ({ templat
 
 export default function Templates() {
   return (
-    <section className="px-3 md:px-8 lg:px-20 py-12">
+    <section className="max-w-7xl mx-auto px-3 md:px-8 lg:px-20 py-12">
       <div className="flex items-center justify-between mb-8">
         <h2 className="text-2xl md:text-3xl font-extrabold text-yellow-400">
           Ready-to-Use Templates

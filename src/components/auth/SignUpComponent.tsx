@@ -220,13 +220,13 @@ const SignupForm = () => {
           </div>
           <div className="flex justify-center space-x-6 mt-[-10px]">
             <button className="transition-transform duration-200 hover:scale-110">
-              <Image src="/google.svg" alt="Google Icon" width={50} height={50} />
+              <Image src="/social_media_icon/google.svg" alt="Google Icon" width={50} height={50} />
             </button>
             <button className="transition-transform duration-200 hover:scale-110">
-              <Image src="/facebook.svg" alt="Facebook Icon" width={44} height={44} />
+              <Image src="/social_media_icon/fb.svg" alt="Facebook Icon" width={44} height={44} />
             </button>
             <button className="transition-transform duration-200 hover:scale-110">
-              <Image src="/github.svg" alt="Github Icon" width={44} height={44} />
+              <Image src="/social_media_icon/github.svg" alt="Github Icon" width={44} height={44} />
             </button>
           </div>
 

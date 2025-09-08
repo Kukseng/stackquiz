@@ -1,52 +1,73 @@
 "use client";
-
-import { motion } from "framer-motion";
+import { motion, useAnimation, useInView } from "framer-motion";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+import { useRef, useEffect } from "react";
+
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 export function EstablishmentSection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+
+  const textRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLDivElement>(null);
+
+  const textControls = useAnimation();
+  const imgControls = useAnimation();
+
+  const textInView = useInView(textRef, { once: false, margin: "-100px" });
+  const imgInView = useInView(imgRef, { once: false, margin: "-100px" });
+
+  useEffect(() => {
+    if (textInView)
+      textControls.start({ opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } });
+    else textControls.start({ opacity: 0, x: 50 });
+
+    if (imgInView)
+      imgControls.start({ opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: "easeOut" } });
+    else imgControls.start({ opacity: 0, x: -50, scale: 0.95 });
+  }, [textInView, imgInView, textControls, imgControls]);
+
   return (
-    <section className="container mx-auto px-4 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-8">
-      <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
-        {/* Left Side: Image */}
-        <motion.div
-          className="flex-1"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <Image
-            src="/about_svg/aboutus(goal).svg" // image in public folder
-            alt="Our Goal Illustration"
-            width={500} // base width
-            height={500} // base height
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
-          />
-        </motion.div>
+    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 sm:pt-16 lg:pt-20">
+      <div className="max-w-7xl mx-auto">
+        {/* flex-col-reverse for mobile, flex-row for desktop */}
+        <div className="flex flex-col-reverse lg:flex-row items-center gap-16 lg:gap-28">
 
-        {/* Right Side: Content */}
-        <motion.div
-          className="flex-1 text-center lg:text-left"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-            Our{" "}
-            <span className=" text-yellow">
-              Establishment
-            </span>
-          </h2>
+          {/* Text Section */}
+          <motion.div
+            ref={textRef}
+            initial={{ opacity: 0, x: -50 }}
+            animate={textControls}
+            className="flex-1 text-center lg:text-left order-2 lg:order-1 lg:pr-12"
+          >
+            <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">
+              <span className="text-yellow">{t.establishment.title}</span>
+            </h2>
+            <p className="text-gray-300 text-base sm:text-lg md:text-xl lg:text-2xl leading-relaxed">
+              {t.establishment.description}
+            </p>
+          </motion.div>
 
-          <p className="text-gray-300 text-base sm:text-lg lg:text-2xl leading-relaxed">
-            Our platform makes learning fun, social, and
-            <br className="hidden sm:block" />
-            accessible by blending game-based quizzes with
-            <br className="hidden sm:block" />
-            real-time competition to keep learners engaged.
-          </p>
-        </motion.div>
+          {/* Image Section */}
+          <motion.div
+            ref={imgRef}
+            initial={{ opacity: 0, x: 50, scale: 0.95 }}
+            animate={imgControls}
+            className="flex-1 order-1 lg:order-2 w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto mb-6 lg:mb-0"
+          >
+            <Image
+              src="/about_svg/aboutus(goal).svg"
+              alt="Our Establishment Illustration"
+              width={350}
+              height={350}
+              className="w-full h-auto object-contain"
+            />
+          </motion.div>
+
+        </div>
       </div>
     </section>
   );

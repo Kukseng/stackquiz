@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { QuizSidebar } from "./quizsidebar";
-import { QuizMainContent } from "./quizmaincontent";
+import  QuizMainContent from "./quizmaincontent";
 import { QuizHeader } from "./quizheader";
-import { useQuizStore, Question } from "./hooks/useQuizbuilder";
+import  {ThemeSidebar}  from "./themeSidebar"; 
+import { useQuizStore } from "./hooks/useQuizbuilder";
 import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
 import PublishModal from "./modal/publice_modal";
@@ -26,26 +27,39 @@ export function QuizBuilderLayout() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
 
-  // Handle delete: set next active question
+  // NEW: theme state
+  const [selectedTheme, setSelectedTheme] = useState("pink");
+
+  // Handle delete
   const handleDelete = (id: number) => {
     const remaining = questions.filter((q) => q.id !== id);
     deleteQuestion(id);
     setActiveQuestionId(remaining.length ? remaining[0].id : null);
   };
 
+  // Mapping theme -> Tailwind gradient
+  const themeGradients: Record<string, string> = {
+    blue: "from-blue-50 to-blue-100",
+    pink: "from-pink-50 to-purple-50",
+    purple: "from-purple-50 to-indigo-100",
+    green: "from-green-50 to-emerald-100",
+    gray: "from-gray-100 to-gray-200",
+  };
+
   return (
-    <div className="min-h-screen flex flex-col bg-gradient-to-br from-pink-50 to-purple-50 relative">
+    <div
+      className={`min-h-screen flex flex-col bg-gradient-to-br ${themeGradients[selectedTheme]} relative`}
+    >
       {/* Navbar */}
       <QuizHeader
         questions={questions}
         onPublish={() => setShowPublishModal(true)}
         onSave={() => console.log("Save quiz", questions)}
         onExit={() => console.log("Exit clicked")}
-        onAddQuestion={() => setShowAddQuestionModal(true)}
       />
 
       <div className="flex w-full">
-        {/* Sidebar */}
+        {/* Sidebar Left */}
         <QuizSidebar
           questions={questions}
           activeQuestionId={activeQuestionId}
@@ -62,6 +76,13 @@ export function QuizBuilderLayout() {
           onToggleCorrectAnswer={toggleCorrectAnswer}
           onDeleteQuestion={() => setShowDeleteModal(true)}
           onDuplicateQuestion={duplicateQuestion}
+          theme={selectedTheme}
+        />
+
+        {/* Sidebar Right (Themes) */}
+        <ThemeSidebar
+          selectedTheme={selectedTheme}
+          onThemeChange={setSelectedTheme}
         />
       </div>
 

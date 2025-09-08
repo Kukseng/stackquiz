@@ -41,7 +41,11 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
         <h3 className="text-lg font-medium mb-4">Adding the final touches</h3>
 
         {/* Tag */}
+        <label className="block text-sm font-medium mb-1" htmlFor="tag">
+          Tag
+        </label>
         <input
+          id="tag"
           type="text"
           placeholder="Tag"
           className="w-full p-3 border rounded-lg mb-3"
@@ -50,7 +54,11 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
         />
 
         {/* Description */}
+        <label className="block text-sm font-medium mb-1" htmlFor="description">
+          Description
+        </label>
         <textarea
+          id="description"
           placeholder="Description"
           className="w-full p-3 border rounded-lg mb-3 h-20"
           value={formData.description}
@@ -58,7 +66,11 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
         />
 
         {/* Category */}
+        <label className="block text-sm font-medium mb-1" htmlFor="category">
+          Category
+        </label>
         <select
+          id="category"
           className="w-full p-3 border rounded-lg mb-3"
           value={formData.category}
           onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
@@ -74,7 +86,11 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
         </select>
 
         {/* Difficulty */}
+        <label className="block text-sm font-medium mb-1" htmlFor="difficulty">
+          Difficulty
+        </label>
         <select
+          id="difficulty"
           className="w-full p-3 border rounded-lg mb-3"
           value={formData.difficulty}
           onChange={e => setFormData(prev => ({ ...prev, difficulty: e.target.value }))}
@@ -85,7 +101,11 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
         </select>
 
         {/* Visibility */}
+        <label className="block text-sm font-medium mb-1" htmlFor="visibility">
+          Visibility
+        </label>
         <select
+          id="visibility"
           className="w-full p-3 border rounded-lg mb-3"
           value={formData.visibility}
           onChange={e => setFormData(prev => ({ ...prev, visibility: e.target.value }))}

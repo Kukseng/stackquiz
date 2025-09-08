@@ -12,6 +12,7 @@ export interface QuizOption {
   icon?: IconType
 }
 
+
 export interface Question {
   id: number
   type: string

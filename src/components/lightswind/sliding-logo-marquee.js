@@ -6,7 +6,7 @@ import { Pause, Play } from "lucide-react";
 export function SlidingLogoMarquee({ items, speed = 60, pauseOnHover = true, enableBlur = true, blurIntensity = 1, height = "100px", width = "100%", gap = "0.5rem", scale = 1, direction = "horizontal", autoPlay = true, backgroundColor, showGridBackground = false, className, onItemClick, enableSpillEffect = false, animationSteps = 8, showControls = true, }) {
     const containerRef = useRef(null);
     const [isPlaying, setIsPlaying] = useState(autoPlay);
-   const [_dimensions, setDimensions] = useState({ width: 0, height: 0 });
+   const [setDimensions] = useState({ width: 0, height: 0 });
 
     useEffect(() => {
         const updateDimensions = () => {
@@ -18,7 +18,7 @@ export function SlidingLogoMarquee({ items, speed = 60, pauseOnHover = true, ena
         updateDimensions();
         window.addEventListener("resize", updateDimensions);
         return () => window.removeEventListener("resize", updateDimensions);
-    }, []);
+    });
     const handleItemClick = (item) => {
         if (item.href) {
             window.open(item.href, "_blank", "noopener,noreferrer");

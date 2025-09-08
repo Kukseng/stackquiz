@@ -5,10 +5,10 @@ import { useState } from "react";
 interface ThemeSidebarProps {
   selectedTheme: string;
   onThemeChange: (theme: string) => void;
-  onDurationChange?: (duration: number) => void; // optional callback for duration
+  onDurationChange?: (duration: number) => void; // optional callback
 }
 
-const durations = [5, 10, 20, 30, 40, 50]; 
+const durations = [5, 10, 20, 30, 40, 50];
 
 const themes = [
   { id: "blue", label: "Blue Sky", image: "/background/10.png" },
@@ -28,28 +28,11 @@ export function ThemeSidebar({
   const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = parseInt(e.target.value);
     setSelectedDuration(value);
-    onDurationChange && onDurationChange(value);
+    onDurationChange?.(value);
   };
 
   return (
-    <div className="w-64 h-screen overflow-y-auto p-4 border-l border-gray-200">
-        {/* Duration Selector BELOW themes */}
-      <div className="mt-4">
-        <label className="block text-gray-600 font-medium mb-2">
-          Theme Duration
-        </label>
-        <select
-          value={selectedDuration}
-          onChange={handleDurationChange}
-          className="w-full p-2 border rounded-md"
-        >
-          {durations.map((d) => (
-            <option key={d} value={d}>
-              {d} seconds
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className="w-64 h-screen overflow-y-auto p-4 border-l border-gray-200 bg-white">
       <h2 className="text-gray-700 font-bold mb-4">Themes</h2>
 
       <div className="space-y-3 mb-6">
@@ -74,7 +57,23 @@ export function ThemeSidebar({
         ))}
       </div>
 
-      
+      {/* Duration Selector */}
+      <div className="mt-auto">
+        <label className="block text-gray-600 font-medium mb-2">
+          Theme Duration
+        </label>
+        <select
+          value={selectedDuration}
+          onChange={handleDurationChange}
+          className="w-full p-2 border rounded-md"
+        >
+          {durations.map((d) => (
+            <option key={d} value={d}>
+              {d} seconds
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   );
 }

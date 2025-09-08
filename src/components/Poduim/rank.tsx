@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge";
 import Image from "next/image";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 
 export default function Rank() {
   const leaderboardData = [
@@ -18,12 +18,16 @@ export default function Rank() {
     leaderboardData[2],
   ];
 
-  const podiumVariants = {
+  const podiumVariants: Variants = {
     hidden: { y: 100, opacity: 0 },
     visible: (i: number) => ({
       y: 0,
       opacity: 1,
-      transition: { delay: i * 0.25, type: "spring", stiffness: 120 },
+      transition: {
+        delay: i * 0.25,
+        type: "spring",
+        stiffness: 120,
+      },
     }),
   };
 
@@ -40,8 +44,6 @@ export default function Rank() {
         WebkitBackdropFilter: "blur(6px)",
       }}
     >
-     
-
       {/* Header */}
       <div className="flex items-center justify-between mb-8">
         <div className="flex items-center gap-6">
@@ -65,16 +67,10 @@ export default function Rank() {
           // podium heights & styles
           const podiumHeight = isFirst ? 360 : index === 0 ? 240 : 200;
           const podiumPadding = isFirst ? 20 : index === 0 ? 14 : 10;
-          const textSize = isFirst
-            ? "text-9xl"
-            : index === 0
-            ? "text-7xl"
-            : "text-6xl";
-          const scoreSize = isFirst
-            ? "text-5xl"
-            : index === 0
-            ? "text-3xl"
-            : "text-2xl";
+          const textSize =
+            isFirst ? "text-9xl" : index === 0 ? "text-7xl" : "text-6xl";
+          const scoreSize =
+            isFirst ? "text-5xl" : index === 0 ? "text-3xl" : "text-2xl";
 
           return (
             <motion.div
@@ -87,7 +83,7 @@ export default function Rank() {
             >
               {/* Avatar with hover effect */}
               <motion.div
-                className="w-32 h-32 bg-white rounded-full p-1 mb-4 shadow-lg cursor-pointer hover:scale-105 hover:shadow-2xl transition-transform"
+                className="w-32 h-32 bg-white rounded-full p-1 mb-4 shadow-lg cursor-pointer hover:scale-105 hover:shadow-2xl transition-transform relative"
                 animate={{ y: [0, -8, 0] }}
                 transition={{
                   repeat: Infinity,
@@ -95,10 +91,11 @@ export default function Rank() {
                   delay: index * 0.3,
                 }}
               >
-                <img
+                <Image
                   src={player.avatar || "/placeholder.svg"}
                   alt={player.name}
-                  className="w-full h-full rounded-full object-cover"
+                  fill
+                  className="rounded-full object-cover"
                 />
               </motion.div>
 
@@ -140,56 +137,53 @@ export default function Rank() {
                 </div>
               </motion.div>
 
-           {/* Crown + Sparkle effects for 1st place */}
-{isFirst && (
-  <>
-    {/* Crown */}
-    <motion.div
-      className="absolute -top-20 text-7xl drop-shadow-[0_0_40px_gold]"
-      animate={{ rotate: [0, 15, -15, 0] }}
-      transition={{ repeat: Infinity, duration: 2 }}
-      style={{
-        textShadow: `
-          0 0 20px gold,
-          0 0 40px gold,
-          0 0 60px orange,
-          0 0 80px yellow,
-          0 0 100px gold
-        `,
-      }}
-    >
-      👑
-    </motion.div>
+              {/* Crown + Sparkle effects for 1st place */}
+              {isFirst && (
+                <>
+                  {/* Crown as Image */}
+                  <motion.div
+                    className="absolute -top-16 left-1/2 -translate-x-1/2"
+                    animate={{ rotate: [0, 10, -10, 0] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                  >
+                    <Image
+                      src="/crown.svg" 
+                      alt="Crown"
+                      width={90}
+                      height={80}
+                      className="drop-shadow-[0_0_20px_rgba(255,215,0,1)]"
+                    />
+                  </motion.div>
 
-    {/* Sparkles */}
-    <div className="absolute -top-28 left-1/2 transform -translate-x-1/2 w-32 h-32 pointer-events-none">
-      {[...Array(8)].map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute bg-yellow-300 rounded-full"
-          style={{
-           
-            top: '50%',
-            left: '50%',
-            boxShadow: '0 0 20px yellow, 0 0 40px gold',
-          }}
-          animate={{
-            x: [0, Math.random() * 40 - 20, 0],
-            y: [0, Math.random() * 40 - 20, 0],
-            opacity: [0, 1, 0],
-            scale: [0.7, 1.2, 0.7],
-          }}
-          transition={{
-            repeat: Infinity,
-            duration: 1.2 + Math.random(),
-            delay: i * 0.15,
-          }}
-        />
-      ))}
-    </div>
-  </>
-)}
-
+                  {/* Sparkles */}
+                  <div className="absolute -top-28 left-1/2 transform -translate-x-1/2 w-32 h-32 pointer-events-none">
+                    {[...Array(8)].map((_, i) => (
+                      <motion.div
+                        key={i}
+                        className="absolute bg-yellow-300 rounded-full"
+                        style={{
+                          top: "50%",
+                          left: "50%",
+                          width: "6px",
+                          height: "6px",
+                          boxShadow: "0 0 20px yellow, 0 0 40px gold",
+                        }}
+                        animate={{
+                          x: [0, Math.random() * 40 - 20, 0],
+                          y: [0, Math.random() * 40 - 20, 0],
+                          opacity: [0, 1, 0],
+                          scale: [0.7, 1.2, 0.7],
+                        }}
+                        transition={{
+                          repeat: Infinity,
+                          duration: 1.2 + Math.random(),
+                          delay: i * 0.15,
+                        }}
+                      />
+                    ))}
+                  </div>
+                </>
+              )}
             </motion.div>
           );
         })}

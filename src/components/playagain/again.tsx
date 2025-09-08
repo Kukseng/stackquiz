@@ -2,22 +2,23 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import CardQuizComponent from "../CardQuizComponent";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import Image from "next/image";
-import { Fullscreen } from "lucide-react";
+
 export function Again() {
   const players = [
     { name: "Boba", rank: 2, score: 85 },
     { name: "Dada", rank: 1, score: 100 },
     { name: "Titi", rank: 3, score: 70 },
   ];
-  const podiumVariants = {
+
+  const podiumVariants: Variants = {
     hidden: {
       opacity: 0,
       y: 100,
       scale: 0.8,
     },
-    visible: (index) => ({
+    visible: (index: number) => ({
       opacity: 1,
       y: 0,
       scale: 1,
@@ -29,6 +30,7 @@ export function Again() {
       },
     }),
   };
+
   const quizCards = [
     {
       title: "Math Fundamental",
@@ -69,7 +71,7 @@ export function Again() {
   ];
 
   return (
-    <div className="min-h-[800px] bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden  rounded-lg ">
+    <div className="min-h-[800px] bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden rounded-lg">
       {/* Background decorative elements */}
       <div className="absolute inset-0 opacity-10">
         <div className="absolute top-20 left-10 w-32 h-32 rounded-full bg-pink-400 blur-xl"></div>
@@ -84,9 +86,8 @@ export function Again() {
           <div className="mb-12">
             <div className="flex items-start gap-8">
               {/* Podium Illustration */}
-              {/* Podium Illustration */}
               <div className="relative">
-                <Card className="w-[500px] h-[300px] ">
+                <Card className="w-[500px] h-[300px]">
                   <Image
                     src="/Hey2.jpg"
                     width={800}
@@ -103,7 +104,6 @@ export function Again() {
                           : player.rank === 2
                           ? 24
                           : 16;
-                        const podiumPadding = isFirst ? 6 : 5;
                         const textSize = isFirst ? "text-4xl" : "text-3xl";
 
                         return (
@@ -138,17 +138,17 @@ export function Again() {
                                 stiffness: 120,
                               }}
                               className={`
-                  w-20 h-${podiumHeight} 
-                  ${
-                    isFirst
-                      ? "bg-gradient-to-b from-yellow-400 to-orange-500"
-                      : player.rank === 2
-                      ? "bg-blue-400"
-                      : "bg-purple-500"
-                  } 
-                  rounded-t flex items-center justify-center text-white font-bold ${textSize}
-                  shadow-xl hover:shadow-2xl transition-shadow cursor-pointer
-                `}
+                                w-20 h-${podiumHeight} 
+                                ${
+                                  isFirst
+                                    ? "bg-gradient-to-b from-yellow-400 to-orange-500"
+                                    : player.rank === 2
+                                    ? "bg-blue-400"
+                                    : "bg-purple-500"
+                                } 
+                                rounded-t flex items-center justify-center text-white font-bold ${textSize}
+                                shadow-xl hover:shadow-2xl transition-shadow cursor-pointer
+                              `}
                               whileHover={{ scale: 1.05 }}
                               whileTap={{ scale: 0.95 }}
                             >
@@ -158,7 +158,7 @@ export function Again() {
                             {/* Crown for 1st place */}
                             {isFirst && (
                               <motion.div
-                                className="absolute -top-16 text-6xl"
+                                className="absolute -top-14 text-6xl"
                                 animate={{
                                   rotate: [0, 10, -10, 0],
                                   scale: [1, 1.1, 1],
@@ -169,7 +169,13 @@ export function Again() {
                                   ease: "easeInOut",
                                 }}
                               >
-                                👑
+                                <Image
+                                  src="/crown.svg"
+                                  alt="Crown"
+                                  width={60}
+                                  height={60}
+                                  className="drop-shadow-[0_0_20px_rgba(255,215,0,1)]"
+                                />
                               </motion.div>
                             )}
 
@@ -225,19 +231,19 @@ export function Again() {
                 <div className="flex gap-3 mb-4">
                   <Button
                     variant="outline"
-                    className=" py-6 bg-transparent border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
+                    className="py-6 bg-transparent border-yellow-400 text-yellow-400 hover:bg-yellow-400 hover:text-black"
                   >
                     Up to 40 participants
                   </Button>
                   <Button
                     variant="outline"
-                    className=" py-6 bg-transparent border-gray-400 text-gray-300 hover:bg-gray-400 hover:text-black"
+                    className="py-6 bg-transparent border-gray-400 text-gray-300 hover:bg-gray-400 hover:text-black"
                   >
                     Competition
                   </Button>
                   <Button
                     variant="outline"
-                    className=" py-6 bg-transparent border-gray-400 text-gray-300 hover:bg-gray-400 hover:text-black"
+                    className="py-6 bg-transparent border-gray-400 text-gray-300 hover:bg-gray-400 hover:text-black"
                   >
                     Assessment
                   </Button>
@@ -255,10 +261,10 @@ export function Again() {
                   <div className="flex gap-3">
                     <Input
                       placeholder="Computer Science"
-                      className=" flex-1 py-6 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
+                      className="flex-1 py-6 bg-gray-800/50 border-gray-600 text-white placeholder:text-gray-400"
                       defaultValue="Computer Science"
                     />
-                    <Button className="bg-yellow-500 hover:bg-yellow-600 text-black font-semibold px-8 py-6">
+                    <Button className="box-raduis font-bold btn-text btn-secondary px-8 py-6">
                       Start
                     </Button>
                   </div>

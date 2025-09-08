@@ -1,18 +1,12 @@
-"use client"
-import { Search } from "lucide-react"
-import { useState } from "react"
-import Link from "next/link"
+"use client";
+
+import { Search } from "lucide-react";
+import { useState } from "react";
+import Link from "next/link";
 
 export default function Searchbar() {
-  const [focusedInput, setFocusedInput] = useState(false)
-  const [activeButton, setActiveButton] = useState("Library") // default active
-
-  const buttonClass = (isActive: boolean, baseColor: string, hoverColor: string) =>
-    `px-6 py-2.5 rounded-full font-semibold shadow-md transition-all duration-300 transform hover:scale-105 hover:shadow-lg ${
-      isActive
-        ? `bg-${baseColor} text-${hoverColor} shadow-lg scale-105`
-        : `bg-${baseColor}/80 text-${hoverColor}/80 hover:bg-${baseColor} hover:text-${hoverColor}`
-    }`
+  const [focusedInput, setFocusedInput] = useState(false);
+  const [activeButton, setActiveButton] = useState("Library"); // default active
 
   return (
     <div className="flex items-center justify-center gap-4 px-6 py-4">
@@ -84,5 +78,5 @@ export default function Searchbar() {
         </button>
       </Link>
     </div>
-  )
+  );
 }

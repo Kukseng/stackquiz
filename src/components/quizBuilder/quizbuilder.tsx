@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { QuizSidebar } from "./quizsidebar";
-import  QuizMainContent  from "./quizmaincontent";
+import QuizMainContent from "./quizmaincontent";
 import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
 import PublishModal from "./modal/publice_modal";
@@ -57,6 +57,7 @@ export default function QuizBuilder() {
         onToggleCorrectAnswer={toggleCorrectAnswer}
         onDeleteQuestion={handleDelete}
         onDuplicateQuestion={duplicateQuestion}
+        theme={theme} 
       />
 
       {/* Add Question Modal */}

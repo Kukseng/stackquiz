@@ -16,7 +16,6 @@ interface CardQuizProps {
 }
 
 export default function CardQuizComponent({
-  id,
   title,
   questions,
   time,
@@ -48,13 +47,11 @@ export default function CardQuizComponent({
 
   return (
     <motion.div
-      key={id}
       ref={ref}
       initial={{ opacity: 0, y: 60 }}
       animate={controls}
       whileHover={{ scale: 1.05 }}
-      transition={{ type: "spring", stiffness: 200, damping: 20 }}
-      className="bg-white rounded-xl overflow-hidden shadow-md border cursor-pointer"
+      className="bg-white rounded-xl overflow-hidden shadow-md border cursor-pointer transition-transform duration-300"
     >
       {/* Image */}
       <div className="relative w-full h-56">
@@ -66,14 +63,14 @@ export default function CardQuizComponent({
         <h3 className="font-bold text-lg text-gray-800">{title}</h3>
         <p className="text-gray-600 text-sm">{questions} questions</p>
 
-        <div className="mt-12 flex items-center justify-between">
+        <div className="mt-4 flex items-center justify-between">
           <span className={`${color} text-white text-xs px-3 py-1 rounded-full`}>
             {difficulty}
           </span>
 
           <div className="flex items-center gap-1 text-sm text-gray-600">
             <Clock size={16} />
-            {time}
+            <span>{time}</span>
           </div>
         </div>
       </div>

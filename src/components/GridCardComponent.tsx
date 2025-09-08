@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import CardQuizComponent from "./CardQuizComponent"; 
+import CardQuizComponent from "./CardQuizComponent";
 
 const challenges = [
   {
@@ -12,16 +12,54 @@ const challenges = [
     color: "bg-green-500",
     image: "https://sohamtimes.org//wp-content/uploads/2018/07/Mathematics.png",
   },
- 
+  {
+    id: 2,
+    title: "Computer Programming",
+    questions: 25,
+    time: "1 hour",
+    difficulty: "Hard",
+    color: "bg-red-500",
+    image:
+      "https://media.geeksforgeeks.org/wp-content/uploads/20241017105314407132/Basics-of-Computer-Programming-For-Beginners.webp",
+  },
+  {
+    id: 3,
+    title: "Science Essentials",
+    questions: 20,
+    time: "45 min",
+    difficulty: "Medium",
+    color: "bg-yellow-500",
+    image:
+      "https://img.freepik.com/free-vector/hand-drawn-science-education-background_23-2148499325.jpg",
+  },
+  {
+    id: 4,
+    title: "Chemistry Basics",
+    questions: 15,
+    time: "30 min",
+    difficulty: "Easy",
+    color: "bg-green-500",
+    image: "https://i.ytimg.com/vi/5iTOphGnCtg/hq720.jpg",
+  },
 ];
 
 export default function GridCardComponents() {
   return (
-    <section className="px-4 md:px-10 lg:px-20 mt-8">
+    <section className="px-4 mt-8">
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
-        {challenges.map((c, i) => (
-          <CardQuizComponent key={c.id} {...c} index={i} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {challenges.map((challenge, index) => (
+          <CardQuizComponent
+            key={challenge.id}
+            id={challenge.id}          // Pass id
+            index={index}             // Pass index for staggered animation
+            title={challenge.title}
+            questions={challenge.questions}
+            time={challenge.time}
+            difficulty={challenge.difficulty}
+            color={challenge.color}
+            image={challenge.image}
+          />
         ))}
       </div>
     </section>

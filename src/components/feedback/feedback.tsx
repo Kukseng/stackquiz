@@ -1,7 +1,7 @@
 
 "use client";
-import { useState, useEffect } from "react";
-import { Star, Sparkles, Heart, Trophy } from "lucide-react";
+import { useState } from "react";
+import { Star} from "lucide-react";
 import { motion } from "framer-motion";
 
 // Animated Ghost Component

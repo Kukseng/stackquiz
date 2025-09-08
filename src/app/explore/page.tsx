@@ -1,4 +1,4 @@
-import ExplorePage from "@/components/explore/ExplorePage";
+import { Explore as ExploreComponent } from "@/components/explore1/explore";
 
 export const metadata = {
   title: "StackQuizz | Explore",
@@ -7,8 +7,7 @@ export const metadata = {
 export default function Explore() {
   return (
     <div>
-      <ExplorePage/>
-
+      <ExploreComponent />
     </div>
-  )
+  );
 }

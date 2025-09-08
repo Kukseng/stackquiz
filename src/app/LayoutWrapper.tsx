@@ -15,8 +15,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
   // hide layout for signup and quiz-builder pages
-  const hideLayout = pathname === "/signup" || pathname === "/quizbuilder";
-
+  const hideLayout = pathname === "/signup" || pathname === "/quiz-builder" || pathname === "/leaderboard/playagain"||pathname === "/leaderboard/library"||pathname==="/leaderboard/poduim"||pathname==="/leaderboard"||pathname==="/leaderboard/explore"||pathname==="/leaderboard/favorite"||pathname==="/leaderboard/feedback"||pathname==="/leaderboard/summary";
   return (
     <>
       {!hideLayout && <Navbar />}

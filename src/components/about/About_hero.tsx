@@ -1,10 +1,10 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { motion, useAnimation, useInView } from "framer-motion";
+import { motion} from "framer-motion";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
-import { useRef, useEffect } from "react";
+// import { useRef, useEffect } from "react";
 import Link from "next/link";
 
 import en from "@/locales/en.json";
@@ -30,14 +30,7 @@ const fadeInLeft: Variants = {
   }
 };
 
-const fadeInRight: Variants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
+
 
 const scaleIn: Variants = {
   hidden: { opacity: 0, scale: 0.8 },
@@ -50,30 +43,7 @@ const scaleIn: Variants = {
 
 
 
-const SectionTitle = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-  <motion.div
-    className={`text-center mb-16 ${className}`}
-    variants={fadeInUp}
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true, margin: "-100px" }}
-  >
-    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
-      <span className="relative">
-        <span className="text-yellow-400 relative">
-          {children}
-          <motion.div
-            className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full"
-            initial={{ width: 0 }}
-            whileInView={{ width: "100%" }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-            viewport={{ once: true }}
-          />
-        </span>
-      </span>
-    </h2>
-  </motion.div>
-);
+
 
 // About Hero Component
 export function AboutHero() {

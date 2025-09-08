@@ -1,8 +1,5 @@
 "use client";
-import { motion, useAnimation, useInView } from "framer-motion";
-import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
-import { useRef, useEffect } from "react";
 import { ContentSection } from "./ContentSection";
 
 import en from "@/locales/en.json";

@@ -1,7 +1,7 @@
 "use client"
 // components/ValuesSection.tsx
 import React from "react";
-import { motion, useAnimation, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
@@ -19,32 +19,11 @@ const fadeInUp: Variants = {
   }
 };
 
-const fadeInLeft: Variants = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
 
-const fadeInRight: Variants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
 
-const scaleIn: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
+
+
+
 interface ValueCardProps {
   title: string;
   description: string;

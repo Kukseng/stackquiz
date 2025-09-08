@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+// import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import {  Variants } from "framer-motion";
 import { motion } from "framer-motion";
@@ -171,7 +171,7 @@ const SectionTitle = ({ children, className = "" }: { children: React.ReactNode,
 
             {/* Contact Information Cards */}
             <div className="space-y-6">
-              {contactInfo.map((info, index) => (
+              {contactInfo.map((info) => (
                 <motion.div
                   key={info.label}
                   className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300 group"

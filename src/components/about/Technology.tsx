@@ -2,14 +2,10 @@
 import React from "react";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
-import { motion, useAnimation, useInView } from "framer-motion";
+import { motion } from "framer-motion";
 import {  Variants } from "framer-motion";
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
-import {
-  SlidingLogoMarquee,
-  SlidingLogoMarqueeItem,
-} from "../ui/SlidingLogoMarquee";
 
 export function TechnologySection() {
   const { language } = useLanguage();
@@ -32,23 +28,7 @@ export function TechnologySection() {
   }
 };
 
-const fadeInLeft: Variants = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
 
-const fadeInRight: Variants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
 
 const scaleIn: Variants = {
   hidden: { opacity: 0, scale: 0.8 },

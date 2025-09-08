@@ -19,7 +19,7 @@ export const metadata = {
   type: "website",
   images: [
     {
-      url: "https://app.stackquiz.me/bg-meta.png",
+      url: "https://app.stackquiz.me/bg-meta.png?v=2",
       width: 1200,
       height: 630,
       alt: "StackQuizz - Real-time Quiz Platform",
@@ -30,7 +30,7 @@ twitter: {
   card: "summary_large_image",
   title: "StackQuizz | Home",
   description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
-  images: ["https://app.stackquiz.me/bg-meta.png"],
+  images: ["https://app.stackquiz.me/bg-meta.png?v=2"],
 },
 
 };

@@ -14,23 +14,25 @@ export const metadata = {
   description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
   keywords: "quiz, real-time, competition, knowledge, interactive, live quiz",
   openGraph: {
-    title: "StackQuizz | Home",
-    description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
-    type: "website",
-    images: [
-      {
-        url: "/bg-meta.png", // Add your image path here
-        width: 1200,
-        height: 630,
-        alt: "StackQuizz - Real-time Quiz Platform",
-      },
-    ],
-  },
-  twitter: {
-    title: "StackQuizz | Home",
-    description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
-    images: ["/bg-meta.png"], // Same image for Twitter
-  },
+  title: "StackQuizz | Home",
+  description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
+  type: "website",
+  images: [
+    {
+      url: "https://app.stackquiz.me/bg-meta.png",
+      width: 1200,
+      height: 630,
+      alt: "StackQuizz - Real-time Quiz Platform",
+    },
+  ],
+},
+twitter: {
+  card: "summary_large_image",
+  title: "StackQuizz | Home",
+  description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
+  images: ["https://app.stackquiz.me/bg-meta.png"],
+},
+
 };
 
 export default function HomePage() {

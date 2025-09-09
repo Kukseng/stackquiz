@@ -1,53 +1,21 @@
 "use client";
 
-import { motion } from "framer-motion";
-import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+import { ContentSection } from "./ContentSection";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 export function EstablishmentSection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+
   return (
-    <section className="container mx-auto px-4 sm:px-8 lg:px-16 py-12 sm:py-16 lg:py-8">
-      <div className="flex flex-col lg:flex-row items-center gap-12 lg:gap-24">
-        {/* Left Side: Image */}
-        <motion.div
-          className="flex-1"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut" }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <Image
-            src="/about_svg/aboutus(goal).svg" // image in public folder
-            alt="Our Goal Illustration"
-            width={500} // base width
-            height={500} // base height
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
-          />
-        </motion.div>
-
-        {/* Right Side: Content */}
-        <motion.div
-          className="flex-1 text-center lg:text-left"
-          initial={{ opacity: 0, y: 40 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: "easeOut", delay: 0.2 }}
-          viewport={{ once: true, amount: 0.3 }}
-        >
-          <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 sm:mb-6">
-            Our{" "}
-            <span className=" text-yellow">
-              Establishment
-            </span>
-          </h2>
-
-          <p className="text-gray-300 text-base sm:text-lg lg:text-2xl leading-relaxed">
-            Our platform makes learning fun, social, and
-            <br className="hidden sm:block" />
-            accessible by blending game-based quizzes with
-            <br className="hidden sm:block" />
-            real-time competition to keep learners engaged.
-          </p>
-        </motion.div>
-      </div>
-    </section>
+    <ContentSection
+      title={t.establishment.title}
+      description={t.establishment.description}
+      imageSrc="/about_svg/aboutus(goal).svg"
+      imageAlt="Our Establishment Illustration"
+      reversed={false}
+    />
   );
 }

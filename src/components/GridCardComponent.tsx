@@ -1,6 +1,6 @@
 "use client";
 import React from "react";
-import CardQuizComponent from "./CardQuizComponent"; 
+import CardQuizComponent from "./CardQuizComponent";
 
 const challenges = [
   {
@@ -48,9 +48,19 @@ export default function GridCardComponents() {
   return (
     <section className=" mt-8">
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
-        {challenges.map((c, i) => (
-          <CardQuizComponent key={c.id} {...c} index={i} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {challenges.map((challenge, index) => (
+          <CardQuizComponent
+            key={challenge.id}
+            id={challenge.id}          // Pass id
+            index={index}             // Pass index for staggered animation
+            title={challenge.title}
+            questions={challenge.questions}
+            time={challenge.time}
+            difficulty={challenge.difficulty}
+            color={challenge.color}
+            image={challenge.image}
+          />
         ))}
       </div>
     </section>

@@ -5,6 +5,7 @@ import { motion, useAnimation, useInView } from "framer-motion";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
 import { useRef, useEffect } from "react";
+import Link from "next/link";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
@@ -23,65 +24,69 @@ export function AboutHero() {
   const imgInView = useInView(imgRef, { once: false, margin: "-100px" });
 
   useEffect(() => {
-    if (textInView) {
+    if (textInView)
       textControls.start({ opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } });
-    } else {
-      textControls.start({ opacity: 0, x: -50 });
-    }
+    else textControls.start({ opacity: 0, x: -50 });
 
-    if (imgInView) {
+    if (imgInView)
       imgControls.start({ opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: "easeOut" } });
-    } else {
-      imgControls.start({ opacity: 0, x: 50, scale: 0.95 });
-    }
+    else imgControls.start({ opacity: 0, x: 50, scale: 0.95 });
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="container mx-auto px-4 sm:px-6 lg:px-9 py-20 lg:py-20 text-center">
-      <div className="flex flex-col lg:flex-row items-center justify-between gap-12 lg:gap-20">
-        {/* Text Section */}
-        <motion.div
-          ref={textRef}
-          initial={{ opacity: 0, x: -50 }}
-          animate={textControls}
-          className="flex-1 text-center lg:text-left"
-        >
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold text-white mb-6 leading-tight">
-            {t.heroAbout.welcome}
-            <br />
-            <span className="text-yellow">STACKQUIZ</span>
-            <br />
-            {t.heroAbout.aboutUs}
-          </h1>
+    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-20 sm:pt-36 lg:pt-40">
+      <div className="max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
-          <p className="text-base sm:text-lg lg:text-xl text-gray-300 mb-8 leading-relaxed">
-            {t.heroAbout.weAre}
-            <br className="hidden sm:block" />
-            {t.heroAbout.quiz}
-            <br className="hidden sm:block" />
-            {t.heroAbout.knowlage}
-          </p>
+          {/* Text Content */}
+          <motion.div
+            ref={textRef}
+            initial={{ opacity: 0, x: -50 }}
+            animate={textControls}
+            className="text-center lg:text-left"
+          >
+            <h1 className="text-3xl py-7 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
+              {t.heroAbout.welcome}
+              <br />
+              <span className="text-yellow">STACKQUIZ</span>
+              <br />
+              {t.heroAbout.aboutUs}
+            </h1>
 
-          <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
-            Get Started
-          </Button>
-        </motion.div>
+            <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0">
+              {t.heroAbout.weAre}
+              <br className="hidden sm:block" />
+              {t.heroAbout.quiz}
+              <br className="hidden sm:block" />
+              {t.heroAbout.knowlage}
+            </p>
 
-        {/* Image Section */}
-        <motion.div
-          ref={imgRef}
-          initial={{ opacity: 0, x: 50, scale: 0.95 }}
-          animate={imgControls}
-          className="flex-1 relative w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-lg mx-auto"
-        >
-          <Image
-            src="/about_svg/aboutus.svg"
-            alt="About Us Illustration"
-            width={600}
-            height={400}
-            className="w-full h-auto"
-          />
-        </motion.div>
+            <div className="flex justify-center lg:justify-start">
+              <Link href="/signup">
+                <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
+                  Get Started
+                </Button>
+              </Link>
+            </div>
+          </motion.div>
+
+          {/* Image Content */}
+          <motion.div
+            ref={imgRef}
+            initial={{ opacity: 0, x: 50, scale: 0.95 }}
+            animate={imgControls}
+            className="order-2 lg:order-1 relative w-full h-64 sm:h-80 md:h-96 flex items-center justify-center mt-8 lg:mt-0"
+          >
+            <Image
+              src="/about_svg/aboutus.svg"
+              alt="About Us Illustration"
+              width={500}
+              height={500}
+              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
+            />
+          </motion.div>
+
+        </div>
       </div>
     </section>
   );

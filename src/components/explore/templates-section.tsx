@@ -111,7 +111,7 @@ const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }
       className="bg-white rounded-xl overflow-hidden shadow-md border cursor-pointer"
     >
       <div className="relative w-full h-58">
-        <Image src={challenge.image} alt={challenge.title} fill className="object-cover" />
+        <Image src={challenge.image} alt={challenge.title} fill className="object-contain" />
       </div>
 
       <div className="p-4">
@@ -119,7 +119,7 @@ const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }
         <p className="text-gray-600 text-sm">{challenge.questions} questions</p>
 
         <div className="mt-12 flex items-center justify-between">
-          <span className={`${challenge.color} text-white text-xs px-3 py-1 rounded-full`}>
+          <span className={`${challenge.color} text-gray-700 text-xs px-3 py-1 rounded-full`}>
             {challenge.difficulty}
           </span>
           <div className="flex items-center gap-1 text-sm text-gray-600">
@@ -136,7 +136,7 @@ export default function ChallengeGrid() {
   return (
     <section className="px-4 md:px-10 lg:px-20 mt-8">
       {/* Search and filter */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-evenly mb-8 gap-4">
+      <div className="flex max-w-7xl mx-auto flex-col md:flex-row md:items-center md:justify-evenly mb-8 gap-4">
         <div className="relative w-full md:w-1/2">
           <span className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <Search size={16} className="text-white opacity-70" />

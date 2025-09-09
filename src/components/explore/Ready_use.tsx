@@ -39,9 +39,9 @@ const templates = [
 
 export default function Templates() {
   return (
-    <section className="px-4 md:px-10 py-12">
+    <section className=" px-4 md:px-10 py-12">
       {/* Header */}
-      <div className="flex items-center justify-between mb-8">
+      <div className="max-w-7xl mx-auto flex items-center justify-between mb-8">
         <h2 className="text-2xl md:text-3xl font-extrabold text-yellow-400">
           Ready-to-Use Templates
         </h2>

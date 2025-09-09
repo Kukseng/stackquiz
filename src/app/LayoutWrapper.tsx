@@ -15,7 +15,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
   // hide layout for signup and quiz-builder pages
-  const hiddenLayouts = ["/signup"];
+  const hiddenLayouts = ["/signup", "/dashboard","/dashboard/library", "/dashboard/report", "/dashboard/activity", "/dashboard/profile"];
   const hideLayout = hiddenLayouts.includes(pathname || "");
 
   return (

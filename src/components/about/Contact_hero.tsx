@@ -1,9 +1,8 @@
 "use client";
 
 import { useState, ChangeEvent, FormEvent } from "react";
-// import { Card, CardContent } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import {  Variants } from "framer-motion";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
 
@@ -13,7 +12,6 @@ import kh from "@/locales/km.json";
 export function ContactSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
-
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -21,312 +19,211 @@ export function ContactSection() {
     message: "",
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => setForm({ ...form, [e.target.name]: e.target.value });
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
-    console.log("Form submitted:", form);
-    setIsSubmitting(false);
-    
-    // Reset form after successful submission
-    setForm({
-      firstName: "",
-      lastName: "",
-      email: "",
-      message: "",
-    });
+  ) => {
+    setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const contactInfo = [
-    {
-      icon: "/map.png",
-      label: "Address",
-      value: "Tuol Kouk, Phnom Penh, Cambodia",
-      delay: 0
+  const handleSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    console.log("Form submitted:", form);
+  };
+
+  // Animation variants
+  const containerVariants = {
+    hidden: { opacity: 0, y: 40 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { staggerChildren: 0.15, duration: 0.6 },
     },
-    {
-      icon: "/call.png",
-      label: "Phone",
-      value: "(+855) 96 458 789 / 97 458 789",
-      delay: 0.1
-    },
-    {
-      icon: "/email.png",
-      label: "Email",
-      value: "info.stackquiz@gmail.com",
-      delay: 0.2
-    }
-  ];
+  };
 
-
-  // 
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-const fadeInLeft: Variants = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-const fadeInRight: Variants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-const scaleIn: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-// 
-
-const SectionTitle = ({ children, className = "" }: { children: React.ReactNode, className?: string }) => (
-  <motion.div
-    className={`text-center mb-16 ${className}`}
-    variants={fadeInUp}
-    initial="hidden"
-    whileInView="visible"
-    viewport={{ once: true, margin: "-100px" }}
-  >
-    <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
-      <span className="relative">
-        <span className="text-yellow-400 relative">
-          {children}
-          <motion.div
-            className="absolute -bottom-2 left-0 w-full h-1 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full"
-            initial={{ width: 0 }}
-            whileInView={{ width: "100%" }}
-            transition={{ delay: 0.5, duration: 0.8 }}
-            viewport={{ once: true }}
-          />
-        </span>
-      </span>
-    </h2>
-  </motion.div>
-);
-
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.6 } },
+  };
 
   return (
-    <section className="relative py-20 text-white overflow-hidden">
-      <SectionTitle>{t.contact.title}</SectionTitle>
+    <section className="relative max-w-7xl mx-auto py-12 sm:py-16 lg:py-20 text-white overflow-hidden px-4 sm:px-6 lg:px-8">
+      {/* Background */}
+      <motion.div
+        className="absolute inset-0 overflow-hidden"
+        initial={{ scale: 1.2, opacity: 0 }}
+        animate={{ scale: 1, opacity: 0.8 }}
+        transition={{ duration: 1.5 }}
+      >
+        <div className="absolute inset-0 bg-[url('/stars.png')] bg-cover bg-center opacity-80" />
+      </motion.div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <motion.div
-          className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start"
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true, margin: "-100px" }}
-        >
-          {/* Left Section - Contact Info & Illustration */}
-          <motion.div
-            className="space-y-8"
-            variants={fadeInLeft}
-          >
-            {/* Illustration */}
+      {/* Section Title */}
+      <div className="relative text-center mb-12 sm:mb-16">
+        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
+          <span className="relative text-yellow-400 underline decoration-yellow-400">
+            {t.contact.title}
+          </span>
+        </h2>
+      </div>
+
+      <motion.div
+        className="flex flex-col md:flex-row gap-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
+        <Card className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-2xl shadow-xl p-6 md:p-10 flex flex-col md:flex-row gap-8 text-white w-full">
+          {/* Left Section */}
+          <CardContent className="flex-1 flex flex-col items-center md:items-start gap-6 text-center md:text-left">
+            <motion.img
+              src="about_svg/aboutus(contact).svg"
+              alt="Support"
+              className="w-28 sm:w-40 md:w-56 lg:w-64 h-auto"
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.8 }}
+            />
+
+            {/* Address */}
             <motion.div
-              className="flex justify-center lg:justify-start mb-8"
-              variants={scaleIn}
-              transition={{ delay: 0.2 }}
+              className="flex items-center gap-3 justify-center md:justify-start"
+              variants={itemVariants}
             >
-              <motion.div
-                whileHover={{ scale: 1.05, rotate: 2 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                <Image
-                  src="/about_svg/aboutus(contact).svg"
-                  alt="Contact Us"
-                  width={400}
-                  height={400}
-                  className="w-64 sm:w-80 lg:w-96 h-auto drop-shadow-2xl"
-                />
-              </motion.div>
+              <Image src="/map.png" alt="Map Icon" width={24} height={24} />
+              <p className="text-sm sm:text-base break-words">
+                Toul Kouk, Phnom Penh, Cambodia
+              </p>
             </motion.div>
 
-            {/* Contact Information Cards */}
-            <div className="space-y-6">
-              {contactInfo.map((info) => (
-                <motion.div
-                  key={info.label}
-                  className="flex items-center gap-4 p-4 rounded-2xl bg-white/5 backdrop-blur-sm border border-white/10 hover:bg-white/10 transition-all duration-300 group"
-                  variants={{
-                    hidden: { opacity: 0, x: -30 },
-                    visible: { 
-                      opacity: 1, 
-                      x: 0,
-                      transition: { delay: info.delay, duration: 0.6 }
-                    }
-                  }}
-                  whileHover={{ scale: 1.02, x: 10 }}
-                >
-                  <div className="flex-shrink-0 w-12 h-12 rounded-full bg-yellow-400/20 flex items-center justify-center group-hover:bg-yellow-400/30 transition-colors">
-                    <Image 
-                      src={info.icon} 
-                      alt={info.label} 
-                      width={24} 
-                      height={24}
-                      className="object-contain"
-                    />
-                  </div>
-                  <div>
-                    <p className="text-sm text-yellow-400 font-medium">{info.label}</p>
-                    <p className="text-white font-medium">{info.value}</p>
-                  </div>
-                </motion.div>
-              ))}
-            </div>
-          </motion.div>
+            {/* Phone */}
+            <motion.div
+              className="flex items-center gap-3 justify-center md:justify-start"
+              variants={itemVariants}
+            >
+              <Image src="/call.png" alt="Call Icon" width={24} height={24} />
+              <p className="text-sm sm:text-base break-words">
+                (+885) 96 458 789 / 97 458 789
+              </p>
+            </motion.div>
 
-          {/* Right Section - Contact Form */}
-          <motion.div
-            className="bg-white/5 backdrop-blur-xl border border-white/10 rounded-3xl p-8 shadow-2xl"
-            variants={fadeInRight}
-          >
+            {/* Email */}
+            <motion.div
+              className="flex items-center gap-3 justify-center md:justify-start"
+              variants={itemVariants}
+            >
+              <Image src="/email.png" alt="Email Icon" width={24} height={24} />
+              <p className="text-sm sm:text-base break-all">
+                info.stackquiz@gmail.com
+              </p>
+            </motion.div>
+          </CardContent>
+
+          {/* Right Section - Form */}
+          <CardContent className="flex-[2] w-full">
             <motion.form
               onSubmit={handleSubmit}
-              className="space-y-6"
-              variants={{
-                hidden: {},
-                visible: {
-                  transition: { staggerChildren: 0.1 }
-                }
-              }}
+              className="flex flex-col gap-6"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
             >
-              {/* Name Fields */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                {/* First Name */}
                 <motion.div
-                  className="space-y-2"
-                  variants={fadeInUp}
+                  className="flex flex-col gap-2"
+                  variants={itemVariants}
                 >
-                  <label htmlFor="firstName" className="text-sm font-medium text-yellow-400">
+                  <label
+                    htmlFor="firstName"
+                    className="text-sm font-medium text-yellow-400"
+                  >
                     First Name
                   </label>
-                  <motion.input
+                  <input
                     type="text"
                     id="firstName"
                     name="firstName"
-                    placeholder="Enter your first name"
+                    placeholder="Roeurm"
                     value={form.firstName}
                     onChange={handleChange}
-                    required
-                    className="w-full bg-white/5 border border-white/20 text-white placeholder-gray-400 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-300 hover:border-white/30"
-                    whileFocus={{ scale: 1.02 }}
+                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
                 </motion.div>
 
+                {/* Last Name */}
                 <motion.div
-                  className="space-y-2"
-                  variants={fadeInUp}
+                  className="flex flex-col gap-2"
+                  variants={itemVariants}
                 >
-                  <label htmlFor="lastName" className="text-sm font-medium text-yellow-400">
+                  <label
+                    htmlFor="lastName"
+                    className="text-sm font-medium text-yellow-400"
+                  >
                     Last Name
                   </label>
-                  <motion.input
+                  <input
                     type="text"
                     id="lastName"
                     name="lastName"
-                    placeholder="Enter your last name"
+                    placeholder="Dara"
                     value={form.lastName}
                     onChange={handleChange}
-                    required
-                    className="w-full bg-white/5 border border-white/20 text-white placeholder-gray-400 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-300 hover:border-white/30"
-                    whileFocus={{ scale: 1.02 }}
+                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
                 </motion.div>
               </div>
 
-              {/* Email Field */}
-              <motion.div
-                className="space-y-2"
-                variants={fadeInUp}
-              >
-                <label htmlFor="email" className="text-sm font-medium text-yellow-400">
-                  Email Address
+              {/* Email */}
+              <motion.div className="flex flex-col gap-2" variants={itemVariants}>
+                <label
+                  htmlFor="email"
+                  className="text-sm font-medium text-yellow-400"
+                >
+                  Email
                 </label>
-                <motion.input
+                <input
                   type="email"
                   id="email"
                   name="email"
-                  placeholder="Enter your email address"
+                  placeholder="info123@gmail.com"
                   value={form.email}
                   onChange={handleChange}
-                  required
-                  className="w-full bg-white/5 border border-white/20 text-white placeholder-gray-400 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-300 hover:border-white/30"
-                  whileFocus={{ scale: 1.02 }}
+                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 />
               </motion.div>
 
-              {/* Message Field */}
-              <motion.div
-                className="space-y-2"
-                variants={fadeInUp}
-              >
-                <label htmlFor="message" className="text-sm font-medium text-yellow-400">
+              {/* Message */}
+              <motion.div className="flex flex-col gap-2" variants={itemVariants}>
+                <label
+                  htmlFor="message"
+                  className="text-sm font-medium text-yellow-400"
+                >
                   Message
                 </label>
-                <motion.textarea
+                <textarea
                   id="message"
                   name="message"
-                  placeholder="Tell us how we can help you..."
+                  placeholder="Write your message..."
                   value={form.message}
                   onChange={handleChange}
-                  required
                   rows={6}
-                  className="w-full bg-white/5 border border-white/20 text-white placeholder-gray-400 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-yellow-400 focus:border-transparent transition-all duration-300 hover:border-white/30 resize-none"
-                  whileFocus={{ scale: 1.02 }}
+                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base min-h-[10rem] p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
                 />
               </motion.div>
 
               {/* Submit Button */}
               <motion.button
                 type="submit"
-                disabled={isSubmitting}
-                className={`w-full bg-gradient-to-r from-yellow-400 to-orange-400 text-black font-bold py-4 px-6 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed ${
-                  isSubmitting ? 'animate-pulse' : 'hover:scale-105'
-                }`}
-                variants={fadeInUp}
-                whileHover={!isSubmitting ? { scale: 1.05 } : {}}
-                whileTap={!isSubmitting ? { scale: 0.98 } : {}}
+                className="w-full sm:w-auto bg-yellow-400 btn-text btn-secondary text-black font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-yellow-300 transition-all text-base sm:text-lg"
+                whileHover={{ scale: 0.98 }}
+                whileTap={{ scale: 0.95 }}
               >
-                {isSubmitting ? (
-                  <div className="flex items-center justify-center gap-2">
-                    <div className="w-5 h-5 border-2 border-black border-t-transparent rounded-full animate-spin" />
-                    Sending...
-                  </div>
-                ) : (
-                  "Send Message"
-                )}
+                Send Message
               </motion.button>
             </motion.form>
-          </motion.div>
-        </motion.div>
-      </div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </section>
   );
 }

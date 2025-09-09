@@ -4,7 +4,7 @@ import { FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 
 export default function Footer() {
   return (
-    <footer className="w-full bg-footer text-white">
+    <footer className="w-screen bg-footer text-white relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
       {/* Main Footer Content */}
       <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-5 gap-4 text-center md:text-left">
         {/* Organized and Sponsored By */}
@@ -17,7 +17,7 @@ export default function Footer() {
               src="/istad-logo-white.png"
               width={200}
               height={150}
-              alt="ISTAD Logo"
+              alt="Logo"
             />
           </div>
           <p className="text-[16px] text-gray-300 leading-relaxed">
@@ -25,21 +25,18 @@ export default function Footer() {
           </p>
         </div>
 
-        {/* About This Site - Aligned with Signup Button */}
+        {/* About This Site */}
         <div className="space-y-4">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
             ABOUT THIS SITE
           </h3>
-          {/* Logo container aligned to match navbar signup button position */}
-          <div className="flex items-center justify-center md:justify-start">
-            <div className="flex items-center space-x-3 px-6 py-2">
-              <div className="w-12 h-12 flex items-center justify-center">
-                <Image src="/logo-sq.png" width={45} height={45} alt="StackQuiz Logo" />
-              </div>
-              <div>
-                <div className="text-xl font-bold">
-                  STACK <span className="text-yellow-400">QUIZ</span>
-                </div>
+          <div className="flex items-center justify-center md:justify-start space-x-3">
+            <div className="w-12 h-12 flex items-center justify-center">
+              <Image src="/logo-sq.png" width={45} height={45} alt="logo" />
+            </div>
+            <div>
+              <div className="text-xl font-bold">
+                STACK <span className="text-yellow">QUIZZ</span>
               </div>
             </div>
           </div>
@@ -83,7 +80,7 @@ export default function Footer() {
         </div>
 
         {/* Contacts */}
-        <div className="space-y-4">
+        <div className="space-y-4 text-center md:text-left">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
             CONTACTS
           </h3>
@@ -116,20 +113,18 @@ export default function Footer() {
           <div className="text-[16px] text-gray-300">
             © 2025 StackQuizz Inc. All rights reserved.
           </div>
-          <div className="flex justify-center space-x-2">
+          <div className="flex justify-center md:justify-start space-x-2">
             <Image
               src="/social_media_icon/fb.svg"
               width={27}
               height={28}
               alt="Facebook"
-              className="hover:opacity-80 transition-opacity"
             />
             <Image
               src="/social_media_icon/github.svg"
               width={28}
               height={30}
               alt="Github"
-              className="hover:opacity-80 transition-opacity"
             />
             <Image
               src="/social_media_icon/telegram.svg"
@@ -142,14 +137,12 @@ export default function Footer() {
               width={36}
               height={36}
               alt="Instagram"
-              className="hover:opacity-80 transition-opacity"
             />
             <Image
               src="/social_media_icon/youtube.svg"
               width={34}
               height={34}
               alt="Youtube"
-              className="hover:opacity-80 transition-opacity"
             />
           </div>
         </div>

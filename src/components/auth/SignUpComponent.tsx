@@ -5,7 +5,9 @@ import { z } from 'zod';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import FormField from './FormField'; // make sure this file exists
 
+// -------------------- Zod Schema --------------------
 const signupSchema = z
   .object({
     username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
@@ -29,14 +31,15 @@ type FormData = {
   lastName: string;
 };
 
-const EyeIcon = () => (
+// -------------------- Eye Icons --------------------
+export const EyeIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-400 cursor-pointer">
     <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
     <circle cx="12" cy="12" r="3" />
   </svg>
 );
 
-const EyeOffIcon = () => (
+export const EyeOffIcon = () => (
   <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-400 cursor-pointer">
     <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
     <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
@@ -45,6 +48,7 @@ const EyeOffIcon = () => (
   </svg>
 );
 
+// -------------------- Signup Form --------------------
 const SignupForm = () => {
   const [formData, setFormData] = useState<FormData>({
     username: '',
@@ -54,7 +58,6 @@ const SignupForm = () => {
     firstName: '',
     lastName: '',
   });
-
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
@@ -106,26 +109,31 @@ const SignupForm = () => {
   return (
     <div className="flex flex-col items-center justify-center p-4 lg:p-14">
       <div className="flex flex-col md:flex-row w-full max-w-5xl rounded-3xl lg:border-8 border-white/70 transition-transform duration-500">
-        {/* Left Side */}
+
+        {/* Left Side (desktop only) */}
         <div className="hidden md:flex flex-col items-center justify-center w-1/2 p-8 rounded-l-2xl bg-pink-100 relative overflow-hidden">
-          <div className="w-4/5">
-            <Image src="/signup.svg" alt="Signup Illustration" width={500} height={500} />
-          </div>
-          <div className="p-1.5 absolute top-4 left-4 flex items-center space-x-2">
+          {/* logo + name in top-left of left side */}
+          <div className="absolute top-4 left-4 flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="/logo.png" alt="Logo" width={40} height={50} />
+              <Image src="/logo-sq.png" alt="Logo" width={40} height={40} />
               <span className="font-bold text-yellow text-lg">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
             </Link>
           </div>
+
+          <div className="w-6/5">
+            <Image src="/signup.svg" alt="Signup Illustration" width={500} height={500} />
+          </div>
         </div>
 
-        {/* Right Side */}
+        {/* Right Side (form) */}
         <div className="flex-1 w-full md:w-1/2 p-4 md:px-10 py-8 bg-white rounded-2xl md:rounded-r-2xl md:rounded-l-none">
+
+          {/* Mobile logo + name (visible on small screens) */}
           <div className="flex justify-center items-center space-x-2 mb-4 md:hidden">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="/logo.png" alt="Logo" width={50} height={50} />
+              <Image src="/logo-sq.png" alt="Logo" width={48} height={48} />
               <span className="font-bold text-yellow text-2xl">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
@@ -150,6 +158,7 @@ const SignupForm = () => {
             <FormField id="lastName" label="Last Name" type="text" value={formData.lastName} placeholder="Dara" onChange={handleChange} error={errors.lastName} icon="/user.svg" />
             <FormField id="username" label="Username" type="text" value={formData.username} placeholder="doungdara" onChange={handleChange} error={errors.username} icon="/user.svg" />
             <FormField id="email" label="Email" type="email" value={formData.email} placeholder="doungdara@gmail.com" onChange={handleChange} error={errors.email} icon="/mail.svg" />
+
             <FormField
               id="password"
               label="Password"
@@ -162,6 +171,7 @@ const SignupForm = () => {
               toggle={() => setShowPassword(!showPassword)}
               toggleIcon={showPassword ? <EyeOffIcon /> : <EyeIcon />}
             />
+
             <FormField
               id="confirmPassword"
               label="Confirm Password"
@@ -181,7 +191,7 @@ const SignupForm = () => {
           </form>
 
           {/* Social login */}
-          <div className="text-center my-4 mt-[-0px]">
+          <div className="text-center my-4">
             <span className="text-gray-500">or</span>
           </div>
           <div className="flex justify-center space-x-6 mt-[-10px]">
@@ -194,7 +204,7 @@ const SignupForm = () => {
 
           <p className="text-center text-gray-500 mt-2 text-sm">
             Already have an account?{' '}
-            <Link href="#" className="text-indigo-600 font-semibold hover:underline">
+            <Link href="/login" className="text-indigo-600 font-semibold hover:underline">
               Login
             </Link>
           </p>
@@ -203,42 +213,5 @@ const SignupForm = () => {
     </div>
   );
 };
-
-interface FormFieldProps {
-  id: string;
-  label: string;
-  type: string;
-  placeholder?: string;
-  value: string;
-  onChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
-  error?: string;
-  icon: string;
-  toggle?: () => void;
-  toggleIcon?: React.ReactNode;
-}
-
-const FormField = ({ id, label, type, placeholder, value, onChange, error, icon, toggle, toggleIcon }: FormFieldProps) => (
-  <div>
-    <label htmlFor={id} className="block text-gray-700 font-medium mb-1 text-[14px]">
-      {label}
-    </label>
-    <div className="relative">
-      <input
-        id={id}
-        name={id}
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={onChange}
-        className="w-full pl-12 pr-12 py-2 rounded-xl border border-amber-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-      />
-      <div className="absolute inset-y-0 left-0 flex items-center pl-4 pointer-events-none">
-        <Image src={icon} alt={`${label} Icon`} width={17} height={17} />
-      </div>
-      {toggle && <div onClick={toggle} className="absolute right-4 top-1/2 -translate-y-1/2 cursor-pointer">{toggleIcon}</div>}
-    </div>
-    {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-  </div>
-);
 
 export default SignupForm;

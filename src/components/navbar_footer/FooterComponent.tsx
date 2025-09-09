@@ -6,7 +6,7 @@ export default function Footer() {
   return (
     <footer className="w-screen bg-footer text-white relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto py-12 grid grid-cols-1 md:grid-cols-5 gap-4 text-center md:text-left">
+      <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-5 gap-4 text-center md:text-left">
         {/* Organized and Sponsored By */}
         <div className="space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-wider text-white">
@@ -109,7 +109,7 @@ export default function Footer() {
 
       {/* Bottom Section */}
       <div className="w-full border-t border-gray-600 py-4">
-        <div className="max-w-7xl mx-auto px-6 flex flex-col md:flex-row justify-center md:justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-center md:justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
           <div className="text-[16px] text-gray-300">
             © 2025 StackQuizz Inc. All rights reserved.
           </div>
@@ -127,15 +127,15 @@ export default function Footer() {
               alt="Github"
             />
             <Image
-              src="/social_media_icon/twitter.svg"
-              width={34}
+              src="/social_media_icon/telegram.svg"
+              width={28}
               height={34}
-              alt="Twitter"
+              alt="Telegram"
             />
             <Image
               src="/social_media_icon/ig.svg"
-              width={34}
-              height={34}
+              width={36}
+              height={36}
               alt="Instagram"
             />
             <Image

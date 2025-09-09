@@ -13,14 +13,14 @@ const mentors = [
     image: "/ourImage/teacherchipor.png",
     shineColors: ["#3b82f6", "#eab308", "#ec4899"],
     borderColors: "border-blue-400",
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+    socials: { linkedin: "#", github: "#", telegram: "#" },
   },
   {
     name: "Srorng Sokcheat",
     image: "/ourImage/teachersokcheat.jpg",
     shineColors: ["#f97316", "#eab308", "#ec4899"],
     borderColors: "border-orange-400",
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+    socials: { linkedin: "#", github: "#", telegram: "#" },
   },
 ];
 
@@ -209,7 +209,7 @@ export function MentorsSection() {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <Image
-                    src="/LinkedIn.png"
+                    src="/social_media_icon/linkedin.svg"
                     alt="LinkedIn"
                     width={32}
                     height={32}
@@ -236,15 +236,15 @@ export function MentorsSection() {
               </a>
 
               <a
-                href={mentor.socials.instagram}
+                href={mentor.socials.telegram}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-block w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 hover:scale-110 transition-transform duration-200"
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <Image
-                    src="/instagram.png"
-                    alt="Instagram"
+                    src="/social_media_icon/telegram.svg"
+                    alt="telegram"
                     width={32}
                     height={32}
                     className="object-contain w-full h-full"

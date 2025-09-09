@@ -91,7 +91,7 @@ export function TeamsSection() {
                 <Image src="/social_media_icon/github.svg" alt="GitHub" width={28} height={28} className="object-contain" />
               </a>
               <a href={member.socials.instagram} target="_blank" rel="noopener noreferrer">
-                <Image src="/instagram.png" alt="Instagram" width={28} height={28} className="object-contain" />
+                <Image src="/social_media_icon/telegram-logo.png" alt="Telegram" width={28} height={28} className="object-contain" />
               </a>
             </div>
           </motion.div>

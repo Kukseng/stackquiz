@@ -1,9 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/context/LanguageContext";
-
 import { ContentSection } from "./ContentSection";
-
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
 

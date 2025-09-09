@@ -243,7 +243,7 @@ export function MentorsSection() {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <Image
-                    src="/instagram.png"
+                    src="/social_media_icon/telegram-logo.png"
                     alt="Instagram"
                     width={32}
                     height={32}

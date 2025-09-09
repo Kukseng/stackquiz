@@ -8,14 +8,14 @@ import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
 
 const teamMembers = [
-  { name: "Mom Rotha", position: "Full Stack Developer", image: "/ourImage/rotha.png", shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", instagram: "#" } },
-  { name: "Pech Rattanakmony", position: "Full Stack Developer", image: "/ourImage/mony.jpg", shineColors: ["#fb923c", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", instagram: "#" } },
-  { name: "Phou Kukseng", position: "Full Stack Developer", image: "/ourImage/kukseng.jpg", shineColors: ["#4ade80", "#60a5fa", "#a855f7"], socials: { linkedin: "#", github: "#", instagram: "#" } },
-  { name: "Ey Channim", position: "Full Stack Developer", image: "/ourImage/channim.png", shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", instagram: "#" } },
-  { name: "Roeurm Dara", position: "Full Stack Developer", image: "/ourImage/dara.jpg", shineColors: ["#c084fc", "#06b6d4", "#10b981"], socials: { linkedin: "#", github: "#", instagram: "#" } },
-  { name: "Ben Leomheng", position: "Full Stack Developer", image: "/kukseng.jpg", shineColors: ["#4ade80", "#60a5fa", "#a855f7"], socials: { linkedin: "#", github: "#", instagram: "#" } },
-  { name: "Chaing Polin", position: "Full Stack Developer", image: "/mony.jpg", shineColors: ["#8b5cf6", "#f59e0b", "#06b6d4"], socials: { linkedin: "#", github: "#", instagram: "#" } },
-  { name: "Leng Senghong", position: "Full Stack Developer", image: "/ourImage/senghong.png", shineColors: ["#14b8a6", "#f97316", "#ec4899"], socials: { linkedin: "#", github: "#", instagram: "#" } },
+  { name: "Mom Rotha", position: "Full Stack Developer", image: "/ourImage/rotha.png", shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { name: "Pech Rattanakmony", position: "Full Stack Developer", image: "/ourImage/mony.jpg", shineColors: ["#fb923c", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { name: "Phou Kukseng", position: "Full Stack Developer", image: "/ourImage/kukseng.jpg", shineColors: ["#4ade80", "#60a5fa", "#a855f7"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { name: "Ey Channim", position: "Full Stack Developer", image: "/ourImage/channim.png", shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { name: "Roeurm Dara", position: "Full Stack Developer", image: "/ourImage/dara.jpg", shineColors: ["#c084fc", "#06b6d4", "#10b981"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { name: "Ben Leomheng", position: "Full Stack Developer", image: "/kukseng.jpg", shineColors: ["#4ade80", "#60a5fa", "#a855f7"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { name: "Chaing Polin", position: "Full Stack Developer", image: "/mony.jpg", shineColors: ["#8b5cf6", "#f59e0b", "#06b6d4"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { name: "Leng Senghong", position: "Full Stack Developer", image: "/ourImage/senghong.png", shineColors: ["#14b8a6", "#f97316", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
 ];
 
 export function TeamsSection() {
@@ -85,13 +85,13 @@ export function TeamsSection() {
             {/* Social Icons */}
             <div className="flex gap-4 mt-4">
               <a href={member.socials.linkedin} target="_blank" rel="noopener noreferrer">
-                <Image src="/linkedin.png" alt="LinkedIn" width={28} height={28} className="object-contain" />
+                <Image src="/social_media_icon/linkedin.svg" alt="LinkedIn" width={28} height={28} className="object-contain" />
               </a>
               <a href={member.socials.github} target="_blank" rel="noopener noreferrer">
                 <Image src="/social_media_icon/github.svg" alt="GitHub" width={28} height={28} className="object-contain" />
               </a>
-              <a href={member.socials.instagram} target="_blank" rel="noopener noreferrer">
-                <Image src="/instagram.png" alt="Instagram" width={28} height={28} className="object-contain" />
+              <a href={member.socials.telegram} target="_blank" rel="noopener noreferrer">
+                <Image src="/social_media_icon/telegram.svg" alt="telegram" width={28} height={28} className="object-contain" />
               </a>
             </div>
           </motion.div>

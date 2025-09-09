@@ -218,7 +218,7 @@ export default function ChallengeGrid() {
           />
         </div>
 
-        <select className="w-full md:w-auto text-white px-4 py-2 mt-4 md:mt-0 rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <select className="w-full md:w-auto text-gray-500 px-4 py-2 mt-4 md:mt-0 rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-500">
           <option>Select category</option>
           <option>Math</option>
           <option>Physical</option>

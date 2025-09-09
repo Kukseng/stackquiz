@@ -92,7 +92,7 @@ const SectionTitle = ({ children, className = "" }: { children: React.ReactNode,
                 whileHover={{ scale: 1.1, y: -10 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
-                <div className="w-20 h-20 mb-4 relative group-hover:drop-shadow-2xl transition-all duration-300">
+                <div className="w-40 h-20 m-4 relative group-hover:drop-shadow-2xl transition-all duration-300">
                   <Image
                     src={tech.image}
                     alt={tech.name}
@@ -100,9 +100,9 @@ const SectionTitle = ({ children, className = "" }: { children: React.ReactNode,
                     className="object-contain"
                   />
                 </div>
-                <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">
+                {/* <span className="text-sm font-medium text-white/80 group-hover:text-white transition-colors">
                   {tech.name}
-                </span>
+                </span> */}
               </motion.div>
             ))}
           </div>

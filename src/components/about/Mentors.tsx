@@ -244,7 +244,7 @@ export function MentorsSection() {
                 <div className="w-full h-full flex items-center justify-center">
                   <Image
                     src="/social_media_icon/telegram.svg"
-                    alt="telegram"
+                    alt="Instagram"
                     width={32}
                     height={32}
                     className="object-contain w-full h-full"

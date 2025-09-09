@@ -209,7 +209,7 @@ export function MentorsSection() {
               >
                 <div className="w-full h-full flex items-center justify-center">
                   <Image
-                    src="/LinkedIn.png"
+                    src="/linkedin.png"
                     alt="LinkedIn"
                     width={32}
                     height={32}

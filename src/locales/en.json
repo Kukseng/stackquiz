@@ -55,5 +55,26 @@
     "address": "Khan Toul Kork, Phnom Penh, Cambodia",
     "phone": "+855 717563743 / 971777544",
     "emailAddress": "infostackquizz123@gmail.com"
-  }
+  },
+  "platform":{
+    "title": "Our Amazing Platform",
+    "description":"Create quizzes to promote the educational benefits of your content. Engage your audience in real-time, and create moments they never forget.",
+    "getStarted": "Get Start"
+  },
+  "establishment":{
+    "title": "Our Establishment",
+    "description": "Our platform makes learning fun, social,and accessible by blending game-based quizzes with real-time competition to keep learners engaged."
+  },
+  "mission": {
+    "title": "Our Mission",
+    "description": "Our mission is to revolutionize online learning and knowledge-sharing through education and quizzes to bridge the gap between entertainment and learning, making education more engaging and effective."
+  },
+  "vision": {
+  "title": "Our Vision",
+  "description": "Our vision is to become the leading platform where learning and entertainment seamlessly merge, creating a global community of learners who are motivated to explore new topics through fun and engaging quizzes."
 }
+
+}
+
+
+

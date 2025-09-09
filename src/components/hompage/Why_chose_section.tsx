@@ -76,7 +76,7 @@ export function WhyChooseSection() {
   ]);
 
   return (
-    <section className="py-12 glow-pink">
+    <section className="py-12">
       <div className="max-w-7xl mx-auto text-center">
         <div className="text-center mb-12">
           <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
@@ -93,7 +93,7 @@ export function WhyChooseSection() {
             ref={feature1Ref}
             initial={{ opacity: 0, y: 50 }}
             animate={feature1Controls}
-            className="relative rounded-2xl p-[3px] card-glow transform transition duration-300 hover:scale-110 overflow-hidden"
+            className="relative rounded-2xl p-[3px] transform transition duration-300 hover:scale-110 overflow-hidden"
           >
             <div
               className={`absolute inset-0 bg-gradient-to-r ${features[0].gradient} animate-gradient-x`}
@@ -114,7 +114,7 @@ export function WhyChooseSection() {
             ref={feature2Ref}
             initial={{ opacity: 0, y: 50 }}
             animate={feature2Controls}
-            className="relative rounded-2xl p-[3px] card-glow transform transition duration-300 hover:scale-110 overflow-hidden"
+            className="relative rounded-2xl p-[3px] transform transition duration-300 hover:scale-110 overflow-hidden"
           >
             <div
               className={`absolute inset-0 bg-gradient-to-r ${features[1].gradient} animate-gradient-x`}
@@ -135,7 +135,7 @@ export function WhyChooseSection() {
             ref={feature3Ref}
             initial={{ opacity: 0, y: 50 }}
             animate={feature3Controls}
-            className="relative rounded-2xl p-[3px] card-glow transform transition duration-300 hover:scale-110 overflow-hidden"
+            className="relative rounded-2xl p-[3px] transform transition duration-300 hover:scale-110 overflow-hidden"
           >
             <div
               className={`absolute inset-0 bg-gradient-to-r ${features[2].gradient} animate-gradient-x`}

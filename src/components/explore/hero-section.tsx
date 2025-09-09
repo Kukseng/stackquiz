@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { useRef, useEffect } from "react";
+import Link from "next/link";
 
 export default function Banner() {
   const ref = useRef<HTMLDivElement>(null);
@@ -53,7 +54,9 @@ export default function Banner() {
           whileTap={{ scale: 0.95 }}
           className="mt-6  rounded-xl btn-secondary btn-text px-6 py-1 sm:py-1 md:py-2 box-radius text-base sm:text-lg font-semibold shadow-md"
         >
+          <Link href="/joinroom" className="flex items-center gap-2">
           Play Now
+          </Link>
         </motion.button>
       </div>
     </motion.section>

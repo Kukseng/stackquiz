@@ -56,6 +56,7 @@ const ReviewCard = ({
   body: string;
 }) => {
   return (
+    
     <figure
       className={cn(
         "relative h-full py-12  w-64 cursor-pointer overflow-hidden rounded-xl border p-4",
@@ -85,6 +86,13 @@ const ReviewCard = ({
 export function FeedbackQuiz() {
   return (
     <div className="relative max-w-7xl mx-auto flex w-full flex-col items-center justify-center overflow-hidden">
+      <div className="text-center mb-30">
+        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+          <span className="relative">
+            <span className="text-yellow text-underline">Feedback player</span>
+          </span>
+        </h2>
+      </div>
       <Marquee pauseOnHover className="[--duration:20s] gap-4">
         {firstRow.map((review) => (
           <ReviewCard key={review.username} {...review} />

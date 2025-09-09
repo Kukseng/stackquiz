@@ -1,86 +1,139 @@
 "use client";
-import { Button } from "@/components/ui/button";
-import { motion, useAnimation, useInView } from "framer-motion";
-import { useRef, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
+import { Button } from "../ui/button";
+import Link from "next/link";
 export default function CreateQuizSection() {
-  const textRef = useRef<HTMLDivElement>(null);
-  const imgRef = useRef<HTMLDivElement>(null);
-
-  const textControls = useAnimation();
-  const imgControls = useAnimation();
-
-  const textInView = useInView(textRef, { once: false, margin: "-100px" });
-  const imgInView = useInView(imgRef, { once: false, margin: "-100px" });
+  const [isVisible, setIsVisible] = useState(false);
+  const sectionRef = useRef(null);
 
   useEffect(() => {
-    if (textInView) {
-      textControls.start({
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: { type: "spring", stiffness: 80, damping: 20 },
-      });
-    } else {
-      textControls.start({ opacity: 0, y: 50, scale: 0.95 });
-    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setIsVisible(entry.isIntersecting),
+      { threshold: 0.2, rootMargin: "-50px" }
+    );
 
-    if (imgInView) {
-      imgControls.start({
-        opacity: 1,
-        y: 0,
-        scale: 1,
-        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.3 },
-      });
-    } else {
-      imgControls.start({ opacity: 0, y: 50, scale: 0.95 });
-    }
-  }, [textInView, imgInView, textControls, imgControls]);
+    if (sectionRef.current) observer.observe(sectionRef.current);
+    return () => observer.disconnect();
+  }, []);
 
   return (
-    <div className="w-full px-4 sm:px-7  md:px-8 lg:px-10 xl:px-12 py-12">
-      <motion.div
-        className="bg-gray-screen-page  box-radius max-w-3xl w-full flex flex-col lg:flex-row items-center lg:items-stretch p-8 sm:p-4 lg:p-6 gap-3 lg:gap-4 mx-auto"
-        initial={{ scale: 1 }}
-        animate={{ scale: 1 }}
-        transition={{ type: "spring", stiffness: 80, damping: 20 }}
-      >
-        {/* Left: Text + Button */}
-        <motion.div
-          ref={textRef}
-          initial={{ opacity: 0, y: 50, scale: 0.95 }}
-          animate={textControls}
-          className="flex-1 flex flex-col justify-center text-center lg:text-left space-y-2"
+    <div className="w-full px-2  sm:px-3 md:px-4 lg:px-6">
+      <div ref={sectionRef} className="max-w-3xl mx-auto">
+        {/* Main Container */}
+        <div
+          className={`
+            relative
+            box-radius overflow-hidden shadow-lg
+            transition-all duration-1000 ease-out
+            ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-6 scale-95"}
+          `}
         >
-          <h1 className="text-4xl sm:text-4xl md:text-5xl lg:text-5xl font-bold text-white leading-tight">
-            Create a quiz
-          </h1>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl text-white">
-            Play for free <br /> with participants
-          </p>
-          <div className="mt-2">
-            <Button className="btn-secondary btn-text px-4 py-2 sm:py-3 box-radius font-semibold text-sm sm:text-base">
-              Get start →
-            </Button>
+          {/* Animated Background Elements */}
+          <div className="absolute inset-0 overflow-hidden">
+            <div className="absolute -top-3 -right-3 w-24 h-24 bg-blue-400 bg-opacity-10 rounded-full blur-lg animate-pulse"></div>
+            <div
+              className="absolute top-1/2 -left-6 w-20 h-20 bg-blue-600 bg-opacity-20 rounded-full blur-md animate-bounce"
+              style={{ animationDelay: "1s", animationDuration: "3s" }}
+            ></div>
+            <div 
+              className="absolute bottom-6 right-1/4 w-12 h-12 bg-purple-400 bg-opacity-15 rounded-full blur-sm animate-pulse"
+              style={{ animationDelay: "2s" }}
+            ></div>
           </div>
-        </motion.div>
 
-        {/* Right: Illustration */}
-        <motion.div
-          ref={imgRef}
-          initial={{ opacity: 0, y: 50, scale: 0.95 }}
-          animate={imgControls}
-          className="flex-1 flex justify-center lg:justify-end mt-4 lg:mt-0"
-        >
-          <Image
-            src="/quiz.svg"
-            alt="3D character thinking"
-            width={500}
-            height={500}
-            className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
-          />
-        </motion.div>
-      </motion.div>
+          {/* Content Grid */}
+          <div className="relative grid rounded-2xl md:bg-gradient-to-br from-white/1 to-white/10 lg:grid-cols-2 p-4 lg:p-8 items-center">
+            {/* Left Content */}
+            <div
+              className={`
+                space-y-6 text-center lg:text-left
+                transition-all duration-1200 ease-out
+                ${isVisible ? "opacity-100 translate-x-0" : "opacity-0 -translate-x-6"}
+              `}
+              style={{ transitionDelay: "200ms" }}
+            >
+              {/* Main Heading */}
+              <div className="space-y-3">
+                <h1
+                  className={`
+                    text-3xl sm:text-4xl lg:text-5xl font-bold text-white leading-tight
+                    transition-all duration-1000 ease-out
+                    ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+                  `}
+                  style={{ transitionDelay: "600ms" }}
+                >
+                  Create Amazing
+                  <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
+                    Quiz Games
+                  </span>
+                </h1>
+
+                <p
+                  className={`
+                    text-lg sm:text-xl text-gray-300  font-light leading-relaxed
+                    transition-all duration-1000 ease-out
+                    ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+                  `}
+                  style={{ transitionDelay: "800ms" }}
+                >
+                  Engage your audience with interactive quizzes.
+                  <br className="hidden sm:block" />
+                  <span className="text-yellow-200 font-medium">Play together, learn together.</span>
+                </p>
+              </div>
+
+              {/* CTA Button */}
+              <div
+                className={`
+                  transition-all duration-1000 ease-out 
+                  ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+                `}
+                style={{ transitionDelay: "1000ms" }}
+              >
+                <Link href="/signup" className="flex items-center gap-2">
+                <Button className="btn-secondary box-radius btn-text px-4 py-3 sm:py-3 rounded-lg font-semibold text-sm sm:text-base">
+                  Get Started
+                </Button>
+                </Link>
+              </div>
+
+              {/* Feature Points */}
+              <div
+                className={`
+                  flex flex-wrap gap-4 justify-center lg:justify-start text-blue-100
+                  transition-all duration-1000 ease-out
+                  ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
+                `}
+                style={{ transitionDelay: "1200ms" }}
+              >
+                {["No Setup Required", "Real-time Results", "Mobile Friendly"].map((feature, index) => (
+                  <div key={feature} className="flex items-center gap-2">
+                    <div
+                      className="w-3 h-3 bg-green-400 rounded-full animate-pulse"
+                      style={{ animationDelay: `${index * 0.2}s` }}
+                    />
+                    <span className="text-sm text-gray-50 font-medium">{feature}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Right Image (responsive) */}
+            <div className="flex justify-center mt-6 md:justify-end">
+              <div className="w-full max-w-[150px] sm:max-w-[200px] md:max-w-[250px] lg:max-w-[300px]">
+                <Image
+                  src="/quiz.svg"
+                  alt="People engaging with quiz platform"
+                  width={500} 
+                  height={500} 
+                  className="w-full h-auto object-contain"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

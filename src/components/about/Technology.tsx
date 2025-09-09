@@ -10,8 +10,16 @@ import {
   SlidingLogoMarqueeItem,
 } from "../ui/SlidingLogoMarquee";
 
+const SECTION_SPACING = {
+  sectionGap: "py-16 sm:py-20 lg:py-24 xl:py-28",
+  
+  containerPadding: "px-4 sm:px-6 lg:px-8 xl:px-10",
+  contentGap: "space-y-8 sm:space-y-12 lg:space-y-16",
+  titleMargin: "mb-12 sm:mb-16 lg:mb-20",
+  gridGap: "gap-8 sm:gap-12 lg:gap-16 xl:gap-20",
+  cardGap: "gap-6 sm:gap-8 lg:gap-12",
+};
 export function TechnologySection() {
-
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
 
@@ -29,7 +37,7 @@ export function TechnologySection() {
       id: index.toString(),
       content: (
         <div
-          className="w-50 h-25  mx-3 p-3 
+          className="w-50 h-25 mx-3 p-3 
                      backdrop-blur-xl rounded-xl 
                      flex items-center justify-center 
                      transition-all duration-300 cursor-pointer 
@@ -49,9 +57,9 @@ export function TechnologySection() {
   );
 
   return (
-    <section className="container mx-auto px-6 lg:px-10 lg:py-12">
-      {/* Header with improved spacing */}
-      <div className="text-center mb-30">
+    <section className={`${SECTION_SPACING.containerPadding} ${SECTION_SPACING.sectionGap}`}>
+      {/* Header */}
+      <div className={`text-center ${SECTION_SPACING.titleMargin}`}>
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
           <span className="relative">
             <span className="text-yellow text-underline">{t.heroAbout.technology}</span>
@@ -59,11 +67,9 @@ export function TechnologySection() {
         </h2>
       </div>
 
-
-      {/* Glass Background Wrapper with better spacing */}
-      <div className="relative max-w-7xl  mx-auto">
-        <div className="rounded-2xl bg-gradient-to-br from-purple-100/40 to-blue-400/50
-                        shadow-2xl shadow-black/10">
+      {/* Glass Background Wrapper */}
+      <div className="relative max-w-7xl mx-auto">
+        <div className="rounded-2xl bg-gradient-to-br from-purple-100/40 to-blue-400/50 shadow-2xl shadow-black/10">
           <SlidingLogoMarquee
             items={marqueeItems}
             speed={25}
@@ -79,11 +85,8 @@ export function TechnologySection() {
             className="w-full"
           />
         </div>
-        
-      
       </div>
     </section>
   );
 }
 
-export default TechnologySection;

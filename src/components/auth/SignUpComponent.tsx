@@ -1,25 +1,27 @@
-'use client';
+"use client";
 
-import React, { useState, FormEvent } from 'react';
-import { z } from 'zod';
-import Image from 'next/image';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import FormField from './FormField'; // make sure this file exists
+import React, { useState, FormEvent } from "react";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+import Link from "next/link";
+import FormField from "./FormField";
+import { FaUser, FaEnvelope, FaKey } from "react-icons/fa";
+import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
+import Image from "next/image";
 
 // -------------------- Zod Schema --------------------
 const signupSchema = z
   .object({
-    username: z.string().min(3, { message: 'Username must be at least 3 characters' }),
-    email: z.string().email({ message: 'Invalid email address' }),
-    password: z.string().min(8, { message: 'Password must be at least 8 characters' }),
-    confirmPassword: z.string().min(8, { message: 'Confirm password must be at least 8 characters' }),
-    firstName: z.string().min(2, { message: 'First name is required' }),
-    lastName: z.string().min(2, { message: 'Last name is required' }),
+    username: z.string().min(3),
+    email: z.string().email(),
+    password: z.string().min(8),
+    confirmPassword: z.string().min(8),
+    firstName: z.string().min(2),
+    lastName: z.string().min(2),
   })
   .refine((data) => data.password === data.confirmPassword, {
-    message: 'Passwords do not match',
-    path: ['confirmPassword'],
+    message: "Passwords do not match",
+    path: ["confirmPassword"],
   });
 
 type FormData = {
@@ -31,32 +33,14 @@ type FormData = {
   lastName: string;
 };
 
-// -------------------- Eye Icons --------------------
-export const EyeIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-400 cursor-pointer">
-    <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" />
-    <circle cx="12" cy="12" r="3" />
-  </svg>
-);
-
-export const EyeOffIcon = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-gray-400 cursor-pointer">
-    <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" />
-    <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" />
-    <path d="M6.61 6.61A13.52 13.52 0 0 0 2 12s3 7 10 7a9.75 9.75 0 0 0 5.36-1.66" />
-    <line x1="2" x2="22" y1="2" y2="22" />
-  </svg>
-);
-
-// -------------------- Signup Form --------------------
 const SignupForm = () => {
   const [formData, setFormData] = useState<FormData>({
-    username: '',
-    email: '',
-    password: '',
-    confirmPassword: '',
-    firstName: '',
-    lastName: '',
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    firstName: "",
+    lastName: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
@@ -79,16 +63,20 @@ const SignupForm = () => {
       signupSchema.parse(formData);
       setLoading(true);
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(formData),
+        }
+      );
 
       const data = await response.json();
-      if (!response.ok) throw new Error(data.message || 'Service business logic error');
+      if (!response.ok)
+        throw new Error(data.message || "Service business logic error");
 
-      router.push('/dashboard');
+      router.push("/dashboard");
     } catch (err) {
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
@@ -99,7 +87,7 @@ const SignupForm = () => {
       } else if (err instanceof Error) {
         setGeneralError(err.message);
       } else {
-        setGeneralError('An unexpected error occurred.');
+        setGeneralError("An unexpected error occurred.");
       }
     } finally {
       setLoading(false);
@@ -109,31 +97,41 @@ const SignupForm = () => {
   return (
     <div className="flex flex-col items-center justify-center p-4 lg:p-14">
       <div className="flex flex-col md:flex-row w-full max-w-5xl rounded-3xl lg:border-8 border-white/70 transition-transform duration-500">
-
         {/* Left Side (desktop only) */}
         <div className="hidden md:flex flex-col items-center justify-center w-1/2 p-8 rounded-l-2xl bg-pink-100 relative overflow-hidden">
-          {/* logo + name in top-left of left side */}
+          {/* Logo */}
           <div className="absolute top-4 left-4 flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="/logo-sq.png" alt="Logo" width={40} height={40} />
+              <Image
+                src="/logo-sq.png" 
+                alt="Signup illustration"
+                width={40}
+                height={40}
+                className="object-contain"
+              />
               <span className="font-bold text-yellow text-lg">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
             </Link>
           </div>
 
-          <div className="w-6/5">
-            <Image src="/signup.svg" alt="Signup Illustration" width={500} height={500} />
+          {/* Hero Image */}
+          <div className="mt-12">
+            <Image
+              src="/signup.svg" 
+              alt="Signup illustration"
+              width={400}
+              height={400}
+              className="object-contain"
+            />
           </div>
         </div>
 
         {/* Right Side (form) */}
         <div className="flex-1 w-full md:w-1/2 p-4 md:px-10 py-8 bg-white rounded-2xl md:rounded-r-2xl md:rounded-l-none">
-
-          {/* Mobile logo + name (visible on small screens) */}
+          {/* Mobile logo */}
           <div className="flex justify-center items-center space-x-2 mb-4 md:hidden">
             <Link href="/" className="flex items-center space-x-2">
-              <Image src="/logo-sq.png" alt="Logo" width={48} height={48} />
               <span className="font-bold text-yellow text-2xl">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
@@ -154,39 +152,91 @@ const SignupForm = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <FormField id="firstName" label="First Name" type="text" value={formData.firstName} placeholder="Doung" onChange={handleChange} error={errors.firstName} icon="/user.svg" />
-            <FormField id="lastName" label="Last Name" type="text" value={formData.lastName} placeholder="Dara" onChange={handleChange} error={errors.lastName} icon="/user.svg" />
-            <FormField id="username" label="Username" type="text" value={formData.username} placeholder="doungdara" onChange={handleChange} error={errors.username} icon="/user.svg" />
-            <FormField id="email" label="Email" type="email" value={formData.email} placeholder="doungdara@gmail.com" onChange={handleChange} error={errors.email} icon="/mail.svg" />
+            <FormField
+              id="firstName"
+              label="First Name"
+              type="text"
+              value={formData.firstName}
+              placeholder="Doung"
+              onChange={handleChange}
+              error={errors.firstName}
+              icon={<FaUser className="text-gray-400 h-5 w-5" />}
+            />
+            <FormField
+              id="lastName"
+              label="Last Name"
+              type="text"
+              value={formData.lastName}
+              placeholder="Dara"
+              onChange={handleChange}
+              error={errors.lastName}
+              icon={<FaUser className="text-gray-400 h-5 w-5" />}
+            />
+            <FormField
+              id="username"
+              label="Username"
+              type="text"
+              value={formData.username}
+              placeholder="doungdara"
+              onChange={handleChange}
+              error={errors.username}
+              icon={<FaUser className="text-gray-400 h-5 w-5" />}
+            />
+            <FormField
+              id="email"
+              label="Email"
+              type="email"
+              value={formData.email}
+              placeholder="doungdara@gmail.com"
+              onChange={handleChange}
+              error={errors.email}
+              icon={<FaEnvelope className="text-gray-400 h-5 w-5" />}
+            />
 
             <FormField
               id="password"
               label="Password"
-              type={showPassword ? 'text' : 'password'}
+              type={showPassword ? "text" : "password"}
               value={formData.password}
               placeholder="S@%Dara12!@"
               onChange={handleChange}
               error={errors.password}
-              icon="/key.svg"
+              icon={<FaKey className="text-gray-400 h-5 w-5" />}
               toggle={() => setShowPassword(!showPassword)}
-              toggleIcon={showPassword ? <EyeOffIcon /> : <EyeIcon />}
+              toggleIcon={
+                showPassword ? (
+                  <HiOutlineEyeOff className="h-5 w-5 text-gray-400 cursor-pointer" />
+                ) : (
+                  <HiOutlineEye className="h-5 w-5 text-gray-400 cursor-pointer" />
+                )
+              }
             />
 
             <FormField
               id="confirmPassword"
               label="Confirm Password"
-              type={showConfirmPassword ? 'text' : 'password'}
+              type={showConfirmPassword ? "text" : "password"}
               value={formData.confirmPassword}
               placeholder="S@%Dara12!@"
               onChange={handleChange}
               error={errors.confirmPassword}
-              icon="/key.svg"
+              icon={<FaKey className="text-gray-400 h-5 w-5" />}
               toggle={() => setShowConfirmPassword(!showConfirmPassword)}
-              toggleIcon={showConfirmPassword ? <EyeOffIcon /> : <EyeIcon />}
+              toggleIcon={
+                showConfirmPassword ? (
+                  <HiOutlineEyeOff className="h-5 w-5 text-gray-400 cursor-pointer" />
+                ) : (
+                  <HiOutlineEye className="h-5 w-5 text-gray-400 cursor-pointer" />
+                )
+              }
             />
 
-            <button type="submit" disabled={loading} className="w-full py-3 rounded-xl btn-secondary btn-text font-semibold shadow-lg transition-all duration-300">
-              {loading ? 'Signing Up...' : 'Create Account'}
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full py-3 rounded-xl btn-secondary btn-text font-semibold shadow-lg transition-all duration-300"
+            >
+              {loading ? "Signing Up..." : "Create Account"}
             </button>
           </form>
 
@@ -195,16 +245,27 @@ const SignupForm = () => {
             <span className="text-gray-500">or</span>
           </div>
           <div className="flex justify-center space-x-6 mt-[-10px]">
-            {['google', 'fb', 'github'].map((provider) => (
-              <button key={provider} className="transition-transform duration-200 hover:scale-110">
-                <Image src={`/social_media_icon/${provider}.svg`} alt={`${provider} Icon`} width={44} height={44} />
+            {["google", "fb", "github"].map((provider) => (
+              <button
+                key={provider}
+                className="transition-transform duration-200 hover:scale-110"
+              >
+                <Image
+                  src={`/social_media_icon/${provider}.svg`}
+                  alt={`${provider} Icon`}
+                  width={44}
+                  height={44}
+                />
               </button>
             ))}
           </div>
 
           <p className="text-center text-gray-500 mt-2 text-sm">
-            Already have an account?{' '}
-            <Link href="/login" className="text-indigo-600 font-semibold hover:underline">
+            Already have an account?{" "}
+            <Link
+              href="/login"
+              className="text-indigo-600 font-semibold hover:underline"
+            >
               Login
             </Link>
           </p>

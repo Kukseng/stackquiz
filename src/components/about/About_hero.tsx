@@ -1,128 +1,91 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { motion} from "framer-motion";
+import { motion, useAnimation, useInView } from "framer-motion";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
-// import { useRef, useEffect } from "react";
+import { useRef, useEffect } from "react";
 import Link from "next/link";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
-import {  Variants } from "framer-motion";
 
-// Consistent animation variants
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-const fadeInLeft: Variants = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-
-
-const scaleIn: Variants = {
-  hidden: { opacity: 0, scale: 0.8 },
-  visible: { 
-    opacity: 1, 
-    scale: 1, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-
-
-
-
-// About Hero Component
 export function AboutHero() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+
+  const textRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef<HTMLDivElement>(null);
+
+  const textControls = useAnimation();
+  const imgControls = useAnimation();
+
+  const textInView = useInView(textRef, { once: false, margin: "-100px" });
+  const imgInView = useInView(imgRef, { once: false, margin: "-100px" });
+
+  useEffect(() => {
+    if (textInView)
+      textControls.start({ opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } });
+    else textControls.start({ opacity: 0, x: -50 });
+
+    if (imgInView)
+      imgControls.start({ opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: "easeOut" } });
+    else imgControls.start({ opacity: 0, x: 50, scale: 0.95 });
+  }, [textInView, imgInView, textControls, imgControls]);
 
   return (
     <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-20 sm:pt-36 lg:pt-40">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+
           {/* Text Content */}
           <motion.div
-            variants={fadeInLeft}
-            initial="hidden"
-            animate="visible"
+            ref={textRef}
+            initial={{ opacity: 0, x: -50 }}
+            animate={textControls}
             className="text-center lg:text-left"
           >
-            <motion.h1 
-              className="text-3xl py-7 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight"
-              variants={fadeInUp}
-            >
+            <h1 className="text-3xl py-7 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
               {t.heroAbout.welcome}
               <br />
-              <motion.span 
-                className="text-yellow-400 inline-block"
-                whileHover={{ scale: 1.05 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
-                STACKQUIZ
-              </motion.span>
+              <span className="text-yellow">STACKQUIZ</span>
               <br />
               {t.heroAbout.aboutUs}
-            </motion.h1>
+            </h1>
 
-            <motion.p 
-              className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0"
-              variants={fadeInUp}
-              transition={{ delay: 0.2 }}
-            >
+            <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0">
               {t.heroAbout.weAre}
               <br className="hidden sm:block" />
               {t.heroAbout.quiz}
               <br className="hidden sm:block" />
               {t.heroAbout.knowlage}
-            </motion.p>
+            </p>
 
-            <motion.div
-              variants={fadeInUp}
-              transition={{ delay: 0.4 }}
-            >
+            <div className="flex justify-center lg:justify-start">
               <Link href="/signup">
-                <Button className="btn-secondary btn-text px-8 py-4 box-radius font-semibold text-lg hover:scale-105 transition-all duration-300 shadow-lg hover:shadow-xl">
+                <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
                   Get Started
                 </Button>
               </Link>
-            </motion.div>
+            </div>
           </motion.div>
 
           {/* Image Content */}
           <motion.div
-            variants={scaleIn}
-            initial="hidden"
-            animate="visible"
-            transition={{ delay: 0.3 }}
+            ref={imgRef}
+            initial={{ opacity: 0, x: 50, scale: 0.95 }}
+            animate={imgControls}
             className="order-2 lg:order-1 relative w-full h-64 sm:h-80 md:h-96 flex items-center justify-center mt-8 lg:mt-0"
           >
-            <motion.div
-              whileHover={{ scale: 1.05, rotate: 2 }}
-              transition={{ type: "spring", stiffness: 300, damping: 20 }}
-            >
-              <Image
-                src="/about_svg/aboutus.svg"
-                alt="About Us Illustration"
-                width={500}
-                height={500}
-                className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain drop-shadow-2xl"
-              />
-            </motion.div>
+            <Image
+              src="/about_svg/aboutus.svg"
+              alt="About Us Illustration"
+              width={500}
+              height={500}
+              className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
+            />
           </motion.div>
+
         </div>
       </div>
     </section>

@@ -12,26 +12,19 @@ import Image from "next/image";
 // -------------------- Zod Schema --------------------
 const signupSchema = z
   .object({
-    username: z.string().min(3),
-    email: z.string().email(),
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
-    firstName: z.string().min(2),
-    lastName: z.string().min(2),
+    username: z.string().min(3, { message: "Username must be at least 3 characters" }),
+    email: z.string().email({ message: "Invalid email address" }),
+    password: z.string().min(8, { message: "Password must be at least 8 characters" }),
+    confirmPassword: z.string().min(8, { message: "Confirm password must be at least 8 characters" }),
+    firstName: z.string().min(2, { message: "First name must be at least 2 characters" }),
+    lastName: z.string().min(2, { message: "Last name must be at least 2 characters" }),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
-type FormData = {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
-};
+type FormData = z.infer<typeof signupSchema>;
 
 const SignupForm = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -64,7 +57,7 @@ const SignupForm = () => {
       setLoading(true);
 
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
+        `${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000"}/api/v1/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -73,15 +66,16 @@ const SignupForm = () => {
       );
 
       const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Service business logic error");
+      if (!response.ok) throw new Error(data.message || "Service business logic error");
 
       router.push("/dashboard");
     } catch (err) {
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
         err.issues.forEach((issue) => {
-          newErrors[issue.path[0] as string] = issue.message;
+          if (issue.path.length > 0) {
+            newErrors[String(issue.path[0])] = issue.message;
+          }
         });
         setErrors(newErrors);
       } else if (err instanceof Error) {
@@ -103,13 +97,13 @@ const SignupForm = () => {
           <div className="absolute top-4 left-4 flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
               <Image
-                src="/logo-sq.png" 
+                src="/logo-sq.png"
                 alt="Signup illustration"
                 width={40}
                 height={40}
                 className="object-contain"
               />
-              <span className="font-bold text-yellow text-lg">
+              <span className="font-bold text-lg text-yellow-500">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
             </Link>
@@ -118,7 +112,7 @@ const SignupForm = () => {
           {/* Hero Image */}
           <div className="mt-12">
             <Image
-              src="/signup.svg" 
+              src="/signup.svg"
               alt="Signup illustration"
               width={400}
               height={400}
@@ -132,14 +126,14 @@ const SignupForm = () => {
           {/* Mobile logo */}
           <div className="flex justify-center items-center space-x-2 mb-4 md:hidden">
             <Link href="/" className="flex items-center space-x-2">
-              <span className="font-bold text-yellow text-2xl">
+              <span className="font-bold text-2xl text-yellow-500">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
             </Link>
           </div>
 
           <h2 className="text-2xl font-extrabold text-gray-800 mb-2 text-center md:text-left">
-            Sign <span className="text-yellow">Up</span>
+            Sign <span className="text-yellow-500">Up</span>
           </h2>
           <p className="text-gray-500 mt-1 text-center md:text-left">
             Create your personal account to get started.
@@ -234,7 +228,7 @@ const SignupForm = () => {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3 rounded-xl btn-secondary btn-text font-semibold shadow-lg transition-all duration-300"
+              className="w-full py-3 rounded-xl btn-text btn-secondary text-white font-semibold shadow-lg hover:opacity-90 transition-all duration-300"
             >
               {loading ? "Signing Up..." : "Create Account"}
             </button>

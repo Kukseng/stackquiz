@@ -44,7 +44,7 @@ export default function HomePage() {
         <CreateQuizSection />
         <WhyChooseSection />
         <PlatformSection />
-        <FeedbackQuiz />
+        <FeedbackQuiz/>
         <TopPlayersSection />
         <QuizTypeComponent />
         {/* <CardSwipeDemo/> */}

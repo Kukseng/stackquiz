@@ -3,6 +3,7 @@
 import { Clock, Search, Filter, Star, Users, BookOpen } from "lucide-react";
 import { motion, useAnimation, useInView } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
+import Image from "next/image";
 
 const challenges = [
   {
@@ -148,11 +149,12 @@ const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }
       {/* Image Container */}
       <div className="relative w-full h-48 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
-        <img
-          src={challenge.image}
-          alt={challenge.title}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-        />
+        <Image
+  src={challenge.image} // can be a local path or remote URL
+  alt={challenge.title}
+  fill // makes it cover the parent container like w-full h-full
+  className="object-cover group-hover:scale-110 transition-transform duration-700"
+/>
 
         {/* Rating Badge */}
         <div className="absolute top-3 right-3 z-20 bg-white/95 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">

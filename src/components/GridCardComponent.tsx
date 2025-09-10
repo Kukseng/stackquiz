@@ -1,5 +1,6 @@
 "use client";
-import React from "react";
+import React, { useState } from "react";
+import { Search } from "lucide-react";
 import CardQuizComponent from "./CardQuizComponent";
 
 const challenges = [
@@ -9,18 +10,27 @@ const challenges = [
     questions: 15,
     time: "30 min",
     difficulty: "Easy",
-    color: "bg-green-500",
+    color: "from-emerald-400 to-emerald-600",
+    textColor: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+    participants: 1250,
+    rating: 4.8,
     image: "https://sohamtimes.org//wp-content/uploads/2018/07/Mathematics.png",
   },
-    {
+  {
     id: 2,
     title: "Computer Programming",
     questions: 25,
     time: "1 hour",
     difficulty: "Hard",
-    color: "bg-red-500",
-    image:
-      "https://media.geeksforgeeks.org/wp-content/uploads/20241017105314407132/Basics-of-Computer-Programming-For-Beginners.webp",
+    color: "from-red-400 to-red-600",
+    textColor: "text-red-600",
+    bgColor: "bg-red-50",
+    borderColor: "border-red-200",
+    participants: 890,
+    rating: 4.9,
+    image: "https://media.geeksforgeeks.org/wp-content/uploads/20241017105314407132/Basics-of-Computer-Programming-For-Beginners.webp",
   },
   {
     id: 3,
@@ -28,9 +38,13 @@ const challenges = [
     questions: 20,
     time: "45 min",
     difficulty: "Medium",
-    color: "bg-yellow-500",
-    image:
-      "https://img.freepik.com/free-vector/hand-drawn-science-education-background_23-2148499325.jpg",
+    color: "from-amber-400 to-amber-600",
+    textColor: "text-amber-600",
+    bgColor: "bg-amber-50",
+    borderColor: "border-amber-200",
+    participants: 2100,
+    rating: 4.7,
+    image: "https://img.freepik.com/free-vector/hand-drawn-science-education-background_23-2148499325.jpg",
   },
   {
     id: 4,
@@ -38,29 +52,32 @@ const challenges = [
     questions: 15,
     time: "30 min",
     difficulty: "Easy",
-    color: "bg-green-500",
+    color: "from-emerald-400 to-emerald-600",
+    textColor: "text-emerald-600",
+    bgColor: "bg-emerald-50",
+    borderColor: "border-emerald-200",
+    participants: 1560,
+    rating: 4.6,
     image: "https://i.ytimg.com/vi/5iTOphGnCtg/hq720.jpg",
   },
- 
 ];
 
-export default function GridCardComponents() {
+export default function ChallengeGrid() {
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");
+
+  const filteredChallenges =
+    selectedDifficulty === "All"
+      ? challenges
+      : challenges.filter((c) => c.difficulty === selectedDifficulty);
+
   return (
-    <section className=" mt-8">
+    <section className="max-w-7xl mx-auto  mt-8">
+
+
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-        {challenges.map((challenge, index) => (
-          <CardQuizComponent
-            key={challenge.id}
-            id={challenge.id}          // Pass id
-            index={index}             // Pass index for staggered animation
-            title={challenge.title}
-            questions={challenge.questions}
-            time={challenge.time}
-            difficulty={challenge.difficulty}
-            color={challenge.color}
-            image={challenge.image}
-          />
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-10">
+        {filteredChallenges.map((challenge, i) => (
+          <CardQuizComponent key={challenge.id} challenge={challenge} index={i} />
         ))}
       </div>
     </section>

@@ -18,7 +18,7 @@ export default function CreateQuizSection() {
   }, []);
 
   return (
-    <div className="w-full px-2  sm:px-3 md:px-4 lg:px-6">
+    <div className="w-full px-2 py-12  sm:px-3 md:px-4 lg:px-6">
       <div ref={sectionRef} className="max-w-3xl mx-auto">
         {/* Main Container */}
         <div

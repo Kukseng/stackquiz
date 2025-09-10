@@ -1,4 +1,3 @@
-
 "use client";
 import { Clock, Search, Filter, Star, Users, BookOpen } from "lucide-react";
 import { motion, useAnimation, useInView } from "framer-motion";
@@ -32,7 +31,8 @@ const challenges = [
     borderColor: "border-red-200",
     participants: 890,
     rating: 4.9,
-    image: "https://media.geeksforgeeks.org/wp-content/uploads/20241017105314407132/Basics-of-Computer-Programming-For-Beginners.webp",
+    image:
+      "https://media.geeksforgeeks.org/wp-content/uploads/20241017105314407132/Basics-of-Computer-Programming-For-Beginners.webp",
   },
   {
     id: 3,
@@ -46,7 +46,8 @@ const challenges = [
     borderColor: "border-amber-200",
     participants: 2100,
     rating: 4.7,
-    image: "https://img.freepik.com/free-vector/hand-drawn-science-education-background_23-2148499325.jpg",
+    image:
+      "https://img.freepik.com/free-vector/hand-drawn-science-education-background_23-2148499325.jpg",
   },
   {
     id: 4,
@@ -88,7 +89,8 @@ const challenges = [
     borderColor: "border-amber-200",
     participants: 1890,
     rating: 4.5,
-    image: "https://kodakco.sgp1.digitaloceanspaces.com/blog/wp-content/uploads/2024/07/16125413/english-british-england-language.webp",
+    image:
+      "https://kodakco.sgp1.digitaloceanspaces.com/blog/wp-content/uploads/2024/07/16125413/english-british-england-language.webp",
   },
   {
     id: 7,
@@ -102,7 +104,8 @@ const challenges = [
     borderColor: "border-emerald-200",
     participants: 980,
     rating: 4.4,
-    image: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwHrywq-qhKrn_w3Q1u4aVmek2QVcP2VuN8g&s",
+    image:
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwHrywq-qhKrn_w3Q1u4aVmek2QVcP2VuN8g&s",
   },
   {
     id: 8,
@@ -116,11 +119,15 @@ const challenges = [
     borderColor: "border-red-200",
     participants: 1420,
     rating: 4.8,
-    image: "https://cdn.businessday.ng/wp-content/uploads/2023/12/Education-1.png",
+    image:
+      "https://cdn.businessday.ng/wp-content/uploads/2023/12/Education-1.png",
   },
 ];
 
-const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }> = ({ challenge, index }) => {
+const ChallengeCard: React.FC<{
+  challenge: (typeof challenges)[0];
+  index: number;
+}> = ({ challenge, index }) => {
   const ref = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
   const inView = useInView(ref, { once: false, margin: "-100px" });
@@ -130,7 +137,12 @@ const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }
       controls.start({
         opacity: 1,
         y: 0,
-        transition: { type: "spring", stiffness: 80, damping: 20, delay: index * 0.15 },
+        transition: {
+          type: "spring",
+          stiffness: 80,
+          damping: 20,
+          delay: index * 0.15,
+        },
       });
     } else {
       controls.start({ opacity: 0, y: 60 });
@@ -150,16 +162,18 @@ const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }
       <div className="relative w-full h-48 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent z-10" />
         <Image
-  src={challenge.image} // can be a local path or remote URL
-  alt={challenge.title}
-  fill // makes it cover the parent container like w-full h-full
-  className="object-cover group-hover:scale-110 transition-transform duration-700"
-/>
+          src={challenge.image} // can be a local path or remote URL
+          alt={challenge.title}
+          fill // makes it cover the parent container like w-full h-full
+          className="object-cover group-hover:scale-110 transition-transform duration-700"
+        />
 
         {/* Rating Badge */}
         <div className="absolute top-3 right-3 z-20 bg-white/95 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
           <Star size={12} className="text-yellow-500 fill-current" />
-          <span className="text-xs font-semibold text-gray-700">{challenge.rating}</span>
+          <span className="text-xs font-semibold text-gray-700">
+            {challenge.rating}
+          </span>
         </div>
       </div>
 
@@ -184,7 +198,9 @@ const ChallengeCard: React.FC<{ challenge: typeof challenges[0]; index: number }
 
         {/* Footer - Fixed alignment */}
         <div className="flex items-center justify-between pt-4 border-t border-gray-100">
-          <span className={`bg-gradient-to-r ${challenge.color} text-white text-xs font-semibold px-3 py-1.5 rounded-full`}>
+          <span
+            className={`bg-gradient-to-r ${challenge.color} text-white text-xs font-semibold px-3 py-1.5 rounded-full`}
+          >
             {challenge.difficulty}
           </span>
           <div className="flex items-center gap-1 text-sm font-medium text-gray-600">

@@ -64,7 +64,7 @@ export function AboutHero() {
             <div className="flex justify-center lg:justify-start">
               <Link href="/signup">
                 <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
-                  Get Started
+                  {t.heroAbout.getStarted}
                 </Button>
               </Link>
             </div>

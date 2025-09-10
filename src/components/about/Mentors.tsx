@@ -9,17 +9,17 @@ import kh from "@/locales/km.json";
 
 const mentors = [
   {
-    name: "Sreng Chipor",
-    image: "/ourImage/teacherchipor.png",
-    shineColors: ["#3b82f6", "#eab308", "#ec4899"],
-    borderColors: "border-blue-400",
-    socials: { linkedin: "#", github: "#", telegram: "#" },
-  },
-  {
     name: "Srorng Sokcheat",
     image: "/ourImage/teachersokcheat.jpg",
     shineColors: ["#f97316", "#eab308", "#ec4899"],
     borderColors: "border-orange-400",
+    socials: { linkedin: "#", github: "https://github.com/Sokcheatsrorng", telegram: "#" },
+  },
+  {
+    name: "Sreng Chipor",
+    image: "/ourImage/teacherchipor.png",
+    shineColors: ["#3b82f6", "#eab308", "#ec4899"],
+    borderColors: "border-blue-400",
     socials: { linkedin: "#", github: "#", telegram: "#" },
   },
 ];

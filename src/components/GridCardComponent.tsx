@@ -12,7 +12,7 @@ const challenges = [
     color: "bg-green-500",
     image: "https://sohamtimes.org//wp-content/uploads/2018/07/Mathematics.png",
   },
-  {
+    {
     id: 2,
     title: "Computer Programming",
     questions: 25,
@@ -41,11 +41,12 @@ const challenges = [
     color: "bg-green-500",
     image: "https://i.ytimg.com/vi/5iTOphGnCtg/hq720.jpg",
   },
+ 
 ];
 
 export default function GridCardComponents() {
   return (
-    <section className="px-4 mt-8">
+    <section className=" mt-8">
       {/* Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {challenges.map((challenge, index) => (

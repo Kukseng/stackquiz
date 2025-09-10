@@ -1,6 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import React, { useState, FormEvent } from "react";
+import { signIn } from "next-auth/react";
+
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -8,30 +11,24 @@ import FormField from "./FormField";
 import { FaUser, FaEnvelope, FaKey } from "react-icons/fa";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Image from "next/image";
+import { useRegisterMutation } from "@/lib/api/authApi";
 
 // -------------------- Zod Schema --------------------
 const signupSchema = z
   .object({
-    username: z.string().min(3),
-    email: z.string().email(),
-    password: z.string().min(8),
-    confirmPassword: z.string().min(8),
-    firstName: z.string().min(2),
-    lastName: z.string().min(2),
+    username: z.string().min(3, "Username must be at least 3 characters"),
+    email: z.string().email("Invalid email address"),
+    password: z.string().min(8, "Password must be at least 8 characters"),
+    confirmPassword: z.string().min(8, "Password confirmation is required"),
+    firstName: z.string().min(2, "First name is too short"),
+    lastName: z.string().min(2, "Last name is too short"),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
     path: ["confirmPassword"],
   });
 
-type FormData = {
-  username: string;
-  email: string;
-  password: string;
-  confirmPassword: string;
-  firstName: string;
-  lastName: string;
-};
+type FormData = z.infer<typeof signupSchema>;
 
 const SignupForm = () => {
   const [formData, setFormData] = useState<FormData>({
@@ -43,17 +40,19 @@ const SignupForm = () => {
     lastName: "",
   });
   const [errors, setErrors] = useState<Record<string, string>>({});
-  const [loading, setLoading] = useState(false);
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const router = useRouter();
+  const [register, { isLoading }] = useRegisterMutation();
 
+  // Handle field changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
+  // Handle form submit
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
@@ -61,52 +60,50 @@ const SignupForm = () => {
 
     try {
       signupSchema.parse(formData);
-      setLoading(true);
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/register`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(formData),
-        }
-      );
+      const response = await register({
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        confirmedPassword: formData.confirmPassword, // API expects "confirmedPassword"
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+      }).unwrap();
 
-      const data = await response.json();
-      if (!response.ok)
-        throw new Error(data.message || "Service business logic error");
-
-      router.push("/dashboard");
-    } catch (err) {
+      console.log("Registration successful:", response);
+      router.push("/verify-email"); // redirect on success
+    } catch (err: any) {
       if (err instanceof z.ZodError) {
+        // Handle validation errors
         const newErrors: Record<string, string> = {};
         err.issues.forEach((issue) => {
           newErrors[issue.path[0] as string] = issue.message;
         });
         setErrors(newErrors);
+      } else if (err?.data?.error || err?.data?.message) {
+        // Handle API errors
+        setGeneralError(err.data.error || err.data.message);
       } else if (err instanceof Error) {
         setGeneralError(err.message);
       } else {
         setGeneralError("An unexpected error occurred.");
       }
-    } finally {
-      setLoading(false);
     }
   };
 
   return (
-    <div className="flex flex-col items-center justify-center p-4 lg:p-14">
-      <div className="flex flex-col md:flex-row w-full max-w-5xl rounded-3xl lg:border-8 border-white/70 transition-transform duration-500">
+    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+      <div className="flex flex-col md:flex-row w-full max-w-6xl rounded-3xl lg:border-8 border-white/70 transition-transform duration-500 shadow-2xl">
         {/* Left Side (desktop only) */}
-        <div className="hidden md:flex flex-col items-center justify-center w-1/2 p-8 rounded-l-2xl bg-pink-100 relative overflow-hidden">
+        <div className="hidden md:flex flex-col items-center justify-center w-1/2 p-6 rounded-l-2xl bg-pink-100 relative overflow-hidden">
           {/* Logo */}
           <div className="absolute top-4 left-4 flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
               <Image
-                src="/logo-sq.png" 
+                src="/logo-sq.png"
                 alt="Signup illustration"
-                width={40}
-                height={40}
+                width={36}
+                height={36}
                 className="object-contain"
               />
               <span className="font-bold text-yellow text-lg">
@@ -116,151 +113,177 @@ const SignupForm = () => {
           </div>
 
           {/* Hero Image */}
-          <div className="mt-12">
+          <div className="mt-8">
             <Image
-              src="/signup.svg" 
+              src="/signup.svg"
               alt="Signup illustration"
-              width={400}
-              height={400}
+              width={350}
+              height={350}
               className="object-contain"
             />
           </div>
         </div>
 
         {/* Right Side (form) */}
-        <div className="flex-1 w-full md:w-1/2 p-4 md:px-10 py-8 bg-white rounded-2xl md:rounded-r-2xl md:rounded-l-none">
+        <div className="flex-1 w-full md:w-1/2 p-4 md:p-6 bg-white rounded-2xl md:rounded-r-2xl md:rounded-l-none">
           {/* Mobile logo */}
-          <div className="flex justify-center items-center space-x-2 mb-4 md:hidden">
+          <div className="flex justify-center items-center space-x-2 mb-3 md:hidden">
             <Link href="/" className="flex items-center space-x-2">
               <span className="font-bold text-yellow text-2xl">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
             </Link>
           </div>
-
-          <h2 className="text-2xl font-extrabold text-gray-800 mb-2 text-center md:text-left">
-            Sign <span className="text-yellow">Up</span>
-          </h2>
-          <p className="text-gray-500 mt-1 text-center md:text-left">
-            Create your personal account to get started.
-          </p>
-
+          <div className="text-center md:text-left mb-4">
+            <h2 className="text-2xl font-extrabold text-gray-800 mb-1">
+              Sign <span className="text-yellow">Up</span>
+            </h2>
+            <p className="text-gray-500 text-sm">
+              Create your personal account to get started.
+            </p>
+          </div>
           {generalError && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4 text-center">
+            <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-xl mb-3 text-center text-sm">
               {generalError}
             </div>
           )}
+          <form onSubmit={handleSubmit} className="space-y-3">
+            {/* Name fields in two columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormField
+                id="firstName"
+                label="First Name"
+                type="text"
+                value={formData.firstName}
+                placeholder="Doung"
+                onChange={handleChange}
+                error={errors.firstName}
+                icon={<FaUser className="text-gray-400 h-4 w-4" />}
+              />
+              <FormField
+                id="lastName"
+                label="Last Name"
+                type="text"
+                value={formData.lastName}
+                placeholder="Dara"
+                onChange={handleChange}
+                error={errors.lastName}
+                icon={<FaUser className="text-gray-400 h-4 w-4" />}
+              />
+            </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4 mt-4">
-            <FormField
-              id="firstName"
-              label="First Name"
-              type="text"
-              value={formData.firstName}
-              placeholder="Doung"
-              onChange={handleChange}
-              error={errors.firstName}
-              icon={<FaUser className="text-gray-400 h-5 w-5" />}
-            />
-            <FormField
-              id="lastName"
-              label="Last Name"
-              type="text"
-              value={formData.lastName}
-              placeholder="Dara"
-              onChange={handleChange}
-              error={errors.lastName}
-              icon={<FaUser className="text-gray-400 h-5 w-5" />}
-            />
-            <FormField
-              id="username"
-              label="Username"
-              type="text"
-              value={formData.username}
-              placeholder="doungdara"
-              onChange={handleChange}
-              error={errors.username}
-              icon={<FaUser className="text-gray-400 h-5 w-5" />}
-            />
-            <FormField
-              id="email"
-              label="Email"
-              type="email"
-              value={formData.email}
-              placeholder="doungdara@gmail.com"
-              onChange={handleChange}
-              error={errors.email}
-              icon={<FaEnvelope className="text-gray-400 h-5 w-5" />}
-            />
+            {/* Username and Email in two columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormField
+                id="username"
+                label="Username"
+                type="text"
+                value={formData.username}
+                placeholder="doungdara"
+                onChange={handleChange}
+                error={errors.username}
+                icon={<FaUser className="text-gray-400 h-4 w-4" />}
+              />
+              <FormField
+                id="email"
+                label="Email"
+                type="email"
+                value={formData.email}
+                placeholder="doungdara@gmail.com"
+                onChange={handleChange}
+                error={errors.email}
+                icon={<FaEnvelope className="text-gray-400 h-4 w-4" />}
+              />
+            </div>
 
-            <FormField
-              id="password"
-              label="Password"
-              type={showPassword ? "text" : "password"}
-              value={formData.password}
-              placeholder="S@%Dara12!@"
-              onChange={handleChange}
-              error={errors.password}
-              icon={<FaKey className="text-gray-400 h-5 w-5" />}
-              toggle={() => setShowPassword(!showPassword)}
-              toggleIcon={
-                showPassword ? (
-                  <HiOutlineEyeOff className="h-5 w-5 text-gray-400 cursor-pointer" />
-                ) : (
-                  <HiOutlineEye className="h-5 w-5 text-gray-400 cursor-pointer" />
-                )
-              }
-            />
-
-            <FormField
-              id="confirmPassword"
-              label="Confirm Password"
-              type={showConfirmPassword ? "text" : "password"}
-              value={formData.confirmPassword}
-              placeholder="S@%Dara12!@"
-              onChange={handleChange}
-              error={errors.confirmPassword}
-              icon={<FaKey className="text-gray-400 h-5 w-5" />}
-              toggle={() => setShowConfirmPassword(!showConfirmPassword)}
-              toggleIcon={
-                showConfirmPassword ? (
-                  <HiOutlineEyeOff className="h-5 w-5 text-gray-400 cursor-pointer" />
-                ) : (
-                  <HiOutlineEye className="h-5 w-5 text-gray-400 cursor-pointer" />
-                )
-              }
-            />
+            {/* Password fields in two columns */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <FormField
+                id="password"
+                label="Password"
+                type={showPassword ? "text" : "password"}
+                value={formData.password}
+                placeholder="Password"
+                onChange={handleChange}
+                error={errors.password}
+                icon={<FaKey className="text-gray-400 h-4 w-4" />}
+                toggle={() => setShowPassword(!showPassword)}
+                toggleIcon={
+                  showPassword ? (
+                    <HiOutlineEyeOff className="h-4 w-4 text-gray-400 cursor-pointer" />
+                  ) : (
+                    <HiOutlineEye className="h-4 w-4 text-gray-400 cursor-pointer" />
+                  )
+                }
+              />
+              <FormField
+                id="confirmPassword"
+                label="Confirm Password"
+                type={showConfirmPassword ? "text" : "password"}
+                value={formData.confirmPassword}
+                placeholder="Confirm Password"
+                onChange={handleChange}
+                error={errors.confirmPassword}
+                icon={<FaKey className="text-gray-400 h-4 w-4" />}
+                toggle={() => setShowConfirmPassword(!showConfirmPassword)}
+                toggleIcon={
+                  showConfirmPassword ? (
+                    <HiOutlineEyeOff className="h-4 w-4 text-gray-400 cursor-pointer" />
+                  ) : (
+                    <HiOutlineEye className="h-4 w-4 text-gray-400 cursor-pointer" />
+                  )
+                }
+              />
+            </div>
 
             <button
               type="submit"
-              disabled={loading}
-              className="w-full py-3 rounded-xl btn-secondary btn-text font-semibold shadow-lg transition-all duration-300"
+              disabled={isLoading}
+              className="w-full py-2.5 rounded-xl btn-secondary btn-text font-semibold shadow-lg transition-all duration-300"
             >
-              {loading ? "Signing Up..." : "Create Account"}
+              {isLoading ? "Signing Up..." : "Create Account"}
             </button>
           </form>
-
           {/* Social login */}
-          <div className="text-center my-4">
-            <span className="text-gray-500">or</span>
+          <div className="text-center my-3">
+            <span className="text-gray-500 text-sm">or</span>
           </div>
-          <div className="flex justify-center space-x-6 mt-[-10px]">
-            {["google", "fb", "github"].map((provider) => (
-              <button
-                key={provider}
-                className="transition-transform duration-200 hover:scale-110"
-              >
-                <Image
-                  src={`/social_media_icon/${provider}.svg`}
-                  alt={`${provider} Icon`}
-                  width={44}
-                  height={44}
-                />
-              </button>
-            ))}
+          <div className="flex justify-center space-x-4">
+            <button
+              onClick={() => signIn("google")}
+              className="transition-transform duration-200 hover:scale-110"
+            >
+              <Image
+                src="/social_media_icon/google.svg"
+                alt="Google Icon"
+                width={36}
+                height={36}
+              />
+            </button>
+            <button
+              onClick={() => signIn("github")}
+              className="transition-transform duration-200 hover:scale-110"
+            >
+              <Image
+                src="/social_media_icon/github.svg"
+                alt="GitHub Icon"
+                width={36}
+                height={36}
+              />
+            </button>
+             <button
+              onClick={() => signIn("facebook")}
+              className="transition-transform duration-200 hover:scale-110"
+            >
+              <Image
+                src="/social_media_icon/fb.svg"
+                alt="GitHub Icon"
+                width={36}
+                height={36}
+              />
+            </button>
           </div>
-
-          <p className="text-center text-gray-500 mt-2 text-sm">
+          <p className="text-center text-gray-500 mt-3 text-sm">
             Already have an account?{" "}
             <Link
               href="/login"

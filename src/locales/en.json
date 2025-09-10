@@ -22,6 +22,7 @@
     "technology": "Our Technology",
     "mentor": "Our Mentors",
     "ourTeam": "Our Team",
+    "getStarted":"Get Started",
 
     "value": "Our Values",
     "values": [
@@ -38,6 +39,22 @@
         "description": "Embracing growth mindset and always striving to improve and evolve."
       }
     ] 
+  },
+  "mentors":{
+    "mentor1": "Srorng Sokcheat",
+    "mentor12":"Sreng Chipor"
+
+  },
+   "teams":{
+    "rotha": "Mom Rotha",
+    "mony":"Pech Rattanakmony",
+    "kukseng":"Phou Kukseng",
+    "channim":"Ey Channim",
+    "dara":"Roeurm Dara",
+    "loemheng":"Ben Loemheng",
+    "polin":"Chaing Polin",
+    "senghong":"Leng Senghong"
+
   },
   "contact": {
     "title": "Contact Us",

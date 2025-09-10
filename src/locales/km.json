@@ -43,22 +43,26 @@
     ]
   },
 
-  "mentors":{
-    "mentor1": "ស្រ៊ង សុខជាតិ",
-    "mentor12":"ស្រេង ជីប៉"
-
+  "mentors": {
+    "mentor1": {
+      "name": "ស្រ៊ង សុខជាតិ",
+      "role": "អ្នកណែនាំផ្នែក Fullstack"
+    },
+    "mentor12": {
+      "name": "ស្រេង ជីប៉",
+      "role": "អ្នកណែនាំផ្នែក Fullstack"
+    }
   },
-   "teams":{
-    "rotha": "មុំ​ រដ្ឋា",
-    "mony":"ប៉ិច រតនៈមុន្នី",
-    "kukseng":"ភូ​ កុកសេង",
-    "channim":"អុី ចាន់នីម",
-    "dara":"រឿម តារា",
-    "loemheng":"ប៊ិន លឹមហេង",
-    "polin":"ចាំង ប៉ូលីន",
-    "senghong":"ឡេង​ សេងហុង"
-
-  },
+  "teams": {
+  "rotha": { "name": "មុំ​ រដ្ឋា", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "mony": { "name": "ប៉ិច រតនៈមុន្នី", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "kukseng": { "name": "ភូ​ កុកសេង", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "channim": { "name": "អុី ចាន់នីម", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "dara": { "name": "រឿម តារា", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "loemheng": { "name": "ប៊ិន លឹមហេង", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "polin": { "name": "ចាំង ប៉ូលីន", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "senghong": { "name": "ឡេង​ សេងហុង", "role": " អ្នកអភិវឌ្ឍ Full Stack" }
+},
 
   "contact": {
     "title": "ទំនាក់ទំនងមកពួកយើង",

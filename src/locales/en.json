@@ -40,22 +40,26 @@
       }
     ] 
   },
-  "mentors":{
-    "mentor1": "Srorng Sokcheat",
-    "mentor12":"Sreng Chipor"
-
+  "mentors": {
+    "mentor1": {
+      "name": "Srorng Sokcheat",
+      "role": "Fullstack Mentor"
+    },
+    "mentor12": {
+      "name": "Sreng Chipor",
+      "role": "Fullstack Mentor"
+    }
   },
-   "teams":{
-    "rotha": "Mom Rotha",
-    "mony":"Pech Rattanakmony",
-    "kukseng":"Phou Kukseng",
-    "channim":"Ey Channim",
-    "dara":"Roeurm Dara",
-    "loemheng":"Ben Loemheng",
-    "polin":"Chaing Polin",
-    "senghong":"Leng Senghong"
-
-  },
+  "teams": {
+  "rotha": { "name": "Mom Rotha", "role": "Full Stack Developer" },
+  "mony": { "name": "Pech Rattanakmony", "role": "Full Stack Developer" },
+  "kukseng": { "name": "Phou Kukseng", "role": "Full Stack Developer" },
+  "channim": { "name": "Ey Channim", "role": "Full Stack Developer" },
+  "dara": { "name": "Roeurm Dara", "role": "Full Stack Developer" },
+  "loemheng": { "name": "Ben Loemheng", "role": "Full Stack Developer" },
+  "polin": { "name": "Chaing Polin", "role": "Full Stack Developer" },
+  "senghong": { "name": "Leng Senghong", "role": "Full Stack Developer" }
+},
   "contact": {
     "title": "Contact Us",
     "firstName": "First Name",

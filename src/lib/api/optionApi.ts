@@ -1,0 +1,86 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+export interface Option {
+  id: string;
+  optionText: string;
+  optionOrder: number;
+  createdAt: string;
+  isCorrected: boolean;
+}
+
+export interface CreateOptionRequest {
+  optionText: string;
+  optionOrder: number;
+  isCorrected: boolean;
+  questionId: string;
+}
+
+export interface UpdateOptionRequest {
+  optionText?: string;
+  optionOrder?: number;
+  isCorrected?: boolean;
+}
+
+export const optionApi = createApi({
+  reducerPath: "optionApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://stackquiz-api.stackquiz.me/api/v1",
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as any).auth?.token;
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      return headers;
+    },
+  }),
+  tagTypes: ["Option"],
+  endpoints: (builder) => ({
+    // Get all 
+    getOptions: builder.query<Option[], void>({
+      query: () => `/options`,
+      providesTags: ["Option"],
+    }),
+
+    //Get options by questionId 
+    getOptionsByQuestion: builder.query<Option[], string>({
+      query: (questionId) => `/options/questions/${questionId}/public`,
+      providesTags: (result, error, questionId) => [{ type: "Option", id: questionId }],
+    }),
+
+    //Add options to a question
+    addOptionsToQuestion: builder.mutation<Option[], { questionId: string; data: CreateOptionRequest[] }>({
+      query: ({ questionId, data }) => ({
+        url: `/options/questions/${questionId}`,
+        method: "POST",
+        body: data,
+      }),
+      invalidatesTags: ["Option"],
+    }),
+
+    //Update an option
+    updateOption: builder.mutation<Option, { optionId: string; data: UpdateOptionRequest }>({
+      query: ({ optionId, data }) => ({
+        url: `/options/${optionId}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { optionId }) => [{ type: "Option", id: optionId }],
+    }),
+
+    //Delete an option
+    deleteOption: builder.mutation<void, string>({
+      query: (optionId) => ({
+        url: `/options/${optionId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, optionId) => [{ type: "Option", id: optionId }],
+    }),
+  }),
+});
+
+export const {
+  useGetOptionsQuery,
+  useGetOptionsByQuestionQuery,
+  useAddOptionsToQuestionMutation,
+  useUpdateOptionMutation,
+  useDeleteOptionMutation,
+} = optionApi;

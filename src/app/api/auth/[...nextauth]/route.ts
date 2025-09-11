@@ -2,6 +2,7 @@ import NextAuth, { DefaultUser } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import FacebookProvider from "next-auth/providers/facebook";
+import { signIn } from "next-auth/react";
 const authOptions = {
   providers: [
     GoogleProvider({
@@ -21,7 +22,7 @@ const authOptions = {
     async signIn({ user }: { user: DefaultUser }) {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/oauth-register`,
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth-register`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -30,14 +31,14 @@ const authOptions = {
               username: user.email?.split("@")[0],
               firstName: user.name?.split(" ")[0],
               lastName: user.name?.split(" ")[1] || "",
+              
             }),
           }
         );
 
         const data = await res.json();
         console.log("OAuth register response:", res.status, data);
-
-        // Only allow login if registration succeeds
+      //  signIn("keycloak");
         return res.ok;
       } catch (err) {
         console.error("OAuth registration failed:", err);

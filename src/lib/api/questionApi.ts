@@ -1,0 +1,105 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
+export interface Question {
+  id: string;
+  text: string;
+  type: "TF" | "MCQ"; 
+  questionOrder: number;
+  timeLimit: number;
+  points: number;
+  imageUrl?: string;
+  quizId?: string;
+}
+
+export interface CreateQuestionRequest {
+  text: string;
+  type: "TF" | "MCQ";
+  timeLimit: number;
+  points: number;
+  imageUrl?: string;
+  quizId: string;
+}
+
+export interface UpdateQuestionRequest {
+  text?: string;
+  type?: "TF" | "MCQ";
+  questionOrder?: number;
+  timeLimit?: number;
+  points?: number;
+  imageUrl?: string;
+}
+
+export const questionApi = createApi({
+  reducerPath: "questionApi",
+  baseQuery: fetchBaseQuery({
+    baseUrl: "https://stackquiz-api.stackquiz.me/api/v1",
+    prepareHeaders: (headers, { getState }) => {
+      const token = (getState() as any).auth?.token;
+      if (token) headers.set("Authorization", `Bearer ${token}`);
+      return headers;
+    },
+  }),
+  tagTypes: ["Question"],
+  endpoints: (builder) => ({
+    //Get all questions
+    getQuestions: builder.query<Question[], void>({
+      query: () => `/questions`,
+      providesTags: ["Question"],
+    }),
+
+    //Get question by ID
+    getQuestionById: builder.query<Question, string>({
+      query: (id) => `/questions/${id}`,
+      providesTags: (result, error, id) => [{ type: "Question", id }],
+    }),
+
+    //Create new question
+    createQuestion: builder.mutation<Question, CreateQuestionRequest>({
+      query: (body) => ({
+        url: `/questions`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Question"],
+    }),
+
+    //Update question (PATCH)
+    updateQuestion: builder.mutation<Question, { id: string; data: UpdateQuestionRequest }>({
+      query: ({ id, data }) => ({
+        url: `/questions/${id}`,
+        method: "PATCH",
+        body: data,
+      }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Question", id }],
+    }),
+
+    //Delete question by ID
+    deleteQuestion: builder.mutation<void, string>({
+      query: (id) => ({
+        url: `/questions/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: (result, error, id) => [{ type: "Question", id }],
+    }),
+
+    //Delete multiple questions (batch)
+    deleteQuestionsBatch: builder.mutation<void, string[]>({
+      query: (ids) => ({
+        url: `/questions`,
+        method: "DELETE",
+        body: ids,
+      }),
+      invalidatesTags: ["Question"],
+    }),
+  }),
+});
+
+export const {
+  useGetQuestionsQuery,
+  useGetQuestionByIdQuery,
+  useCreateQuestionMutation,
+  useUpdateQuestionMutation,
+  useDeleteQuestionMutation,
+  useDeleteQuestionsBatchMutation,
+} = questionApi;

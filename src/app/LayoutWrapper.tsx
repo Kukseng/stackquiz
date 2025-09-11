@@ -26,17 +26,13 @@ const LAYOUT_CONFIG = {
     "/leaderboard",
   ],
   
-  // Alternative: You could also use regex patterns for more complex matching
-  // hiddenPathRegex: [
-  //   /^\/dashboard(\/.*)?$/,
-  //   /^\/leaderboard(\/.*)?$/,
-  // ]
+ 
 };
 
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
-  // Function to check if layout should be hidden
+  // check if layout should be hidden
   const shouldHideLayout = (currentPath: string): boolean => {
     // Check exact paths
     if (LAYOUT_CONFIG.hiddenPaths.includes(currentPath)) {
@@ -48,10 +44,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
       currentPath.startsWith(prefix)
     );
     
-    // Alternative regex approach:
-    // return LAYOUT_CONFIG.hiddenPathRegex?.some(regex => 
-    //   regex.test(currentPath)
-    // ) || false;
+    
   };
 
   const hideLayout = shouldHideLayout(pathname);

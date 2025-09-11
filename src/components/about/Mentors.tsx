@@ -9,18 +9,24 @@ import kh from "@/locales/km.json";
 
 const mentors = [
   {
-    name: "Sreng Chipor",
-    image: "/ourImage/teacherchipor.png",
-    shineColors: ["#3b82f6", "#eab308", "#ec4899"],
-    borderColors: "border-blue-400",
-    socials: { linkedin: "#", github: "#", telegram: "#" },
-  },
-  {
-    name: "Srorng Sokcheat",
+    key: "mentor1",
     image: "/ourImage/teachersokcheat.jpg",
     shineColors: ["#f97316", "#eab308", "#ec4899"],
-    borderColors: "border-orange-400",
-    socials: { linkedin: "#", github: "#", telegram: "#" },
+    socials: {
+      linkedin: "https://www.linkedin.com/in/srorng-sokcheat-09b542341/",
+      github: "https://github.com/Sokcheatsrorng",
+      telegram: "https://t.me/Sokcheat_srorng",
+    },
+  },
+  {
+    key: "mentor12",
+    image: "/ourImage/teacherchipor.png",
+    shineColors: ["#3b82f6", "#eab308", "#ec4899"],
+    socials: {
+      linkedin: "https://www.linkedin.com/in/sreng-chipor-a31346239/",
+      github: "https://github.com/jiporCK",
+      telegram: "https://t.me/jiporsreng",
+    },
   },
 ];
 
@@ -30,163 +36,77 @@ export function MentorsSection() {
 
   return (
     <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 text-white overflow-hidden">
-      {/* Add keyframe animations */}
       <style jsx>{`
         @keyframes colorCycle {
-          0% {
-            border-color: var(--color-0);
-          }
-          33.33% {
-            border-color: var(--color-1);
-          }
-          66.66% {
-            border-color: var(--color-2);
-          }
-          100% {
-            border-color: var(--color-0);
-          }
+          0% { border-color: var(--color-0); }
+          33.33% { border-color: var(--color-1); }
+          66.66% { border-color: var(--color-2); }
+          100% { border-color: var(--color-0); }
         }
+        .animated-border-tr { animation: colorCycle 3s linear infinite; }
+        .animated-border-bl { animation: colorCycle 3s linear infinite 0.5s; }
+        .corner-border-tr, .corner-border-bl { pointer-events: none; }
 
-        .animated-border-tr {
-          animation: colorCycle 3s linear infinite;
-        }
-
-        .animated-border-bl {
-          animation: colorCycle 3s linear infinite 0.5s;
-        }
-
-        /* Responsive border dimensions */
+        /* Responsive sizes */
         @media (max-width: 640px) {
-          .corner-border-tr {
-            width: 180px;
-            height: 360px;
-            top: -1.5rem;
-            right: -0.5rem;
-          }
-
-          .corner-border-bl {
-            width: 180px;
-            height: 360px;
-            bottom: -10rem;
-            left: -0.5rem;
-          }
+          .corner-border-tr { width: 180px; height: 360px; top: -1.5rem; right: -0.5rem; }
+          .corner-border-bl { width: 180px; height: 360px; bottom: -10rem; left: -0.5rem; }
         }
-
         @media (min-width: 641px) and (max-width: 768px) {
-          .corner-border-tr {
-            width: 160px;
-            height: 320px;
-            top: -1.5rem;
-            right: -0.5rem;
-          }
-
-          .corner-border-bl {
-            width: 160px;
-            height: 320px;
-            bottom: -9rem;
-            left: -0.5rem;
-          }
+          .corner-border-tr { width: 160px; height: 320px; top: -1.5rem; right: -0.5rem; }
+          .corner-border-bl { width: 160px; height: 320px; bottom: -9rem; left: -0.5rem; }
         }
-
         @media (min-width: 769px) and (max-width: 1024px) {
-          .corner-border-tr {
-            width: 180px;
-            height: 380px;
-            top: -1.5rem;
-            right: 0;
-          }
-
-          .corner-border-bl {
-            width: 180px;
-            height: 380px;
-            bottom: -10rem;
-            left: 0;
-          }
+          .corner-border-tr { width: 180px; height: 380px; top: -1.5rem; right: 0; }
+          .corner-border-bl { width: 180px; height: 380px; bottom: -10rem; left: 0; }
         }
-
         @media (min-width: 1025px) {
-          .corner-border-tr {
-            width: 220px;
-            height: 460px;
-            top: -1.5rem;
-            right: 0;
-          }
-
-          .corner-border-bl {
-            width: 220px;
-            height: 460px;
-            bottom: -10rem;
-            left: 0;
-          }
+          .corner-border-tr { width: 220px; height: 460px; top: -1.5rem; right: 0; }
+          .corner-border-bl { width: 220px; height: 460px; bottom: -10rem; left: 0; }
         }
       `}</style>
 
-      {/* Section title */}
-      <div className="text-center mb-30">
+      {/* Section Title */}
+      <div className="text-center mb-12 ">
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-          <span className="relative">
-            <span className="text-yellow text-underline">{t.heroAbout.mentor}</span>
-          </span>
+          <span className="text-yellow text-underline">{t.heroAbout.mentor}</span>
         </h2>
       </div>
 
-      {/* Mentor cards */}
-      <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-30 sm:gap-16 md:gap-20 lg:gap-24 px-4 sm:px-6 md:px-8">
+      {/* Mentor Cards */}
+      <div className="max-w-4xl mx-auto py-12 grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 md:gap-20 lg:gap-24 px-4 sm:px-6 md:px-8">
         {mentors.map((mentor, idx) => (
           <motion.div
-            key={idx}
+            key={mentor.key}
             className="relative flex flex-col items-center text-center"
             initial={{ opacity: 0, y: 50 }}
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: "easeOut", delay: idx * 0.2 }}
             viewport={{ once: true, amount: 0.3 }}
-            whileHover={{
-              scale: 1.02,
-              transition: { duration: 0.3 },
-            }}
-            style={
-              {
-                "--color-0": mentor.shineColors[0],
-                "--color-1": mentor.shineColors[1],
-                "--color-2": mentor.shineColors[2],
-              } as React.CSSProperties
-            }
+            whileHover={{ scale: 1.02, transition: { duration: 0.3 } }}
+            style={{
+              "--color-0": mentor.shineColors[0],
+              "--color-1": mentor.shineColors[1],
+              "--color-2": mentor.shineColors[2],
+            } as React.CSSProperties}
           >
-            {/* Frame around image with animated colors */}
-            <div className="relative w-72 h-72 xs:w-80 xs:h-80 sm:w-72 sm:h-72 md:w-80 md:h-80 lg:w-72 lg:h-72 xl:w-80 xl:h-80 flex items-center justify-center">
-              {/* Top-right corner with animated border */}
-              <div
-                className="absolute corner-border-tr border-t-3 sm:border-t-4 md:border-t-5 border-r-3 sm:border-r-4 md:border-r-5 rounded-tr-xl sm:rounded-tr-2xl animated-border-tr"
-                style={{
-                  filter: "drop-shadow(0 0 0px currentColor)",
-                }}
-              />
+            {/* Image with animated border */}
+            <div className="relative w-72 h-72 xs:w-80 xs:h-80 flex items-center justify-center">
+              <div className="absolute corner-border-tr border-t-4 border-r-4 rounded-tr-2xl animated-border-tr" />
+              <div className="absolute corner-border-bl border-b-4 border-l-4 rounded-bl-2xl animated-border-bl" />
 
-              {/* Bottom-left corner with animated border */}
-              <div
-                className="absolute corner-border-bl border-b-3 sm:border-b-4 md:border-b-5 border-l-3 sm:border-l-4 md:border-l-5 rounded-bl-xl sm:rounded-bl-2xl animated-border-bl"
-                style={{
-                  filter: "drop-shadow(0 0 0px currentColor)",
-                }}
-              />
-
-              {/* ShineBorder wrapper */}
-              <div className="relative p-[4px] sm:p-[5px] md:p-[6px] rounded-full overflow-hidden">
-                {/* animated gradient border */}
+              <div className="relative p-[4px] rounded-full overflow-hidden">
                 <motion.div
                   className="absolute inset-0 rounded-full"
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 6, ease: "linear" }}
                 />
-
-                {/* white background to mask inner area */}
-                <div className="relative p-[3px] sm:p-[4px] rounded-full bg-white">
-                  <div className="relative w-64 h-64 xs:w-72 xs:h-72 sm:w-64 sm:h-64 md:w-72 md:h-72 lg:w-64 lg:h-64 xl:w-72 xl:h-72">
+                <div className="relative p-[3px] rounded-full bg-white">
+                  <div className="relative w-64 h-64 xs:w-72 xs:h-72">
                     <Image
                       src={mentor.image}
-                      alt={mentor.name}
+                      alt={t.mentors[mentor.key as keyof typeof t.mentors].name}
                       fill
-                      sizes="(max-width: 640px) 256px, (max-width: 768px) 256px, (max-width: 1024px) 256px, (max-width: 1280px) 256px, 288px"
                       className="rounded-full object-cover"
                     />
                   </div>
@@ -194,63 +114,32 @@ export function MentorsSection() {
               </div>
             </div>
 
-            {/* Name */}
-            <h3 className="mt-8 sm:mt-7 md:mt-8 text-2xl xs:text-3xl sm:text-2xl md:text-3xl lg:text-2xl xl:text-3xl font-semibold px-2">
-              {mentor.name}
-            </h3>
-
-            {/* Social icons */}
-            <div className="flex gap-6 sm:gap-5 md:gap-6 mt-6 sm:mt-5 md:mt-6">
-              <a
-                href={mentor.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-8 h-8 sm:w-7 sm:h-7 md:w-8 md:h-8 hover:scale-110 transition-transform duration-200"
-              >
-                <div className="w-full h-full flex items-center justify-center">
+            {/* Name & Role */}
+            <h3 className="mt-6 text-2xl font-semibold">
+  {t.mentors[mentor.key as keyof typeof t.mentors].name}
+</h3>
+<p className="mt-2 text-gray-300 text-base sm:text-lg">
+  {t.mentors[mentor.key as keyof typeof t.mentors].role}
+</p>
+            {/* Social links */}
+            <div className="flex gap-6 mt-6">
+              {Object.entries(mentor.socials).map(([key, link]) => (
+                <a
+                  key={key}
+                  href={link}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-8 h-8 hover:scale-110 transition-transform flex items-center justify-center"
+                >
                   <Image
-                    src="/social_media_icon/linkedin.svg"
-                    alt="LinkedIn"
-                    width={32}
-                    height={32}
-                    className="object-contain w-full h-full"
+                    src={`/social_media_icon/${key}.svg`}
+                    alt={key}
+                    width={28}
+                    height={28}
+                    className="object-contain"
                   />
-                </div>
-              </a>
-
-              <a
-                href={mentor.socials.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 hover:scale-110 transition-transform duration-200"
-              >
-                <div className="w-full h-full flex items-center justify-center">
-                  <Image
-                    src="/social_media_icon/github.svg"
-                    alt="GitHub"
-                    width={32}
-                    height={32}
-                    className="object-contain w-full h-full"
-                  />
-                </div>
-              </a>
-
-              <a
-                href={mentor.socials.telegram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 hover:scale-110 transition-transform duration-200"
-              >
-                <div className="w-full h-full flex items-center justify-center">
-                  <Image
-                    src="/social_media_icon/telegram.svg"
-                    alt="Instagram"
-                    width={32}
-                    height={32}
-                    className="object-contain w-full h-full"
-                  />
-                </div>
-              </a>
+                </a>
+              ))}
             </div>
           </motion.div>
         ))}

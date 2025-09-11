@@ -3,8 +3,9 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { UserPlus, Menu, X } from "lucide-react";
+import { UserPlus, Menu, X, Star, Heart } from "lucide-react";
 import ReactCountryFlag from "react-country-flag";
+import { useSession } from "next-auth/react";
 import { useLanguage } from "@/context/LanguageContext";
 
 import en from "@/locales/en.json";
@@ -18,6 +19,8 @@ export function Navbar() {
   const { language, toggleLanguage } = useLanguage();
   const t = language === "en" ? en : kh;
 
+  const { data: session } = useSession(); 
+
   const navLinks = [
     { name: t.navbar.home, href: "/" },
     { name: t.navbar.explore, href: "/explore" },
@@ -30,6 +33,35 @@ export function Navbar() {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
+
+
+    //OAuth profile image
+  // const getAvatarUrl = () => {
+  //   const nickname = session?.user?.name || "user";
+  //   return (
+  //     session?.user?.image ||
+  //     `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nickname)}`
+  //   );
+  // };
+
+  // Generate cute avatar for kids
+  const getAvatarUrl = () => {
+    const nickname = session?.user?.name || session?.user?.email || "user";
+    return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nickname)}`;
+  };
+
+  // Get first name or email prefix for display
+  const getDisplayName = () => {
+    const fullName = session?.user?.name;
+    if (fullName) {
+      return fullName.split(' ')[0]; // Get first name only
+    }
+    const email = session?.user?.email;
+    if (email) {
+      return email.split('@')[0]; 
+    }
+    return "Player";
+  };
 
   return (
     <header
@@ -95,23 +127,66 @@ export function Navbar() {
             )}
           </button>
 
-          {/* Signup */}
-          <Link href="/signup">
-            <button className="btn-secondary btn-text flex items-center gap-2 px-6 py-2 box-radius  font-semibold">
-              <UserPlus className="w-4 h-4" /> {t.navbar.signup}
-            </button>
-          </Link>
+          {/* Cute Profile / Signup */}
+          {session ? (
+            <Link href="/profile">
+              <div className="relative group">
+                {/* Cute profile container with animated border */}
+                <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl cursor-pointer hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                  
+                  {/* Avatar with cute border */}
+                  <div className="relative">
+                    <Image
+                      src={getAvatarUrl()}
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-3 border-white shadow-md"
+                    />
+                    {/* Cute sparkle effect */}
+                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-300 rounded-full flex items-center justify-center animate-pulse">
+                      <Star className="w-2.5 h-2.5 text-yellow-600 fill-current" />
+                    </div>
+                  </div>
+                  
+                  {/* Name with cute styling */}
+                  <div className="flex flex-col">
+                    <span className="text-white font-bold text-sm leading-tight">
+                      Hi, {getDisplayName()}! 👋
+                    </span>
+                    <span className="text-white/80 text-xs font-medium">
+                      Ready to play? 🎯
+                    </span>
+                  </div>
+
+                  {/* Cute heart decoration */}
+                  <Heart className="w-4 h-4 text-white/70 fill-current animate-bounce" style={{animationDelay: '0.5s'}} />
+                </div>
+
+                {/* Floating cute elements on hover */}
+                <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="flex gap-1">
+                    <span className="text-lg animate-bounce" style={{animationDelay: '0.1s'}}>⭐</span>
+                    <span className="text-lg animate-bounce" style={{animationDelay: '0.2s'}}>🌟</span>
+                    <span className="text-lg animate-bounce" style={{animationDelay: '0.3s'}}>✨</span>
+                  </div>
+                </div>
+              </div>
+            </Link>
+          ) : (
+            <Link href="/signup">
+              <button className="btn-secondary btn-text flex items-center gap-2 px-6 py-2 box-radius font-semibold">
+                <UserPlus className="w-4 h-4" /> {t.navbar.signup}
+              </button>
+            </Link>
+          )}
 
           {/* Mobile menu toggle */}
           <button
             className="md:hidden text-white ml-2"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            {mobileOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>

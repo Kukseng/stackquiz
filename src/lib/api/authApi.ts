@@ -5,7 +5,7 @@ import { RegisterRequest, RegisterResponse } from "../types/auth";
 export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://stackquiz-api.stackquiz.me/api/v1",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL,
     credentials: "include",
   }),
   endpoints: (builder) => ({

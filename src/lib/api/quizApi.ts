@@ -20,7 +20,7 @@ export interface QuizRequest {
 
 export const quizApi = createApi({
   reducerPath: "quizApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://stackquiz-api.stackquiz.me/api/v1" }),
+  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
   tagTypes: ["Quiz"],
   endpoints: (builder) => ({
     //Get quiz by ID

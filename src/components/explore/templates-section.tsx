@@ -1,5 +1,5 @@
 "use client";
-import { Clock, Search, Filter, Star, Users, BookOpen } from "lucide-react";
+import { Clock, Search,  Star, Users, BookOpen } from "lucide-react";
 import { motion, useAnimation, useInView } from "framer-motion";
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";

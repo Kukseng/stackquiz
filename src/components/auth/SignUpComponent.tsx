@@ -256,8 +256,8 @@ const SignupForm = () => {
               <Image
                 src="/social_media_icon/google.svg"
                 alt="Google Icon"
-                width={36}
-                height={36}
+                width={40}
+                height={40}
               />
             </button>
             <button

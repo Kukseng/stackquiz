@@ -13,7 +13,7 @@ export interface CategoryRequest {
 
 export const categoryApi = createApi({
   reducerPath: "categoryApi",
-  baseQuery: fetchBaseQuery({ baseUrl: "https://stackquiz-api.stackquiz.me/api/v1" }),
+  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
   tagTypes: ["Category"],
   endpoints: (builder) => ({
     //Get all 

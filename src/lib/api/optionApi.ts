@@ -25,7 +25,7 @@ export interface UpdateOptionRequest {
 export const optionApi = createApi({
   reducerPath: "optionApi",
   baseQuery: fetchBaseQuery({
-    baseUrl: "https://stackquiz-api.stackquiz.me/api/v1",
+    baseUrl: process.env.NEXT_PUBLIC_API_URL,
     prepareHeaders: (headers, { getState }) => {
       const token = (getState() as any).auth?.token;
       if (token) headers.set("Authorization", `Bearer ${token}`);

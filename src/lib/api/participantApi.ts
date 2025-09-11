@@ -16,7 +16,7 @@ export interface ParticipantResponse {
 
 export const participantApi = createApi({
   reducerPath: 'participantApi',
-  baseQuery: fetchBaseQuery({ baseUrl:"https://stackquiz-api.stackquiz.me/api/v1"  }),
+  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL  }),
   endpoints: (builder) => ({
     joinQuiz: builder.mutation<ParticipantResponse, JoinQuizRequest>({
       query: (body) => ({

@@ -19,7 +19,7 @@ export function Navbar() {
   const { language, toggleLanguage } = useLanguage();
   const t = language === "en" ? en : kh;
 
-  const { data: session } = useSession(); 
+  const { data: session } = useSession();
 
   const navLinks = [
     { name: t.navbar.home, href: "/" },
@@ -37,18 +37,20 @@ export function Navbar() {
   // Generate cute avatar for kids
   const getAvatarUrl = () => {
     const nickname = session?.user?.name || session?.user?.email || "user";
-    return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nickname)}`;
+    return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(
+      nickname
+    )}`;
   };
 
   // Get first name or email prefix for display
   const getDisplayName = () => {
     const fullName = session?.user?.name;
     if (fullName) {
-      return fullName.split(' ')[0]; // Get first name only
+      return fullName.split(" ")[0]; // Get first name only
     }
     const email = session?.user?.email;
     if (email) {
-      return email.split('@')[0]; // Get part before @
+      return email.split("@")[0]; // Get part before @
     }
     return "Player";
   };
@@ -77,11 +79,11 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`transition-colors ${
+                className={`block text-lg transition-colors ${
                   isActive
                     ? "text-[#FFCC00]"
                     : "text-white hover:text-[#FFCC00] hover:underline"
-                }`}
+                } ${language === "kh" ? "kh-font" : ""}`}
               >
                 {link.name}
               </Link>
@@ -112,7 +114,7 @@ export function Navbar() {
                   svg
                   style={{ width: "1.5em", height: "1.5em" }}
                 />{" "}
-                ខ្មែរ
+                <span className="kh-font">ខ្មែរ</span>
               </>
             )}
           </button>
@@ -123,7 +125,6 @@ export function Navbar() {
               <div className="relative group">
                 {/* Desktop version - full cute profile */}
                 <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl cursor-pointer hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                  
                   {/* Avatar with cute border */}
                   <div className="relative">
                     <Image
@@ -138,7 +139,7 @@ export function Navbar() {
                       <Star className="w-2.5 h-2.5 text-yellow-600 fill-current" />
                     </div>
                   </div>
-                  
+
                   {/* Name with cute styling */}
                   <div className="flex flex-col">
                     <span className="text-white font-bold text-sm leading-tight">
@@ -150,7 +151,10 @@ export function Navbar() {
                   </div>
 
                   {/* Cute heart decoration */}
-                  <Heart className="w-4 h-4 text-white/70 fill-current animate-bounce" style={{animationDelay: '0.5s'}} />
+                  <Heart
+                    className="w-4 h-4 text-white/70 fill-current animate-bounce"
+                    style={{ animationDelay: "0.5s" }}
+                  />
                 </div>
 
                 {/* Mobile version - compact cute profile */}
@@ -173,9 +177,24 @@ export function Navbar() {
                 {/* Floating cute elements on hover - desktop only */}
                 <div className="hidden sm:block absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="flex gap-1">
-                    <span className="text-lg animate-bounce" style={{animationDelay: '0.1s'}}>⭐</span>
-                    <span className="text-lg animate-bounce" style={{animationDelay: '0.2s'}}>🌟</span>
-                    <span className="text-lg animate-bounce" style={{animationDelay: '0.3s'}}>✨</span>
+                    <span
+                      className="text-lg animate-bounce"
+                      style={{ animationDelay: "0.1s" }}
+                    >
+                      ⭐
+                    </span>
+                    <span
+                      className="text-lg animate-bounce"
+                      style={{ animationDelay: "0.2s" }}
+                    >
+                      🌟
+                    </span>
+                    <span
+                      className="text-lg animate-bounce"
+                      style={{ animationDelay: "0.3s" }}
+                    >
+                      ✨
+                    </span>
                   </div>
                 </div>
               </div>
@@ -183,7 +202,12 @@ export function Navbar() {
           ) : (
             <Link href="/signup">
               <button className="btn-secondary btn-text flex items-center gap-2 px-6 py-2 box-radius font-semibold">
-                <UserPlus className="w-4 h-4" /> {t.navbar.signup}
+                <UserPlus className="w-4 h-4" />{" "}
+                {language === "en" ? (
+                  <span>{t.navbar.signup}</span>
+                ) : (
+                  <span className="kh-font">{t.navbar.signup}</span>
+                )}
               </button>
             </Link>
           )}
@@ -193,7 +217,11 @@ export function Navbar() {
             className="md:hidden text-white ml-2"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+            {mobileOpen ? (
+              <X className="w-6 h-6" />
+            ) : (
+              <Menu className="w-6 h-6" />
+            )}
           </button>
         </div>
       </div>
@@ -211,7 +239,7 @@ export function Navbar() {
                   isActive
                     ? "text-[#FFCC00]"
                     : "text-white hover:text-[#FFCC00] hover:underline"
-                }`}
+                } ${language === "kh" ? "kh-font" : ""}`}
                 onClick={() => setMobileOpen(false)}
               >
                 {link.name}

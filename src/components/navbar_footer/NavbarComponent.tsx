@@ -21,7 +21,7 @@ export function Navbar() {
   const navLinks = [
     { name: t.navbar.home, href: "/" },
     { name: t.navbar.explore, href: "/explore" },
-    { name: t.navbar.live, href: "/joinroom" },
+    { name: t.navbar.live, href: "/join-room" },
     { name: t.navbar.about, href: "/about" },
   ];
 

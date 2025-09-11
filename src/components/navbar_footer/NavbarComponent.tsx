@@ -34,16 +34,6 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-
-    //OAuth profile image
-  // const getAvatarUrl = () => {
-  //   const nickname = session?.user?.name || "user";
-  //   return (
-  //     session?.user?.image ||
-  //     `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(nickname)}`
-  //   );
-  // };
-
   // Generate cute avatar for kids
   const getAvatarUrl = () => {
     const nickname = session?.user?.name || session?.user?.email || "user";
@@ -58,7 +48,7 @@ export function Navbar() {
     }
     const email = session?.user?.email;
     if (email) {
-      return email.split('@')[0]; 
+      return email.split('@')[0]; // Get part before @
     }
     return "Player";
   };
@@ -131,8 +121,8 @@ export function Navbar() {
           {session ? (
             <Link href="/profile">
               <div className="relative group">
-                {/* Cute profile container with animated border */}
-                <div className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl cursor-pointer hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
+                {/* Desktop version - full cute profile */}
+                <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl cursor-pointer hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
                   
                   {/* Avatar with cute border */}
                   <div className="relative">
@@ -163,8 +153,25 @@ export function Navbar() {
                   <Heart className="w-4 h-4 text-white/70 fill-current animate-bounce" style={{animationDelay: '0.5s'}} />
                 </div>
 
-                {/* Floating cute elements on hover */}
-                <div className="absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                {/* Mobile version - compact cute profile */}
+                <div className="flex sm:hidden items-center justify-center w-12 h-12 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-full cursor-pointer hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-110 shadow-lg hover:shadow-xl">
+                  <div className="relative">
+                    <Image
+                      src={getAvatarUrl()}
+                      alt="User Avatar"
+                      width={32}
+                      height={32}
+                      className="rounded-full border-2 border-white shadow-md"
+                    />
+                    {/* Small sparkle for mobile */}
+                    <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-300 rounded-full flex items-center justify-center animate-pulse">
+                      <Star className="w-2 h-2 text-yellow-600 fill-current" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Floating cute elements on hover - desktop only */}
+                <div className="hidden sm:block absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <div className="flex gap-1">
                     <span className="text-lg animate-bounce" style={{animationDelay: '0.1s'}}>⭐</span>
                     <span className="text-lg animate-bounce" style={{animationDelay: '0.2s'}}>🌟</span>

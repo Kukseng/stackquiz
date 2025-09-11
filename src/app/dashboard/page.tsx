@@ -10,12 +10,12 @@ const DashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Select category');
 
-  const recentActivities = [
-    { title: 'Web Design', date: '09.04', progress: 100 },
-    { title: 'Web Design', date: '10.04', progress: 100 },
-    { title: 'Web Design', date: '26.04', progress: 100 },
-    { title: 'Web Design', date: '29.04', progress: 100 },
-  ];
+  // const recentActivities = [
+  //   { title: 'Web Design', date: '09.04', progress: 100 },
+  //   { title: 'Web Design', date: '10.04', progress: 100 },
+  //   { title: 'Web Design', date: '26.04', progress: 100 },
+  //   { title: 'Web Design', date: '29.04', progress: 100 },
+  // ];
 
   
 

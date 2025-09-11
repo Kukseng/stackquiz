@@ -6,6 +6,7 @@ export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: fetchBaseQuery({
     baseUrl: "https://stackquiz-api.stackquiz.me/api/v1",
+    credentials: "include",
   }),
   endpoints: (builder) => ({
     register: builder.mutation<RegisterResponse, RegisterRequest>({

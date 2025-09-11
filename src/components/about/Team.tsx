@@ -8,14 +8,86 @@ import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
 
 const teamMembers = [
-  { name: "Mom Rotha", position: "Full Stack Developer", image: "/ourImage/rotha.png", shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
-  { name: "Pech Rattanakmony", position: "Full Stack Developer", image: "/ourImage/mony.jpg", shineColors: ["#fb923c", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
-  { name: "Phou Kukseng", position: "Full Stack Developer", image: "/ourImage/kukseng.jpg", shineColors: ["#4ade80", "#60a5fa", "#a855f7"], socials: { linkedin: "#", github: "#", telegram: "#" } },
-  { name: "Ey Channim", position: "Full Stack Developer", image: "/ourImage/channim.png", shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
-  { name: "Roeurm Dara", position: "Full Stack Developer", image: "/ourImage/dara.jpg", shineColors: ["#c084fc", "#06b6d4", "#10b981"], socials: { linkedin: "#", github: "#", telegram: "#" } },
-  { name: "Ben Leomheng", position: "Full Stack Developer", image: "/kukseng.jpg", shineColors: ["#4ade80", "#60a5fa", "#a855f7"], socials: { linkedin: "#", github: "#", telegram: "#" } },
-  { name: "Chaing Polin", position: "Full Stack Developer", image: "/mony.jpg", shineColors: ["#8b5cf6", "#f59e0b", "#06b6d4"], socials: { linkedin: "#", github: "#", telegram: "#" } },
-  { name: "Leng Senghong", position: "Full Stack Developer", image: "/ourImage/senghong.png", shineColors: ["#14b8a6", "#f97316", "#ec4899"], socials: { linkedin: "#", github: "#", telegram: "#" } },
+  { 
+    id: "rotha",
+    image: "/ourImage/rotha.png", 
+    shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rotha-mom-266a512ba/", 
+      github: "https://github.com/momrotha/", 
+      telegram: "https://t.me/rothamomm" 
+    } 
+  },
+  { 
+    id: "mony",
+    image: "/ourImage/mony.jpg", 
+    shineColors: ["#fb923c", "#fbbf24", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rattanakmony-pech-b12a37335/", 
+      github: "https://github.com/aintantony", 
+      telegram: "https://t.me/aintantony" 
+    } 
+  },
+  { 
+    id: "kukseng",
+    image: "/ourImage/kukseng.jpg", 
+    shineColors: ["#4ade80", "#60a5fa", "#a855f7"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/kukseng-phou-5726b8317/", 
+      github: "https://github.com/Kukseng", 
+      telegram: "https://t.me/Kukseng" 
+    } 
+  },
+  { 
+    id: "channim",
+    image: "/ourImage/channim.png", 
+    shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/ey-channim-b318b8310/", 
+      github: "https://github.com/ChannimEY", 
+      telegram: "https://t.me/Jii_nim1" 
+    } 
+  },
+  { 
+    id: "dara",
+    image: "/ourImage/dara.jpg", 
+    shineColors: ["#c084fc", "#06b6d4", "#10b981"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rouerm-dara-757176346", 
+      github: "https://github.com/Roeurmdara", 
+      telegram: "https://t.me/Roeurmdara" 
+    } 
+  },
+  { 
+    id: "loemheng",
+    image: "/ourImage/heng.jpg", 
+    shineColors: ["#4ade80", "#60a5fa", "#a855f7"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/ben-loemheng-145533326/", 
+      github: "https://github.com/loemheng840", 
+      telegram: "https://t.me/loemheng" 
+    } 
+  },
+  { 
+    id: "polin",
+    image: "/mony.jpg", 
+    shineColors: ["#8b5cf6", "#f59e0b", "#06b6d4"], 
+    socials: { 
+      linkedin: "https://github.com/polinchaing", 
+      github: "https://github.com/polinchaing", 
+      telegram: "https://t.me/Polinchaing" 
+    } 
+  },
+  { 
+    id: "senghong",
+    image: "/ourImage/senghong.png", 
+    shineColors: ["#14b8a6", "#f97316", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rouerm-dara-757176346", 
+      github: "https://github.com/senghong", 
+      telegram: "https://t.me/Lengsenghong" 
+    } 
+  },
 ];
 
 export function TeamsSection() {
@@ -35,6 +107,15 @@ export function TeamsSection() {
 
         .animated-border {
           animation: colorCycle 2s linear infinite;
+        }
+
+        .social-link {
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .social-link:hover {
+          transform: scale(1.2);
+          opacity: 0.8;
         }
       `}</style>
 
@@ -70,7 +151,7 @@ export function TeamsSection() {
               <div className="p-2 rounded-full bg-gradient-to-tr">
                 <Image
                   src={member.image}
-                  alt={member.name}
+                  alt={t.teams[member.id as keyof typeof t.teams]?.name || member.id}
                   width={250}
                   height={250}
                   className="rounded-full object-cover border-3 border-white w-60 h-60"
@@ -79,20 +160,77 @@ export function TeamsSection() {
             </div>
 
             {/* Name & Position */}
-            <h3 className="mt-6 text-xl font-semibold">{member.name}</h3>
-            {member.position && <p className="text-sm sm:text-base text-gray-300">{member.position}</p>}
+            <h3 className="mt-6 text-xl font-semibold">
+              {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
+            </h3>
+            <p className="text-sm sm:text-base text-gray-300">
+              {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
+            </p>
 
             {/* Social Icons */}
-            <div className="flex gap-4 mt-4">
-              <a href={member.socials.linkedin} target="_blank" rel="noopener noreferrer">
-                <Image src="/social_media_icon/linkedin.svg" alt="LinkedIn" width={28} height={28} className="object-contain" />
-              </a>
-              <a href={member.socials.github} target="_blank" rel="noopener noreferrer">
-                <Image src="/social_media_icon/github.svg" alt="GitHub" width={28} height={28} className="object-contain" />
-              </a>
-              <a href={member.socials.telegram} target="_blank" rel="noopener noreferrer">
-                <Image src="/social_media_icon/telegram.svg" alt="Telegram" width={28} height={28} className="object-contain" />
-              </a>
+            <div className="flex gap-4 mt-4 relative z-10">
+              {member.socials.linkedin && member.socials.linkedin !== "#" && (
+                <a 
+                  href={member.socials.linkedin} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="social-link cursor-pointer block relative z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(member.socials.linkedin, '_blank');
+                  }}
+                >
+                  <Image 
+                    src="/social_media_icon/linkedin.svg" 
+                    alt="LinkedIn" 
+                    width={28} 
+                    height={28} 
+                    className="object-contain pointer-events-none" 
+                  />
+                </a>
+              )}
+              
+              {member.socials.github && member.socials.github !== "#" && (
+                <a 
+                  href={member.socials.github} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="social-link cursor-pointer block relative z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(member.socials.github, '_blank');
+                  }}
+                >
+                  <Image 
+                    src="/social_media_icon/github.svg" 
+                    alt="GitHub" 
+                    width={28} 
+                    height={28} 
+                    className="object-contain pointer-events-none" 
+                  />
+                </a>
+              )}
+              
+              {member.socials.telegram && member.socials.telegram !== "#" && (
+                <a 
+                  href={member.socials.telegram} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="social-link cursor-pointer block relative z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(member.socials.telegram, '_blank');
+                  }}
+                >
+                  <Image 
+                    src="/social_media_icon/telegram.svg" 
+                    alt="Telegram" 
+                    width={28} 
+                    height={28} 
+                    className="object-contain pointer-events-none" 
+                  />
+                </a>
+              )}
             </div>
           </motion.div>
         ))}

@@ -19,7 +19,7 @@ export const categoryApi = createApi({
     //Get all 
     getCategories: builder.query<Category[], void>({
       query: () => `/categories`,
-      providesTags: ["Category"],
+      // providesTags: ["Category"],
     }),
 
     //Create 

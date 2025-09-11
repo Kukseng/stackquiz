@@ -1,10 +1,17 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useState } from "react";
 import {
   useGetCategoriesQuery,
   useCreateCategoryMutation,
-} from "@/lib/"; // adjust import path
+} from "@/lib/api/categoryApi"; // adjust import path
 
+
+export interface Category {
+  id: string;
+  name: string;
+  description: string;
+}
 const CategoryTest: React.FC = () => {
   const { data: categories, isLoading, isError } = useGetCategoriesQuery();
   const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
@@ -31,7 +38,7 @@ const CategoryTest: React.FC = () => {
       <h1 className="text-xl font-bold mb-4">Categories</h1>
 
       <ul className="list-disc pl-5 mb-4">
-        {categories?.map((cat) => (
+        {categories?.map((cat:any) => (
           <li key={cat.id}>
             <strong>{cat.name}</strong>: {cat.description}
           </li>

@@ -22,7 +22,7 @@ const authOptions = {
     async signIn({ user }: { user: DefaultUser }) {
       try {
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth-register`,
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth/register`,
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -33,6 +33,7 @@ const authOptions = {
               lastName: user.name?.split(" ")[1] || "",
               
             }),
+              credentials: "include"
           }
         );
 

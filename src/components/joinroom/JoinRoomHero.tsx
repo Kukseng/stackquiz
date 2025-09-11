@@ -164,7 +164,7 @@ export default function JoinRoomHero() {
               >
                 <Image
                   src="/logo-sq.png"
-                  alt="StackQuizz Logo"
+                  alt="StackQuiz Logo"
                   width={80}
                   height={80}
                   className="drop-shadow-2xl"
@@ -190,7 +190,7 @@ export default function JoinRoomHero() {
                   }}
                   transition={{ duration: 2, repeat: Infinity }}
                 >
-                  QUIZZ
+                  QUIZ
                 </motion.span>
               </motion.h1>
             </div>

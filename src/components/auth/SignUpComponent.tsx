@@ -248,7 +248,7 @@ const SignupForm = () => {
           <div className="text-center my-3">
             <span className="text-gray-500 text-sm">or</span>
           </div>
-          <div className="flex justify-center space-x-4">
+          <div className="flex justify-center space-x-2">
             <button
               onClick={() => signIn("google")}
               className="transition-transform duration-200 hover:scale-110"

@@ -34,7 +34,7 @@ export function AboutHero() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-20 sm:pt-36 lg:pt-40">
+    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-20 sm:pt-24 lg:pt-28">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
 
@@ -64,7 +64,7 @@ export function AboutHero() {
             <div className="flex justify-center lg:justify-start">
               <Link href="/signup">
                 <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
-                  Get Started
+                  {t.heroAbout.getStarted}
                 </Button>
               </Link>
             </div>
@@ -75,7 +75,7 @@ export function AboutHero() {
             ref={imgRef}
             initial={{ opacity: 0, x: 50, scale: 0.95 }}
             animate={imgControls}
-            className="order-2 lg:order-1 relative w-full h-64 sm:h-80 md:h-96 flex items-center justify-center mt-8 lg:mt-0"
+            className="order-2 lg:order-1 relative w-full h-64 sm:h-80 md:h-96 flex items-center justify-center mt-8 lg:mt-20"
           >
             <Image
               src="/about_svg/aboutus.svg"

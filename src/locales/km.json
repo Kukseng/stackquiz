@@ -17,13 +17,14 @@
   },
   "heroAbout": {
     "welcome": "សូមស្វាគមន៍មកកាន់",
-    "aboutUs": "អំពីពួកយើង",
+    "aboutUs": "របស់ពួកយើង",
     "weAre": "យើងមានចិត្តចង់បង្កើតបទពិសោធន៍សប្បាយ និងអន្តរកម្ម",
     "quiz": "បទពិសោធន៍ Quiz ដែលនាំមនុស្សមកជាប់គ្នា និងតេស្ត",
     "knowlage": "ចំណេះដឹងដែលជួយឲ្យអ្នករៀន និងចងចាំបានយូរ",
     "technology": "បច្ចេកវិទ្យារបស់យើង",
     "mentor": "អ្នកណែនាំរបស់ពួកយើង",
     "ourTeam": "ក្រុមរបស់ពួកយើង",
+    "getStarted":"ចាប់ផ្តើម",
   
     "value" : "តម្លៃរបស់ពួកយើង",
     "values": [
@@ -41,6 +42,28 @@
       }
     ]
   },
+
+  "mentors": {
+    "mentor1": {
+      "name": "ស្រ៊ង សុខជាតិ",
+      "role": "អ្នកណែនាំផ្នែក Fullstack"
+    },
+    "mentor12": {
+      "name": "ស្រេង ជីប៉",
+      "role": "អ្នកណែនាំផ្នែក Fullstack"
+    }
+  },
+  "teams": {
+  "rotha": { "name": "មុំ​ រដ្ឋា", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "mony": { "name": "ប៉ិច រតនៈមុន្នី", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "kukseng": { "name": "ភូ​ កុកសេង", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "channim": { "name": "អុី ចាន់នីម", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "dara": { "name": "រឿម តារា", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "loemheng": { "name": "ប៊ិន លឹមហេង", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "polin": { "name": "ចាំង ប៉ូលីន", "role": " អ្នកអភិវឌ្ឍ Full Stack" },
+  "senghong": { "name": "ឡេង​ សេងហុង", "role": " អ្នកអភិវឌ្ឍ Full Stack" }
+},
+
   "contact": {
     "title": "ទំនាក់ទំនងមកពួកយើង",
     "firstName": "នាមខ្លួន",

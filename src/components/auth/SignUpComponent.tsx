@@ -102,11 +102,11 @@ const SignupForm = () => {
               <Image
                 src="/logo-sq.png"
                 alt="Signup illustration"
-                width={36}
-                height={36}
+                width={40}
+                height={40}
                 className="object-contain"
               />
-              <span className="font-bold text-yellow text-lg">
+              <span className="font-bold text-yellow-500 text-2xl">
                 <span className="text-blue-950">STACK</span>QUIZ
               </span>
             </Link>
@@ -115,10 +115,10 @@ const SignupForm = () => {
           {/* Hero Image */}
           <div className="mt-8">
             <Image
-              src="/signup.svg"
+              src="/signup.png"
               alt="Signup illustration"
-              width={350}
-              height={350}
+              width={400}
+              height={400}
               className="object-contain"
             />
           </div>

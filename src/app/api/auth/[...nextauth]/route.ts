@@ -1,8 +1,9 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import NextAuth, { DefaultUser } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import FacebookProvider from "next-auth/providers/facebook";
-import { signIn } from "next-auth/react";
+// import { signIn } from "next-auth/react";
 const authOptions = {
   providers: [
     GoogleProvider({
@@ -10,17 +11,21 @@ const authOptions = {
       clientSecret: process.env.GOOGLE_CLIENT_SECRET!,
     }),
     GitHubProvider({
-      clientId: process.env.GITHUB_CLIENT_ID!,
-      clientSecret: process.env.GITHUB_CLIENT_SECRET!,
+      clientId: process.env.GH_CLIENT_ID!,
+      clientSecret: process.env.GH_CLIENT_SECRET!,
     }),
-      FacebookProvider({
-    clientId: process.env.FACEBOOK_CLIENT_ID!,
-    clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-  }),
+    FacebookProvider({
+      clientId: process.env.FACEBOOK_CLIENT_ID!,
+      clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
+    }),
   ],
   callbacks: {
     async signIn({ user }: { user: DefaultUser }) {
       try {
+        const fullName = user.name || user.email?.split("@")[0] || "User";
+        const firstName = fullName.split(" ")[0] || "User";
+        const lastName = fullName.split(" ")[1] || "Anonymous";
+
         const res = await fetch(
           `${process.env.NEXT_PUBLIC_API_URL}/auth/oauth/register`,
           {
@@ -29,17 +34,22 @@ const authOptions = {
             body: JSON.stringify({
               email: user.email,
               username: user.email?.split("@")[0],
-              firstName: user.name?.split(" ")[0],
-              lastName: user.name?.split(" ")[1] || "",
-              
+              firstName,
+              lastName,
             }),
-              credentials: "include"
+            credentials: "include",
           }
         );
 
-        const data = await res.json();
+        
+        let data: any = null;
+        try {
+          data = await res.json();
+        } catch (e) {
+          console.warn("No JSON returned from OAuth register API");
+        }
+
         console.log("OAuth register response:", res.status, data);
-      //  signIn("keycloak");
         return res.ok;
       } catch (err) {
         console.error("OAuth registration failed:", err);

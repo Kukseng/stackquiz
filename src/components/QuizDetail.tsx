@@ -12,8 +12,6 @@ import {
   Settings,
   Share2,
   Download,
-  Bookmark,
-  Star,
   ChevronDown
 } from 'lucide-react';
 

@@ -13,7 +13,7 @@ const mentors = [
     image: "/ourImage/teachersokcheat.jpg",
     shineColors: ["#f97316", "#eab308", "#ec4899"],
     socials: {
-      linkedin: "https://linkedin.com/in/sokcheatsrorng",
+      linkedin: "https://www.linkedin.com/in/srorng-sokcheat-09b542341/",
       github: "https://github.com/Sokcheatsrorng",
       telegram: "https://t.me/Sokcheat_srorng",
     },
@@ -23,7 +23,7 @@ const mentors = [
     image: "/ourImage/teacherchipor.png",
     shineColors: ["#3b82f6", "#eab308", "#ec4899"],
     socials: {
-      linkedin: "https://linkedin.com/in/srengchipor",
+      linkedin: "https://www.linkedin.com/in/sreng-chipor-a31346239/",
       github: "https://github.com/jiporCK",
       telegram: "https://t.me/jiporsreng",
     },
@@ -67,14 +67,14 @@ export function MentorsSection() {
       `}</style>
 
       {/* Section Title */}
-      <div className="text-center mb-12">
+      <div className="text-center mb-12 ">
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
           <span className="text-yellow text-underline">{t.heroAbout.mentor}</span>
         </h2>
       </div>
 
       {/* Mentor Cards */}
-      <div className="max-w-4xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 md:gap-20 lg:gap-24 px-4 sm:px-6 md:px-8">
+      <div className="max-w-4xl mx-auto py-12 grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 md:gap-20 lg:gap-24 px-4 sm:px-6 md:px-8">
         {mentors.map((mentor, idx) => (
           <motion.div
             key={mentor.key}

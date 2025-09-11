@@ -3,10 +3,9 @@
 import { Button } from "@/components/ui/button";
 import { motion, useAnimation, useInView } from "framer-motion";
 import Image from "next/image";
-import { useLanguage } from "@/context/LanguageContext";
 import { useRef, useEffect } from "react";
 import Link from "next/link";
-
+import { useLanguage } from "@/context/LanguageContext";
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
 
@@ -25,11 +24,20 @@ export function AboutHero() {
 
   useEffect(() => {
     if (textInView)
-      textControls.start({ opacity: 1, x: 0, transition: { duration: 0.8, ease: "easeOut" } });
+      textControls.start({
+        opacity: 1,
+        x: 0,
+        transition: { duration: 0.8, ease: "easeOut" },
+      });
     else textControls.start({ opacity: 0, x: -50 });
 
     if (imgInView)
-      imgControls.start({ opacity: 1, x: 0, scale: 1, transition: { duration: 0.8, ease: "easeOut" } });
+      imgControls.start({
+        opacity: 1,
+        x: 0,
+        scale: 1,
+        transition: { duration: 0.8, ease: "easeOut" },
+      });
     else imgControls.start({ opacity: 0, x: 50, scale: 0.95 });
   }, [textInView, imgInView, textControls, imgControls]);
 
@@ -37,13 +45,16 @@ export function AboutHero() {
     <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-20 sm:pt-24 lg:pt-28">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-
           {/* Text Content */}
           <motion.div
             ref={textRef}
             initial={{ opacity: 0, x: -50 }}
             animate={textControls}
-            className="text-center lg:text-left"
+            className={
+              language === "en"
+                ? "en-font text-center lg:text-left"
+                : "kh-font text-center lg:text-left"
+            }
           >
             <h1 className="text-3xl py-7 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
               {t.heroAbout.welcome}
@@ -63,7 +74,11 @@ export function AboutHero() {
 
             <div className="flex justify-center lg:justify-start">
               <Link href="/signup">
-                <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
+                <Button
+                  className={`btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg ${
+                    language === "en" ? "en-font" : "kh-font"
+                  }`}
+                >
                   {t.heroAbout.getStarted}
                 </Button>
               </Link>
@@ -85,7 +100,6 @@ export function AboutHero() {
               className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
             />
           </motion.div>
-
         </div>
       </div>
     </section>

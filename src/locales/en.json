@@ -22,6 +22,7 @@
     "technology": "Our Technology",
     "mentor": "Our Mentors",
     "ourTeam": "Our Team",
+    "getStarted":"Get Started",
 
     "value": "Our Values",
     "values": [
@@ -39,6 +40,26 @@
       }
     ] 
   },
+  "mentors": {
+    "mentor1": {
+      "name": "Srorng Sokcheat",
+      "role": "Fullstack Mentor"
+    },
+    "mentor12": {
+      "name": "Sreng Chipor",
+      "role": "Fullstack Mentor"
+    }
+  },
+  "teams": {
+  "rotha": { "name": "Mom Rotha", "role": "Full Stack Developer" },
+  "mony": { "name": "Pech Rattanakmony", "role": "Full Stack Developer" },
+  "kukseng": { "name": "Phou Kukseng", "role": "Full Stack Developer" },
+  "channim": { "name": "Ey Channim", "role": "Full Stack Developer" },
+  "dara": { "name": "Roeurm Dara", "role": "Full Stack Developer" },
+  "loemheng": { "name": "Ben Loemheng", "role": "Full Stack Developer" },
+  "polin": { "name": "Chaing Polin", "role": "Full Stack Developer" },
+  "senghong": { "name": "Leng Senghong", "role": "Full Stack Developer" }
+},
   "contact": {
     "title": "Contact Us",
     "firstName": "First Name",

@@ -116,8 +116,8 @@ export default function Footer() {
           <div className="flex justify-center md:justify-start space-x-2">
             <Image
               src="/social_media_icon/fb.svg"
-              width={27}
-              height={28}
+              width={28}
+              height={30}
               alt="Facebook"
             />
             <Image
@@ -129,19 +129,19 @@ export default function Footer() {
             <Image
               src="/social_media_icon/telegram.svg"
               width={28}
-              height={34}
+              height={30}
               alt="Telegram"
             />
             <Image
               src="/social_media_icon/ig.svg"
-              width={36}
-              height={36}
+              width={28}
+              height={30}
               alt="Instagram"
             />
             <Image
               src="/social_media_icon/youtube.svg"
-              width={34}
-              height={34}
+              width={28}
+              height={30}
               alt="Youtube"
             />
           </div>

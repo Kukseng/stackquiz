@@ -18,7 +18,7 @@ export default function CreateQuizSection() {
   }, []);
 
   return (
-    <div className="w-full px-2  sm:px-3 md:px-4 lg:px-6">
+    <div className="w-full px-2 py-12  sm:px-3 md:px-4 lg:px-6">
       <div ref={sectionRef} className="max-w-3xl mx-auto">
         {/* Main Container */}
         <div
@@ -30,7 +30,7 @@ export default function CreateQuizSection() {
           `}
         >
           {/* Animated Background Elements */}
-          <div className="absolute inset-0 overflow-hidden">
+          <div className="absolute inset-0 overflow-hidden bg-gradient-to-br from-blue-400/25 to-blue-800/40 backdrop-blur-md rounded-xl p-6 shadow-lg">
             <div className="absolute -top-3 -right-3 w-24 h-24 bg-blue-400 bg-opacity-10 rounded-full blur-lg animate-pulse"></div>
             <div
               className="absolute top-1/2 -left-6 w-20 h-20 bg-blue-600 bg-opacity-20 rounded-full blur-md animate-bounce"

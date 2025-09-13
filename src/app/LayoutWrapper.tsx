@@ -16,6 +16,7 @@ const LAYOUT_CONFIG = {
   // Exact paths where layout should be hidden
   hiddenPaths: [
     "/signup",
+    "/login",
     "/verify-email", 
     "/quizbuilder",
   ],

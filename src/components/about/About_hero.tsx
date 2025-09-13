@@ -12,6 +12,7 @@ import kh from "@/locales/km.json";
 export function AboutHero() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   const textRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
@@ -50,13 +51,9 @@ export function AboutHero() {
             ref={textRef}
             initial={{ opacity: 0, x: -50 }}
             animate={textControls}
-            className={
-              language === "en"
-                ? "en-font text-center lg:text-left"
-                : "kh-font text-center lg:text-left"
-            }
+            className={fontClass}
           >
-            <h1 className="text-3xl py-7 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl py-7 font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
               {t.heroAbout.welcome}
               <br />
               <span className="text-yellow">STACKQUIZ</span>
@@ -64,7 +61,7 @@ export function AboutHero() {
               {t.heroAbout.aboutUs}
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0">
+            <p className="text-lg sm:text-2xl md:text-2xl  text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0">
               {t.heroAbout.weAre}
               <br className="hidden sm:block" />
               {t.heroAbout.quiz}

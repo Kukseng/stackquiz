@@ -1,16 +1,23 @@
 "use client";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 export function StatsSection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en.stats : kh.stats;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
   const stats = [
-    { number: "10K+", label: "Questions", icon: "/icon_hero/quiz_create.svg" },
-    { number: "4K+", label: "Active Players", icon: "/icon_hero/active_play.svg" },
-    { number: "20+", label: "Countries", icon: "/icon_hero/contry.svg" },
+    { number: "10K+", label: t.questions, icon: "/icon_hero/quiz_create.svg" },
+    { number: "4K+", label: t.activePlayers, icon: "/icon_hero/active_play.svg" },
+    { number: "20+", label: t.countries, icon: "/icon_hero/contry.svg" },
   ];
 
   return (
-    <section className="relative w-full py-12 bg-footer  ">
-      <div className="relative max-w-7xl mx-auto  z-10 flex items-center justify-center px-4">
+    <section className={`relative w-full py-12 bg-footer ${fontClass}`}>
+      <div className="relative max-w-7xl mx-auto z-10 flex items-center justify-center px-4">
         <div className="w-full grid md:grid-cols-3 gap-8 text-center">
           {stats.map((stat, index) => (
             <div

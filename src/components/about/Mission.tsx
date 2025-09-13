@@ -8,6 +8,7 @@ import kh from "@/locales/km.json";
 export function MissionSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
     <ContentSection
@@ -16,6 +17,7 @@ export function MissionSection() {
       imageSrc="/about_svg/aboutus(mission).svg"
       imageAlt="Our Mission Illustration"
       reversed={true}
+      className={fontClass} 
     />
   );
 }

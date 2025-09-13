@@ -5,6 +5,9 @@ import Image from "next/image";
 // import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../ui/button";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 type InputAreaProps = {
   value: string;
@@ -33,6 +36,10 @@ export default function InputArea({
 }: InputAreaProps) {
   const [isFocused, setIsFocused] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
+
+  const { language, toggleLanguage } = useLanguage();
+  const t = language === "en" ? en.inputArea : kh.inputArea;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -128,7 +135,7 @@ export default function InputArea({
                 exit={{ opacity: 0, y: 10 }}
                 className="absolute -top-2 left-4 px-2 bg-gradient-to-r from-blue-900 to-purple-900 rounded text-xs font-medium text-yellow-400"
               >
-                Room Code
+                {t.labelname}
               </motion.div>
             )}
           </AnimatePresence>
@@ -188,7 +195,7 @@ export default function InputArea({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}
       >
-        Enter the room code provided by your quiz host
+        {t.hint}
       </motion.p>
     </motion.div>
   );

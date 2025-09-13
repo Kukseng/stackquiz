@@ -69,7 +69,7 @@ export function HeroSection() {
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg">
+            <p className="text-lg sm:text-2xl md:text-2xl text-[var(--cosmic-muted)] mb-8 max-w-lg">
               {t.hero.description}
             </p>
 

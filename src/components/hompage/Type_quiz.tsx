@@ -3,6 +3,9 @@ import React, { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { motion, useAnimation, useInView } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 interface QuizType {
   id: number;
@@ -12,32 +15,13 @@ interface QuizType {
   image: string;
 }
 
-const items: QuizType[] = [
-  {
-    id: 1,
-    title: "Fill the Blank",
-    description: "Complete the sentence with the correct answer.",
-    color: "bg-gradient-to-tr from-blue-500 to-red-400",
-    image: "/type_quiz/fill.svg",
-  },
-  {
-    id: 2,
-    title: "Multiple Choice",
-    description: "Choose the correct answer from several options.",
-    color: "bg-gradient-to-tr from-green-500 to-red-400",
-    image: "/type_quiz/multi.svg",
-  },
-  {
-    id: 3,
-    title: "True/False",
-    description: "Decide if the statement is correct or not.",
-    color: "bg-gradient-to-tr from-purple-500 to-yellow-500",
-    image: "/type_quiz/truefalse.svg",
-  },
-
-];
-
 export function QuizTypeComponent() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
+  const items: QuizType[] = t.quizTypes;
+
   const [active, setActive] = useState(0);
 
   const prev = () =>
@@ -58,48 +42,45 @@ export function QuizTypeComponent() {
   const inView3 = useInView(ref3, { once: false, margin: "-100px" });
 
   useEffect(() => {
-    if (inView1)
+    if (inView1) {
       control1.start({
         opacity: 1,
         y: 0,
         transition: { type: "spring", stiffness: 80, damping: 20 },
       });
-    else control1.start({ opacity: 0, y: 40 });
+    } else {
+      control1.start({ opacity: 0, y: 40 });
+    }
 
-    if (inView2)
+    if (inView2) {
       control2.start({
         opacity: 1,
         y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 80,
-          damping: 20,
-          delay: 0.2,
-        },
+        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.2 },
       });
-    else control2.start({ opacity: 0, y: 40 });
+    } else {
+      control2.start({ opacity: 0, y: 40 });
+    }
 
-    if (inView3)
+    if (inView3) {
       control3.start({
         opacity: 1,
         y: 0,
-        transition: {
-          type: "spring",
-          stiffness: 80,
-          damping: 20,
-          delay: 0.4,
-        },
+        transition: { type: "spring", stiffness: 80, damping: 20, delay: 0.4 },
       });
-    else control3.start({ opacity: 0, y: 40 });
+    } else {
+      control3.start({ opacity: 0, y: 40 });
+    }
   }, [inView1, inView2, inView3, control1, control2, control3]);
 
   return (
-    <section className="px-4 py-12">
+    <section className={`px-4 py-12 ${fontClass}`}>
       {/* Section Title */}
-      <div className="text-center mb-12">
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white relative inline-block">
-          Type <span className="text-yellow-400">Quiz</span>
-          <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
+      <div className="text-center mb-20">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+          <span className="text-yellow text-underline">
+            {language === "en" ? "Quiz Types" : "ប្រភេទកម្រងសំណួរ"}
+          </span>
         </h2>
       </div>
 
@@ -112,7 +93,8 @@ export function QuizTypeComponent() {
             const isLeft = index === (active - 1 + items.length) % items.length;
 
             const ref = index === 0 ? ref1 : index === 1 ? ref2 : ref3;
-            const control = index === 0 ? control1 : index === 1 ? control2 : control3;
+            const control =
+              index === 0 ? control1 : index === 1 ? control2 : control3;
 
             return (
               <motion.div
@@ -155,7 +137,7 @@ export function QuizTypeComponent() {
         {/* Navigation Buttons */}
         <button
           onClick={prev}
-          className="absolute  left-3 sm:left-6 top-1/2 -translate-y-1/2 text-yellow bg-blue-500/30 p-3 rounded-full hover:bg-blue-600/30 transition z-30"
+          className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 text-yellow bg-blue-500/30 p-3 rounded-full hover:bg-blue-600/30 transition z-30"
         >
           <ChevronLeft size={30} />
         </button>

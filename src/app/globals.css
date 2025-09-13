@@ -9,7 +9,7 @@
   font-family: var(--font-kantumruy);
 }
 :root {
-   --font-dm-sans: "DM Sans", sans-serif;
+  --font-dm-sans: "DM Sans", sans-serif;
   --font-kantumruy: "Kantumruy Pro", sans-serif;
   /* Core colors */
   --background: oklch(1 0 0);

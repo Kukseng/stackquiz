@@ -92,10 +92,10 @@ export default function Footer() {
               <FaEnvelope className="text-lg" /> info.stackquiz@gmail.com
             </a>
             <a
-              href="tel:+88596458789"
+              href="tel:+885883062075"
               className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200"
             >
-              <FaPhoneAlt className="text-lg" /> (+885) 96 458 789
+              <FaPhoneAlt className="text-lg" /> (+885) 883 062 075
             </a>
             <a
               href="tel:+88597458789"

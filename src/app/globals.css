@@ -1,8 +1,16 @@
 @import "tailwindcss";
 @import "tw-animate-css";
 
+.en-font {
+  font-family: var(--font-dm-sans);
+}
+
+.kh-font {
+  font-family: var(--font-kantumruy);
+}
 :root {
-  --font-dm-sans: "DM Sans", sans-serif;
+   --font-dm-sans: "DM Sans", sans-serif;
+  --font-kantumruy: "Kantumruy Pro", sans-serif;
   /* Core colors */
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);

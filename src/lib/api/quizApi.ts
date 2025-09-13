@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { baseApi } from "./baseApi";
 export interface Quiz {
   id: string;
   title: string;
@@ -18,10 +18,7 @@ export interface QuizRequest {
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
 }
 
-export const quizApi = createApi({
-  reducerPath: "quizApi",
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
-  tagTypes: ["Quiz"],
+export const quizApi =  baseApi.injectEndpoints({
   endpoints: (builder) => ({
     //Get quiz by ID
     getQuizById: builder.query<Quiz, string>({

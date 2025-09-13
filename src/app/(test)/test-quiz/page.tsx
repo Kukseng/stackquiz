@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import { useGetCategoriesQuery, useCreateCategoryMutation } from "@/lib/api/categoryApi";
 import { useSession, signIn } from "next-auth/react";

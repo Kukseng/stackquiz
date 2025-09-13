@@ -145,58 +145,52 @@
 //     </div>
 //   );
 // }
-'use client'
-import React, { useState } from "react";
-import { useJoinQuizMutation } from "@/lib/api/participantApi";
+"use client";
 
-const JoinQuizForm = () => {
-  const [quizCode, setQuizCode] = useState("");
-  const [nickname, setNickname] = useState("");
-  const [joinQuiz, { data, isLoading, isError }] = useJoinQuizMutation();
+import { useGetCategoriesQuery, useCreateCategoryMutation } from "@/lib/api/categoryApi";
+import { useSession, signIn } from "next-auth/react";
+import { useState } from "react";
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    await joinQuiz({ quizCode, nickname });
+export default function CategoryComponent() {
+  const { data: session, status } = useSession();
+  const isAuthed = status === "authenticated";
+  const accessToken = (session as any)?.apiAccessToken ?? null;
+
+  // only run when authenticated so we don't send a naked request
+  const { data: categories, isLoading } = useGetCategoriesQuery(undefined, {
+    skip: !isAuthed,
+  });
+
+  const [createCategory] = useCreateCategoryMutation();
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+
+  const handleCreate = async () => {
+    if (!isAuthed || !accessToken) {
+      await signIn(); // show login
+      return;
+    }
+    try {
+      await createCategory({ name, description }).unwrap();
+      alert("Category created successfully!");
+      setName(""); setDescription("");
+    } catch (err) {
+      console.error("Failed to create category:", err);
+      alert("Create failed");
+    }
   };
 
+  if (!isAuthed) return <p>Signing in…</p>;
+  if (isLoading) return <p>Loading…</p>;
+
   return (
-    <div className="p-4 mt-30 max-w-md mx-auto">
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          placeholder="Enter Quiz Code"
-          value={quizCode}
-          onChange={(e) => setQuizCode(e.target.value)}
-          className="border p-2 w-full rounded"
-          required
-        />
-        <input
-          type="text"
-          placeholder="Enter Nickname"
-          value={nickname}
-          onChange={(e) => setNickname(e.target.value)}
-          className="border p-2 w-full rounded"
-          required
-        />
-        <button
-          type="submit"
-          disabled={isLoading}
-          className="bg-blue-600 text-white px-4 py-2 rounded"
-        >
-          {isLoading ? "Joining..." : "Join Quiz"}
-        </button>
-      </form>
+    <div>
+      <h1>Categories</h1>
+      <ul>{categories?.map((c) => <li key={c.id}>{c.name}</li>)}</ul>
 
-      {data && (
-        <div className="mt-4 p-3 border rounded bg-green-50">
-           Joined as <strong>{data.nickname}</strong>  
-          in session <strong>{data.sessionName}</strong>
-        </div>
-      )}
-
-      {isError && <p className="text-red-500 mt-2">❌ Failed to join quiz</p>}
+      <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+      <input placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+      <button onClick={handleCreate}>Create Category</button>
     </div>
   );
-};
-
-export default JoinQuizForm;
+}

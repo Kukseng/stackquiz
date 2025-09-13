@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { baseApi } from "./baseApi";
 export interface Option {
   id: string;
   optionText: string;
@@ -22,17 +22,7 @@ export interface UpdateOptionRequest {
   isCorrected?: boolean;
 }
 
-export const optionApi = createApi({
-  reducerPath: "optionApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth?.token;
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
-  tagTypes: ["Option"],
+export const optionApi =  baseApi.injectEndpoints({
   endpoints: (builder) => ({
     // Get all 
     getOptions: builder.query<Option[], void>({

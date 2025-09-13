@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { baseApi } from "./baseApi";
 export interface Question {
   id: string;
   text: string;
@@ -30,17 +30,7 @@ export interface UpdateQuestionRequest {
   imageUrl?: string;
 }
 
-export const questionApi = createApi({
-  reducerPath: "questionApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    prepareHeaders: (headers, { getState }) => {
-      const token = (getState() as any).auth?.token;
-      if (token) headers.set("Authorization", `Bearer ${token}`);
-      return headers;
-    },
-  }),
-  tagTypes: ["Question"],
+export const questionApi =  baseApi.injectEndpoints({
   endpoints: (builder) => ({
     //Get all questions
     getQuestions: builder.query<Question[], void>({

@@ -1,73 +1,46 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
-import React, { useState } from "react";
-import {
-  useGetCategoriesQuery,
-  useCreateCategoryMutation,
-} from "@/lib/api/categoryApi"; // adjust import path
+import { useGetCategoriesQuery, useCreateCategoryMutation } from "@/lib/api/categoryApi";
+import { useSession, signIn } from "next-auth/react";
+import { useState } from "react";
 
+export default function CategoryComponent() {
+  const { data: session, status } = useSession();
+  const isAuthed = status === "authenticated" && !!(session as any)?.apiAccessToken;
 
-export interface Category {
-  id: string;
-  name: string;
-  description: string;
-}
-const CategoryTest: React.FC = () => {
-  const { data: categories, isLoading, isError } = useGetCategoriesQuery();
-  const [createCategory, { isLoading: isCreating }] = useCreateCategoryMutation();
+  const { data: categories, isLoading } = useGetCategoriesQuery(undefined, {
+    skip: !isAuthed,  // don't call until we have a token
+  });
 
+  const [createCategory] = useCreateCategoryMutation();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
 
   const handleCreate = async () => {
-    if (!name) return;
+    if (!isAuthed) {
+      await signIn(); // trigger login if somehow not signed in
+      return;
+    }
     try {
       await createCategory({ name, description }).unwrap();
-      setName("");
-      setDescription("");
-    } catch (err) {
-      console.error("Failed to create category:", err);
+      alert("Created!");
+      setName(""); setDescription("");
+    } catch (e) {
+      console.error("Failed to create category:", e);
+      alert("Create failed");
     }
   };
 
-  if (isLoading) return <p>Loading categories...</p>;
-  if (isError) return <p>Error loading categories</p>;
+  if (!isAuthed) return <p>Signing in…</p>;
+  if (isLoading) return <p>Loading…</p>;
 
   return (
-    <div className="p-6">
-      <h1 className="text-xl font-bold mb-4">Categories</h1>
+    <div>
+      <h1>Categories</h1>
+      <ul>{categories?.map((c) => <li key={c.id}>{c.name}</li>)}</ul>
 
-      <ul className="list-disc pl-5 mb-4">
-        {categories?.map((cat:any) => (
-          <li key={cat.id}>
-            <strong>{cat.name}</strong>: {cat.description}
-          </li>
-        ))}
-      </ul>
-
-      <div className="space-y-2">
-        <input
-          className="border p-2 rounded w-full"
-          placeholder="Category name"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
-        <input
-          className="border p-2 rounded w-full"
-          placeholder="Description (optional)"
-          value={description}
-          onChange={(e) => setDescription(e.target.value)}
-        />
-        <button
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-          onClick={handleCreate}
-          disabled={isCreating}
-        >
-          {isCreating ? "Creating..." : "Add Category"}
-        </button>
-      </div>
+      <input placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+      <input placeholder="Description" value={description} onChange={(e) => setDescription(e.target.value)} />
+      <button onClick={handleCreate}>Create Category</button>
     </div>
   );
-};
-
-export default CategoryTest;
+}

@@ -4,7 +4,9 @@ import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
 export const participantAnswerApi = createApi({
   reducerPath: "participantAnswerApi",
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
+  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL,
+    credentials: "include",
+   }),
   tagTypes: ["Answer"],
   endpoints: (builder) => ({
     updateAnswer: builder.mutation({

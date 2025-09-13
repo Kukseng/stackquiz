@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import Image from "next/image";
-// import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "../ui/button";
 import { useLanguage } from "@/context/LanguageContext";
@@ -37,7 +36,7 @@ export default function InputArea({
   const [isFocused, setIsFocused] = React.useState(false);
   const [hasError, setHasError] = React.useState(false);
 
-  const { language, toggleLanguage } = useLanguage();
+  const { language } = useLanguage();
   const t = language === "en" ? en.inputArea : kh.inputArea;
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
@@ -81,7 +80,7 @@ export default function InputArea({
         transition={{ type: "spring", stiffness: 300, damping: 30 }}
       >
         {/* Input Container */}
-        <div className="relative flex-1">
+        <div className={`relative flex-1 ${fontClass}`}>
           {/* Icon */}
           {iconSrc && (
             <motion.div
@@ -165,7 +164,7 @@ export default function InputArea({
                   animate={{ rotate: 360 }}
                   transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                 />
-                Joining...
+                {t.buttonJoining}
               </div>
             ) : (
               buttonLabel

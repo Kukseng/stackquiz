@@ -4,15 +4,22 @@ import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import FacebookProvider from "next-auth/providers/facebook";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL ??
-  (() => {
-    throw new Error("API_URL or NEXT_PUBLIC_API_URL must be set");
-  })();
+/** Force runtime execution;  */
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
+export const runtime = "nodejs";
 
-async function post(path: string, body: any) {
-  const url = `${API_URL}/${path.replace(/^\/+/, "")}`;
-  console.log("[NextAuth] POST", url);
+function resolveApiBase(): string {
+  const base = process.env.API_URL ?? process.env.NEXT_PUBLIC_API_URL ?? "";
+  if (!base) {
+    throw new Error("API_URL or NEXT_PUBLIC_API_URL must be set");
+  }
+  return base.replace(/\/+$/, "");
+}
+
+async function post(path: string, body: unknown) {
+  const base = resolveApiBase();
+  const url = `${base}/${String(path).replace(/^\/+/, "")}`;
   const res = await fetch(url, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -22,7 +29,6 @@ async function post(path: string, body: any) {
   return res;
 }
 
-// ❌ DON'T export this from a route file
 const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers: [
@@ -34,12 +40,12 @@ const authOptions: NextAuthOptions = {
     GitHubProvider({
       clientId: process.env.GH_CLIENT_ID!,
       clientSecret: process.env.GH_CLIENT_SECRET!,
-      authorization: { params: { scope: "read:user user:email" } },
+      authorization: { params: { scope: "read:user user:email" } }, // GitHub has no openid scope
     }),
     FacebookProvider({
       clientId: process.env.FACEBOOK_CLIENT_ID!,
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET!,
-      authorization: { params: { scope: "public_profile,email" } },
+      authorization: { params: { scope: "public_profile,email" } }, // Facebook has no openid scope
     }),
   ],
   callbacks: {
@@ -61,7 +67,6 @@ const authOptions: NextAuthOptions = {
           (profile as any)?.last_name ??
           (user as any)?.name?.split(" ")?.slice(1).join(" ") ??
           "";
-
         const baseUsername =
           (token as any)?.name ??
           (user as any)?.name ??
@@ -75,29 +80,24 @@ const authOptions: NextAuthOptions = {
             username: baseUsername,
           });
 
-          console.log("[NextAuth] /auth/oauth/register status:", r.status);
-
           if (r.ok) {
             const data = await r.json();
             const payload = (data as any).data ?? data;
-
             (token as any).apiAccessToken = payload.accessToken ?? null;
             (token as any).apiRefreshToken = payload.refreshToken ?? null;
             (token as any).apiAccessTokenExpires =
               Date.now() + ((payload.expiresIn ?? 3600) * 1000);
             (token as any).email = email;
           } else {
-            const errTxt = await r.text().catch(() => "");
-            console.error("[NextAuth] oauth/register failed:", r.status, errTxt);
-            delete (token as any).apiAccessToken;
-            delete (token as any).apiRefreshToken;
-            delete (token as any).apiAccessTokenExpires;
+            // keep OAuth session but drop API token
+            (token as any).apiAccessToken = null;
+            (token as any).apiRefreshToken = null;
+            (token as any).apiAccessTokenExpires = null;
           }
-        } catch (e) {
-          console.error("[NextAuth] oauth/register error:", e);
-          delete (token as any).apiAccessToken;
-          delete (token as any).apiRefreshToken;
-          delete (token as any).apiAccessTokenExpires;
+        } catch {
+          (token as any).apiAccessToken = null;
+          (token as any).apiRefreshToken = null;
+          (token as any).apiAccessTokenExpires = null;
         }
       }
       return token;
@@ -110,6 +110,4 @@ const authOptions: NextAuthOptions = {
 };
 
 const handler = NextAuth(authOptions);
-
-
 export { handler as GET, handler as POST };

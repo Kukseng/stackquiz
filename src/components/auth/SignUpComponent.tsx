@@ -12,6 +12,9 @@ import { FaUser, FaEnvelope, FaKey } from "react-icons/fa";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 import Image from "next/image";
 import { useRegisterMutation } from "@/lib/api/authApi";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 // -------------------- Zod Schema --------------------
 const signupSchema = z
@@ -31,6 +34,10 @@ const signupSchema = z
 type FormData = z.infer<typeof signupSchema>;
 
 const SignupForm = () => {
+  const { language, toggleLanguage } = useLanguage();
+  const t = language === "en" ? en.signup : kh.signup;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
   const [formData, setFormData] = useState<FormData>({
     username: "",
     email: "",
@@ -92,7 +99,9 @@ const SignupForm = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4">
+    <div
+      className={`min-h-screen flex flex-col items-center justify-center p-4 ${fontClass}`}
+    >
       <div className="flex flex-col md:flex-row w-full max-w-6xl rounded-3xl lg:border-8 border-white/70 transition-transform duration-500 shadow-2xl">
         {/* Left Side (desktop only) */}
         <div className="hidden md:flex flex-col items-center justify-center w-1/2 p-6 rounded-l-2xl bg-pink-100 relative overflow-hidden">
@@ -126,6 +135,15 @@ const SignupForm = () => {
 
         {/* Right Side (form) */}
         <div className="flex-1 w-full md:w-1/2 p-4 md:p-6 bg-white rounded-2xl md:rounded-r-2xl md:rounded-l-none">
+          {/* Switch Language */}
+          <div className="flex justify-end mb-3">
+            <button
+              onClick={toggleLanguage}
+              className="px-3 py-1 border rounded-lg text-sm font-semibold hover:bg-gray-200"
+            >
+              {language === "en" ? "EN" : "ខ្មែរ"}
+            </button>
+          </div>
           {/* Mobile logo */}
           <div className="flex justify-center items-center space-x-2 mb-3 md:hidden">
             <Link href="/" className="flex items-center space-x-2">
@@ -136,11 +154,9 @@ const SignupForm = () => {
           </div>
           <div className="text-center md:text-left mb-4">
             <h2 className="text-2xl font-extrabold text-gray-800 mb-1">
-              Sign <span className="text-yellow">Up</span>
+              {t.title} <span className="text-yellow">{t.up}</span>
             </h2>
-            <p className="text-gray-500 text-sm">
-              Create your personal account to get started.
-            </p>
+            <p className="text-gray-500 text-sm">{t.subtitle}</p>
           </div>
           {generalError && (
             <div className="bg-red-100 border border-red-400 text-red-700 px-3 py-2 rounded-xl mb-3 text-center text-sm">
@@ -152,20 +168,20 @@ const SignupForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField
                 id="firstName"
-                label="First Name"
+                label={t.firstName}
                 type="text"
                 value={formData.firstName}
-                placeholder="Doung"
+                placeholder={t.firstName}
                 onChange={handleChange}
                 error={errors.firstName}
                 icon={<FaUser className="text-gray-400 h-4 w-4" />}
               />
               <FormField
                 id="lastName"
-                label="Last Name"
+                label={t.lastName}
                 type="text"
                 value={formData.lastName}
-                placeholder="Dara"
+                placeholder={t.lastName}
                 onChange={handleChange}
                 error={errors.lastName}
                 icon={<FaUser className="text-gray-400 h-4 w-4" />}
@@ -176,20 +192,20 @@ const SignupForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField
                 id="username"
-                label="Username"
+                label={t.username}
                 type="text"
                 value={formData.username}
-                placeholder="doungdara"
+                placeholder={t.username}
                 onChange={handleChange}
                 error={errors.username}
                 icon={<FaUser className="text-gray-400 h-4 w-4" />}
               />
               <FormField
                 id="email"
-                label="Email"
+                label={t.email}
                 type="email"
                 value={formData.email}
-                placeholder="doungdara@gmail.com"
+                placeholder={t.email}
                 onChange={handleChange}
                 error={errors.email}
                 icon={<FaEnvelope className="text-gray-400 h-4 w-4" />}
@@ -200,10 +216,10 @@ const SignupForm = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <FormField
                 id="password"
-                label="Password"
+                label={t.password}
                 type={showPassword ? "text" : "password"}
                 value={formData.password}
-                placeholder="Password"
+                placeholder={t.password}
                 onChange={handleChange}
                 error={errors.password}
                 icon={<FaKey className="text-gray-400 h-4 w-4" />}
@@ -218,10 +234,10 @@ const SignupForm = () => {
               />
               <FormField
                 id="confirmPassword"
-                label="Confirm Password"
+                label={t.confirmPassword}
                 type={showConfirmPassword ? "text" : "password"}
                 value={formData.confirmPassword}
-                placeholder="Confirm Password"
+                placeholder={t.confirmPassword}
                 onChange={handleChange}
                 error={errors.confirmPassword}
                 icon={<FaKey className="text-gray-400 h-4 w-4" />}
@@ -241,12 +257,12 @@ const SignupForm = () => {
               disabled={isLoading}
               className="w-full py-2.5 rounded-xl btn-secondary btn-text font-semibold shadow-lg transition-all duration-300"
             >
-              {isLoading ? "Signing Up..." : "Create Account"}
+              {isLoading ? t.loading : t.createAccount}
             </button>
           </form>
           {/* Social login */}
           <div className="text-center my-3">
-            <span className="text-gray-500 text-sm">or</span>
+            <span className="text-gray-500 text-sm">{t.or}</span>
           </div>
           <div className="flex justify-center space-x-2">
             <button
@@ -271,7 +287,7 @@ const SignupForm = () => {
                 height={36}
               />
             </button>
-             <button
+            <button
               onClick={() => signIn("facebook", { callbackUrl: "/" })}
               className="transition-transform duration-200 hover:scale-110"
             >
@@ -284,12 +300,12 @@ const SignupForm = () => {
             </button>
           </div>
           <p className="text-center text-gray-500 mt-3 text-sm">
-            Already have an account?{" "}
+            {t.already}{" "}
             <Link
               href="/login"
               className="text-indigo-600 font-semibold hover:underline"
             >
-              Login
+              {t.login}
             </Link>
           </p>
         </div>

@@ -8,6 +8,7 @@ import kh from "@/locales/km.json";
 export function VisionSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
     <ContentSection
@@ -16,6 +17,7 @@ export function VisionSection() {
       imageSrc="/about_svg/aboutus(vision).svg"
       imageAlt="Our Vision Illustration"
       reversed={false}
+      className={fontClass} 
     />
   );
 }

@@ -18,6 +18,7 @@ export function Navbar() {
 
   const { language, toggleLanguage } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   const { data: session } = useSession();
 
@@ -57,7 +58,7 @@ export function Navbar() {
 
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 font-bold w-full px-4 py-4 transition-colors duration-300 ${
+      className={`fixed top-0 left-0 right-0 z-50 font-bold w-full px-4 py-4 transition-colors duration-300  ${
         scrolled ? "bg-[#1355b4]/70 backdrop-blur-lg" : "bg-gray-screen-page"
       }`}
     >
@@ -65,14 +66,14 @@ export function Navbar() {
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
           <Image src="/logo-sq.png" width={45} height={45} alt="Logo" />
-          <span className="hidden md:inline text-2xl font-bold">
+          <span className="hidden md:inline text-2xl font-extrabold">
             <span className="text-white">STACK</span>
             <span className="text-yellow">QUIZ</span>
           </span>
         </Link>
 
         {/* Desktop Nav */}
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className={`hidden md:flex items-center gap-8 ${fontClass}`}>
           {navLinks.map((link) => {
             const isActive = pathname === link.href;
             return (
@@ -83,7 +84,7 @@ export function Navbar() {
                   isActive
                     ? "text-[#FFCC00]"
                     : "text-white hover:text-[#FFCC00] hover:underline"
-                } ${language === "kh" ? "kh-font" : ""}`}
+                }`}
               >
                 {link.name}
               </Link>
@@ -114,7 +115,7 @@ export function Navbar() {
                   svg
                   style={{ width: "1.5em", height: "1.5em" }}
                 />{" "}
-                <span className="kh-font">ខ្មែរ</span>
+                <span>ខ្មែរ</span>
               </>
             )}
           </button>
@@ -206,7 +207,7 @@ export function Navbar() {
                 {language === "en" ? (
                   <span>{t.navbar.signup}</span>
                 ) : (
-                  <span className="kh-font">{t.navbar.signup}</span>
+                  <span>{t.navbar.signup}</span>
                 )}
               </button>
             </Link>
@@ -239,7 +240,7 @@ export function Navbar() {
                   isActive
                     ? "text-[#FFCC00]"
                     : "text-white hover:text-[#FFCC00] hover:underline"
-                } ${language === "kh" ? "kh-font" : ""}`}
+                }`}
                 onClick={() => setMobileOpen(false)}
               >
                 {link.name}

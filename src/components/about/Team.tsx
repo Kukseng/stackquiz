@@ -93,9 +93,10 @@ const teamMembers = [
 export function TeamsSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <section className="relative py-20 text-white overflow-hidden">
+    <section className={`relative py-20 text-white overflow-hidden ${fontClass}`}>
       {/* Keyframe Animation */}
       <style jsx>{`
         @keyframes colorCycle {
@@ -122,7 +123,7 @@ export function TeamsSection() {
       {/* Section Title */}
       <div className="text-center mb-20">
         <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
-          <span className="text-yellow-400 underline">{t.heroAbout.ourTeam}</span>
+          <span className="text-yellow text-underline">{t.heroAbout.ourTeam}</span>
         </h2>
       </div>
 

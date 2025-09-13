@@ -6,11 +6,17 @@ import { useRouter } from "next/navigation";
 import { motion} from "framer-motion";
 import InputArea from "@/components/joinroom/InputArea";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 export default function JoinRoomHero() {
   const [code, setCode] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
+   const { language, toggleLanguage } = useLanguage();
+  const t = language === "en" ? en.inputArea : kh.inputArea;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   const onSubmit = async () => {
     const clean = code.trim();
@@ -139,7 +145,7 @@ export default function JoinRoomHero() {
   );
 
   return (
-    <div className="relative min-h-screen overflow-hidden">
+    <div className={`relative min-h-screen overflow-hidden ${fontClass}`}>
       <BackgroundDecorations />
 
       {/* Main Content */}
@@ -201,7 +207,7 @@ export default function JoinRoomHero() {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              Join the ultimate quiz experience
+              {t.join}
             </motion.p>
           </motion.div>
 
@@ -210,10 +216,10 @@ export default function JoinRoomHero() {
             value={code}
             onChange={setCode}
             onSubmit={onSubmit}
-            placeholder="Enter Room Code..."
+            placeholder={t.placeholder}
             iconSrc="/gameButton.svg"
             iconAlt="Room code"
-            buttonLabel="Join Room"
+            buttonLabel={t.label}
             buttonDisabled={!code.trim()}
             isLoading={isLoading}
           />

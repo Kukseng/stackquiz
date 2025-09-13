@@ -195,6 +195,25 @@
     "buttonJoining": "Joining...",
     "placeholder": "Enter Room Code...",
     "join": "Join the ultimate quiz experience"
+  },
+  "discoverQuiz": {
+    "heading": "Create and discover amazing quizzes",
+    "cards": [
+      {
+        "title": "Your StackQuiz",
+        "desc": "Use the StackQuiz creator to build your own quizzes from scratch",
+        "button": "Create your first StackQuiz"
+      },
+      {
+        "title": "Favorite StackQuiz",
+        "desc": "Find your favorite learning resources and save them for later",
+        "button": "Go to Discover"
+      }
+    ]
+  },
+  "hero-ex":{
+    "challenge":"Play game and Challenge with Friends 👑",
+    "play":"Play Now"
   }
 
 }

@@ -4,8 +4,14 @@ import Image from "next/image";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { useRef, useEffect } from "react";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 export default function Banner() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
   const ref = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
   const inView = useInView(ref, { once: false, margin: "-100px" }); // <-- animate every scroll
@@ -42,12 +48,12 @@ export default function Banner() {
       />
 
       {/* Overlay for text box */}
-      <div className="relative z-10 bg-gradient-to-b from-blue-900/60 to-blue-700/60 p-6 md:p-10 rounded-2xl shadow-xl text-center max-w-md">
+      <div className={`relative z-10 bg-gradient-to-b from-blue-900/60 to-blue-700/60 p-6 md:p-10 rounded-2xl shadow-xl text-center max-w-md ${fontClass}`}>
         <h1 className="text-3xl md:text-4xl font-extrabold text-white drop-shadow-lg">
           Stack Quiz!
         </h1>
         <p className="mt-3 text-lg text-gray-200">
-          Play game and Challenge with Friends 👑
+          {t["hero-ex"].challenge}
         </p>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -55,7 +61,7 @@ export default function Banner() {
           className="mt-6  rounded-xl btn-secondary btn-text px-6 py-1 sm:py-1 md:py-2 box-radius text-base sm:text-lg font-semibold shadow-md"
         >
           <Link href="/joinroom" className="flex items-center gap-2">
-          Play Now
+          {t["hero-ex"].play}
           </Link>
         </motion.button>
       </div>

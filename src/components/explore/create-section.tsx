@@ -2,6 +2,9 @@
 import React, { useRef, useEffect } from "react";
 import { Plus, Heart } from "lucide-react";
 import { motion, useAnimation, useInView } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 interface CardType {
   id: number;
@@ -34,7 +37,6 @@ const cards: CardType[] = [
   },
 ];
 
-// Extracted Card Component
 const AnimatedCard: React.FC<{ card: CardType; index: number }> = ({ card, index }) => {
   const ref = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
@@ -95,15 +97,26 @@ const AnimatedCard: React.FC<{ card: CardType; index: number }> = ({ card, index
 };
 
 const CreateDiscoverQuiz: React.FC = () => {
+  const { language } = useLanguage();
+  const t = language === "en" ? en.discoverQuiz : kh.discoverQuiz;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
+  const translatedCards: CardType[] = cards.map((card, index) => ({
+    ...card,
+    title: t.cards[index].title,
+    desc: t.cards[index].desc,
+    buttonText: t.cards[index].button,
+  }));
+
   return (
-    <div className="p-3 sm:p-4 md:p-6 lg:p-8">
+    <div className={`p-3 sm:p-4 md:p-6 lg:p-8 ${fontClass}`}>
       <div className="max-w-7xl mx-auto">
         <h1 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl xl:text-5xl font-bold text-yellow-400 text-center mb-8 sm:mb-12 md:mb-16 px-4 leading-tight">
-          Create and discover amazing quizzes
+          {t.heading}
         </h1>
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-10">
-          {cards.map((card, index) => (
+          {translatedCards.map((card, index) => (
             <AnimatedCard key={card.id} card={card} index={index} />
           ))}
         </div>

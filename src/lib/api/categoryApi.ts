@@ -1,44 +1,21 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+// src/lib/api/categoryApi.ts
+import { baseApi } from "./baseApi";
 
-export interface Category {
-  id: string;
-  name: string;
-  description: string;
-}
+export interface Category { id: string; name: string; description: string; }
+export interface CategoryRequest { name: string; description?: string; }
 
-export interface CategoryRequest {
-  name: string;
-  description?: string;
-}
-
-export const categoryApi = createApi({
-  reducerPath: "categoryApi",
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
-  tagTypes: ["Category"],
+export const categoryApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    //Get all 
     getCategories: builder.query<Category[], void>({
-      query: () => `/categories`,
-      // providesTags: ["Category"],
+      query: () => "/categories",
+      providesTags: ["Category"],
     }),
-
-    //Create 
     createCategory: builder.mutation<Category, CategoryRequest>({
-      query: (body) => ({
-        url: `/categories`,
-        method: "POST",
-        body,
-      }),
+      query: (body) => ({ url: "/categories", method: "POST", body }),
       invalidatesTags: ["Category"],
     }),
-
-    //Create  (batch)
     createCategoriesBatch: builder.mutation<Category[], CategoryRequest[]>({
-      query: (body) => ({
-        url: `/categories/batch`,
-        method: "POST",
-        body,
-      }),
+      query: (body) => ({ url: "/categories/batch", method: "POST", body }),
       invalidatesTags: ["Category"],
     }),
   }),

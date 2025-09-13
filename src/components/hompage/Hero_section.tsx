@@ -48,7 +48,8 @@ export function HeroSection() {
             ref={textRef}
             initial={{ opacity: 0, x: -50 }}
             animate={textControls}
-            className="text-center lg:text-left flex flex-col items-center lg:items-start"
+            className={`text-center lg:text-left flex flex-col items-center lg:items-start 
+              ${ language === "kh" ? "kh-font" : ""}`}
           >
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
               {t.hero.engageWith}

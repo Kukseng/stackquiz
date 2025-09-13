@@ -4,6 +4,14 @@ const nextConfig = {
   images: {
     unoptimized: true,
   },
+  theme: {
+  extend: {
+    fontFamily: {
+      dmsan: ["DM Sans", "sans-serif"],
+      kh: ["Kantumruy Pro", "sans-serif"],
+    },
+  },
+},
 };
 
 module.exports = nextConfig;

@@ -30,13 +30,13 @@ export const optionApi =  baseApi.injectEndpoints({
       providesTags: ["Option"],
     }),
 
-    //Get options by questionId 
+    //Get options 
     getOptionsByQuestion: builder.query<Option[], string>({
       query: (questionId) => `/options/questions/${questionId}/public`,
       providesTags: (result, error, questionId) => [{ type: "Option", id: questionId }],
     }),
 
-    //Add options to a question
+    //Add options
     addOptionsToQuestion: builder.mutation<Option[], { questionId: string; data: CreateOptionRequest[] }>({
       query: ({ questionId, data }) => ({
         url: `/options/questions/${questionId}`,

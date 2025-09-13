@@ -1,4 +1,4 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+
 import { baseApi } from "./baseApi";
 export interface Quiz {
   id: string;

@@ -1,5 +1,7 @@
 "use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 
 export default function Footer() {
@@ -49,14 +51,19 @@ export default function Footer() {
             LINKS
           </h3>
           <nav className="space-y-2">
-            {["Home", "Explore", "Join Room", "About Us"].map((link) => (
-              <a
-                key={link}
-                href="#"
+            {[
+              { name: "Home", href: "/" },
+              { name: "Explore", href: "/explore" },
+              { name: "Join Room", href: "/join-room" },
+              { name: "About Us", href: "/about" },
+            ].map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
                 className="block text-gray-300 hover:text-white transition-colors duration-200"
               >
-                {link}
-              </a>
+                {link.name}
+              </Link>
             ))}
           </nav>
         </div>
@@ -120,6 +127,7 @@ export default function Footer() {
               height={30}
               alt="Facebook"
             />
+
             <Image
               src="/social_media_icon/github.svg"
               width={28}
@@ -132,12 +140,20 @@ export default function Footer() {
               height={30}
               alt="Telegram"
             />
-            <Image
-              src="/social_media_icon/ig.svg"
-              width={28}
-              height={30}
-              alt="Instagram"
-            />
+
+            <Link
+              href="https://www.instagram.com/team.stackquiz/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image
+                src="/social_media_icon/ig.svg"
+                width={28}
+                height={30}
+                alt="Instagram"
+              />
+            </Link>
+
             <Image
               src="/social_media_icon/youtube.svg"
               width={28}

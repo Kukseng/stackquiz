@@ -14,7 +14,7 @@ export default function JoinRoomHero() {
   const [code, setCode] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const router = useRouter();
-   const { language, toggleLanguage } = useLanguage();
+   const { language} = useLanguage();
   const t = language === "en" ? en.inputArea : kh.inputArea;
   const fontClass = language === "en" ? "en-font" : "kh-font";
 

@@ -51,7 +51,7 @@ export function AboutHero() {
             ref={textRef}
             initial={{ opacity: 0, x: -50 }}
             animate={textControls}
-            className={fontClass}
+            className={`${fontClass} text-center lg:text-left`}
           >
             <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl py-7 font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
               {t.heroAbout.welcome}

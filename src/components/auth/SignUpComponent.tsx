@@ -266,7 +266,7 @@ const SignupForm = () => {
           </div>
           <div className="flex justify-center space-x-2">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/" })}
+              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
               className="transition-transform duration-200 hover:scale-110"
             >
               <Image
@@ -277,7 +277,7 @@ const SignupForm = () => {
               />
             </button>
             <button
-              onClick={() => signIn("github", { callbackUrl: "/" })}
+              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
               className="transition-transform duration-200 hover:scale-110"
             >
               <Image
@@ -288,7 +288,7 @@ const SignupForm = () => {
               />
             </button>
             <button
-              onClick={() => signIn("facebook", { callbackUrl: "/" })}
+              onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
               className="transition-transform duration-200 hover:scale-110"
             >
               <Image

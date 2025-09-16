@@ -1,55 +1,46 @@
-import { clsx, ClassValue } from "clsx";
-import { twMerge } from "tailwind-merge";
 
-//  merge class names safely
-export function cn(...inputs: ClassValue[]): string {
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
+// Utility function to merge class names with Tailwind
+export  function cn(...inputs: unknown[]) {
     return twMerge(clsx(inputs));
 }
-
-//  format currency with type-safe options
-export function formatCurrency(
-    amount: number,
-    currency: string = "USD",
-    options: Intl.NumberFormatOptions = {}
-): string {
+// Utility function to format a number with currency
+export  function formatCurrency(amount: number, currency = "USD", options?: Intl.NumberFormatOptions) {
     return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency,
         ...options,
     }).format(amount);
 }
-
-//  unique id generator
-export function generateUniqueId(prefix: string = "id"): string {
+// Utility function to generate a unique ID
+export function generateUniqueId(prefix = "id") {
     return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
 }
-
-//  truncate text safely
-export function truncateText(text: string, maxLength: number): string {
-    if (text.length <= maxLength) return text;
+// Utility function to truncate text
+export function truncateText(text: string, maxLength: number) {
+    if (text.length <= maxLength)
+        return text;
     return text.substring(0, maxLength) + "...";
 }
-
-//  format date with options
+// Utility function to format date
 export function formatDate(
-    date: Date,
-    options: Intl.DateTimeFormatOptions = {}
-): string {
+    date: Date | number | string,
+    options?: Intl.DateTimeFormatOptions
+) {
+    const parsedDate: Date | number =
+        typeof date === "string" ? new Date(date) : date;
     return new Intl.DateTimeFormat("en-US", {
         day: "numeric",
         month: "short",
         year: "numeric",
         ...options,
-    }).format(date);
+    }).format(parsedDate);
 }
-
-//  debounce function
-export function debounce<F extends (...args: unknown[]) => void>(
-    func: F,
-    wait: number
-): (...args: Parameters<F>) => void {
+// Utility function to debounce function calls
+export function debounce<T extends (...args: unknown[]) => void>(func: T, wait: number) {
     let timeout: ReturnType<typeof setTimeout> | null = null;
-    return function (...args: Parameters<F>): void {
+    return function (...args: Parameters<T>) {
         const later = () => {
             timeout = null;
             func(...args);
@@ -60,14 +51,10 @@ export function debounce<F extends (...args: unknown[]) => void>(
         timeout = setTimeout(later, wait);
     };
 }
-
-
-export function throttle<F extends (...args: unknown[]) => void>(
-    func: F,
-    limit: number
-): (...args: Parameters<F>) => void {
+// Utility function to throttle function calls
+export function throttle<T extends (...args: unknown[]) => void>(func: T, limit: number) {
     let inThrottle = false;
-    return function (...args: Parameters<F>): void {
+    return function (...args: Parameters<T>) {
         if (!inThrottle) {
             func(...args);
             inThrottle = true;

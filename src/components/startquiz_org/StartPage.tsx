@@ -1,11 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import Stage from "./Stage";
 import Card from "./Card";
-import { Button } from "@/components/ui/button";
 import CardQuizComponent from "../CardQuizComponent";
+import { Button } from "@/components/ui/button";
+import { startSession } from "@/services/sessionApi";
 
 type CardData = {
   id: number;
@@ -59,6 +61,24 @@ const quizCards: CardData[] = [
 ];
 
 export default function StartPage() {
+  const router = useRouter();
+  const [loading, setLoading] = useState(false);
+
+  async function handleStart(sessionId: string) {
+    setLoading(true);
+    try {
+      const token = localStorage.getItem("authToken") || "";
+      const result = await startSession(sessionId, token);
+      console.log("✅ Session started:", result);
+
+      // Redirect to WaitParticipant page (pass sessionId via query or state)
+      router.push(`/wait-participant?sessionId=${sessionId}`);
+    } catch (err) {
+      console.error("❌ Failed to start session", err);
+      setLoading(false);
+    }
+  }
+
   return (
     <Stage>
       <div className="grid gap-8">
@@ -79,7 +99,8 @@ export default function StartPage() {
               Computer Programming
             </h2>
             <p className="mt-2 text-white/80 text-sm leading-relaxed">
-              Computer programming is writing code to make computers perform tasks or solve problems.
+              Computer programming is writing code to make computers perform
+              tasks or solve problems.
             </p>
 
             <div className="flex items-center gap-3 mt-3">
@@ -97,8 +118,13 @@ export default function StartPage() {
                 <div className="rounded-full border border-amber-300 bg-black/30 px-16 py-2 text-white/85">
                   Computer Science
                 </div>
-                <Button size="sm" className="h-10 font-bold rounded-full px-6 btn-text btn-secondary">
-                  Start
+                <Button
+                  onClick={() => handleStart(q.id.toString())}
+                  disabled={loading}
+                  size="sm"
+                  className="h-10 font-bold rounded-full px-6 btn-text btn-secondary"
+                >
+                  {loading ? "Starting..." : "Start"}
                 </Button>
               </div>
             </div>

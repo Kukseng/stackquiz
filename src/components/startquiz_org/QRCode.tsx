@@ -1,21 +1,34 @@
-import React from "react";
+"use client";
 
-/**
- * Lightweight placeholder QR (no dep). Replace with real QR if you prefer.
- */
-export default function QRCodeBox({
-  text = "stackquiz.com",
-  className = "",
-}: {
-  text?: string;
+import React from "react";
+import QRCode from "react-qr-code";
+
+interface QRCodeBoxProps {
+  joinUrl: string;        // The URL participants use to join
   className?: string;
-}) {
+}
+
+export default function QRCodeBox({ joinUrl, className = "" }: QRCodeBoxProps) {
+  const handleCopy = () => {
+    navigator.clipboard.writeText(joinUrl);
+    alert("✅ Join link copied to clipboard!");
+  };
+
   return (
-    <div
-      className={`rounded-xl bg-white p-3 text-[10px] text-black ${className}`}
-    >
-      <div className="aspect-square w-full rounded-md bg-[radial-gradient(circle,black_20%,white_21%),radial-gradient(circle,black_20%,white_21%)] [background-size:8px_8px,8px_8px] [background-position:0_0,4px_4px]"></div>
-      <div className="pt-2 text-center font-medium">{text}</div>
+    <div className={`rounded-xl bg-white p-3 flex flex-col items-center ${className}`}>
+      {/* QR Code */}
+      <QRCode value={joinUrl} size={160} />
+
+      {/* Join URL + copy button */}
+      <div className="mt-2 w-full flex flex-col items-center">
+        <div className="text-sm text-black font-medium truncate max-w-full">{joinUrl}</div>
+        <button
+          onClick={handleCopy}
+          className="mt-1 px-3 py-1 rounded-full bg-blue-500 text-white text-xs hover:bg-blue-600 transition"
+        >
+          Copy Link
+        </button>
+      </div>
     </div>
   );
 }

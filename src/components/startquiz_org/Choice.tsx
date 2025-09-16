@@ -1,11 +1,10 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Stage from "./Stage";
 import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6";
 import { IoTriangle } from "react-icons/io5";
 
-// Render icon based on name
 const renderIcon = (icon: string) => {
   switch (icon) {
     case "circle":
@@ -26,27 +25,31 @@ interface OptionButtonProps {
   color: string;
   icon: string;
   correct?: boolean;
+  disabled?: boolean;
+  onClick: () => void;
 }
 
-const OptionButton: React.FC<OptionButtonProps> = ({ text, color, icon}) => (
-  <button
-  className={`flex w-full items-center justify-between rounded-2xl px-16 py-6 text-left text-base font-semibold text-white shadow-lg transition`}
-  style={{ backgroundColor: color }}
->
-  {/* Left side: Only Icon */}
-  <div className="flex items-center">
-    {renderIcon(icon)}
-  </div>
+const OptionButton: React.FC<OptionButtonProps> = ({ text, color, icon, correct, disabled, onClick }) => {
+  let bgColor = color;
 
-  {/* Middle: Text */}
-  <div className="flex-1 text-center">
-    <span>{text}</span>
-  </div>
+  if (disabled) {
+    // Highlight correct or incorrect
+    bgColor = correct ? "#06d6a0" : "#555"; // green if correct, gray if wrong
+  }
 
-  {/* Right side (optional something else) */}
-  <div></div>
-</button>
-);
+  return (
+    <button
+      onClick={onClick}
+      disabled={disabled}
+      className="flex w-full items-center justify-between rounded-2xl px-16 py-6 text-left text-base font-semibold text-white shadow-lg transition"
+      style={{ backgroundColor: bgColor }}
+    >
+      <div className="flex items-center">{renderIcon(icon)}</div>
+      <div className="flex-1 text-center">{text}</div>
+      <div></div>
+    </button>
+  );
+};
 
 export default function Choice() {
   const options = [
@@ -55,6 +58,21 @@ export default function Choice() {
     { text: "HybridText Market Language", color: "#118ab2", icon: "square" },
     { text: "Hyperlink Type Make Language", color: "#06d6a0", icon: "diamond" },
   ];
+
+  const [selectedIdx, setSelectedIdx] = useState<number | null>(null);
+  const [showAnswer, setShowAnswer] = useState(false);
+
+  const handleClick = (idx: number) => {
+    if (showAnswer) return; // prevent clicking after answering
+    setSelectedIdx(idx);
+    setShowAnswer(true);
+
+    const selectedOption = options[idx];
+    console.log("User selected:", selectedOption.text);
+
+    // TODO: send answer to WebSocket
+    // sendAnswer(questionId, selectedOption.text);
+  };
 
   return (
     <Stage>
@@ -79,6 +97,8 @@ export default function Choice() {
               color={opt.color}
               icon={opt.icon}
               correct={opt.correct}
+              disabled={showAnswer}
+              onClick={() => handleClick(idx)}
             />
           ))}
         </div>
@@ -88,7 +108,7 @@ export default function Choice() {
           <div className="grid place-content-center rounded-full bg-gradient-to-b from-[#6a5af9] to-[#4735d4] h-16 w-16 text-white text-2xl font-bold">
             5
           </div>
-          <div className="rounded-full bg-white/10 px-3 py-1 text-white/80">Answers 0</div>
+          <div className="rounded-full bg-white/10 px-3 py-1 text-white/80">Answers {showAnswer ? 1 : 0}</div>
         </div>
       </div>
     </Stage>

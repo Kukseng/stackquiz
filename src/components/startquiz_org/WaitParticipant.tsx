@@ -1,96 +1,110 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Stage from "./Stage";
-import { Users, Copy } from "lucide-react";
-import QRCodeBox from "./QRCode";
+import QRCode from "react-qr-code";
+import { Users } from "lucide-react";
+import { createSession, connectWebSocket } from "@/services/QuizSessionService";
 
-export default function WaitParticipant() {
-  const joinUrl = "Join my stackquiz.com";
-  const joinCode = "989 249";
+type Participant = { name: string; emoji: string };
 
-  const participants = [
-    { name: "Dada", emoji: "😄" },
-    { name: "Bobo", emoji: "👩🏻‍🦳" },
-    { name: "Jira", emoji: "👧🏽" },
-    { name: "Titi", emoji: "🧒🏼" },
-  ];
+interface OrganizerSessionProps {
+  quizId: string;
+  hostName: string;
+}
+
+export default function OrganizerSession({ quizId, hostName }: OrganizerSessionProps) {
+  const [sessionCode, setSessionCode] = useState("");
+  const [sessionId, setSessionId] = useState("");
+  const [participants, setParticipants] = useState<Participant[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const token = localStorage.getItem("authToken") || ""; // if required
+
+    async function init() {
+      try {
+        // 1️⃣ Create session
+        const session = await createSession(quizId, hostName, token);
+        console.log("✅ Session created:", session);
+
+        setSessionId(session.id);
+        setSessionCode(session.sessionCode);
+
+        // 2️⃣ Connect WebSocket to listen participants
+        connectWebSocket(session.id, (msg) => {
+          if (msg.type === "PARTICIPANT_JOIN") {
+            setParticipants((prev) => [
+              ...prev,
+              { name: msg.data.name, emoji: "😄" },
+            ]);
+          } else if (msg.type === "PARTICIPANT_LEAVE") {
+            setParticipants((prev) =>
+              prev.filter((p) => p.name !== msg.data.name)
+            );
+          } else {
+            console.log("📩 WS message:", msg);
+          }
+        });
+
+        setLoading(false);
+      } catch (err) {
+        console.error("❌ Session creation error:", err);
+        setLoading(false);
+      }
+    }
+
+    init();
+  }, [quizId, hostName]);
+
+  const joinUrl = `${window.location.origin}/join?sessionId=${sessionId}`;
 
   return (
     <Stage>
       <div className="mx-auto max-w-[780px]">
-        {/* Tray */}
+        {/* QR + Join Info */}
         <div className="relative flex items-stretch gap-6 rounded-[16px] bg-[#5b6fb6]/35 p-6 ring-1 ring-white/10">
-          {/* Left: black instruction card */}
+          {/* Left: join info */}
           <div className="flex-[3] rounded-[16px] bg-[#0f0f0f] px-6 py-6 shadow flex flex-col justify-center">
-            {/* row 1 */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="grid h-10 w-10 place-content-center rounded-full bg-[#6b4a4a] text-white text-base font-semibold">
-                  1
-                </span>
-                <span className="text-white/90 text-lg leading-tight">
-                  Join using
-                  <br className="hidden md:block" /> any device
-                </span>
-              </div>
-              <button
-                title="Copy URL"
-                className="inline-flex items-center gap-2 text-white"
-              >
-                <span className="hidden sm:inline font-semibold">
-                  {joinUrl}
-                </span>
-                <Copy size={18} className="opacity-75 hover:opacity-100" />
-              </button>
+            <div className="text-white text-lg mb-3">
+              Session Code: <b>{sessionCode || "Generating..."}</b>
             </div>
-
-            {/* divider */}
-            <hr className="my-5 border-white/30" />
-
-            {/* row 2 */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <span className="grid h-10 w-10 place-content-center rounded-full bg-[#6b4a4a] text-white text-base font-semibold">
-                  2
-                </span>
-                <span className="text-white/90 text-lg leading-tight">
-                  Enter the
-                  <br className="hidden md:block" /> join code
-                </span>
-              </div>
-              <button
-                title="Copy join code"
-                className="inline-flex items-center gap-3"
-              >
-                <span className="rounded-md bg-black/40 px-4 py-1.5 text-2xl font-extrabold tracking-widest text-white">
-                  {joinCode}
-                </span>
-                <Copy size={18} className="text-white/75 hover:text-white" />
-              </button>
-            </div>
+            <div className="text-white/80 mb-2">Participants:</div>
+            {participants.length > 0 ? (
+              participants.map((p, i) => (
+                <div key={i} className="text-white flex items-center gap-2">
+                  <span>{p.emoji}</span>
+                  <span>{p.name}</span>
+                </div>
+              ))
+            ) : (
+              <div className="text-white/60">No participants yet</div>
+            )}
           </div>
 
-          {/* Right: QR block */}
-          <div className="flex-[1.2] rounded-[16px]  flex flex-col items-center justify-center">
+          {/* Right: QR code */}
+          <div className="flex-[1.2] flex flex-col items-center justify-center">
             <div className="rounded-2xl bg-white p-3">
-              <QRCodeBox className="h-40 w-40" />
+              {sessionCode && <QRCode value={joinUrl} size={160} />}
             </div>
             <div className="mt-3 text-sm text-white/90">Scan to join</div>
           </div>
         </div>
 
-        {/* Footer: Start + counter */}
+        {/* Footer: participant count */}
         <div className="mt-6 flex items-center">
-          <button className="rounded-full px-6 py-2 text-sm font-bold text-white shadow btn-text btn-secondary hover:opacity-90 transition">
-            START
-          </button>
-
           <div className="ml-auto inline-flex items-center gap-2 rounded-full bg-black/45 px-3 py-1.5 text-white/90 text-sm">
             <Users size={16} />
             <span>{participants.length}</span>
           </div>
         </div>
+
+        {/* Loading overlay */}
+        {loading && (
+          <div className="absolute inset-0 flex items-center justify-center bg-black/50 text-white text-xl font-bold rounded-xl">
+            Creating Session...
+          </div>
+        )}
       </div>
     </Stage>
   );

@@ -94,10 +94,10 @@ export default function StartPage() {
             <div className="mt-7">
               <div className="text-sm text-white/85 mb-2">Content</div>
               <div className="flex items-center gap-3">
-                <div className="rounded-full border border-amber-300 bg-black/30 px-4 py-2 text-white/85">
+                <div className="rounded-full border border-amber-300 bg-black/30 px-16 py-2 text-white/85">
                   Computer Science
                 </div>
-                <Button size="sm" className="h-10 rounded-full px-6 bg-white/10 text-white hover:bg-white/20">
+                <Button size="sm" className="h-10 font-bold rounded-full px-6 btn-text btn-secondary">
                   Start
                 </Button>
               </div>

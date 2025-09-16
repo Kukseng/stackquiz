@@ -1,19 +1,36 @@
 "use client";
 import React from "react";
 import Image from "next/image";
+import { useLanguage } from "@/context/LanguageContext";
+
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 import {
   SlidingLogoMarquee,
   SlidingLogoMarqueeItem,
 } from "../ui/SlidingLogoMarquee";
 
+const SECTION_SPACING = {
+  sectionGap: "py-16 sm:py-20 lg:py-24 xl:py-28",
+  containerPadding: "px-4 sm:px-6 lg:px-8 xl:px-10",
+  contentGap: "space-y-8 sm:space-y-12 lg:space-y-16",
+  titleMargin: "mb-12 sm:mb-16 lg:mb-20",
+  gridGap: "gap-8 sm:gap-12 lg:gap-16 xl:gap-20",
+  cardGap: "gap-6 sm:gap-8 lg:gap-12",
+};
+
 export function TechnologySection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
   const technologies = [
-    { name: "Redis", image: "/Redis.png" },
-    { name: "PostgreSQL", image: "/postgres.webp" },
-    { name: "Spring Boot", image: "/Springboot.png" },
-    { name: "docker", image: "/docker.webp" },
-    { name: "Next.js", image: "/nextjs.png" },
-    { name: "Blender", image: "/Blender.png" },
+    { name: "Redis", image: "/technology/redis.png" },
+    { name: "PostgreSQL", image: "/technology/postgres.webp" },
+    { name: "Spring Boot", image: "/technology/spring.png" },
+    { name: "Docker", image: "/technology/docker.webp" },
+    { name: "Next.js", image: "/technology/next.png" },
+    { name: "Blender", image: "/technology/blender.png" },
   ];
 
   const marqueeItems: SlidingLogoMarqueeItem[] = technologies.map(
@@ -21,7 +38,7 @@ export function TechnologySection() {
       id: index.toString(),
       content: (
         <div
-          className="w-50 h-25  mx-3 p-3 
+          className="w-50 h-25 mx-3 p-3 
                      backdrop-blur-xl rounded-xl 
                      flex items-center justify-center 
                      transition-all duration-300 cursor-pointer 
@@ -41,25 +58,19 @@ export function TechnologySection() {
   );
 
   return (
-    <section className="container mx-auto px-6 lg:px-10 lg:py-12">
-      {/* Header with improved spacing */}
-      <div className="text-center mb-30">
-  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-    <span className="relative">
-      Our{" "}
-      <span className="text-yellow">
-        Technology
-      </span>
-      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-    </span>
-  </h2>
-</div>
+    <section className={`${SECTION_SPACING.containerPadding} ${SECTION_SPACING.sectionGap} ${fontClass}`}>
+      {/* Header */}
+      <div className={`text-center ${SECTION_SPACING.titleMargin}`}>
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+          <span className="relative">
+            <span className="text-yellow text-underline">{t.heroAbout.technology}</span>
+          </span>
+        </h2>
+      </div>
 
-      {/* Glass Background Wrapper with better spacing */}
-      <div className="relative max-w-7xl  mx-auto">
-        <div className="rounded-2xl md:bg-gradient-to-br from-white/10 to-white/5 
-                        backdrop-blur-xl 
-                        md:shadow-2xl shadow-black/20 ">
+      {/* Glass Background Wrapper */}
+      <div className="relative max-w-7xl mx-auto">
+        <div className="rounded-2xl bg-gradient-to-br from-purple-100/40 to-blue-400/50 shadow-2xl shadow-black/10">
           <SlidingLogoMarquee
             items={marqueeItems}
             speed={25}
@@ -75,11 +86,7 @@ export function TechnologySection() {
             className="w-full"
           />
         </div>
-        
-      
       </div>
     </section>
   );
 }
-
-export default TechnologySection;

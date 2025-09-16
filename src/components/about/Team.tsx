@@ -2,118 +2,133 @@
 
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/context/LanguageContext";
+
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 const teamMembers = [
-  {
-    name: "Mom Rotha",
-    position: "Full Stack Developer",
-    image: "/teacherchipor.png",
-    frameColor: "from-blue-400 to-yellow-400",
-    shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], // blue-400, yellow-400, pink-400
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "rotha",
+    image: "/ourImage/rotha.png", 
+    shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rotha-mom-266a512ba/", 
+      github: "https://github.com/momrotha/", 
+      telegram: "https://t.me/rothamomm" 
+    } 
   },
-  {
-    name: "Pech Rattanakmony",
-    position: "Full Stack Developer",
-    image: "/mony.jpg",
-    frameColor: "from-orange-400 to-pink-400",
-    shineColors: ["#fb923c", "#fbbf24", "#ec4899"], // orange-400, yellow-400, pink-400
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "mony",
+    image: "/ourImage/mony.jpg", 
+    shineColors: ["#fb923c", "#fbbf24", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rattanakmony-pech-b12a37335/", 
+      github: "https://github.com/aintantony", 
+      telegram: "https://t.me/aintantony" 
+    } 
   },
-  {
-    name: "Phou Kukseng",
-    position: "Full Stack Developer",
-    image: "/kukseng.jpg",
-    frameColor: "from-green-400 to-blue-400",
-    shineColors: ["#4ade80", "#60a5fa", "#a855f7"], // green-400, blue-400, purple-500
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "kukseng",
+    image: "/ourImage/kukseng.jpg", 
+    shineColors: ["#4ade80", "#60a5fa", "#a855f7"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/kukseng-phou-5726b8317/", 
+      github: "https://github.com/Kukseng", 
+      telegram: "https://t.me/Kukseng" 
+    } 
   },
-  {
-    name: "Ey Channim",
-    position: "Full Stack Developer",
-    image: "/member4.jpg",
-    frameColor: "from-purple-400 to-pink-400",
-    shineColors: ["#c084fc", "#ec4899", "#f59e0b"], // purple-400, pink-400, amber-500
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "channim",
+    image: "/ourImage/channim.png", 
+    shineColors: ["#60a5fa", "#fbbf24", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/ey-channim-b318b8310/", 
+      github: "https://github.com/ChannimEY", 
+      telegram: "https://t.me/Jii_nim1" 
+    } 
   },
-  {
-    name: "Roeurm Dara",
-    position: "Full Stack Developer",
-    image: "/dara.jpg",
-    frameColor: "from-purple-400 to-pink-400",
-    shineColors: ["#c084fc", "#06b6d4", "#10b981"], // purple-400, cyan-500, emerald-500
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "dara",
+    image: "/ourImage/dara.jpg", 
+    shineColors: ["#c084fc", "#06b6d4", "#10b981"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rouerm-dara-757176346", 
+      github: "https://github.com/Roeurmdara", 
+      telegram: "https://t.me/Roeurmdara" 
+    } 
   },
-  {
-    name: "Ben Leomheng",
-    position: "Full Stack Developer",
-    image: "/member4.jpg",
-    frameColor: "from-purple-400 to-pink-400",
-    shineColors: ["#f97316", "#eab308", "#ef4444"],
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "loemheng",
+    image: "/ourImage/heng.jpg", 
+    shineColors: ["#4ade80", "#60a5fa", "#a855f7"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/ben-loemheng-145533326/", 
+      github: "https://github.com/loemheng840", 
+      telegram: "https://t.me/loemheng" 
+    } 
   },
-  {
-    name: "Chaing Polin",
-    position: "Full Stack Developer",
-    image: "/member4.jpg",
-    frameColor: "from-purple-400 to-pink-400",
-    shineColors: ["#8b5cf6", "#06b6d4", "#f59e0b"],
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "polin",
+    image: "/mony.jpg", 
+    shineColors: ["#8b5cf6", "#f59e0b", "#06b6d4"], 
+    socials: { 
+      linkedin: "https://github.com/polinchaing", 
+      github: "https://github.com/polinchaing", 
+      telegram: "https://t.me/Polinchaing" 
+    } 
   },
-  {
-    name: "Leng Senghong",
-    position: "Full Stack Developer",
-    image: "/member4.jpg",
-    frameColor: "from-purple-400 to-pink-400",
-    shineColors: ["#14b8a6", "#f97316", "#ec4899"],
-    socials: { linkedin: "#", github: "#", instagram: "#" },
+  { 
+    id: "senghong",
+    image: "/ourImage/senghong.png", 
+    shineColors: ["#14b8a6", "#f97316", "#ec4899"], 
+    socials: { 
+      linkedin: "https://www.linkedin.com/in/rouerm-dara-757176346", 
+      github: "https://github.com/senghong", 
+      telegram: "https://t.me/Lengsenghong" 
+    } 
   },
 ];
 
 export function TeamsSection() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
   return (
-    <section className="relative py-20 text-white overflow-hidden">
-      {/* Add keyframe animations */}
+    <section className={`relative py-20 text-white overflow-hidden ${fontClass}`}>
+      {/* Keyframe Animation */}
       <style jsx>{`
         @keyframes colorCycle {
-          0% {
-            border-color: var(--color-0);
-          }
-          33.33% {
-            border-color: var(--color-1);
-          }
-          66.66% {
-            border-color: var(--color-2);
-          }
-          100% {
-            border-color: var(--color-0);
-          }
+          0%   { border-color: var(--color-0); }
+          33%  { border-color: var(--color-1); }
+          66%  { border-color: var(--color-2); }
+          100% { border-color: var(--color-0); }
         }
 
-        .animated-border-tr {
-          animation: colorCycle 1.5s linear infinite; /* faster speed */
+        .animated-border {
+          animation: colorCycle 2s linear infinite;
         }
 
-        .animated-border-bl {
-          animation: colorCycle 1.5s linear infinite 0.25s; /* faster speed, offset */
+        .social-link {
+          transition: transform 0.2s ease, opacity 0.2s ease;
+        }
+
+        .social-link:hover {
+          transform: scale(1.2);
+          opacity: 0.8;
         }
       `}</style>
 
-      {/* Section title */}
-      <div className="text-center mb-30">
-  <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
-    <span className="relative">
-      Our{" "}
-      <span className="text-yellow">
-        Team
-      </span>
-      <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-    </span>
-  </h2>
-</div>
+      {/* Section Title */}
+      <div className="text-center mb-20">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+          <span className="text-yellow text-underline">{t.heroAbout.ourTeam}</span>
+        </h2>
+      </div>
 
-      {/* Team member cards */}
-      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-x-35 gap-y-30">
+      {/* Team Grid */}
+      <div className="max-w-7xl mx-auto grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-14">
         {teamMembers.map((member, idx) => (
           <motion.div
             key={idx}
@@ -122,100 +137,101 @@ export function TeamsSection() {
             whileInView={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: idx * 0.2 }}
             viewport={{ once: true, amount: 0.3 }}
-            whileHover={{
-              scale: 1.05,
-              transition: { duration: 0.3 },
-            }}
-            style={
-              {
-                "--color-0": teamMembers[idx].shineColors[0],
-                "--color-1": teamMembers[idx].shineColors[1],
-                "--color-2": teamMembers[idx].shineColors[2],
-              } as React.CSSProperties
-            }
+            whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
+            style={{
+              "--color-0": member.shineColors[0],
+              "--color-1": member.shineColors[1],
+              "--color-2": member.shineColors[2],
+            } as React.CSSProperties}
           >
-            {/* Frame around image with animated colors */}
-            <div className="relative w-72 h-72 flex items-center justify-center">
-              {/* Top-right animated border */}
-              <div
-                className="absolute -top-6 right-0 w-56 h-[420px] border-t-5 border-r-5 rounded-tr-2xl animated-border-tr"
-                style={{}}
-              />
+            {/* Image Frame */}
+            <div className="relative w-64 h-64 flex items-center justify-center">
+              <div className="absolute -top-4 right-0 w-56 h-[300px] border-t-4 border-r-4 rounded-tr-2xl animated-border" />
+              <div className="absolute -bottom-32 left-0 w-56 h-[300px] border-b-4 border-l-4 rounded-bl-2xl animated-border" />
 
-              {/* Bottom-left animated border */}
-              <div
-                className="absolute -bottom-40 left-0 w-56 h-[420px] border-b-5 border-l-5 rounded-bl-2xl animated-border-bl"
-                style={{}}
-              />
-
-              <div className="p-4 rounded-full bg-gradient-to-tr ">
+              <div className="p-2 rounded-full bg-gradient-to-tr">
                 <Image
                   src={member.image}
-                  alt={member.name}
-                  width={288}
-                  height={288}
-                  className="rounded-full object-cover border-4 w-64 h-64 border-white"
+                  alt={t.teams[member.id as keyof typeof t.teams]?.name || member.id}
+                  width={250}
+                  height={250}
+                  className="rounded-full object-cover border-3 border-white w-60 h-60"
                 />
               </div>
             </div>
 
-            <h3 className="mt-8 text-xl font-semibold">{member.name}</h3>
-            {member.position && (
-              <p className="text-sm sm:text-base text-gray-300">
-                {member.position}
-              </p>
-            )}
+            {/* Name & Position */}
+            <h3 className="mt-6 text-xl font-semibold">
+              {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
+            </h3>
+            <p className="text-sm sm:text-base text-gray-300">
+              {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
+            </p>
 
-            {/* Social icons */}
-            <div className="flex gap-6 mt-4 text-2xl">
-              <a
-                href={member.socials.linkedin}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-8 h-8"
-              >
-                <div className="w-full h-full overflow-hidden flex items-center justify-center">
-                  <Image
-                    src="/linkedin.png"
-                    alt="LinkedIn"
-                    width={30}
-                    height={30}
-                    className="object-contain"
+            {/* Social Icons */}
+            <div className="flex gap-4 mt-4 relative z-10">
+              {member.socials.linkedin && member.socials.linkedin !== "#" && (
+                <a 
+                  href={member.socials.linkedin} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="social-link cursor-pointer block relative z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(member.socials.linkedin, '_blank');
+                  }}
+                >
+                  <Image 
+                    src="/social_media_icon/linkedin.svg" 
+                    alt="LinkedIn" 
+                    width={28} 
+                    height={28} 
+                    className="object-contain pointer-events-none" 
                   />
-                </div>
-              </a>
-              <a
-                href={member.socials.github}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-8 h-8"
-              >
-                <div className="w-full h-full overflow-hidden flex items-center justify-center">
-                  <Image
-                    src="/github.png"
-                    alt="GitHub"
-                    width={30}
-                    height={30}
-                    className="object-contain"
+                </a>
+              )}
+              
+              {member.socials.github && member.socials.github !== "#" && (
+                <a 
+                  href={member.socials.github} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="social-link cursor-pointer block relative z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(member.socials.github, '_blank');
+                  }}
+                >
+                  <Image 
+                    src="/social_media_icon/github.svg" 
+                    alt="GitHub" 
+                    width={28} 
+                    height={28} 
+                    className="object-contain pointer-events-none" 
                   />
-                </div>
-              </a>
-              <a
-                href={member.socials.instagram}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block w-8 h-8"
-              >
-                <div className="w-full h-full overflow-hidden flex items-center justify-center">
-                  <Image
-                    src="/instagram.png"
-                    alt="Instagram"
-                    width={30}
-                    height={30}
-                    className="object-contain"
+                </a>
+              )}
+              
+              {member.socials.telegram && member.socials.telegram !== "#" && (
+                <a 
+                  href={member.socials.telegram} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="social-link cursor-pointer block relative z-10"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    window.open(member.socials.telegram, '_blank');
+                  }}
+                >
+                  <Image 
+                    src="/social_media_icon/telegram.svg" 
+                    alt="Telegram" 
+                    width={28} 
+                    height={28} 
+                    className="object-contain pointer-events-none" 
                   />
-                </div>
-              </a>
+                </a>
+              )}
             </div>
           </motion.div>
         ))}

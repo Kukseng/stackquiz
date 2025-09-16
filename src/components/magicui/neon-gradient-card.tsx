@@ -1,12 +1,10 @@
-"use client";
-
 import {
   CSSProperties,
-  ReactElement,
   ReactNode,
   useEffect,
   useRef,
   useState,
+  HTMLAttributes,
 } from "react";
 
 import { cn } from "/lib/utils";
@@ -16,67 +14,39 @@ interface NeonColorsProps {
   secondColor: string;
 }
 
-interface NeonGradientCardProps {
-  /**
-   * @default <div />
-   * @type ReactElement
-   * @description
-   * The component to be rendered as the card
-   * */
-  as?: ReactElement;
+interface NeonGradientCardProps extends HTMLAttributes<HTMLDivElement> {
   /**
    * @default ""
-   * @type string
-   * @description
-   * The className of the card
-   */
-  className?: string;
-
-  /**
-   * @default ""
-   * @type ReactNode
-   * @description
    * The children of the card
-   * */
+   */
   children?: ReactNode;
 
   /**
-   * @default 5
-   * @type number
-   * @description
-   * The size of the border in pixels
-   * */
+   * @default 2
+   * Border size in pixels
+   */
   borderSize?: number;
 
   /**
    * @default 20
-   * @type number
-   * @description
-   * The size of the radius in pixels
-   * */
+   * Border radius in pixels
+   */
   borderRadius?: number;
 
   /**
-   * @default "{ firstColor: '#ff00aa', secondColor: '#00FFF1' }"
-   * @type string
-   * @description
-   * The colors of the neon gradient
-   * */
+   * Neon gradient colors
+   */
   neonColors?: NeonColorsProps;
 
   [key: string]: unknown;
 }
-
 export const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
   className,
   children,
   borderSize = 2,
   borderRadius = 20,
-  neonColors = {
-    firstColor: "#ff00aa",
-    secondColor: "#00FFF1",
-  },
-  ...props
+  neonColors = { firstColor: "#ff00aa", secondColor: "#00FFF1" },
+  ...props // now type-safe, can include any div props
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -88,13 +58,9 @@ export const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
         setDimensions({ width: offsetWidth, height: offsetHeight });
       }
     };
-
     updateDimensions();
     window.addEventListener("resize", updateDimensions);
-
-    return () => {
-      window.removeEventListener("resize", updateDimensions);
-    };
+    return () => window.removeEventListener("resize", updateDimensions);
   }, []);
 
   useEffect(() => {
@@ -126,7 +92,7 @@ export const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
         "relative z-10 size-full rounded-[var(--border-radius)]",
         className
       )}
-      {...props}
+      {...props} // safely forwards all div props
     >
       <div
         className={cn(

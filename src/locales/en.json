@@ -214,7 +214,22 @@
   "hero-ex":{
     "challenge":"Play game and Challenge with Friends 👑",
     "play":"Play Now"
+  },
+  "quiz-instructions": {
+    "hostTemplate": "How to Host a Template",
+    "hostDesc": "Share your quiz in just two quick steps.",
+    "step1Title": "Select Your Template",
+    "step1Desc": "Choose from saved templates or our website's collection.",
+    "step2Title": "Host or Assign",
+    "step2Desc": "Host it instantly or schedule as an assignment.",
+    "playQuiz": "How to Play",
+    "playDesc": "Begin your quiz adventure in two easy steps.",
+    "playStep1Title": "Choose Your Adventure",
+    "playStep1Desc": "Pick a quiz template that interests you.",
+    "playStep2Title": "Start Playing",
+    "playStep2Desc": "Enter your name and begin playing."
   }
+
 
 }
 

@@ -93,7 +93,7 @@ export function Navbar() {
         </nav>
 
         {/* Actions + Mobile Menu Button */}
-        <div className="flex items-center gap-4">
+        <div className={`flex items-center gap-4 ${fontClass}`}>
           {/* Language toggle */}
           <button
             onClick={toggleLanguage}

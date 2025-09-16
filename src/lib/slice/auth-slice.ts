@@ -61,7 +61,7 @@ const authSlice = createSlice({
       state.user = user
       state.token = token
       state.isAuthenticated = true
-
+ 
       if (typeof window !== "undefined") {
         try {
           localStorage.setItem("auth_token", token)

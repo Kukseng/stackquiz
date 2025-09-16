@@ -11,40 +11,37 @@ type ContentSectionProps = {
   reversed?: boolean;
 };
 
-const fadeInUp: Variants = {
-  hidden: { opacity: 0, y: 50 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
+// Animations
+const fadeInDownRight: Variants = {
+  hidden: { opacity: 0, x: -50, y: -50 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
 };
 
-const fadeInLeft: Variants = {
-  hidden: { opacity: 0, x: -50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
+const fadeInDownLeft: Variants = {
+  hidden: { opacity: 0, x: 50, y: -50 },
+  visible: {
+    opacity: 1,
+    x: 0,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
 };
 
-const fadeInRight: Variants = {
-  hidden: { opacity: 0, x: 50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
-};
-
-export function ContentSection({ 
-  title, 
-  description, 
-  imageSrc, 
-  imageAlt, 
-  reversed = false 
+export function ContentSection({
+  title,
+  description,
+  imageSrc,
+  imageAlt,
+  reversed = false,
 }: ContentSectionProps) {
+  const textVariant = reversed ? fadeInDownRight : fadeInDownLeft;
+  const imageVariant = reversed ? fadeInDownLeft : fadeInDownRight;
+
   return (
     <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 py-20">
       <div className="max-w-7xl mx-auto">
@@ -55,15 +52,16 @@ export function ContentSection({
         >
           {/* Text Section */}
           <motion.div
-            variants={reversed ? fadeInLeft : fadeInRight}
+            variants={textVariant}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ margin: "-100px" }} // remove once:true
             className="flex-1 text-center lg:text-left"
           >
             <motion.h2
               className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-8"
-              variants={fadeInUp}
+              variants={textVariant}
+              transition={{ duration: 0.6 }}
             >
               <span className="text-yellow-400 relative">
                 {title}
@@ -72,14 +70,14 @@ export function ContentSection({
                   initial={{ width: 0 }}
                   whileInView={{ width: "100%" }}
                   transition={{ delay: 0.5, duration: 0.8 }}
-                  viewport={{ once: true }}
+                  viewport={{ margin: "-100px" }}
                 />
               </span>
             </motion.h2>
             <motion.p
               className="text-gray-300 text-lg sm:text-xl md:text-2xl leading-relaxed"
-              variants={fadeInUp}
-              transition={{ delay: 0.2 }}
+              variants={textVariant}
+              transition={{ delay: 0.2, duration: 0.6 }}
             >
               {description}
             </motion.p>
@@ -87,10 +85,10 @@ export function ContentSection({
 
           {/* Image Section */}
           <motion.div
-            variants={reversed ? fadeInRight : fadeInLeft}
+            variants={imageVariant}
             initial="hidden"
             whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
+            viewport={{ margin: "-100px" }} // remove once:true
             className="flex-1 w-full max-w-md lg:max-w-lg mx-auto"
           >
             <motion.div

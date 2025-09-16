@@ -132,10 +132,10 @@ export function TeamsSection() {
           <motion.div
             key={idx}
             className="relative flex flex-col items-center text-center"
-            initial={{ opacity: 0, y: 50 }}
-            whileInView={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, x: idx % 2 === 0 ? 100 : -100, scale: 0.8 }} // zoom + left/right
+            whileInView={{ opacity: 1, x: 0, scale: 1 }}
             transition={{ duration: 0.6, ease: "easeOut", delay: idx * 0.2 }}
-            viewport={{ once: true, amount: 0.3 }}
+            viewport={{ once: false, amount: 0.3 }} // ✅ animate every time in view
             whileHover={{ scale: 1.05, transition: { duration: 0.3 } }}
             style={{
               "--color-0": member.shineColors[0],
@@ -164,73 +164,28 @@ export function TeamsSection() {
               {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
             </h3>
             <p className="text-sm sm:text-base text-gray-300">
-              {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
+              {t.teams[member.id as keyof typeof t.teams]?.role || member.id}
             </p>
 
             {/* Social Icons */}
             <div className="flex gap-4 mt-4 relative z-10">
-              {member.socials.linkedin && member.socials.linkedin !== "#" && (
-                <a 
-                  href={member.socials.linkedin} 
-                  target="_blank" 
+              {Object.entries(member.socials).map(([key, link]) => (
+                <a
+                  key={key}
+                  href={link}
+                  target="_blank"
                   rel="noopener noreferrer"
                   className="social-link cursor-pointer block relative z-10"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.open(member.socials.linkedin, '_blank');
-                  }}
                 >
-                  <Image 
-                    src="/social_media_icon/linkedin.svg" 
-                    alt="LinkedIn" 
-                    width={28} 
-                    height={28} 
-                    className="object-contain pointer-events-none" 
+                  <Image
+                    src={`/social_media_icon/${key}.svg`}
+                    alt={key}
+                    width={28}
+                    height={28}
+                    className="object-contain pointer-events-none"
                   />
                 </a>
-              )}
-              
-              {member.socials.github && member.socials.github !== "#" && (
-                <a 
-                  href={member.socials.github} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="social-link cursor-pointer block relative z-10"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.open(member.socials.github, '_blank');
-                  }}
-                >
-                  <Image 
-                    src="/social_media_icon/github.svg" 
-                    alt="GitHub" 
-                    width={28} 
-                    height={28} 
-                    className="object-contain pointer-events-none" 
-                  />
-                </a>
-              )}
-              
-              {member.socials.telegram && member.socials.telegram !== "#" && (
-                <a 
-                  href={member.socials.telegram} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="social-link cursor-pointer block relative z-10"
-                  onClick={(e) => {
-                    e.preventDefault();
-                    window.open(member.socials.telegram, '_blank');
-                  }}
-                >
-                  <Image 
-                    src="/social_media_icon/telegram.svg" 
-                    alt="Telegram" 
-                    width={28} 
-                    height={28} 
-                    className="object-contain pointer-events-none" 
-                  />
-                </a>
-              )}
+              ))}
             </div>
           </motion.div>
         ))}

@@ -14,16 +14,16 @@ interface LayoutWrapperProps {
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
-  // hide layout for signup and quiz-builder pages
-  const hiddenLayouts = ["/signup", "/dashboard","/dashboard/library", "/dashboard/report", "/dashboard/activity", "/dashboard/profile"];
-  const hideLayout = hiddenLayouts.includes(pathname || "");
+  // pages where layout should be visible
+  const showLayouts = ["/", "/explore", "/joinroom", "/about"];
+  const showLayout = showLayouts.includes(pathname || "");
 
   return (
     <>
-      {!hideLayout && <Navbar />}
-      <ParticlesBackground />
+      {showLayout && <Navbar />}
+      {showLayout && <ParticlesBackground />}
       <StoreProvider>{children}</StoreProvider>
-      {!hideLayout && <Footer />}
+      {showLayout && <Footer />}
     </>
   );
 }

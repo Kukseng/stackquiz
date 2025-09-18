@@ -9,50 +9,42 @@ type ContentSectionProps = {
   imageSrc: string;
   imageAlt: string;
   reversed?: boolean;
+  className?: string; 
+  children?: React.ReactNode;
 };
 
+// Animation variants
 const fadeInUp: Variants = {
   hidden: { opacity: 0, y: 50 },
-  visible: { 
-    opacity: 1, 
-    y: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
+  visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const fadeInLeft: Variants = {
   hidden: { opacity: 0, x: -50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
 const fadeInRight: Variants = {
   hidden: { opacity: 0, x: 50 },
-  visible: { 
-    opacity: 1, 
-    x: 0, 
-    transition: { duration: 0.6, ease: "easeOut" } 
-  }
+  visible: { opacity: 1, x: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
-export function ContentSection({ 
-  title, 
-  description, 
-  imageSrc, 
-  imageAlt, 
-  reversed = false 
+export function ContentSection({
+  title,
+  description,
+  imageSrc,
+  imageAlt,
+  reversed = false,
+  className = "",
+  children,
 }: ContentSectionProps) {
   return (
-    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 py-20">
+    <section className={`px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 py-20 ${className}`}>
       <div className="max-w-7xl mx-auto">
         <div
           className={`flex flex-col ${
             reversed ? "lg:flex-row" : "lg:flex-row-reverse"
-          } items-center gap-16 lg:gap-28`}
-        >
+          } items-center gap-16 lg:gap-28`}>
           {/* Text Section */}
           <motion.div
             variants={reversed ? fadeInLeft : fadeInRight}
@@ -107,7 +99,11 @@ export function ContentSection({
             </motion.div>
           </motion.div>
         </div>
+
+        {/* Render any children (like your marquee) */}
+        {children}
       </div>
     </section>
   );
 }
+

@@ -40,7 +40,7 @@ export function HeroSection() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-6 sm:pt-16 lg:pt-20">
+    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-12 sm:pt-16 lg:pt-20">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Text Content */}
@@ -48,9 +48,10 @@ export function HeroSection() {
             ref={textRef}
             initial={{ opacity: 0, x: -50 }}
             animate={textControls}
-            className="text-center lg:text-left"
+            className={`text-center lg:text-left flex flex-col items-center lg:items-start 
+              ${ language === "kh" ? "kh-font" : ""}`}
           >
-            <h1 className="text-3xl py-7 sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-[var(--cosmic-text)] mb-6 leading-tight">
               {t.hero.engageWith}
               <br />
               {t.hero.organizer}
@@ -68,14 +69,18 @@ export function HeroSection() {
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8 max-w-lg mx-auto lg:mx-0">
+            <p className="text-lg sm:text-2xl md:text-2xl text-[var(--cosmic-muted)] mb-8 max-w-lg">
               {t.hero.description}
             </p>
-            <Link href="/signup" className="flex items-center gap-2">
-            <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
-              {t.hero.getStarted}
-            </Button>
-            </Link>
+
+            {/* Button */}
+            <div className="w-full flex justify-center lg:justify-start">
+              <Link href="/signup">
+                <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
+                  {t.hero.getStarted}
+                </Button>
+              </Link>
+            </div>
           </motion.div>
 
           {/* Image */}
@@ -98,5 +103,3 @@ export function HeroSection() {
     </section>
   );
 }
-
-

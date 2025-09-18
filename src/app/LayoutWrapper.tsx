@@ -15,7 +15,7 @@ export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
   // pages where layout should be visible
-  const showLayouts = ["/", "/explore", "/joinroom", "/about"];
+  const showLayouts = ["/", "/explore", "/join-room", "/about"];
   const showLayout = showLayouts.includes(pathname || "");
 
   return (

@@ -137,7 +137,7 @@ const QuizResultsDashboard = () => {
 
         {/* Table Rows */}
         <div className="divide-y divide-gray-200">
-          {questions.map((question, index) => (
+          {questions.map((question) => (
             <div key={question.id} className="py-4">
               <div className="md:grid md:grid-cols-3 md:gap-4 md:items-center">
                 <div className="mb-2 md:mb-0">

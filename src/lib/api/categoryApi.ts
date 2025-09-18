@@ -1,26 +1,29 @@
-// src/lib/api/categoryApi.ts
-import { baseApi } from "./baseApi";
 
-export interface Category { id: string; name: string; description: string; }
-export interface CategoryRequest { name: string; description?: string; }
+import { baseApi } from "./baseApi";
+import { CategoryRequest, CategoryResponse } from "./types/common";
 
 export const categoryApi = baseApi.injectEndpoints({
-  endpoints: (builder) => ({
-    getCategories: builder.query<Category[], void>({
-      query: () => "/categories",
-      providesTags: ["Category"],
+  endpoints: (b) => ({
+    getCategories: b.query<CategoryResponse[], void>({
+      query: () => "categories",
+      providesTags: (res) =>
+        res
+          ? [
+              ...res.map((c) => ({ type: "Category" as const, id: c.id })),
+              { type: "Category" as const, id: "LIST" },
+            ]
+          : [{ type: "Category" as const, id: "LIST" }],
     }),
-    createCategory: builder.mutation<Category, CategoryRequest>({
-      query: (body) => ({ url: "/categories", method: "POST", body }),
-      invalidatesTags: ["Category"],
+    createCategory: b.mutation<CategoryResponse, CategoryRequest>({
+      query: (body) => ({ url: "categories", method: "POST", body }),
+      invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
-    createCategoriesBatch: builder.mutation<Category[], CategoryRequest[]>({
-      query: (body) => ({ url: "/categories/batch", method: "POST", body }),
-      invalidatesTags: ["Category"],
+    createCategoriesBatch: b.mutation<CategoryResponse[], CategoryRequest[]>({
+      query: (body) => ({ url: "categories/batch", method: "POST", body }),
+      invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
   }),
 });
-
 export const {
   useGetCategoriesQuery,
   useCreateCategoryMutation,

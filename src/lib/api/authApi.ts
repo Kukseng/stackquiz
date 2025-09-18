@@ -1,21 +1,31 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-import { RegisterRequest, RegisterResponse } from "../types/auth";
+import { RegisterRequest, RegisterResponse, LoginResponse, LoginRequest } from "./types/auth";
+import { baseApi } from "./baseApi";
 
-export const authApi = createApi({
-  reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL, 
-    credentials: "include", 
-  }),
+// Define Login types
+
+
+export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
+    // Register
     register: builder.mutation<RegisterResponse, RegisterRequest>({
       query: (body) => ({
-        url: "auth/register", 
+        url: "auth/register",
         method: "POST",
         body,
       }),
+      invalidatesTags: ["Auth"],
+    }),
+
+    // Login
+    login: builder.mutation<LoginResponse, LoginRequest>({
+      query: (body) => ({
+        url: "auth/login",
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["Auth"],
     }),
   }),
 });
 
-export const { useRegisterMutation } = authApi;
+export const { useRegisterMutation, useLoginMutation } = authApi;

@@ -143,7 +143,7 @@ StackQuiz leverages cutting-edge technologies for optimal performance, security,
 
 • 🏠 **Home Page:** Platform overview and introduction  
 • 🔍 **Explore:** [https://app.stackquiz.me/explore](https://app.stackquiz.me/explore) - Discover public quizzes  
-• 🎮 **Live Quiz:** [https://app.stackquiz.me/joinroom](https://app.stackquiz.me/joinroom) - Join active quiz sessions  
+• 🎮 **Live Quiz:** [https://app.stackquiz.me/join-room](https://app.stackquiz.me/join-room) - Join active quiz sessions  
 • ℹ️ **About Us:** [https://app.stackquiz.me/about](https://app.stackquiz.me/about) - Learn about our mission  
 • 🔑 **Login:** [https://app.stackquiz.me/login](https://app.stackquiz.me/login) - User authentication  
 • 📝 **Register:** [https://app.stackquiz.me/signup](https://app.stackquiz.me/signup) - Create new account  

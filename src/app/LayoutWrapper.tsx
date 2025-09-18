@@ -11,25 +11,6 @@ interface LayoutWrapperProps {
   children: ReactNode;
 }
 
-// Configuration for layout visibility
-const LAYOUT_CONFIG = {
-  // Exact paths where layout should be hidden
-  hiddenPaths: [
-    "/signup",
-    "/login",
-    "/verify-email", 
-    "/quizbuilder",
-  ],
-  
-  // Path prefixes that should hide layout (matches all subroutes)
-  hiddenPathPrefixes: [
-    "/dashboard",
-    "/leaderboard",
-  ],
-  
- 
-};
-
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 

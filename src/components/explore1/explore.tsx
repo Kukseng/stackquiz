@@ -1,6 +1,6 @@
-// import CardQuizComponent from "../CardQuizComponent";
+"use client";
 import Searchbar from "../leaderboard/Searchbar";
-import GridCardComponent from "../GridCardComponent";
+import TemplatesCardComponent from "../TemplateCardComponent";
 
 export function Explore() {
 
@@ -28,11 +28,7 @@ export function Explore() {
           </div>
 
           {/* Quiz Cards Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-     
-              <GridCardComponent/>
-
-          </div>
+          <TemplatesCardComponent/>
         </div>
       </div>
     </div>

@@ -128,9 +128,10 @@ const SectionTitle = ({ children, className = "" }: { children: React.ReactNode,
 export function ValuesSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <section className="container mx-auto px-4 sm:px-8 lg:px-16 py-20">
+    <section className={`container mx-auto px-4 sm:px-8 lg:px-16 py-20 ${fontClass}`}>
       <SectionTitle>{t.heroAbout.value}</SectionTitle>
 
       <motion.div

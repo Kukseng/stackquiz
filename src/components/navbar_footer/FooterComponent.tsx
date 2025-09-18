@@ -1,5 +1,7 @@
 "use client";
+
 import Image from "next/image";
+import Link from "next/link";
 import { FaEnvelope, FaPhoneAlt } from "react-icons/fa";
 
 export default function Footer() {
@@ -49,14 +51,19 @@ export default function Footer() {
             LINKS
           </h3>
           <nav className="space-y-2">
-            {["Home", "Explore", "Join Room", "About Us"].map((link) => (
-              <a
-                key={link}
-                href="#"
+            {[
+              { name: "Home", href: "/" },
+              { name: "Explore", href: "/explore" },
+              { name: "Join Room", href: "/join-room" },
+              { name: "About Us", href: "/about" },
+            ].map((link) => (
+              <Link
+                key={link.name}
+                href={link.href}
                 className="block text-gray-300 hover:text-white transition-colors duration-200"
               >
-                {link}
-              </a>
+                {link.name}
+              </Link>
             ))}
           </nav>
         </div>
@@ -92,10 +99,10 @@ export default function Footer() {
               <FaEnvelope className="text-lg" /> info.stackquiz@gmail.com
             </a>
             <a
-              href="tel:+88596458789"
+              href="tel:+885883062075"
               className="flex items-center gap-2 text-gray-300 hover:text-white transition-colors duration-200"
             >
-              <FaPhoneAlt className="text-lg" /> (+885) 96 458 789
+              <FaPhoneAlt className="text-lg" /> (+885) 883 062 075
             </a>
             <a
               href="tel:+88597458789"
@@ -116,10 +123,11 @@ export default function Footer() {
           <div className="flex justify-center md:justify-start space-x-2">
             <Image
               src="/social_media_icon/fb.svg"
-              width={27}
-              height={28}
+              width={28}
+              height={30}
               alt="Facebook"
             />
+
             <Image
               src="/social_media_icon/github.svg"
               width={28}
@@ -129,19 +137,27 @@ export default function Footer() {
             <Image
               src="/social_media_icon/telegram.svg"
               width={28}
-              height={34}
+              height={30}
               alt="Telegram"
             />
-            <Image
-              src="/social_media_icon/ig.svg"
-              width={36}
-              height={36}
-              alt="Instagram"
-            />
+
+            <Link
+              href="https://www.instagram.com/team.stackquiz/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image
+                src="/social_media_icon/ig.svg"
+                width={28}
+                height={30}
+                alt="Instagram"
+              />
+            </Link>
+
             <Image
               src="/social_media_icon/youtube.svg"
-              width={34}
-              height={34}
+              width={28}
+              height={30}
               alt="Youtube"
             />
           </div>

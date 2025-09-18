@@ -16,10 +16,11 @@ interface Question {
   options: Option[]
 }
 
+// Updated Category interface to match API response
 interface Category {
-  id: number
+  id: string // Changed from number to string
   name: string
-  icon?: string
+  description: string // Added description field from API
 }
 
 interface PublishModalProps {
@@ -40,6 +41,7 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
 
   const [categories, setCategories] = useState<Category[]>([])
   const [loadingCategories, setLoadingCategories] = useState(true)
+  const [categoryError, setCategoryError] = useState<string | null>(null)
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null)
   const [isDragging, setIsDragging] = useState(false)
@@ -48,22 +50,53 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const res = await fetch("https://stackquiz-api.stackquiz.me/api/v1/categories")
-        if (!res.ok) throw new Error("Failed to fetch categories")
-        const data = await res.json()
-        setCategories(data.data || data) // adjust depending on API shape
+        setLoadingCategories(true)
+        setCategoryError(null)
+        
+        console.log("Fetching categories...")
+        const res = await fetch("https://stackquiz-api.stackquiz.me/api/v1/categories", {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        })
+        
+        if (!res.ok) {
+          throw new Error(`Failed to fetch categories: ${res.status} ${res.statusText}`)
+        }
+        
+        const data: Category[] = await res.json()
+        console.log("Categories fetched:", data)
+        
+        // The API returns an array directly, not wrapped in a data property
+        setCategories(data)
       } catch (err) {
         console.error("Error fetching categories:", err)
+        setCategoryError(err instanceof Error ? err.message : "Failed to load categories")
       } finally {
         setLoadingCategories(false)
       }
     }
+    
     fetchCategories()
   }, [])
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0]
+      
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        alert("Please select a valid image file")
+        return
+      }
+      
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size must be less than 5MB")
+        return
+      }
+      
       setFormData(prev => ({ ...prev, coverImage: file }))
       setPreviewUrl(URL.createObjectURL(file))
     }
@@ -75,8 +108,14 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0]
       if (file.type.startsWith("image/")) {
+        if (file.size > 5 * 1024 * 1024) {
+          alert("Image size must be less than 5MB")
+          return
+        }
         setFormData(prev => ({ ...prev, coverImage: file }))
         setPreviewUrl(URL.createObjectURL(file))
+      } else {
+        alert("Please drop a valid image file")
       }
     }
   }
@@ -92,14 +131,46 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
   }
 
   const removeImage = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl)
+    }
     setFormData(prev => ({ ...prev, coverImage: null }))
     setPreviewUrl(null)
   }
 
   const handleSubmit = () => {
-    console.log("Publishing quiz:", { formData, questions: quizData })
+    // Basic validation
+    if (!formData.tag.trim()) {
+      alert("Please enter a quiz tag")
+      return
+    }
+    if (!formData.description.trim()) {
+      alert("Please enter a quiz description")
+      return
+    }
+    if (!formData.category) {
+      alert("Please select a category")
+      return
+    }
+
+    console.log("Publishing quiz:", { 
+      formData, 
+      questions: quizData,
+      selectedCategory: categories.find(cat => cat.id === formData.category)
+    })
+    
+    // Here you would typically make an API call to publish the quiz
     onClose()
   }
+
+  // Cleanup preview URL on unmount
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl)
+      }
+    }
+  }, [previewUrl])
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -181,7 +252,7 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
           {/* Tag */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="tag">
-              Tag
+              Tag *
             </label>
             <input
               id="tag"
@@ -196,7 +267,7 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
           {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="description">
-              Description
+              Description *
             </label>
             <textarea
               id="description"
@@ -207,10 +278,10 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
             />
           </div>
 
-          {/* Category */}
+          {/* Category - FIXED */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="category">
-              Category
+              Category *
             </label>
             <select
               id="category"
@@ -220,15 +291,29 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
             >
               <option value="">Select a category</option>
               {loadingCategories ? (
-                <option disabled>Loading...</option>
+                <option disabled>Loading categories...</option>
+              ) : categoryError ? (
+                <option disabled>Error loading categories</option>
+              ) : categories.length === 0 ? (
+                <option disabled>No categories available</option>
               ) : (
                 categories.map(cat => (
                   <option key={cat.id} value={cat.id}>
-                    {cat.icon ? `${cat.icon} ` : ""}{cat.name}
+                    {cat.name}
                   </option>
                 ))
               )}
             </select>
+            {categoryError && (
+              <p className="text-red-500 text-sm mt-1">
+                Failed to load categories. Please try again.
+              </p>
+            )}
+            {!loadingCategories && !categoryError && (
+              <p className="text-gray-500 text-sm mt-1">
+                {categories.length} categories available
+              </p>
+            )}
           </div>
 
           {/* Difficulty */}

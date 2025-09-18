@@ -12,6 +12,7 @@ import kh from "@/locales/km.json";
 export function PlatformSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   const textRef = useRef<HTMLDivElement>(null);
   const imgRef = useRef<HTMLDivElement>(null);
@@ -38,10 +39,11 @@ export function PlatformSection() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 sm:py-6 md:py-9 lg:py-10 xl:py-11">
+    <section
+      className={`px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 sm:py-6 md:py-9 lg:py-10 xl:py-11 ${fontClass}`}
+    >
       <div className="max-w-7xl mx-auto py-12">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          
           {/* Text on Top (mobile), Right (desktop) */}
           <motion.div
             ref={textRef}
@@ -49,19 +51,25 @@ export function PlatformSection() {
             animate={textControls}
             className="order-1 lg:order-2 text-center lg:text-left"
           >
-            <h2 className="text-2xl py-7 sm:text-3xl md:text-4xl lg:text-5xl font-bold text-[var(--cosmic-text)] leading-tight">
-              {t.platform.title}
-            </h2>
-
-            <p className="text-base sm:text-lg md:text-xl text-[var(--cosmic-muted)] mb-8">
+            <div className="mb-12">
+              {/* Section Title */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+                <span className="text-yellow text-underline">
+                  {t.platform.title}
+                </span>
+              </h2>
+            </div>
+            {/* Section Description */}
+            <p className="text-lg sm:text-2xl md:text-2xl text-[var(--cosmic-muted)] mb-8">
               {t.platform.description}
             </p>
 
+            {/* Get Started Button */}
             <div className="flex justify-center lg:justify-start">
               <Link href="/signup" className="flex items-center gap-2">
-              <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
-                {t.platform.getStarted}
-              </Button>
+                <Button className="btn-secondary btn-text px-6 py-3 sm:py-4 md:py-5 box-radius font-semibold text-base sm:text-lg">
+                  {t.platform.getStarted}
+                </Button>
               </Link>
             </div>
           </motion.div>
@@ -81,7 +89,6 @@ export function PlatformSection() {
               className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
             />
           </motion.div>
-
         </div>
       </div>
     </section>

@@ -12,6 +12,8 @@ import kh from "@/locales/km.json";
 export function ContactSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
   const [form, setForm] = useState({
     firstName: "",
     lastName: "",
@@ -30,7 +32,6 @@ export function ContactSection() {
     console.log("Form submitted:", form);
   };
 
-  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0, y: 40 },
     visible: {
@@ -46,7 +47,9 @@ export function ContactSection() {
   };
 
   return (
-    <section className="relative max-w-7xl mx-auto py-12 sm:py-16 lg:py-20 text-white overflow-hidden px-4 sm:px-6 lg:px-8">
+    <section
+      className={`relative max-w-7xl mx-auto py-12 sm:py-16 lg:py-20 text-white overflow-hidden px-4 sm:px-6 lg:px-8 ${fontClass}`}
+    >
       {/* Background */}
       <motion.div
         className="absolute inset-0 overflow-hidden"
@@ -59,8 +62,8 @@ export function ContactSection() {
 
       {/* Section Title */}
       <div className="relative text-center mb-12 sm:mb-16">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-          <span className="relative text-yellow-400 underline decoration-yellow-400">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+          <span className="relative text-yellow text-underline">
             {t.contact.title}
           </span>
         </h2>
@@ -90,9 +93,7 @@ export function ContactSection() {
               variants={itemVariants}
             >
               <Image src="/map.png" alt="Map Icon" width={24} height={24} />
-              <p className="text-sm sm:text-base break-words">
-                Toul Kouk, Phnom Penh, Cambodia
-              </p>
+              <p className="text-sm sm:text-base break-words">{t.contact.address}</p>
             </motion.div>
 
             {/* Phone */}
@@ -101,9 +102,7 @@ export function ContactSection() {
               variants={itemVariants}
             >
               <Image src="/call.png" alt="Call Icon" width={24} height={24} />
-              <p className="text-sm sm:text-base break-words">
-                (+885) 96 458 789 / 97 458 789
-              </p>
+              <p className="text-sm sm:text-base break-words">{t.contact.phone}</p>
             </motion.div>
 
             {/* Email */}
@@ -112,9 +111,7 @@ export function ContactSection() {
               variants={itemVariants}
             >
               <Image src="/email.png" alt="Email Icon" width={24} height={24} />
-              <p className="text-sm sm:text-base break-all">
-                info.stackquiz@gmail.com
-              </p>
+              <p className="text-sm sm:text-base break-all">{t.contact.emailAddress}</p>
             </motion.div>
           </CardContent>
 
@@ -129,81 +126,63 @@ export function ContactSection() {
             >
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                 {/* First Name */}
-                <motion.div
-                  className="flex flex-col gap-2"
-                  variants={itemVariants}
-                >
-                  <label
-                    htmlFor="firstName"
-                    className="text-sm font-medium text-yellow-400"
-                  >
-                    First Name
+                <motion.div className="flex flex-col gap-2" variants={itemVariants}>
+                  <label htmlFor="firstName" className="text-sm font-medium text-yellow-400">
+                    {t.contact.firstName}
                   </label>
                   <input
                     type="text"
                     id="firstName"
                     name="firstName"
-                    placeholder="Roeurm"
+                    placeholder={t.contact.placeholder.firstName}
                     value={form.firstName}
                     onChange={handleChange}
-                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
                 </motion.div>
 
                 {/* Last Name */}
-                <motion.div
-                  className="flex flex-col gap-2"
-                  variants={itemVariants}
-                >
-                  <label
-                    htmlFor="lastName"
-                    className="text-sm font-medium text-yellow-400"
-                  >
-                    Last Name
+                <motion.div className="flex flex-col gap-2" variants={itemVariants}>
+                  <label htmlFor="lastName" className="text-sm font-medium text-yellow-400">
+                    {t.contact.lastName}
                   </label>
                   <input
                     type="text"
                     id="lastName"
                     name="lastName"
-                    placeholder="Dara"
+                    placeholder={t.contact.placeholder.lastName}
                     value={form.lastName}
                     onChange={handleChange}
-                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                   />
                 </motion.div>
               </div>
 
               {/* Email */}
               <motion.div className="flex flex-col gap-2" variants={itemVariants}>
-                <label
-                  htmlFor="email"
-                  className="text-sm font-medium text-yellow-400"
-                >
-                  Email
+                <label htmlFor="email" className="text-sm font-medium text-yellow-400">
+                  {t.contact.email}
                 </label>
                 <input
                   type="email"
                   id="email"
                   name="email"
-                  placeholder="info123@gmail.com"
+                  placeholder={t.contact.placeholder.email}
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-10 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
                 />
               </motion.div>
 
               {/* Message */}
               <motion.div className="flex flex-col gap-2" variants={itemVariants}>
-                <label
-                  htmlFor="message"
-                  className="text-sm font-medium text-yellow-400"
-                >
-                  Message
+                <label htmlFor="message" className="text-sm font-medium text-yellow-400">
+                  {t.contact.message}
                 </label>
                 <textarea
                   id="message"
                   name="message"
-                  placeholder="Write your message..."
+                  placeholder={t.contact.placeholder.message}
                   value={form.message}
                   onChange={handleChange}
                   rows={6}
@@ -218,7 +197,7 @@ export function ContactSection() {
                 whileHover={{ scale: 0.98 }}
                 whileTap={{ scale: 0.95 }}
               >
-                Send Message
+                {t.contact.button}
               </motion.button>
             </motion.form>
           </CardContent>

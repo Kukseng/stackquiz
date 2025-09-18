@@ -12,22 +12,23 @@ import {
 
 const SECTION_SPACING = {
   sectionGap: "py-16 sm:py-20 lg:py-24 xl:py-28",
-  
   containerPadding: "px-4 sm:px-6 lg:px-8 xl:px-10",
   contentGap: "space-y-8 sm:space-y-12 lg:space-y-16",
   titleMargin: "mb-12 sm:mb-16 lg:mb-20",
   gridGap: "gap-8 sm:gap-12 lg:gap-16 xl:gap-20",
   cardGap: "gap-6 sm:gap-8 lg:gap-12",
 };
+
 export function TechnologySection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   const technologies = [
     { name: "Redis", image: "/technology/redis.png" },
     { name: "PostgreSQL", image: "/technology/postgres.webp" },
     { name: "Spring Boot", image: "/technology/spring.png" },
-    { name: "docker", image: "/technology/docker.webp" },
+    { name: "Docker", image: "/technology/docker.webp" },
     { name: "Next.js", image: "/technology/next.png" },
     { name: "Blender", image: "/technology/blender.png" },
   ];
@@ -57,10 +58,10 @@ export function TechnologySection() {
   );
 
   return (
-    <section className={`${SECTION_SPACING.containerPadding} ${SECTION_SPACING.sectionGap}`}>
+    <section className={`${SECTION_SPACING.containerPadding} ${SECTION_SPACING.sectionGap} ${fontClass}`}>
       {/* Header */}
       <div className={`text-center ${SECTION_SPACING.titleMargin}`}>
-        <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
           <span className="relative">
             <span className="text-yellow text-underline">{t.heroAbout.technology}</span>
           </span>
@@ -89,4 +90,3 @@ export function TechnologySection() {
     </section>
   );
 }
-

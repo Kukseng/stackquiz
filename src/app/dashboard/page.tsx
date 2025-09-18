@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Search } from 'lucide-react';
 import GridCardComponents from '@/components/GridCardComponent';
+import ChallengeGrid from '@/components/GridCardComponent';
 
 const DashboardPage = () => {
   const [joinCode] = useState('');
@@ -117,9 +118,7 @@ const DashboardPage = () => {
         <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">
           Templates
         </h2>
-        <GridCardComponents />
-        <GridCardComponents />
-        <GridCardComponents />
+        <ChallengeGrid/>
       </div>
 
 

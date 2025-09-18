@@ -3,8 +3,15 @@
 import Image from "next/image";
 import { motion, useAnimation, useInView } from "framer-motion";
 import { useRef, useEffect } from "react";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
 export function TopPlayersSection() {
+const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
+
   const winnerRef = useRef<HTMLDivElement>(null);
   const secondRef = useRef<HTMLDivElement>(null);
   const thirdRef = useRef<HTMLDivElement>(null);
@@ -35,7 +42,7 @@ export function TopPlayersSection() {
   }, [titleInView, winnerInView, secondInView, thirdInView, titleControls, winnerControls, secondControls, thirdControls]);
 
   return (
-    <section className="relative px-4 py-12 overflow-hidden">
+    <section className={`relative px-4 py-12 overflow-hidden} ${fontClass}`}>
       <div className="relative max-w-5xl  mx-auto text-center">
         {/* Title */}
         <motion.h2
@@ -44,10 +51,12 @@ export function TopPlayersSection() {
           animate={titleControls}
           className="text-2xl sm:text-3xl md:text-4xl py-24 lg:text-5xl font-bold text-white mb-12"
         >
-          <span className="relative">
-            Top <span className="text-yellow">Players</span>
-            <span className="absolute left-0 -bottom-1 w-full h-[4px] bg-yellow-400"></span>
-          </span>
+          <div className="text-center mb-12">
+          <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+            <span className="text-yellow text-underline">
+              {t.top.title}</span>
+          </h2>
+        </div>
         </motion.h2>
 
         <div className="flex justify-center items-end gap-6 sm:gap-10 lg:gap-16">

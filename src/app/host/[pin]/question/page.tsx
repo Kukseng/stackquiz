@@ -1,9 +1,9 @@
 import React from 'react'
 
-function page() {
+export default function page() {
   return (
-    <div>page</div>
+    <div>
+      this is question
+    </div>
   )
 }
-
-export default page

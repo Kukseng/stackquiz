@@ -1,15 +1,26 @@
 'use client';
 import { useState } from 'react';
 
-//A simple component for the circular timer
-const Timer = ({ time }) => (
+// ✅ Props types
+interface TimerProps {
+  time: number;
+}
+
+interface AnswerButtonProps {
+  text: string;
+  color: string;
+  icon: string;
+}
+
+// Timer component
+const Timer: React.FC<TimerProps> = ({ time }) => (
   <div className="absolute top-1/3 left-8 transform -translate-y-1/2 w-20 h-20 rounded-full flex items-center justify-center border-4 shadow-lg">
     <span className="text-white text-3xl font-bold">{time}</span>
   </div>
 );
 
-// A simple component for the answer button
-const AnswerButton = ({ text, color, icon }) => (
+// Answer button component
+const AnswerButton: React.FC<AnswerButtonProps> = ({ text, color, icon }) => (
   <button
     className={`flex items-center w-full p-6 text-xl text-white rounded-2xl transition-all transform hover:scale-102 ${color}`}
   >
@@ -35,9 +46,11 @@ export default function QuizQuestion() {
           <div>{question}</div> 
         </div>
       </div>
+
       <div className='relative flex justify-center'>
         <Timer time={time} /> 
       </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 w-11/12 md:w-3/4 mx-auto mt-16">
         {answers.map((answer, index) => (
           <AnswerButton

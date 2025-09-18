@@ -95,7 +95,7 @@ const getValidImageUrl = (thumbnailUrl: string | null | undefined): string => {
   }
 };
 
-export default function ChallengeGrid() {
+export default function TemplateCardComponent() {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -108,7 +108,7 @@ export default function ChallengeGrid() {
         setError(null);
 
         const res = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/quizzes?active=true`,
+          "https://stackquiz-api.stackquiz.me/api/v1/quizzes?active=true",
           {
             method: 'GET',
             headers: {
@@ -205,7 +205,7 @@ export default function ChallengeGrid() {
 
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6 lg:gap-10">
         {filteredChallenges.map((challenge, i) => (
           <CardQuizComponent
             key={challenge.id}

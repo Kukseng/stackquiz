@@ -224,7 +224,7 @@ export default function ChallengeGrid() {
   return (
     <section className="max-w-7xl mx-auto px-4 md:px-10 lg:px-20 mt-8">
       {/* Search and filter */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-evenly mb-6 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-evenly mb-6 ">
         <div className="relative w-full md:w-1/2">
           <span className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
             <Search size={16} className="text-white opacity-70" />

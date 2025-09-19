@@ -40,7 +40,7 @@ interface QuizAPI {
     imageUrl: string;
     createdAt: string;
     updatedAt: string;
-    options: any[];
+    options: unknown[];
   }[];
 }
 

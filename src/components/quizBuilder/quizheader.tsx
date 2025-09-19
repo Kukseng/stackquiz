@@ -1,4 +1,6 @@
 "use client"
+import Link from "next/link"
+import Image from "next/image"
 
 interface QuizHeaderProps {
   questions: unknown[]
@@ -10,7 +12,13 @@ interface QuizHeaderProps {
 export function QuizHeader({ onPublish, onSave, onExit }: QuizHeaderProps) {
   return (
     <div className="fixed top-0 left-0 right-0 z-40 flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-      <div></div>
+      <Link href="/" className="flex items-center gap-2">
+          <Image src="/logo-sq.png" width={45} height={45} alt="Logo" />
+          <span className="hidden md:inline text-2xl font-extrabold">
+            <span className="text-blue-950">STACK</span>
+            <span className="text-yellow">QUIZ</span>
+          </span>
+        </Link>
       <div className="flex items-center space-x-3">
 
         {/* Publish */}

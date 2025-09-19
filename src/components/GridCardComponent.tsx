@@ -2,7 +2,6 @@
 import React, { useState, useEffect } from "react";
 import CardQuizComponent from "./CardQuizComponent";
 
-// Local Challenge type for rendering
 interface Challenge {
   id: string;
   title: string;

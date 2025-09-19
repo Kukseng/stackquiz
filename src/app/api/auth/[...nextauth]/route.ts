@@ -101,7 +101,7 @@ const authOptions: NextAuthOptions = {
       const data = json.data;
       if (!data || !data.access_token) return null; // login failed
 
-      // Map backend -> NextAuth session fields
+     
       return {
         id: data.email ?? credentials.username,
         name: data.name ?? credentials.username,

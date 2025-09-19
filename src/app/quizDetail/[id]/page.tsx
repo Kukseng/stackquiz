@@ -46,7 +46,6 @@ interface QuizData {
 }
 
 
-
 // Constants
 const OPTION_COLORS = ['bg-red-500', 'bg-blue-500', 'bg-orange-500', 'bg-green-500'] as const;
 const API_ENDPOINTS = {

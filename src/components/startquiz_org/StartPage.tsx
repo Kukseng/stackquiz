@@ -14,7 +14,7 @@ interface QuizData {
   title: string;
   description: string;
   thumbnailUrl?: string;
-  questions: any[];
+  questions: string[];
   category?: string;
 }
 

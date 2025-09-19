@@ -45,7 +45,7 @@ interface QuizData {
   participants?: number;
 }
 
-interface QuizDetailPageProps {}
+
 
 // Constants
 const OPTION_COLORS = ['bg-red-500', 'bg-blue-500', 'bg-orange-500', 'bg-green-500'] as const;
@@ -207,7 +207,7 @@ const QuestionCard: React.FC<{
 );
 
 // Main Component
-const QuizDetailPage: React.FC<QuizDetailPageProps> = () => {
+const QuizDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const quizId = params?.id as string;

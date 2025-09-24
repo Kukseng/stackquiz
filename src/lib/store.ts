@@ -7,6 +7,7 @@ import { questionApi } from './api/questionApi';
 import { optionApi } from './api/optionApi';
 import { participantAnswerApi } from './api/participantAnswerApi';
 import { participantApi } from './api/participantApi';
+import { userApi } from './api/userApi';
 
 export const store = configureStore({
   reducer: {
@@ -17,6 +18,8 @@ export const store = configureStore({
     [optionApi.reducerPath]: optionApi.reducer,
     [participantAnswerApi.reducerPath]: participantAnswerApi.reducer,
     [participantApi.reducerPath]: participantApi.reducer,
+    [userApi.reducerPath]: userApi.reducer,
+  
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(
@@ -26,7 +29,9 @@ export const store = configureStore({
       questionApi.middleware,
       optionApi.middleware,
       participantAnswerApi.middleware,
-      participantApi.middleware
+      participantApi.middleware,
+      userApi.middleware
+     
     ),
 });
 

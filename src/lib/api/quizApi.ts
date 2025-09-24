@@ -23,7 +23,7 @@ export const quizApi = createApi({
   baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
   tagTypes: ["Quiz"],
   endpoints: (builder) => ({
-    //Get quiz by ID
+       // Get quiz by ID
     getQuizById: builder.query<Quiz, string>({
       query: (quizId) => `/quizzes/${quizId}`,
       providesTags: (result, error, id) => [{ type: "Quiz", id }],

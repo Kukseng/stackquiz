@@ -78,9 +78,8 @@ export default function QuizMainContent({
                 onUpdateQuestionText(activeQuestion.id, e.target.value)
               }
               placeholder="Enter your question..."
-              className="w-full text-center text-xl font-semibold p-3 mb-6 rounded border-2 border-yellow-400 bg-transparent placeholder-white/70 focus:outline-none text-white"
+              className="w-full text-center text-xl font-semibold p-3 mb-6 rounded border-2 text-gray-900 bg-white border-yellow-400  placeholder-black/50 focus:outline-none"
             />
-
             {/* Options */}
             <div className="space-y-4">
               {activeQuestion.options.map((option) => (

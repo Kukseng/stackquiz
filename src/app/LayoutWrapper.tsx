@@ -11,51 +11,19 @@ interface LayoutWrapperProps {
   children: ReactNode;
 }
 
-// Configuration for layout visibility
-const LAYOUT_CONFIG = {
-  // Exact paths where layout should be hidden
-  hiddenPaths: [
-    "/signup",
-    "/login",
-    "/verify-email", 
-    "/quizbuilder",
-  ],
-  
-  // Path prefixes that should hide layout (matches all subroutes)
-  hiddenPathPrefixes: [
-    "/dashboard",
-    "/leaderboard",
-  ],
-  
- 
-};
-
 export default function LayoutWrapper({ children }: LayoutWrapperProps) {
   const pathname = usePathname();
 
-  // check if layout should be hidden
-  const shouldHideLayout = (currentPath: string): boolean => {
-    // Check exact paths
-    if (LAYOUT_CONFIG.hiddenPaths.includes(currentPath)) {
-      return true;
-    }
-    
-    // Check path prefixes
-    return LAYOUT_CONFIG.hiddenPathPrefixes.some(prefix => 
-      currentPath.startsWith(prefix)
-    );
-    
-    
-  };
-
-  const hideLayout = shouldHideLayout(pathname);
+  // pages where layout should be visible
+  const showLayouts = ["/", "/explore", "/join-room", "/about"];
+  const showLayout = showLayouts.includes(pathname || "");
 
   return (
     <>
-      {!hideLayout && <Navbar />}
-      <ParticlesBackground />
+      {showLayout && <Navbar />}
+      {showLayout && <ParticlesBackground />}
       <StoreProvider>{children}</StoreProvider>
-      {!hideLayout && <Footer />}
+      {showLayout && <Footer />}
     </>
   );
 }

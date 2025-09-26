@@ -10,26 +10,26 @@ import { WhyChooseSection } from "@/components/hompage/Why_chose_section";
 // import CardSwipeDemo from "@/components/hompage/Type_quiz";
 
 export const metadata = {
-  title: "StackQuizz | Home",
-  description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
+  title: "StackQuiz | Home",
+  description: "Engage with organizers in real-time StackQuiz. Compete in live quizzes and test your knowledge!",
   keywords: "quiz, real-time, competition, knowledge, interactive, live quiz",
   openGraph: {
-  title: "StackQuizz | Home",
-  description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
+  title: "StackQuiz | Home",
+  description: "Engage with organizers in real-time StackQuiz. Compete in live quizzes and test your knowledge!",
   type: "website",
   images: [
     {
       url: "https://app.stackquiz.me/bg-meta.png?v=2",
       width: 1200,
       height: 630,
-      alt: "StackQuizz - Real-time Quiz Platform",
+      alt: "StackQuiz - Real-time Quiz Platform",
     },
   ],
 },
 twitter: {
   card: "summary_large_image",
-  title: "StackQuizz | Home",
-  description: "Engage with organizers in real-time StackQuizz. Compete in live quizzes and test your knowledge!",
+  title: "StackQuiz | Home",
+  description: "Engage with organizers in real-time StackQuiz. Compete in live quizzes and test your knowledge!",
   images: ["https://app.stackquiz.me/bg-meta.png?v=2"],
 },
 

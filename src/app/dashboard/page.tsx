@@ -1,15 +1,14 @@
-'use client';
+"use client";
 
-import React, { useState } from 'react';
-import Image from 'next/image';
-import { Search } from 'lucide-react';
-import GridCardComponents from '@/components/GridCardComponent';
-import ChallengeGrid from '@/components/GridCardComponent';
+import React, { useState } from "react";
+import Image from "next/image";
+import { Search } from "lucide-react";
+import ChallengeGrid from "@/components/GridCardComponent";
 
 const DashboardPage = () => {
-  const [joinCode] = useState('');
-  const [searchTerm, setSearchTerm] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState('Select category');
+  const [joinCode, setJoinCode] = useState(""); // ✅ កែត្រឹមត្រូវ
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCategory, setSelectedCategory] = useState("Select category");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");
 
   // Example challenges data
@@ -37,10 +36,14 @@ const DashboardPage = () => {
             <input
               type="text"
               value={joinCode}
+              onChange={(e) => setJoinCode(e.target.value)} // ✅ បន្ថែម onChange
               className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-800 focus:outline-none text-base placeholder-gray-500"
               placeholder="Enter a join code"
             />
-            <button className="bg-[#f97316] px-6 py-3 rounded-xl font-semibold text-white shadow hover:shadow-lg transition-all duration-200">
+            <button
+              onClick={() => console.log("Join Code:", joinCode)} // ✅ ឧទាហរណ៍ការប្រើ joinCode
+              className="bg-[#f97316] px-6 py-3 rounded-xl font-semibold text-white shadow hover:shadow-lg transition-all duration-200"
+            >
               Join
             </button>
           </div>
@@ -118,10 +121,8 @@ const DashboardPage = () => {
         <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">
           Templates
         </h2>
-        <ChallengeGrid/>
+        <ChallengeGrid />
       </div>
-
-
     </div>
   );
 };

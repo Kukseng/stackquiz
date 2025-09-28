@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { QuizSidebar } from "./quizsidebar";
-import  QuizMainContent from "./quizmaincontent";
+import QuizMainContent from "./quizmaincontent";
 import { QuizHeader } from "./quizheader";
-import  {ThemeSidebar}  from "./themeSidebar"; 
+import { ThemeSidebar } from "./themeSidebar";
 import { useQuizStore } from "./hooks/useQuizbuilder";
 import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
@@ -27,17 +27,17 @@ export function QuizBuilderLayout() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
 
-  // NEW: theme state
+  // ✅ Theme state
   const [selectedTheme, setSelectedTheme] = useState("pink");
 
-  // Handle delete
+  // ✅ Handle delete
   const handleDelete = (id: number) => {
     const remaining = questions.filter((q) => q.id !== id);
     deleteQuestion(id);
     setActiveQuestionId(remaining.length ? remaining[0].id : null);
   };
 
-  // Mapping theme -> Tailwind gradient
+  // ✅ Tailwind gradient themes
   const themeGradients: Record<string, string> = {
     blue: "from-blue-50 to-blue-100",
     pink: "from-pink-50 to-purple-50",
@@ -50,16 +50,15 @@ export function QuizBuilderLayout() {
     <div
       className={`min-h-screen flex flex-col bg-gradient-to-br ${themeGradients[selectedTheme]} relative`}
     >
-      {/* Navbar */}
+      {/* ✅ Navbar */}
       <QuizHeader
         questions={questions}
         onPublish={() => setShowPublishModal(true)}
         onSave={() => console.log("Save quiz", questions)}
-        onExit={() => console.log("Exit clicked")}
       />
 
       <div className="flex w-full">
-        {/* Sidebar Left */}
+        {/* ✅ Sidebar Left */}
         <QuizSidebar
           questions={questions}
           activeQuestionId={activeQuestionId}
@@ -67,7 +66,7 @@ export function QuizBuilderLayout() {
           onAddQuestion={() => setShowAddQuestionModal(true)}
         />
 
-        {/* Main Content */}
+        {/* ✅ Main Content */}
         <QuizMainContent
           questions={questions}
           activeQuestionId={activeQuestionId}
@@ -79,14 +78,14 @@ export function QuizBuilderLayout() {
           theme={selectedTheme}
         />
 
-        {/* Sidebar Right (Themes) */}
+        {/* ✅ Sidebar Right (Themes) */}
         <ThemeSidebar
           selectedTheme={selectedTheme}
           onThemeChange={setSelectedTheme}
         />
       </div>
 
-      {/* Add Question Modal */}
+      {/* ✅ Add Question Modal */}
       {showAddQuestionModal && (
         <QuestionTypeModal
           onClose={() => setShowAddQuestionModal(false)}
@@ -94,7 +93,7 @@ export function QuizBuilderLayout() {
         />
       )}
 
-      {/* Delete Question Modal */}
+      {/* ✅ Delete Question Modal */}
       {showDeleteModal && activeQuestionId && (
         <DeleteQuestionModal
           questionId={activeQuestionId}
@@ -103,7 +102,7 @@ export function QuizBuilderLayout() {
         />
       )}
 
-      {/* Publish Modal */}
+      {/* ✅ Publish Modal */}
       {showPublishModal && (
         <PublishModal
           onClose={() => setShowPublishModal(false)}

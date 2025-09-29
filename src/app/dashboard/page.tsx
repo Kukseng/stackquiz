@@ -4,15 +4,27 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import ChallengeGrid from "@/components/GridCardComponent";
+import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface Challenge {
+  id: number;
+  title: string;
+  difficulty: string;
+}
 
 const DashboardPage = () => {
-  const [joinCode, setJoinCode] = useState(""); // ✅ កែត្រឹមត្រូវ
+  const [joinCode, setJoinCode] = useState("");
   const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("Select category");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");
 
-  // Example challenges data
-  const challenges = [
+  const { data: categories, isLoading, isError } = useGetCategoriesQuery();
+
+  const challenges: Challenge[] = [
     { id: 1, title: "Math Quiz", difficulty: "Easy" },
     { id: 2, title: "React Basics", difficulty: "Medium" },
     { id: 3, title: "Algorithms", difficulty: "Hard" },
@@ -20,11 +32,20 @@ const DashboardPage = () => {
     { id: 5, title: "Computer Science", difficulty: "Medium" },
   ];
 
-  // Filter by difficulty
-  const filteredChallenges =
-    selectedDifficulty === "All"
-      ? challenges
-      : challenges.filter((c) => c.difficulty === selectedDifficulty);
+  // Filter challenges and limit to 3 cards
+  const filteredChallenges = challenges
+    .filter((c) =>
+      selectedDifficulty === "All" ? true : c.difficulty === selectedDifficulty
+    )
+    .filter((c) =>
+      selectedCategory === "All"
+        ? true
+        : categories?.find((cat) => cat.id === selectedCategory)?.name === selectedCategory
+    )
+    .filter((c) =>
+      searchTerm ? c.title.toLowerCase().includes(searchTerm.toLowerCase()) : true
+    )
+    .slice(0, 3); // ✅ Limit to 3 cards
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -36,12 +57,12 @@ const DashboardPage = () => {
             <input
               type="text"
               value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)} // ✅ បន្ថែម onChange
-              className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-800 focus:outline-none text-base placeholder-gray-500"
+              onChange={(e) => setJoinCode(e.target.value)}
               placeholder="Enter a join code"
+              className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-800 focus:outline-none text-base placeholder-gray-500"
             />
             <button
-              onClick={() => console.log("Join Code:", joinCode)} // ✅ ឧទាហរណ៍ការប្រើ joinCode
+              onClick={() => console.log("Join Code:", joinCode)}
               className="bg-[#f97316] px-6 py-3 rounded-xl font-semibold text-white shadow hover:shadow-lg transition-all duration-200"
             >
               Join
@@ -68,60 +89,44 @@ const DashboardPage = () => {
       </div>
 
       {/* Search + Filter */}
-      <div className="flex flex-col md:flex-row md:items-center md:justify-evenly mb-6">
+      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+        {/* Search */}
         <div className="relative w-full md:w-1/2">
           <span className="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-            <Search size={16} className="text-white opacity-70" />
+            <Search size={18} className="text-gray-400" />
           </span>
           <input
             type="text"
             placeholder="Search quizzes..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 text-white rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full pl-12 pr-4 py-3 rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 placeholder-gray-400 transition-all"
           />
         </div>
 
+        {/* Category Filter */}
         <select
           value={selectedCategory}
           onChange={(e) => setSelectedCategory(e.target.value)}
-          className="w-full md:w-auto text-gray-500 px-4 py-2 mt-4 md:mt-0 rounded-full border focus:outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full md:w-1/3 px-4 py-3 rounded-full border border-gray-200 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
         >
-          <option>Select category</option>
-          <option>Math</option>
-          <option>Computer</option>
-          <option>Science</option>
-          <option>History</option>
-          <option>English</option>
-          <option>Chemistry</option>
-          <option>Education</option>
-          <option>Other</option>
+          <option value="All">All Categories</option>
+          {isLoading && <option disabled>Loading...</option>}
+          {isError && <option disabled>Error loading categories</option>}
+          {categories?.map((cat: Category) => (
+            <option key={cat.id} value={cat.id}>
+              {cat.name}
+            </option>
+          ))}
         </select>
       </div>
 
-      {/* Difficulty Filter */}
-      <div className="flex justify-center gap-4 mb-8">
-        {["All", "Easy", "Medium", "Hard"].map((level) => (
-          <button
-            key={level}
-            onClick={() => setSelectedDifficulty(level)}
-            className={`px-5 py-2 rounded-full font-semibold transition-colors ${
-              selectedDifficulty === level
-                ? "bg-blue-600 text-white"
-                : "bg-gray-200 text-gray-700 hover:bg-gray-300"
-            }`}
-          >
-            {level}
-          </button>
-        ))}
-      </div>
-
-      {/* Sections */}
+      {/* Templates Section */}
       <div className="mb-6 sm:mb-8">
         <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">
           Templates
         </h2>
-        <ChallengeGrid />
+        <ChallengeGrid challenges={filteredChallenges} />
       </div>
     </div>
   );

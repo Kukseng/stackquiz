@@ -3,7 +3,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
-import { UserPlus, Menu, X, Star, Heart } from "lucide-react";
+import { UserPlus, Menu, X } from "lucide-react";
 import ReactCountryFlag from "react-country-flag";
 import { useSession } from "next-auth/react";
 import { useLanguage } from "@/context/LanguageContext";
@@ -35,26 +35,23 @@ export function Navbar() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Generate cute avatar for kids
-  const getAvatarUrl = () => {
-    const nickname = session?.user?.name || session?.user?.email || "user";
-    return `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(
-      nickname
-    )}`;
-  };
+  // Get avatar URL
+  const avatarUrl = session?.user?.name
+    ? `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(
+        session.user.name
+      )}`
+    : "/avatar2.svg"; // fallback
 
-  // Get first name or email prefix for display
-  const getDisplayName = () => {
-    const fullName = session?.user?.name;
-    if (fullName) {
-      return fullName.split(" ")[0]; // Get first name only
-    }
-    const email = session?.user?.email;
-    if (email) {
-      return email.split("@")[0]; // Get part before @
-    }
-    return "Player";
-  };
+  // Get first name or email prefix
+  const displayName = session?.user?.name
+    ? session.user.name.split(" ")[0]
+    : session?.user?.email
+    ? session.user.email.split("@")[0]
+    : "Player";
+
+  // Determine if the user is "new signup" (adjust logic as needed)
+  // For now, treat all users as not "new signup"
+  const simple = false;
 
   return (
     <header
@@ -120,95 +117,45 @@ export function Navbar() {
             )}
           </button>
 
-          {/* Cute Profile / Signup */}
+          {/* Profile / Signup */}
           {session ? (
-            <Link href="/profile">
-              <div className="relative group">
-                {/* Desktop version - full cute profile */}
-                <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl cursor-pointer hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl">
-                  {/* Avatar with cute border */}
-                  <div className="relative">
+            <Link href="/dashboard">
+              <div className="relative cursor-pointer">
+                {simple ? (
+                  // ✅ Simple profile for new signup
+                  <div className="flex items-center gap-2 px-3 py-2 bg-gray-100 rounded-xl hover:bg-gray-200 transition">
                     <Image
-                      src={getAvatarUrl()}
+                      src={avatarUrl}
                       alt="User Avatar"
-                      width={40}
-                      height={40}
+                      width={30}
+                      height={30}
+                      className="rounded-full"
+                    />
+                    <span className="text-gray-800 font-medium text-sm">
+                      Hi, {displayName}!
+                    </span>
+                  </div>
+                ) : (
+                  // 🎀 Full cute profile for regular users
+                  <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                    <Image
+                      src={avatarUrl}
+                      alt="User Avatar"
+                      width={30}
+                      height={30}
                       className="rounded-full border-3 border-white shadow-md"
                     />
-                    {/* Cute sparkle effect */}
-                    <div className="absolute -top-1 -right-1 w-4 h-4 bg-yellow-300 rounded-full flex items-center justify-center animate-pulse">
-                      <Star className="w-2.5 h-2.5 text-yellow-600 fill-current" />
-                    </div>
-                  </div>
-
-                  {/* Name with cute styling */}
-                  <div className="flex flex-col">
                     <span className="text-white font-bold text-sm leading-tight">
-                      Hi, {getDisplayName()}! 👋
-                    </span>
-                    <span className="text-white/80 text-xs font-medium">
-                      Ready to play? 🎯
+                      Hi, {displayName}!
                     </span>
                   </div>
-
-                  {/* Cute heart decoration */}
-                  <Heart
-                    className="w-4 h-4 text-white/70 fill-current animate-bounce"
-                    style={{ animationDelay: "0.5s" }}
-                  />
-                </div>
-
-                {/* Mobile version - compact cute profile */}
-                <div className="flex sm:hidden items-center justify-center w-12 h-12 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-full cursor-pointer hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-110 shadow-lg hover:shadow-xl">
-                  <div className="relative">
-                    <Image
-                      src={getAvatarUrl()}
-                      alt="User Avatar"
-                      width={32}
-                      height={32}
-                      className="rounded-full border-2 border-white shadow-md"
-                    />
-                    {/* Small sparkle for mobile */}
-                    <div className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-yellow-300 rounded-full flex items-center justify-center animate-pulse">
-                      <Star className="w-2 h-2 text-yellow-600 fill-current" />
-                    </div>
-                  </div>
-                </div>
-
-                {/* Floating cute elements on hover - desktop only */}
-                <div className="hidden sm:block absolute -top-2 -right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  <div className="flex gap-1">
-                    <span
-                      className="text-lg animate-bounce"
-                      style={{ animationDelay: "0.1s" }}
-                    >
-                      ⭐
-                    </span>
-                    <span
-                      className="text-lg animate-bounce"
-                      style={{ animationDelay: "0.2s" }}
-                    >
-                      🌟
-                    </span>
-                    <span
-                      className="text-lg animate-bounce"
-                      style={{ animationDelay: "0.3s" }}
-                    >
-                      ✨
-                    </span>
-                  </div>
-                </div>
+                )}
               </div>
             </Link>
           ) : (
             <Link href="/signup">
               <button className="btn-secondary btn-text flex items-center gap-2 px-6 py-2 box-radius font-semibold">
-                <UserPlus className="w-4 h-4" />{" "}
-                {language === "en" ? (
-                  <span>{t.navbar.signup}</span>
-                ) : (
-                  <span>{t.navbar.signup}</span>
-                )}
+                <UserPlus className="w-4 h-4" /> {t.navbar.signup}
               </button>
             </Link>
           )}
@@ -218,11 +165,7 @@ export function Navbar() {
             className="md:hidden text-white ml-2"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
-            {mobileOpen ? (
-              <X className="w-6 h-6" />
-            ) : (
-              <Menu className="w-6 h-6" />
-            )}
+            {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
         </div>
       </div>

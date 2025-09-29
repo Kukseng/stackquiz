@@ -23,7 +23,6 @@ export interface BulkAnswerSubmission {
     timeTaken: number
   }>
 }
-
 export interface ParticipantAnswer {
   answerId: string
   participantId: string
@@ -60,7 +59,7 @@ class StackQuizAPI {
       return response.json()
     } catch (error) {
       if (isDevelopment) {
-        console.log("[v0] API request failed, using mock response for:", endpoint)
+        console.log(" API request failed, using mock response for:", endpoint)
         return this.getMockResponse<T>(endpoint, options)
       }
       throw error
@@ -68,7 +67,7 @@ class StackQuizAPI {
   }
 
   private getMockResponse<T>(endpoint: string, options: RequestInit = {}): T {
-    console.log("[v0] Mock API call:", endpoint, options.method || "GET")
+    console.log(" Mock API call:", endpoint, options.method || "GET")
 
     // Mock responses based on endpoint
     if (endpoint === "/answers/submit" && options.method === "POST") {
@@ -126,7 +125,7 @@ class StackQuizAPI {
 
   // Submit a single answer
   async submitAnswer(answer: AnswerSubmission): Promise<void> {
-    console.log("[v0] Submitting answer:", answer)
+    console.log("Submitting answer:", answer)
     return this.request("/answers/submit", {
       method: "POST",
       body: JSON.stringify(answer),

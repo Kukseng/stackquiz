@@ -52,17 +52,17 @@ export default function Page() {
     }
   }, [lastEvent, router])
 
-  const handleNextQuestion = () => {
-    // In real app, this would be triggered by WebSocket
-    router.push("/play-quiz/question")
-  }
+  // const handleNextQuestion = () => {
+  //   // In real app, this would be triggered by WebSocket
+  //   router.push("/play-quiz/question")
+  // }
 
-  const handleViewResults = () => {
-    router.push("/play-quiz/result/summary")
-  }
+  // const handleViewResults = () => {
+  //   router.push("/play-quiz/result/summary")
+  // }
 
   return (
-    <div className="min-h-screen quiz-background flex items-center justify-center p-4 bg-gradient-to-br from-purple-50 to-amber-100">
+    <div className="min-h-screen quiz-background flex items-center justify-center p-4">
       <Card className="w-full max-w-lg quiz-card">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-4">
@@ -92,15 +92,8 @@ export default function Page() {
                 </div>
               </div>
             )}
-
-            <div className="bg-blue-50 p-3 rounded-lg border border-blue-200">
-              <p className="text-blue-700 text-sm font-bold">Tip:</p>
-              <p className="text-blue-600 text-sm font-medium">
-                Keep an eye on the timer and submit your best guess if you are running out of time.
-              </p>
-            </div>
           </div>
-
+{/* 
           {showNextButton && (
             <div className="space-y-3">
               <Button
@@ -136,7 +129,7 @@ export default function Page() {
                 ></div>
               </div>
             </div>
-          )}
+          )} */}
         </CardContent>
       </Card>
     </div>

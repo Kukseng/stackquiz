@@ -1,41 +1,56 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import { useRouter } from "next/navigation"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { AlertCircle } from "lucide-react"
-import { useWebSocket } from "@/hooks/use-websocket"
 import { useQuizState } from "@/hooks/use-quiz-state"
-import { QuizTimer } from "@/components/quiz-timer"
+
+interface QuestionOption {
+  id: string
+  text: string
+  isCorrect: boolean
+}
 
 interface Question {
   id: string
   text: string
-  options: Array<{
-    id: string
-    text: string
-  }>
-  timeLimit: number
-  type: "multiple_choice" | "text"
+  options: QuestionOption[]
+  timeLimit: number // seconds
+  type: "multiple_choice" | "true_false" | "text"
 }
 
-export default function Page() {
+interface Result {
+  questionId: string
+  questionText: string
+  isCorrect: boolean
+  selectedOption?: string | null
+  textAnswer?: string
+  points: number
+}
+
+export default function QuizPage() {
   const [participantId, setParticipantId] = useState("")
   const [sessionId, setSessionId] = useState("")
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
   const [selectedOption, setSelectedOption] = useState<string | null>(null)
   const [textAnswer, setTextAnswer] = useState("")
-  const [questionStartTime, setQuestionStartTime] = useState<number>(Date.now())
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [isCorrect, setIsCorrect] = useState<boolean | null>(null)
+  const [results, setResults] = useState<Result[]>([])
+  const [alertMessage, setAlertMessage] = useState<string | null>(null)
+  const [timeLeft, setTimeLeft] = useState<number>(0)
+  const timerRef = useRef<NodeJS.Timeout | null>(null)
+
   const router = useRouter()
+  const { submitAnswer } = useQuizState()
 
-  const { isConnected, lastEvent } = useWebSocket(participantId, sessionId)
-  const { submitAnswer, isSubmitting, submissionError } = useQuizState()
-
+  // ==== Load quizzes ====
   useEffect(() => {
-    // Get participant info from localStorage
     const storedParticipantId = localStorage.getItem("participantId")
     const storedSessionId = localStorage.getItem("sessionId")
 
@@ -47,200 +62,221 @@ export default function Page() {
     setParticipantId(storedParticipantId)
     setSessionId(storedSessionId)
 
-    // Mock question data - in real app this would come from WebSocket
-    setCurrentQuestion({
-      id: "q1",
-      text: "What is the capital of France?",
-      options: [
-        { id: "opt1", text: "London" },
-        { id: "opt2", text: "Berlin" },
-        { id: "opt3", text: "Paris" },
-        { id: "opt4", text: "Madrid" },
-      ],
-      timeLimit: 30,
-      type: "multiple_choice",
-    })
-    setQuestionStartTime(Date.now())
+    fetch("https://stackquiz-api.stackquiz.me/api/v1/quizzes?active=true")
+      .then(res => res.json())
+      .then(data => {
+        const allQuestions: Question[] = data
+          .flatMap((quiz: any) =>
+            quiz.questions.map((q: any) => ({
+              id: q.id,
+              text: q.text,
+              options: q.options.map((opt: any) => ({
+                id: opt.id,
+                text: opt.optionText,
+                isCorrect: opt.isCorrected,
+              })),
+              timeLimit: q.timeLimit,
+              type: q.type === "MCQ" ? "multiple_choice" : q.type === "TF" ? "true_false" : "text",
+            }))
+          )
+          .sort((a, b) => a.timeLimit - b.timeLimit) // optional ordering
+
+        setQuestions(allQuestions)
+      })
+      .catch(() => router.push("/"))
   }, [router])
 
-  // Handle WebSocket events
+  // ==== Countdown timer ====
   useEffect(() => {
-    if (lastEvent?.type === "question") {
-      setCurrentQuestion(lastEvent.data)
+    if (!questions[currentIndex]) return
+
+    setTimeLeft(questions[currentIndex].timeLimit)
+    timerRef.current && clearInterval(timerRef.current)
+
+    timerRef.current = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timerRef.current!)
+          handleOptionSelect(null, true) // auto submit as wrong
+          return 0
+        }
+        return prev - 1
+      })
+    }, 1000)
+
+    return () => clearInterval(timerRef.current)
+  }, [currentIndex, questions])
+
+  // ==== Handle answer selection ====
+  const handleOptionSelect = (optionId: string | null, timeout = false) => {
+    if (selectedOption) return
+
+    const question = questions[currentIndex]
+    setSelectedOption(optionId)
+
+    let correct = false
+    if (!timeout) {
+      if (question.type === "multiple_choice" || question.type === "true_false") {
+        const chosen = question.options.find(opt => opt.id === optionId)
+        correct = chosen?.isCorrect ?? false
+      } else if (question.type === "text") {
+        correct = question.options[0]?.text?.toLowerCase() === textAnswer.trim().toLowerCase()
+      }
+    }
+
+    setIsCorrect(correct)
+    setShowFeedback(true)
+
+    if (timeout) setAlertMessage("Time's up!")
+
+    // Save result
+    setResults(prev => [
+      ...prev,
+      {
+        questionId: question.id,
+        questionText: question.text,
+        isCorrect: correct,
+        selectedOption: optionId,
+        textAnswer: question.type === "text" ? textAnswer : undefined,
+        points: correct ? 100 : 0,
+      },
+    ])
+
+    // Submit answer
+    submitAnswer(participantId, sessionId, {
+      questionId: question.id,
+      optionId: optionId,
+      answerText: question.type === "text" ? textAnswer : undefined,
+      timeTaken: question.timeLimit - timeLeft,
+    }).catch(() => setAlertMessage("Failed to submit answer."))
+
+    // Next question
+    setTimeout(() => {
       setSelectedOption(null)
+      setShowFeedback(false)
+      setIsCorrect(null)
       setTextAnswer("")
-      setQuestionStartTime(Date.now())
-    } else if (lastEvent?.type === "time_up") {
-      handleTimeUp()
-    } else if (lastEvent?.type === "answer_result") {
-      handleAnswerResult(lastEvent.data)
-    }
-  }, [lastEvent])
-
-  const handleTimeUp = () => {
-    if (!isSubmitting) {
-      router.push("/play-quiz/timeup")
-    }
+      setAlertMessage(null)
+      setCurrentIndex(prev => prev + 1)
+    }, 2000)
   }
 
-  interface AnswerResult {
-    isCorrect: boolean
-    [key: string]: unknown
-  }
+  // ==== Render question ====
+  const renderQuestion = () => {
+    const question = questions[currentIndex]
+    if (!question) return null
 
-  const handleAnswerResult = (result: AnswerResult) => {
-    if (result.isCorrect) {
-      router.push("/play-quiz/correct")
-    } else {
-      router.push("/play-quiz/incorrect")
-    }
-  }
-
-  const handleSubmitAnswer = async () => {
-    if (!currentQuestion || !participantId || !sessionId || isSubmitting) return
-
-    const timeTaken = Math.floor((Date.now() - questionStartTime) / 1000)
-
-    console.log("[v0] Submitting answer for question:", currentQuestion.id)
-    console.log("[v0] Selected option:", selectedOption)
-    console.log("[v0] Time taken:", timeTaken)
-
-    const success = await submitAnswer(participantId, sessionId, {
-      questionId: currentQuestion.id,
-      optionId: selectedOption || undefined,
-      answerText: currentQuestion.type === "text" ? textAnswer : undefined,
-      timeTaken,
-    })
-
-    if (success) {
-      console.log("[v0] Answer submitted successfully, navigating to result")
-
-      // Store the answer details for the result page
-      localStorage.setItem(
-        "lastAnswer",
-        JSON.stringify({
-          questionId: currentQuestion.id,
-          questionText: currentQuestion.text,
-          selectedOption,
-          textAnswer,
-          timeTaken,
-        }),
-      )
-
-      // In a real app, we'd wait for the WebSocket response
-      // For demo purposes, simulate a correct answer
-      setTimeout(() => {
-        router.push("/play-quiz/correct")
-      }, 500)
-    } else {
-      console.error("[v0] Answer submission failed")
-    }
-  }
-
-  const canSubmit = currentQuestion?.type === "multiple_choice" ? selectedOption : textAnswer.trim()
-
-  if (!currentQuestion) {
-    return (
-      <div className="min-h-screen quiz-background flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white mx-auto"></div>
-          <p className="mt-2 text-white font-medium">Loading question...</p>
+    if (question.type === "multiple_choice") {
+      return (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          {question.options.map((opt, i) => (
+            <Button
+              key={opt.id}
+              onClick={() => handleOptionSelect(opt.id)}
+              className={`text-white h-16 text-lg font-bold rounded-xl
+                ${selectedOption === opt.id ? (isCorrect ? "bg-green-500" : "bg-red-500") : ["bg-red-500","bg-blue-500","bg-green-500","bg-purple-500"][i % 4]}
+                hover:brightness-110`}
+            >
+              {opt.text}
+            </Button>
+          ))}
         </div>
+      )
+    }
+
+    if (question.type === "true_false") {
+      return (
+        <div className="flex gap-4 mt-4">
+          {["True", "False"].map((val, i) => (
+            <Button
+              key={val}
+              onClick={() => handleOptionSelect(val)}
+              className={`text-white h-16 text-lg font-bold rounded-xl
+                ${selectedOption === val ? (isCorrect ? "bg-green-500" : "bg-red-500") : i === 0 ? "bg-green-500" : "bg-red-500"}
+                hover:brightness-110`}
+            >
+              {val}
+            </Button>
+          ))}
+        </div>
+      )
+    }
+
+    if (question.type === "text") {
+      return (
+        <div className="mt-4">
+          <Textarea
+            value={textAnswer}
+            onChange={e => setTextAnswer(e.target.value)}
+            placeholder="Type your answer..."
+            className="h-24 border-2 border-purple-300 rounded-lg resize-none p-2"
+          />
+          <Button
+            onClick={() => handleOptionSelect(textAnswer)}
+            disabled={textAnswer.trim() === ""}
+            className="mt-4 bg-purple-600 hover:bg-purple-700 text-white h-12 w-full rounded-lg font-bold"
+          >
+            Submit Answer
+          </Button>
+        </div>
+      )
+    }
+
+    return <p>Unsupported question type</p>
+  }
+
+  // ==== Quiz finished ====
+  if (currentIndex >= questions.length) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center space-y-4">
+        <h1 className="text-3xl font-bold">Quiz Finished!</h1>
+        <p className="text-xl">
+          You got {results.filter(r => r.isCorrect).length} / {questions.length} correct
+        </p>
+        <p className="text-lg">
+          Total Points: {results.reduce((acc, r) => acc + r.points, 0)}
+        </p>
+        <Button
+          onClick={() => router.push("/")}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg"
+        >
+          Back to Home
+        </Button>
       </div>
     )
   }
 
+  // ==== Render page ====
   return (
-    <div className="min-h-screen quiz-background p-4 relative">
-      <div className="kahoot-shape kahoot-triangle" style={{ top: "5%", left: "5%", animationDelay: "0s" }}></div>
-      <div className="kahoot-shape kahoot-circle" style={{ top: "10%", right: "10%", animationDelay: "3s" }}></div>
-      <div className="kahoot-shape kahoot-square" style={{ bottom: "20%", left: "8%", animationDelay: "6s" }}></div>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 p-4">
+      {alertMessage && (
+        <Alert variant="destructive" className="mb-4 w-full max-w-2xl">
+          <AlertCircle className="h-5 w-5" />
+          <AlertDescription>{alertMessage}</AlertDescription>
+        </Alert>
+      )}
 
-      <div className="max-w-6xl mx-auto relative z-10">
-        {/* Timer Header */}
-        <div className="mb-8">
-          <Card className="quiz-card">
-            <CardContent className="p-6">
-              <QuizTimer initialTime={currentQuestion.timeLimit} onTimeUp={handleTimeUp} isActive={!isSubmitting} />
-            </CardContent>
-          </Card>
-        </div>
+      <Card className="p-6 shadow-lg border-2 border-purple-300 w-full max-w-2xl">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold">
+            Question {currentIndex + 1} of {questions.length} | Time Left: {timeLeft}s
+          </CardTitle>
+        </CardHeader>
 
-        {/* Question Card */}
-        <Card className="mb-8 quiz-card">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-3xl text-gray-900 font-black text-center leading-tight">
-              {currentQuestion.text}
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {submissionError && (
-              <Alert variant="destructive" className="border-4 border-red-300">
-                <AlertCircle className="h-5 w-5" />
-                <AlertDescription className="font-semibold">{submissionError}</AlertDescription>
-              </Alert>
-            )}
+        <p className="mt-2 text-lg">{questions[currentIndex]?.text}</p>
 
-            {currentQuestion.type === "multiple_choice" ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {currentQuestion.options.map((option, index) => {
-                  const colors = [
-                    "kahoot-answer-red",
-                    "kahoot-answer-blue",
-                    "kahoot-answer-yellow",
-                    "kahoot-answer-green",
-                  ]
-                  const shapes = ["△", "◇", "○", "□"]
-                  const colorClass = colors[index % colors.length]
-                  const shape = shapes[index % shapes.length]
+        {renderQuestion()}
 
-                  return (
-                    <Button
-                      key={option.id}
-                      className={`${colorClass} ${selectedOption === option.id ? "ring-8 ring-white ring-opacity-50" : ""} h-24 text-xl relative overflow-hidden`}
-                      onClick={() => setSelectedOption(option.id)}
-                      disabled={isSubmitting}
-                    >
-                      <div className="flex items-center space-x-4 w-full">
-                        <div className="text-4xl font-black opacity-80">{shape}</div>
-                        <span className="flex-1 text-left font-black">{option.text}</span>
-                      </div>
-                    </Button>
-                  )
-                })}
-              </div>
-            ) : (
-              <div className="space-y-4">
-                <Textarea
-                  value={textAnswer}
-                  onChange={(e) => setTextAnswer(e.target.value)}
-                  placeholder="Type your answer here..."
-                  className="resize-none h-32 border-4 border-purple-200 focus:border-purple-400 text-lg font-semibold rounded-xl"
-                  disabled={isSubmitting}
-                />
-              </div>
-            )}
-
-            <Button
-              onClick={handleSubmitAnswer}
-              disabled={!canSubmit || isSubmitting}
-              className="w-full kahoot-primary-button h-16 text-xl"
-              size="lg"
-            >
-              {isSubmitting ? "Submitting..." : "Submit Answer"}
-            </Button>
-          </CardContent>
-        </Card>
-
-        {/* Connection Status */}
-        <div className="text-center">
-          <span
-            className={`text-lg font-bold px-4 py-2 rounded-full ${isConnected ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}
+        {showFeedback && (
+          <div
+            className={`mt-4 text-center font-bold text-xl ${
+              isCorrect ? "text-green-600" : "text-red-600"
+            }`}
           >
-            {isConnected ? "🟢 Connected" : "🔴 Disconnected"}
-          </span>
-        </div>
-      </div>
+            {isCorrect ? "Correct!" : "Incorrect!"}
+          </div>
+        )}
+      </Card>
     </div>
   )
 }

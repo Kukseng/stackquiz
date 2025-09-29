@@ -20,7 +20,7 @@ export class QuizWebSocket {
     if (isDevelopment) {
       this.isMockMode = true
       this.url = "" // Not needed for mock mode
-      console.log("[v0] Starting in mock WebSocket mode for development")
+      console.log("Starting in mock WebSocket mode for development")
     } else {
       this.url = `wss://stackquiz-api.stackquiz.me/ws?participantId=${participantId}&sessionId=${sessionId}`
     }
@@ -30,7 +30,7 @@ export class QuizWebSocket {
     return new Promise((resolve) => {
       try {
         if (this.isMockMode) {
-          console.log("[v0] Using mock WebSocket for development")
+          console.log("Using mock WebSocket for development")
           this.setupMockWebSocket()
           resolve()
           return
@@ -70,7 +70,7 @@ export class QuizWebSocket {
 
         setTimeout(() => {
           if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
-            console.log("[v0] WebSocket connection timeout, switching to mock mode")
+            console.log("WebSocket connection timeout, switching to mock mode")
             this.ws.close()
             this.ws = null
             this.isMockMode = true
@@ -121,11 +121,11 @@ export class QuizWebSocket {
   }
 
   private setupMockWebSocket() {
-    console.log("[v0] Setting up mock WebSocket")
+    console.log("Setting up mock WebSocket")
 
     // Simulate connection success after a short delay
     setTimeout(() => {
-      console.log("[v0] Mock WebSocket connected")
+      console.log("Mock WebSocket connected")
 
       // Simulate quiz start after 3 seconds
       setTimeout(() => {
@@ -139,7 +139,7 @@ export class QuizWebSocket {
 
   sendMessage(message: { type: string; [key: string]: unknown }) {
     if (this.isMockMode) {
-      console.log("[v0] Mock WebSocket sending message:", message)
+      console.log("Mock WebSocket sending message:", message)
       setTimeout(() => {
         if (message.type === "answer_submit") {
           this.handleMessage({
@@ -167,7 +167,7 @@ export class QuizWebSocket {
       this.ws.close()
       this.ws = null
     }
-    console.log("[v0] WebSocket disconnected")
+    console.log("WebSocket disconnected")
   }
 }
 

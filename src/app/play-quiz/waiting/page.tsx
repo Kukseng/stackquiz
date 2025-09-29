@@ -106,14 +106,13 @@ export default function Page() {
               ></div>
             </div>
           </div>
-
-          <Button
+          {/* <Button
             onClick={handleStartQuiz}
             className="w-full kahoot-primary-button h-16 text-xl"
             disabled={!isConnected}
           >
             {isConnected ? "🚀 Start Quiz" : "Waiting for Connection..."}
-          </Button>
+          </Button> */}
         </CardContent>
       </Card>
     </div>

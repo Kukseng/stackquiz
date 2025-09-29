@@ -64,7 +64,7 @@ export default function Page(){
   }
 
   return (
-    <div className="min-h-screen quiz-background flex items-center justify-center p-4 relative">
+    <div className="min-h-screen flex items-center justify-center p-4 relative">
       <div className="kahoot-shape kahoot-triangle" style={{ top: "10%", left: "15%", animationDelay: "0s" }}></div>
       <div className="kahoot-shape kahoot-circle" style={{ top: "20%", right: "20%", animationDelay: "1s" }}></div>
       <div className="kahoot-shape kahoot-square" style={{ bottom: "25%", left: "10%", animationDelay: "2s" }}></div>
@@ -83,12 +83,7 @@ export default function Page(){
         </CardHeader>
         <CardContent className="space-y-8">
           <div className="text-center space-y-6">
-            <div className="flex items-center justify-center space-x-3 text-green-600 bg-green-50 p-4 rounded-xl border-2 border-green-200">
-              <Trophy className="w-8 h-8" />
-              <span className="text-3xl font-black">+{pointsEarned} points</span>
-            </div>
-
-            {lastAnswer && (
+            {/* {lastAnswer && (
               <div className="bg-green-50 p-6 rounded-xl space-y-4 border-4 border-green-200">
                 <p className="text-sm text-gray-600 font-bold uppercase tracking-wide">Question:</p>
                 <p className="font-black text-gray-800 text-lg">{lastAnswer.questionText}</p>
@@ -103,10 +98,9 @@ export default function Page(){
                   <span className="font-bold">Answered in {lastAnswer.timeTaken}s</span>
                 </div>
               </div>
-            )}
-          </div>
-
-          {showNextButton && (
+            )} */}
+          </div> 
+           {showNextButton && (
             <div className="space-y-4">
               <Button onClick={handleNextQuestion} className="w-full kahoot-answer-green h-16 text-xl" size="lg">
                 <ArrowRight className="w-6 h-6 mr-3" />

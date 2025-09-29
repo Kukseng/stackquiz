@@ -64,7 +64,7 @@ export default function Page() {
   }
 
   return (
-    <div className="min-h-screen quiz-background flex items-center justify-center p-4 bg-gradient-to-br from-purple-50 to-rose-100">
+    <div className="min-h-screen flex items-center justify-center p-4">
       <Card className="w-full max-w-lg quiz-card">
         <CardHeader className="text-center pb-4">
           <div className="mx-auto mb-4">
@@ -78,8 +78,7 @@ export default function Page() {
         <CardContent className="space-y-6">
           <div className="text-center space-y-4">
             <p className="text-red-600 font-semibold text-lg">Better luck next time!</p>
-
-            {lastAnswer && (
+            {/* {lastAnswer && (
               <div className="bg-red-50 p-4 rounded-lg space-y-2 border border-red-200">
                 <p className="text-sm text-gray-600 font-medium">Question:</p>
                 <p className="font-semibold text-gray-800">{lastAnswer.questionText}</p>
@@ -104,10 +103,10 @@ export default function Page() {
                   <span className="font-medium">Answered in {lastAnswer.timeTaken}s</span>
                 </div>
               </div>
-            )}
+            )} */}
           </div>
 
-          {showNextButton && (
+          {/* {showNextButton && (
             <div className="space-y-3">
               <Button
                 onClick={handleNextQuestion}
@@ -142,7 +141,7 @@ export default function Page() {
                 ></div>
               </div>
             </div>
-          )}
+          )} */}
         </CardContent>
       </Card>
     </div>

@@ -23,7 +23,7 @@ export function Navbar() {
   const { data: session } = useSession();
 
   const navLinks = [
-    { name: t.navbar.home, href: "/" },
+    { name: t.navbar.home, href: "/home" },
     { name: t.navbar.explore, href: "/explore" },
     { name: t.navbar.live, href: "/join-room" },
     { name: t.navbar.about, href: "/about" },

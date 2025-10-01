@@ -1,33 +1,57 @@
-import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 
-export interface JoinQuizRequest {
-  quizCode: string;
-  nickname: string;
-}
+import { baseApi } from "./baseApi";
+import type {
+  JoinSessionRequest,
+  ParticipantResponse,
+  SubmitAnswerRequest,
+} from "./types/common";
 
-export interface ParticipantResponse {
-  id: string;
-  nickname: string;
-  sessionCode: string;
-  sessionName: string;
-  totalScore: number;
-  joinedAt: string;
-}
-
-export const participantApi = createApi({
-  reducerPath: 'participantApi',
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    credentials: "include",
+export const participantApi = baseApi.injectEndpoints({
+  endpoints: (b) => ({
+    joinSession: b.mutation<ParticipantResponse, JoinSessionRequest>({
+      query: (body) => ({ url: "participants/join", method: "POST", body }),
+      invalidatesTags: ["Participant"],
     }),
-  endpoints: (builder) => ({
-    joinQuiz: builder.mutation<ParticipantResponse, JoinQuizRequest>({
+    submitAnswer: b.mutation<any, SubmitAnswerRequest>({
       query: (body) => ({
-        url: '/participants/join',
-        method: 'POST',
+        url: "participants/submit-answer",
+        method: "POST",
         body,
       }),
     }),
+    getSessionParticipants: b.query<
+      ParticipantResponse[],
+      { quizCode: string }
+    >({
+      query: ({ quizCode }) => `participants/session/${quizCode}`,
+      providesTags: ["Participant"],
+    }),
+    removeParticipant: b.mutation<void, { participantId: string }>({
+      query: ({ participantId }) => ({
+        url: `participants/${participantId}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Participant"],
+    }),
+    nicknameAvailable: b.query<boolean, { quizCode: string; nickname: string }>(
+      {
+        query: ({ quizCode, nickname }) =>
+          `participants/session/${quizCode}/nickname-available?nickname=${encodeURIComponent(
+            nickname
+          )}`,
+      }
+    ),
+    canJoin: b.query<boolean, { quizCode: string }>({
+      query: ({ quizCode }) => `participants/session/${quizCode}/can-join`,
+    }),
   }),
 });
-
-export const { useJoinQuizMutation } = participantApi;
+export const {
+  useJoinSessionMutation,
+  useSubmitAnswerMutation,
+  useGetSessionParticipantsQuery,
+  useRemoveParticipantMutation,
+  useNicknameAvailableQuery,
+  useCanJoinQuery,
+} = participantApi;

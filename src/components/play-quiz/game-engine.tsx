@@ -271,7 +271,7 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
       </Card>
 
       {/* Timer Bar */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md border-t p-4 shadow-lg">
+      {/* <div className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md border-t p-4 shadow-lg">
         <div className="container mx-auto max-w-4xl">
           <div className="flex items-center justify-center">
             <div className={`w-full max-w-lg h-3 bg-gray-200 rounded-full overflow-hidden`}>
@@ -282,7 +282,7 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
             </div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
 
     {/* Time Up Alert */}

@@ -1,71 +1,29 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-// src/services/participantAnswerApi.ts
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export const participantAnswerApi = createApi({
-  reducerPath: "participantAnswerApi",
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL,
-    credentials: "include",
-   }),
-  tagTypes: ["Answer"],
-  endpoints: (builder) => ({
-    updateAnswer: builder.mutation({
-      query: ({ answerId, ...body }) => ({
-        url: `/answers/${answerId}`,
-        method: "PUT",
-        body,
-      }),
-      invalidatesTags: (result, error, { answerId }) => [
-        { type: "Answer", id: answerId },
-      ],
+import { baseApi } from "./baseApi";
+import type { SubmitAnswerRequest, ParticipantAnswerResponse } from "./types/common";
+
+export const answerApi = baseApi.injectEndpoints({
+  endpoints: (b) => ({
+    submit: b.mutation<ParticipantAnswerResponse, SubmitAnswerRequest>({
+      query: (body) => ({ url: "answers/submit", method: "POST", body }),
+      invalidatesTags: ["ParticipantAnswer","Leaderboard"],
     }),
-
-    submitAnswer: builder.mutation({
-      query: (body) => ({
-        url: `/answers/submit`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Answer"],
+    submitBulk: b.mutation<ParticipantAnswerResponse[], SubmitAnswerRequest[]>({
+      query: (body) => ({ url: "answers/submit/bulk", method: "POST", body }),
+      invalidatesTags: ["ParticipantAnswer","Leaderboard"],
     }),
-
-    submitBulkAnswers: builder.mutation({
-      query: (body) => ({
-        url: `/answers/submit/bulk`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Answer"],
+    getByParticipant: b.query<ParticipantAnswerResponse[], { participantId: string }>({
+      query: ({ participantId }) => `answers/participant/${participantId}`,
+      providesTags: ["ParticipantAnswer"],
     }),
-
-    getAnswersByParticipant: builder.query({
-      query: (participantId) => `/answers/participant/${participantId}`,
-      providesTags: (result, error, participantId) =>
-        result
-          ? [
-              ...result.map(({ answerId }: any) => ({
-                type: "Answer" as const,
-                id: answerId,
-              })),
-              { type: "Answer", id: `PARTICIPANT-${participantId}` },
-            ]
-          : [{ type: "Answer", id: `PARTICIPANT-${participantId}` }],
+    getOne: b.query<ParticipantAnswerResponse, { participantId: string; questionId: string }>({
+      query: ({ participantId, questionId }) => `answers/participant/${participantId}/question/${questionId}`,
+      providesTags: ["ParticipantAnswer"],
     }),
-
-    getAnswerByParticipantAndQuestion: builder.query({
-      query: ({ participantId, questionId }) =>
-        `/answers/participant/${participantId}/question/${questionId}`,
-      providesTags: (result, error, { participantId, questionId }) => [
-        { type: "Answer", id: `${participantId}-${questionId}` },
-      ],
+    update: b.mutation<ParticipantAnswerResponse, { answerId: string; body: SubmitAnswerRequest }>({
+      query: ({ answerId, body }) => ({ url: `answers/${answerId}`, method: "PUT", body }),
+      invalidatesTags: ["ParticipantAnswer","Leaderboard"],
     }),
   }),
 });
-
-export const {
-  useUpdateAnswerMutation,
-  useSubmitAnswerMutation,
-  useSubmitBulkAnswersMutation,
-  useGetAnswersByParticipantQuery,
-  useGetAnswerByParticipantAndQuestionQuery,
-} = participantAnswerApi;
+export const { useSubmitMutation, useSubmitBulkMutation, useGetByParticipantQuery, useGetOneQuery, useUpdateMutation } = answerApi;

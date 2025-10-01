@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
-import { Trophy, Clock, Target, RotateCcw, Share2, Medal } from "lucide-react"
+import { RotateCcw } from "lucide-react"
 import type { Quiz, GameResults } from "@/app/play/page"
 import { useWebSocket } from "../../context/websocket-context"
 import Image from "next/image"
@@ -31,19 +31,6 @@ export function ResultsSystem({ results, quiz, onPlayAgain, playerNickname }: Re
   }
 
   const performance = getPerformanceMessage()
-
-  const handleShare = () => {
-    const shareText = `I just scored ${results.score}/${totalPossiblePoints} points (${percentage}%) on "${quiz.title}" quiz! 🎯`
-    if (navigator.share) {
-      navigator.share({
-        title: "Quiz Results",
-        text: shareText,
-        url: window.location.href,
-      })
-    } else {
-      navigator.clipboard.writeText(shareText)
-    }
-  }
 
 return (
   <div className="min-h-screen p-8 ">

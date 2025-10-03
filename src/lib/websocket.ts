@@ -21,8 +21,8 @@ export class QuizWebSocket {
 
     if (isDevelopment) {
       this.isMockMode = true
-      this.url = ""
-      console.log(`[v0] Starting in mock WebSocket mode (${this.role})`)
+      this.url = "" // Not needed for mock mode
+      console.log("Starting in mock WebSocket mode for development")
     } else {
       const baseUrl = `wss://stackquiz-api.stackquiz.me/ws`
       if (role === "participant" && participantId) {
@@ -37,7 +37,7 @@ export class QuizWebSocket {
     return new Promise((resolve) => {
       try {
         if (this.isMockMode) {
-          console.log(`[v0] Using mock WebSocket for ${this.role}`)
+          console.log("Using mock WebSocket for development")
           this.setupMockWebSocket()
           resolve()
           return
@@ -74,6 +74,17 @@ export class QuizWebSocket {
           this.setupMockWebSocket()
           resolve()
         }
+
+        setTimeout(() => {
+          if (this.ws && this.ws.readyState === WebSocket.CONNECTING) {
+            console.log("WebSocket connection timeout, switching to mock mode")
+            this.ws.close()
+            this.ws = null
+            this.isMockMode = true
+            this.setupMockWebSocket()
+            resolve()
+          }
+        }, 5000)
       } catch (error) {
         console.log("[v0] WebSocket setup error, using mock mode:", error)
         this.isMockMode = true
@@ -129,18 +140,37 @@ export class QuizWebSocket {
   }
 
   private setupMockWebSocket() {
-    console.log(`[v0] Setting up mock WebSocket for ${this.role}`)
+    console.log("Setting up mock WebSocket")
+
+    // Simulate connection success after a short delay
     setTimeout(() => {
-      this.handleMessage({
-        type: this.role === "participant" ? "quiz_start" : "participant_join",
-        data: { message: `Mock event for ${this.role}` },
-      })
-    }, 2000)
+      console.log("Mock WebSocket connected")
+
+      // Simulate quiz start after 3 seconds
+      setTimeout(() => {
+        this.handleMessage({
+          type: "quiz_start",
+          data: { message: "Quiz is starting!" },
+        })
+      }, 3000)
+    }, 1000)
   }
 
   sendMessage(message: { type: string; [key: string]: unknown }) {
     if (this.isMockMode) {
-      console.log(`[v0] Mock ${this.role} sending:`, message)
+      console.log("Mock WebSocket sending message:", message)
+      setTimeout(() => {
+        if (message.type === "answer_submit") {
+          this.handleMessage({
+            type: "answer_result",
+            data: {
+              isCorrect: Math.random() > 0.5,
+              correctAnswer: "Mock Answer",
+              explanation: "This is a mock response",
+            },
+          })
+        }
+      }, 1000)
       return
     }
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
@@ -153,7 +183,7 @@ export class QuizWebSocket {
       this.ws.close()
       this.ws = null
     }
-    console.log(`[v0] ${this.role} WebSocket disconnected`)
+    console.log("WebSocket disconnected")
   }
 }
 

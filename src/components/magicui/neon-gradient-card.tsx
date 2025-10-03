@@ -7,7 +7,7 @@ import {
   HTMLAttributes,
 } from "react";
 
-import { cn } from "/lib/utils";
+import { cn } from "@/lib/utils";
 
 interface NeonColorsProps {
   firstColor: string;
@@ -37,19 +37,17 @@ interface NeonGradientCardProps extends HTMLAttributes<HTMLDivElement> {
    * Neon gradient colors
    */
   neonColors?: NeonColorsProps;
-<<<<<<< HEAD
-=======
 
   [key: string]: unknown;
->>>>>>> 42b2f306aa65056394f65a4fb17915b656817c64
 }
+
 export const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
   className,
   children,
   borderSize = 2,
   borderRadius = 20,
   neonColors = { firstColor: "#ff00aa", secondColor: "#00FFF1" },
-  ...props // now type-safe, can include any div props
+  ...props
 }) => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
@@ -95,7 +93,7 @@ export const NeonGradientCard: React.FC<NeonGradientCardProps> = ({
         "relative z-10 size-full rounded-[var(--border-radius)]",
         className
       )}
-      {...props} // safely forwards all div props
+      {...props}
     >
       <div
         className={cn(

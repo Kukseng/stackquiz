@@ -25,7 +25,7 @@ export default function OrganizerSession({ quizId, hostName }: OrganizerSessionP
     async function init() {
       try {
         // 1️⃣ Create session
-        const session = await createSession(quizId, hostName, token);
+        const session = await createSession(quizId, hostName);
         console.log("✅ Session created:", session);
 
         setSessionId(session.id);

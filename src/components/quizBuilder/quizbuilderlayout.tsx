@@ -35,20 +35,16 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
   const [selectedTheme, setSelectedTheme] = useState("pink");
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // Use RTK Query to fetch quiz data - only when in edit mode
   const { data: quiz, isLoading, error, refetch } = useGetQuizByIdQuery(quizId!, {
     skip: !quizId,
   });
 
-  // Load quiz data when fetched - only once
   useEffect(() => {
-    // Skip if no quiz data or already loaded
     if (!quiz || isDataLoaded) return;
 
     const formattedQuestions = quiz.questions.map((q: any) => ({
       id: q.id,
       type: q.type === "TF" ? "truefalse" : q.type.toLowerCase(),
-      // Fix text formatting: replace underscores with spaces and properly format
       question: q.text.replaceAll("_", " "),
       options: q.options.map((o: any) => ({
         id: o.id,
@@ -114,15 +110,15 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
 
       <div className="flex w-full">
         <QuizSidebar
-          questions={questions}
+          questions={questions as any}
           activeQuestionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
           onQuestionSelect={setActiveQuestionId}
           onAddQuestion={() => setShowAddQuestionModal(true)}
         />
 
         <QuizMainContent
-          questions={questions}
-          activeQuestionId={activeQuestionId}
+          questions={questions as any}
+          activeQuestionId={activeQuestionId as any}
           onUpdateQuestionText={updateQuestionText}
           onUpdateOptionText={updateOptionText}
           onToggleCorrectAnswer={toggleCorrectAnswer}
@@ -140,7 +136,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
 
       {showDeleteModal && activeQuestionId && (
         <DeleteQuestionModal
-          questionId={activeQuestionId}
+          questionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
           onClose={() => setShowDeleteModal(false)}
           onDelete={handleDelete}
         />

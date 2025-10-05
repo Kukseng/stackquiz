@@ -2,8 +2,7 @@
 
 import * as React from "react";
 import { useRouter } from "next/navigation";
-// import { useRouter } from "next/navigation";
-import { motion} from "framer-motion";
+import { motion } from "framer-motion";
 import InputArea from "@/components/joinroom/InputArea";
 import Image from "next/image";
 import { useLanguage } from "@/context/LanguageContext";
@@ -13,34 +12,37 @@ import kh from "@/locales/km.json";
 export default function JoinRoomHero() {
   const [code, setCode] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [particles, setParticles] = React.useState<{ left: string; top: string }[]>([]);
+
   const router = useRouter();
-   const { language} = useLanguage();
+  const { language } = useLanguage();
   const t = language === "en" ? en.inputArea : kh.inputArea;
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
   const onSubmit = async () => {
     const clean = code.trim();
     if (!clean) return;
-
     setIsLoading(true);
-
-    // Simulate API validation (replace with actual validation)
     await new Promise((resolve) => setTimeout(resolve, 1000));
-
     router.push(`/room/${encodeURIComponent(clean)}`);
   };
 
-  // Background decoration components
+  // ✅ បង្កើត particles តែម្ដងនៅ client (មិន SSR)
+  React.useEffect(() => {
+    const randomParticles = Array.from({ length: 6 }).map(() => ({
+      left: `${Math.random() * 100}%`,
+      top: `${Math.random() * 100}%`,
+    }));
+    setParticles(randomParticles);
+  }, []);
+
   const BackgroundDecorations = () => (
     <>
       {/* Animated wavy elements */}
       <motion.div
         className="absolute left-[-220px] bottom-[-340px] w-[540px] h-[540px] opacity-60 pointer-events-none select-none -z-10"
         initial={{ rotate: 0, scale: 0.8 }}
-        animate={{
-          rotate: 360,
-          scale: [0.8, 1, 0.8],
-        }}
+        animate={{ rotate: 360, scale: [0.8, 1, 0.8] }}
         transition={{
           duration: 20,
           repeat: Infinity,
@@ -48,14 +50,7 @@ export default function JoinRoomHero() {
           scale: { duration: 10, repeat: Infinity, repeatType: "reverse" },
         }}
       >
-        <Image
-          src="/wavy.svg"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          fill
-          style={{ objectFit: "contain" }}
-        />
+        <Image src="/wavy.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
       <motion.div
@@ -64,75 +59,33 @@ export default function JoinRoomHero() {
         animate={{ rotate: -360 }}
         transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
       >
-        <Image
-          src="/wavy.svg"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          fill
-          style={{ objectFit: "contain" }}
-        />
+        <Image src="/wavy.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
       {/* Pulsing circles */}
       <motion.div
         className="absolute left-[-340px] top-[-100px] w-[620px] h-[620px] opacity-40 pointer-events-none select-none -z-10"
-        animate={{
-          scale: [1, 1.1, 1],
-          opacity: [0.4, 0.6, 0.4],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut",
-        }}
+        animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.6, 0.4] }}
+        transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
-        <Image
-          src="/circle3d.svg"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          fill
-          style={{ objectFit: "contain" }}
-        />
+        <Image src="/circle3d.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
       <motion.div
         className="absolute right-[-240px] bottom-[-220px] w-[620px] h-[620px] opacity-40 pointer-events-none select-none -z-10"
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.4, 0.7, 0.4],
-        }}
-        transition={{
-          duration: 12,
-          repeat: Infinity,
-          ease: "easeInOut",
-          delay: 2,
-        }}
+        animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
+        transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       >
-        <Image
-          src="/circle3d.svg"
-          alt=""
-          aria-hidden="true"
-          draggable={false}
-          fill
-          style={{ objectFit: "contain" }}
-        />
+        <Image src="/circle3d.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
-      {/* floating particles */}
-      {Array.from({ length: 6 }).map((_, i) => (
+      {/* ✅ floating particles បង្កើតតែម្ដងនៅ client */}
+      {particles.map((pos, i) => (
         <motion.div
           key={i}
           className="absolute w-2 h-2 bg-yellow-400/30 rounded-full pointer-events-none"
-          style={{
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-          }}
-          animate={{
-            y: [-10, -30, -10],
-            opacity: [0.3, 0.8, 0.3],
-          }}
+          style={pos}
+          animate={{ y: [-10, -30, -10], opacity: [0.3, 0.8, 0.3] }}
           transition={{
             duration: 4 + Math.random() * 4,
             repeat: Infinity,
@@ -164,10 +117,7 @@ export default function JoinRoomHero() {
             transition={{ duration: 0.6, type: "spring", stiffness: 100 }}
           >
             <div className="flex items-center justify-center gap-4 mb-4">
-              <motion.div
-                whileHover={{ scale: 1.1, rotate: 10 }}
-                transition={{ type: "spring", stiffness: 300 }}
-              >
+              <motion.div whileHover={{ scale: 1.1, rotate: 10 }} transition={{ type: "spring", stiffness: 300 }}>
                 <Image
                   src="/logo-sq.png"
                   alt="StackQuiz Logo"
@@ -249,7 +199,7 @@ export default function JoinRoomHero() {
         </motion.section>
       </main>
 
-      {/* Custom styles for shake animation */}
+      {/* Custom styles */}
       <style jsx>{`
         @keyframes shake {
           0%,

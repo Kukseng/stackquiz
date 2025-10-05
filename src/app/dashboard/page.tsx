@@ -5,15 +5,10 @@ import Image from "next/image";
 import { Search } from "lucide-react";
 import ChallengeGrid from "@/components/GridCardComponent";
 import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
+
 interface Category {
   id: string;
   name: string;
-}
-
-interface Challenge {
-  id: number;
-  title: string;
-  difficulty: string;
 }
 
 const DashboardPage = () => {
@@ -23,29 +18,6 @@ const DashboardPage = () => {
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");
 
   const { data: categories, isLoading, isError } = useGetCategoriesQuery();
-
-  const challenges: Challenge[] = [
-    { id: 1, title: "Math Quiz", difficulty: "Easy" },
-    { id: 2, title: "React Basics", difficulty: "Medium" },
-    { id: 3, title: "Algorithms", difficulty: "Hard" },
-    { id: 4, title: "History Facts", difficulty: "Easy" },
-    { id: 5, title: "Computer Science", difficulty: "Medium" },
-  ];
-
-  // Filter challenges and limit to 3 cards
-  const filteredChallenges = challenges
-    .filter((c) =>
-      selectedDifficulty === "All" ? true : c.difficulty === selectedDifficulty
-    )
-    .filter((c) =>
-      selectedCategory === "All"
-        ? true
-        : categories?.find((cat) => cat.id === selectedCategory)?.name === selectedCategory
-    )
-    .filter((c) =>
-      searchTerm ? c.title.toLowerCase().includes(searchTerm.toLowerCase()) : true
-    )
-    .slice(0, 3); // ✅ Limit to 3 cards
 
   return (
     <div className="p-4 sm:p-6 lg:p-8">
@@ -126,7 +98,11 @@ const DashboardPage = () => {
         <h2 className="text-lg sm:text-xl font-bold text-gray-800 mb-4 sm:mb-6">
           Templates
         </h2>
-        <ChallengeGrid challenges={filteredChallenges} />
+        <ChallengeGrid 
+  selectedDifficulty={selectedDifficulty}
+  searchTerm={searchTerm}
+  selectedCategory={selectedCategory}
+/>
       </div>
     </div>
   );

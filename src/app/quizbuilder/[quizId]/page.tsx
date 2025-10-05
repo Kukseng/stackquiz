@@ -1,17 +1,12 @@
-"use client";
-
 import { QuizBuilderLayout } from "@/components/quizBuilder/quizbuilderlayout";
-import * as React from "react";
 
 interface QuizBuilderPageProps {
-  params: { quizId: string } | Promise<{ quizId: string }>;
+  params: Promise<{ quizId: string }>;
 }
 
-export default function QuizBuilderPage({ params }: QuizBuilderPageProps) {
-  const unwrappedParams = React.use(params); 
-  const { quizId } = unwrappedParams;
-
-  if (!quizId) return <p>Invalid quiz</p>;
-
+export default async function QuizBuilderPage({ params }: QuizBuilderPageProps) {
+  const { quizId } = await params;
+  
+  // example: const quiz = await fetchQuiz(quizId);
   return <QuizBuilderLayout quizId={quizId} />;
 }

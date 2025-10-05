@@ -3,9 +3,8 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
 import { ChevronDown } from "lucide-react";
-
+import Image from "next/image";
 type UserProfile = {
   id: string;
   profileUser?: string;
@@ -149,7 +148,9 @@ export default function ProfilePage() {
             avatarUrlFromUpload = json.avatarUrl || json.url || undefined;
           } else {
             // If upload endpoint doesn't exist or failed, we'll fallback to embedding base64 in PUT below
-            console.warn("avatar upload endpoint failed, fallback to base64 in PUT");
+            console.warn(
+              "avatar upload endpoint failed, fallback to base64 in PUT"
+            );
           }
         } catch (err) {
           console.warn("avatar upload attempt failed:", err);
@@ -262,7 +263,8 @@ export default function ProfilePage() {
                 />
               ) : (
                 <div className="w-20 h-20 bg-gray-300 rounded-full flex items-center justify-center text-3xl font-bold text-gray-700 border-2 border-orange-400">
-                  {profile.firstName?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase()}
+                  {profile.firstName?.[0]?.toUpperCase() ||
+                    profile.username?.[0]?.toUpperCase()}
                 </div>
               )}
             </div>
@@ -274,7 +276,12 @@ export default function ProfilePage() {
                   : profile.username}
               </h2>
               <p className="text-gray-500 text-sm">{profile.email}</p>
-              <p className="text-xs text-gray-400 mt-1">Member since: {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : "N/A"}</p>
+              <p className="text-xs text-gray-400 mt-1">
+                Member since:{" "}
+                {profile.createdAt
+                  ? new Date(profile.createdAt).toLocaleDateString()
+                  : "N/A"}
+              </p>
             </div>
           </div>
 
@@ -334,14 +341,23 @@ export default function ProfilePage() {
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {/* Avatar upload */}
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Avatar</label>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Avatar
+            </label>
             <div className="flex items-center gap-4">
               <div className="w-24 h-24 relative rounded-full overflow-hidden border-2 border-gray-200">
                 {avatarPreview ? (
-                  <img src={avatarPreview} alt="avatar preview" className="w-full h-full object-cover" />
+                  <Image
+                    src={avatarPreview}
+                    alt="avatar preview"
+                    width={200}
+                    height={200}
+                    className="w-full h-full object-cover rounded-full"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center bg-gray-100 text-gray-500">
-                    {profile.firstName?.[0]?.toUpperCase() || profile.username?.[0]?.toUpperCase()}
+                    {profile.firstName?.[0]?.toUpperCase() ||
+                      profile.username?.[0]?.toUpperCase()}
                   </div>
                 )}
               </div>
@@ -355,103 +371,167 @@ export default function ProfilePage() {
                   id="avatar"
                   className="text-sm"
                 />
-                <p className="text-xs text-gray-500 mt-1">PNG, JPG. Max size: depends on backend.</p>
+                <p className="text-xs text-gray-500 mt-1">
+                  PNG, JPG. Max size: depends on backend.
+                </p>
               </div>
             </div>
           </div>
 
           {/* First Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              First Name
+            </label>
             <input
               type="text"
               value={form.firstName}
               readOnly={!isEditing}
-              onChange={(e) => setForm((p) => ({ ...p, firstName: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, firstName: e.target.value }))
+              }
+              className={`w-full rounded-xl border px-4 py-2 ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
 
           {/* Last Name */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Last Name
+            </label>
             <input
               type="text"
               value={form.lastName}
               readOnly={!isEditing}
-              onChange={(e) => setForm((p) => ({ ...p, lastName: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, lastName: e.target.value }))
+              }
+              className={`w-full rounded-xl border px-4 py-2 ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
 
           {/* Username */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Username</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Username
+            </label>
             <input
               type="text"
               value={form.username}
               readOnly={!isEditing}
-              onChange={(e) => setForm((p) => ({ ...p, username: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, username: e.target.value }))
+              }
+              className={`w-full rounded-xl border px-4 py-2 ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
 
           {/* Email */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Email
+            </label>
             <input
               type="email"
               value={form.email}
               readOnly={!isEditing}
-              onChange={(e) => setForm((p) => ({ ...p, email: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, email: e.target.value }))
+              }
+              className={`w-full rounded-xl border px-4 py-2 ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
 
           {/* Password */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Password (leave blank to keep)</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Password (leave blank to keep)
+            </label>
             <input
               type="password"
               value={form.password}
               readOnly={!isEditing}
-              onChange={(e) => setForm((p) => ({ ...p, password: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, password: e.target.value }))
+              }
+              className={`w-full rounded-xl border px-4 py-2 ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
 
           {/* Profile Type */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Profile Type</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Profile Type
+            </label>
             <input
               type="text"
               value={form.profileUser}
               readOnly={!isEditing}
-              onChange={(e) => setForm((p) => ({ ...p, profileUser: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, profileUser: e.target.value }))
+              }
+              className={`w-full rounded-xl border px-4 py-2 ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
 
           {/* Phone */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Phone
+            </label>
             <input
               type="text"
               value={form.phone}
               readOnly={!isEditing}
-              onChange={(e) => setForm((p) => ({ ...p, phone: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              onChange={(e) =>
+                setForm((p) => ({ ...p, phone: e.target.value }))
+              }
+              className={`w-full rounded-xl border px-4 py-2 ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
 
           {/* Bio */}
           <div className="sm:col-span-2">
-            <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Bio
+            </label>
             <textarea
               value={form.bio}
               readOnly={!isEditing}
               onChange={(e) => setForm((p) => ({ ...p, bio: e.target.value }))}
-              className={`w-full rounded-xl border px-4 py-2 min-h-[80px] ${isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"}`}
+              className={`w-full rounded-xl border px-4 py-2 min-h-[80px] ${
+                isEditing
+                  ? "bg-white border-gray-300"
+                  : "bg-gray-50 border-gray-200 text-gray-600"
+              }`}
             />
           </div>
         </div>

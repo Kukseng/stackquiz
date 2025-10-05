@@ -27,6 +27,12 @@ interface Category {
   description: string;
 }
 
+interface CategoryResponse {
+  id: string;
+  name: string;
+  description?: string;
+}
+
 interface DefaultValues {
   title: string;
   description: string;
@@ -150,12 +156,11 @@ export default function PublishModal({
     if (!formData.category) return alert("Please select a category");
     if (quizData.length === 0) return alert("You must add at least one question before publishing.");
 
-    // Transform questions to API format - keep spaces, don't replace with underscores
     const transformedQuestions = quizData.map((q) => ({
-      text: q.question, // Keep original formatting with spaces
+      text: q.question,
       type: q.type.toUpperCase() === "TRUEFALSE" ? "TF" : q.type.toUpperCase(),
       options: q.options.map((opt) => ({
-        optionText: opt.text, // Keep original formatting with spaces
+        optionText: opt.text,
         isCorrected: opt.correct,
       })),
     }));
@@ -184,10 +189,8 @@ export default function PublishModal({
       
       onClose();
       
-      // Navigate to quiz detail page
       const targetQuizId = isEditMode ? quizId : result?.id;
       if (targetQuizId) {
-        // Force a hard navigation to refresh the page
         window.location.href = `/quiz/${targetQuizId}`;
       }
     } catch (error: any) {

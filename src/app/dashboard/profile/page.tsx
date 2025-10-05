@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState, ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
-import { ChevronDown } from "lucide-react";
 import Image from "next/image";
 type UserProfile = {
   id: string;

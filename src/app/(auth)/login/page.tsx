@@ -62,7 +62,7 @@ const LoginForm = () => {
         return;
       }
 
-      // successful login
+    
       router.push("/dashboard");
     } catch (err: any) {
       if (err instanceof z.ZodError) {
@@ -84,7 +84,7 @@ const LoginForm = () => {
       className={`min-h-screen flex flex-col items-center justify-center p-4 ${fontClass}`}
     >
       <div className="flex flex-col md:flex-row w-full max-w-6xl rounded-3xl lg:border-8 border-white/70 transition-transform duration-500 shadow-2xl">
-        {/* Left Side (desktop only) */}
+        {/* Left Side  */}
         <div className="hidden md:flex flex-col items-center justify-center w-1/2 p-6 rounded-l-2xl bg-blue-100 relative overflow-hidden">
           <div className="absolute top-4 left-4 flex items-center space-x-2">
             <Link href="/" className="flex items-center space-x-2">
@@ -102,7 +102,7 @@ const LoginForm = () => {
           </div>
           <div className="mt-8">
             <Image
-              src="/login.png"
+              src="/book.png"
               alt="Login illustration"
               width={400}
               height={400}
@@ -111,7 +111,7 @@ const LoginForm = () => {
           </div>
         </div>
 
-        {/* Right Side (form) */}
+        {/* Right Side  */}
         <div className="flex-1 w-full md:w-1/2 p-4 md:p-6 bg-white rounded-2xl md:rounded-r-2xl md:rounded-l-none">
           <div className="flex justify-end mb-3">
             <button
@@ -145,6 +145,7 @@ const LoginForm = () => {
               onChange={handleChange}
               error={errors.username}
               icon={<FaUser className="text-gray-400 h-4 w-4" />}
+                autoComplete="username" 
             />
             <FormField
               id="password"
@@ -163,6 +164,7 @@ const LoginForm = () => {
                   <HiOutlineEye className="h-4 w-4 text-gray-400 cursor-pointer" />
                 )
               }
+               autoComplete="current-password"
             />
             <button
               type="submit"

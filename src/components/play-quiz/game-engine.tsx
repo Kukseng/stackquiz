@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback } from "react"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Progress } from "@/components/ui/progress"
 import { Badge } from "@/components/ui/badge"
-import { Clock, CheckCircle, XCircle } from "lucide-react"
-import type { Quiz, GameResults } from "@/app/play/page"
+import { Clock} from "lucide-react"
+import type { Quiz, GameResults } from "@/app/play/[id]/page"
 import { MultipleChoiceQuestion } from "../question-type/multiple-choice"
 import { TrueFalseQuestion } from "../question-type/true-false"
 import { FillBlankQuestion } from "@/components/question-type/fill-blank"
@@ -237,17 +237,17 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
       {/* Question */}
       <Card className="mb-8 border-2 border-gray-100 bg-white/80 backdrop-blur-md shadow-xl rounded-2xl overflow-hidden">
         <CardHeader>
-          {currentQuestion.imageUrl && currentQuestion.imageUrl !== "string" && (
+          {/* {currentQuestion.imageUrl && currentQuestion.imageUrl !== "string" && (
             <div className="w-full h-56 mb-4 overflow-hidden rounded-lg">
               <Image
-                src={currentQuestion.imageUrl || "/placeholder.svg"}
+                src={currentQuestion.imageUrl || "/ourImage/heng.svg"}
                 alt="Question"
                 width={800}
                 height={300}
                 className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
               />
             </div>
-          )}
+          )} */}
           <CardTitle className="text-2xl font-semibold text-gray-800 leading-snug">
             {currentQuestion.text.replace(/_/g, " ")}
           </CardTitle>
@@ -269,20 +269,6 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
           )}
         </CardContent>
       </Card>
-
-      {/* Timer Bar */}
-      {/* <div className="fixed bottom-0 left-0 right-0 bg-white/70 backdrop-blur-md border-t p-4 shadow-lg">
-        <div className="container mx-auto max-w-4xl">
-          <div className="flex items-center justify-center">
-            <div className={`w-full max-w-lg h-3 bg-gray-200 rounded-full overflow-hidden`}>
-              <div
-                className={`h-full transition-all duration-1000 ease-linear ${timeLeft <= 10 ? "bg-red-500" : "bg-gradient-to-r from-indigo-500 to-purple-600"}`}
-                style={{ width: `${(timeLeft / currentQuestion.timeLimit) * 100}%` }}
-              />
-            </div>
-          </div>
-        </div>
-      </div> */}
     </div>
 
     {/* Time Up Alert */}

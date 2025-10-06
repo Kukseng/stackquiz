@@ -393,7 +393,7 @@ const QuizDetailPage: React.FC = () => {
 
               <h4 className="font-semibold text-slate-800 mb-3 text-sm">StackQuiz Self-Study</h4>
               <button className="w-full flex items-center justify-between px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-               onClick={() => router.push(`/play`)}>
+               onClick={() => router.push(`/play/${quizId}`)}>
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4" />
                   <span className="font-medium">Play solo</span>

@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Clock, Users, Trophy, Play, AlertCircle } from "lucide-react"
-import type { Quiz } from "@/app/play/[id]/page"
+import type { Quiz } from "@/app/play/quizDetail/[id]/page"
 
 interface QuizSelectionProps {
   onQuizSelect: (quiz: Quiz) => void
@@ -75,8 +75,8 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
   }
 
   return (
-    <div className="container mx-auto lg:px-20 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quizzes.map((quiz) => (
           <Card
             key={quiz.id}

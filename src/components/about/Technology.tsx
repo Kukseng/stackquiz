@@ -9,6 +9,7 @@ import {
   SlidingLogoMarquee,
   SlidingLogoMarqueeItem,
 } from "../ui/SlidingLogoMarquee";
+import { m, microtask } from "framer-motion";
 
 const SECTION_SPACING = {
   sectionGap: "py-16 sm:py-20 lg:py-24 xl:py-28",
@@ -58,7 +59,8 @@ export function TechnologySection() {
   );
 
   return (
-    <section className={`${SECTION_SPACING.containerPadding} ${SECTION_SPACING.sectionGap} ${fontClass}`}>
+    <section className={`${SECTION_SPACING.containerPadding} ${SECTION_SPACING.sectionGap} ${fontClass} ${"mt-[-150ox]"}`}>
+
       {/* Header */}
       <div className={`text-center ${SECTION_SPACING.titleMargin}`}>
         <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">

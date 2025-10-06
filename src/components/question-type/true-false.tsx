@@ -2,7 +2,7 @@
 
 import { Button } from "@/components/ui/button"
 import { Check, X } from "lucide-react"
-import type { Question } from "@/app/play/page"
+import type { Question } from "@/app/play/quizDetail/[id]/page"
 
 interface TrueFalseQuestionProps {
   question: Question

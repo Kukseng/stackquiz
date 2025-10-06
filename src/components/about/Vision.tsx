@@ -11,7 +11,8 @@ export function VisionSection() {
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <ContentSection
+    <div className="mt-[-150px]">
+        <ContentSection
       title={t.vision.title}
       description={t.vision.description}
       imageSrc="/about_svg/aboutus(vision).svg"
@@ -19,5 +20,7 @@ export function VisionSection() {
       reversed={false}
       className={fontClass} 
     />
+    </div>
+  
   );
 }

@@ -70,7 +70,7 @@ const teamMembers = [
   },
   { 
     id: "polin",
-    image: "/mony.jpg", 
+    image: "/ourImage/polin.png", 
     shineColors: ["#8b5cf6", "#f59e0b", "#06b6d4"], 
     socials: { 
       linkedin: "https://github.com/polinchaing", 
@@ -96,7 +96,7 @@ export function TeamsSection() {
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <section className={`relative py-20 text-white overflow-hidden ${fontClass}`}>
+    <section className={`relative py-20 text-white overflow-hidden mt-[-150px] ${fontClass}`}>
       {/* Keyframe Animation */}
       <style jsx>{`
         @keyframes colorCycle {

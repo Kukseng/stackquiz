@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { RotateCcw } from "lucide-react"
-import type { Quiz, GameResults } from "@/app/play/page"
+import type { Quiz, GameResults } from "@/app/play/[id]/page"
 import { useWebSocket } from "../../context/websocket-context"
 import Image from "next/image"
 
@@ -156,6 +156,12 @@ return (
         >
           <RotateCcw className="w-4 h-4 mr-2" />
           Play Again
+        </Button>
+         <Button
+          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md"
+        >
+          <RotateCcw className="w-4 h-4 mr-2" />
+          Exits
         </Button>
       </div>
     </div>

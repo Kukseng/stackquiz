@@ -1,6 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
+import { useParams } from "next/navigation"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
@@ -12,6 +13,7 @@ interface QuizSelectionProps {
 }
 
 export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
+  const { id } = useParams() as { id?: string }   // 👈 get id from URL
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
@@ -22,17 +24,32 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
         setLoading(true)
         setError(null)
 
-        const response = await fetch(`/api/quizzes`)
+        let response: Response
+
+        if (id) {
+          // Fetch a single quiz by ID
+          response = await fetch(`/api/quizzes/${id}`)
+        } else {
+          // Fetch all quizzes
+          response = await fetch(`/api/quizzes`)
+        }
 
         if (!response.ok) {
           throw new Error(`Failed to fetch quizzes: ${response.status}`)
         }
 
-        const data: Quiz[] = await response.json()
+        const data = await response.json()
 
-        const quizzesWithQuestions = data.filter((quiz) => quiz.questions && quiz.questions.length > 0)
-
-        setQuizzes(quizzesWithQuestions)
+        if (id) {
+          // If fetching a single quiz, wrap it in an array for consistency
+          setQuizzes(data ? [data] : [])
+        } else {
+          // Filter only quizzes with questions
+          const quizzesWithQuestions = (data as Quiz[]).filter(
+            (quiz) => quiz.questions && quiz.questions.length > 0
+          )
+          setQuizzes(quizzesWithQuestions)
+        }
       } catch (err) {
         console.error("Error fetching quizzes:", err)
         setError(err instanceof Error ? err.message : "Failed to load quizzes")
@@ -42,7 +59,7 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
     }
 
     fetchQuizzes()
-  }, [])
+  }, [id])
 
   const getDifficultyColor = (difficulty: string) => {
     switch (difficulty.toLowerCase()) {
@@ -56,6 +73,7 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
+
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -75,8 +93,8 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
   }
 
   return (
-    <div className="container mx-auto lg:px-20 py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div className="container mx-auto px-4 py-8">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quizzes.map((quiz) => (
           <Card
             key={quiz.id}
@@ -85,11 +103,11 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
             <CardHeader>
               {quiz.thumbnailUrl && quiz.thumbnailUrl !== "string" && (
                 <div className="w-full h-32 mb-4 rounded-lg overflow-hidden">
-                    <img
-                        src={quiz.thumbnailUrl}
-                        alt={`${quiz.title} Thumbnail`}
-                        className="w-full h-full object-cover"
-                    />  
+                  <img
+                    src={quiz.thumbnailUrl}
+                    alt={`${quiz.title} Thumbnail`}
+                    className="w-full h-full object-cover"
+                  />
                 </div>
               )}
               <CardTitle className="text-xl text-balance">{quiz.title}</CardTitle>
@@ -104,7 +122,10 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
                 </Badge>
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {Math.round(quiz.questions.reduce((acc, q) => acc + q.timeLimit, 0) / quiz.questions.length)}s avg
+                  {Math.round(
+                    quiz.questions.reduce((acc, q) => acc + q.timeLimit, 0) / quiz.questions.length
+                  )}
+                  s avg
                 </Badge>
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Trophy className="w-3 h-3" />
@@ -116,7 +137,7 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
                 onClick={() => onQuizSelect(quiz)}
                 className="w-full bg-primary hover:bg-primary/90 text-[--font-dm-sans] btn-secondary py-3 rounded-lg transition-all duration-200 hover:shadow-md"
               >
-                <Play className="w-4 h-4 mr-2" />
+                <Play className="w-4 h-4 mr-2"/>
                 Start Quiz
               </Button>
             </CardContent>
@@ -126,7 +147,9 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
 
       {quizzes.length === 0 && !loading && (
         <div className="text-center mt-12">
-          <p className="text-muted-foreground">No quizzes available at the moment. Check back later! 🚀</p>
+          <p className="text-muted-foreground">
+            No quizzes available at the moment. Check back later! 🚀
+          </p>
         </div>
       )}
     </div>

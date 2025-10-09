@@ -83,7 +83,7 @@
   "countries": "Countries"
 },
 "createQuiz": {
-    "heading": "Create Amazing",
+    "heading": "Create",
     "subheading": "Engage your audience with interactive quizzes. Play together, learn together.",
     "cta": "Get Started",
     "features": ["No Setup Required", "Real-time Results", "Mobile Friendly"]
@@ -94,7 +94,6 @@
     "aboutUs": "About Us",
     "weAre": "We are passionate about creating fun and interactive",
     "quiz": "quiz experiences that bring people together, test",
-    "knowlage": "knowledge that helps you learn and remember longer",
     "technology": "Our Technology",
     "mentor": "Our Mentors",
     "ourTeam": "Our Team",

@@ -16,9 +16,10 @@ interface Challenge {
   participants: number;
   rating: number;
   image: string;
+  categoryId?: string;
 }
 
-// API response type - Updated to match your actual API structure
+// API response type
 interface QuizAPI {
   id: string;
   title: string;
@@ -26,25 +27,22 @@ interface QuizAPI {
   thumbnailUrl: string;
   visibility: string;
   difficulty: string;
+  categoryId?: string;
+  category_id?: string;
+  category?: string | { id: string; name: string };
   participants?: number;
   rating?: number;
   createdAt: string;
   updatedAt: string;
-  questions: {
-    id: string;
-    text: string;
-    type: string;
-    questionOrder: number;
-    timeLimit: number;
-    points: number;
-    imageUrl: string;
-    createdAt: string;
-    updatedAt: string;
-    options: string[];
-  }[];
+  questions: Array<any>;
 }
 
-// Function to get difficulty-based styling
+interface TemplateCardComponentProps {
+  selectedDifficulty: string;
+  searchTerm: string;
+  selectedCategory: string;
+}
+
 const getDifficultyStyle = (difficulty: string) => {
   switch (difficulty.toUpperCase()) {
     case 'EASY':
@@ -78,28 +76,44 @@ const getDifficultyStyle = (difficulty: string) => {
   }
 };
 
-// Function to validate and fix image URLs
 const getValidImageUrl = (thumbnailUrl: string | null | undefined): string => {
-  // If no thumbnail URL provided, return placeholder
   if (!thumbnailUrl || thumbnailUrl.trim() === "") {
     return "https://via.placeholder.com/300x200?text=No+Image";
   }
   
-  // Check if URL is valid
   try {
     new URL(thumbnailUrl);
     return thumbnailUrl;
   } catch {
-    // If invalid URL, return placeholder
     return "https://via.placeholder.com/300x200?text=Invalid+Image";
   }
 };
 
-export default function TemplateCardComponent() {
+const extractCategoryId = (quiz: QuizAPI): string | undefined => {
+  if (quiz.categoryId && typeof quiz.categoryId === 'string') {
+    return quiz.categoryId;
+  }
+  if (quiz.category_id && typeof quiz.category_id === 'string') {
+    return quiz.category_id;
+  }
+  if (quiz.category && typeof quiz.category === 'object' && 'id' in quiz.category) {
+    return quiz.category.id;
+  }
+  if (quiz.category && typeof quiz.category === 'string') {
+    return quiz.category;
+  }
+  return undefined;
+};
+
+export default function TemplateCardComponent({
+  selectedDifficulty,
+  searchTerm,
+  selectedCategory,
+}: TemplateCardComponentProps) {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
+  const [noCategoryData, setNoCategoryData] = useState(false);
 
   useEffect(() => {
     const fetchChallenges = async () => {
@@ -113,7 +127,6 @@ export default function TemplateCardComponent() {
             method: 'GET',
             headers: {
               'Content-Type': 'application/json',
-              // Add any required headers here
             },
           }
         );
@@ -124,30 +137,48 @@ export default function TemplateCardComponent() {
 
         const data: QuizAPI[] = await res.json();
 
-        // Debug: Log the API response to check data structure
-        console.log("API Response:", data);
+        // Check if ANY quiz has category data
+        const hasCategories = data.some(quiz => extractCategoryId(quiz) !== undefined);
+        setNoCategoryData(!hasCategories);
 
-        // Map API data into our Challenge format
+        if (data.length > 0) {
+          console.log("🔍 API Response Sample:", {
+            firstQuiz: data[0],
+            hasCategoryField: 'category' in data[0],
+            hasCategoryIdField: 'categoryId' in data[0],
+            hasCategory_idField: 'category_id' in data[0],
+          });
+        }
+
+        if (!hasCategories) {
+          console.warn("⚠️ WARNING: No quizzes have category information in the API response!");
+          console.warn("The API needs to return categoryId, category_id, or category field for filtering to work.");
+        }
+
         const mappedChallenges: Challenge[] = data.map((quiz) => {
           const difficultyStyle = getDifficultyStyle(quiz.difficulty);
+          const categoryId = extractCategoryId(quiz);
           
           return {
             id: quiz.id,
             title: quiz.title || "Untitled Quiz",
             questions: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
-            time: "N/A", // Your API doesn't provide time
+            time: "N/A",
             difficulty: quiz.difficulty || "MEDIUM",
+            categoryId: categoryId,
             ...difficultyStyle,
             participants: quiz.participants || 0,
             rating: quiz.rating || 0,
-            image: getValidImageUrl(quiz.thumbnailUrl), // ✅ FIXED with validation
+            image: getValidImageUrl(quiz.thumbnailUrl),
           };
         });
 
-        console.log("Mapped Challenges:", mappedChallenges);
+        console.log("✅ Total Quizzes Loaded:", mappedChallenges.length);
+        console.log("📊 Quizzes with Categories:", mappedChallenges.filter(c => c.categoryId).length);
+        
         setChallenges(mappedChallenges);
       } catch (err: unknown) {
-        console.error("Error fetching quizzes:", err);
+        console.error("❌ Error fetching quizzes:", err);
         if (err instanceof Error) setError(err.message);
         else setError("Something went wrong");
       } finally {
@@ -158,10 +189,23 @@ export default function TemplateCardComponent() {
     fetchChallenges();
   }, []);
 
-  const filteredChallenges =
-    selectedDifficulty === "All"
-      ? challenges
-      : challenges.filter((c) => c.difficulty === selectedDifficulty);
+  const filteredChallenges = challenges.filter((challenge) => {
+    const matchesDifficulty =
+      selectedDifficulty === "All" ||
+      challenge.difficulty.toUpperCase() === selectedDifficulty.toUpperCase();
+
+    const matchesSearch =
+      searchTerm === "" ||
+      challenge.title.toLowerCase().includes(searchTerm.toLowerCase());
+
+    // If no category data exists, ignore category filter
+    const matchesCategory = 
+      noCategoryData ||
+      selectedCategory === "All" || 
+      (challenge.categoryId !== undefined && challenge.categoryId === selectedCategory);
+
+    return matchesDifficulty && matchesSearch && matchesCategory;
+  });
 
   if (loading) {
     return (
@@ -200,12 +244,32 @@ export default function TemplateCardComponent() {
 
   return (
     <section className="max-w-7xl mx-auto mt-8 px-4 md:px-1 lg:px-3">
+      {/* Warning if category data is missing */}
+      {noCategoryData && selectedCategory !== "All" && (
+        <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
+          <p className="text-sm text-orange-800">
+            <strong>⚠️ Category Filtering Not Available</strong>
+            <br />
+            The quiz API does not return category information. Please update your backend API to include a <code className="bg-orange-100 px-1 rounded">categoryId</code> field in the quiz response.
+            <br />
+            <span className="text-xs mt-1 block">Showing all quizzes regardless of category selection.</span>
+          </p>
+        </div>
+      )}
 
-
-
+      {/* Active filter info */}
+      {!noCategoryData && selectedCategory !== "All" && (
+        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+          <p className="text-sm text-blue-800">
+            <strong>Active Filter:</strong> Category ID = "{selectedCategory}"
+            <br />
+            <strong>Matching Quizzes:</strong> {filteredChallenges.length} of {challenges.length}
+          </p>
+        </div>
+      )}
 
       {/* Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3  gap-6 lg:gap-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-10">
         {filteredChallenges.map((challenge, i) => (
           <CardQuizComponent
             key={challenge.id}
@@ -215,10 +279,14 @@ export default function TemplateCardComponent() {
         ))}
       </div>
 
-      {filteredChallenges.length === 0 && selectedDifficulty !== "All" && (
-        <p className="text-center mt-10 text-gray-500">
-          No quizzes found for {selectedDifficulty} difficulty
-        </p>
+      {/* No results message */}
+      {filteredChallenges.length === 0 && (
+        <div className="text-center mt-10">
+          <p className="text-gray-500 text-lg">No quizzes found</p>
+          <p className="text-gray-400 text-sm mt-2">
+            Try adjusting your search or filters
+          </p>
+        </div>
       )}
     </section>
   );

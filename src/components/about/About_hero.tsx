@@ -65,8 +65,6 @@ export function AboutHero() {
               {t.heroAbout.weAre}
               <br className="hidden sm:block" />
               {t.heroAbout.quiz}
-              <br className="hidden sm:block" />
-              {t.heroAbout.knowlage}
             </p>
 
             <div className="flex justify-center lg:justify-start">

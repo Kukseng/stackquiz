@@ -82,7 +82,7 @@ export function PlatformSection() {
             className="order-2 lg:order-1 relative w-full h-64 sm:h-80 md:h-96 flex items-center justify-center"
           >
             <Image
-              src="/second.svg"
+              src="/second.png"
               alt="People engaging with quiz platform"
               width={300}
               height={350}

@@ -189,7 +189,7 @@ export default function InputArea({
 
       {/* Subtle hint text */}
       <motion.p
-        className="text-center text-white/60 text-sm mt-4"
+        className="text-center text-white/60 text-md mt-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}

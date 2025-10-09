@@ -1,7 +1,9 @@
 "use client";
+
 import React, { useRef, useEffect } from "react";
 import { Plus, Heart } from "lucide-react";
 import { motion, useAnimation, useInView } from "framer-motion";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/context/LanguageContext";
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
@@ -14,6 +16,7 @@ interface CardType {
   buttonText: string;
   buttonColor: string;
   iconBg: string;
+  route: string; 
 }
 
 const cards: CardType[] = [
@@ -25,6 +28,7 @@ const cards: CardType[] = [
     buttonText: "Create your first StackQuiz",
     buttonColor: "text-blue-600",
     iconBg: "bg-blue-600",
+    route: "/quizbuilder/", 
   },
   {
     id: 2,
@@ -34,6 +38,7 @@ const cards: CardType[] = [
     buttonText: "Go to Discover",
     buttonColor: "text-red-500",
     iconBg: "bg-red-500",
+    route: "/discover",
   },
 ];
 
@@ -41,6 +46,7 @@ const AnimatedCard: React.FC<{ card: CardType; index: number }> = ({ card, index
   const ref = useRef<HTMLDivElement>(null);
   const controls = useAnimation();
   const inView = useInView(ref, { once: false, margin: "-100px" });
+  const router = useRouter();
 
   useEffect(() => {
     if (inView) {
@@ -81,6 +87,7 @@ const AnimatedCard: React.FC<{ card: CardType; index: number }> = ({ card, index
           </div>
 
           <button
+            onClick={() => router.push(card.route)}
             className={`bg-white bg-opacity-90 ${card.buttonColor} px-4 py-2 sm:px-6 sm:py-2.5 md:px-8 md:py-3 rounded-full font-semibold hover:bg-opacity-100 hover:scale-105 transition-all duration-200 shadow-lg text-sm sm:text-base`}
           >
             {card.buttonText}

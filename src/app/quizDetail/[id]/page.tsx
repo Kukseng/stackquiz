@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import { useSession } from "next-auth/react";
 import {
   Edit,
   Heart,
@@ -131,7 +132,6 @@ const QuestionCard: React.FC<{
       <div className="absolute inset-0 bg-black/10" />
       <div className="relative bg-white rounded-lg px-3 py-2 shadow-sm max-w-[90%]">
         <p className="text-xs sm:text-sm font-medium text-slate-800 text-center line-clamp-2">
-          {/* Fixed: Display text with proper spacing, replacing underscores */}
           {question.text?.replaceAll("_", " ")}
         </p>
       </div>
@@ -152,7 +152,6 @@ const QuestionCard: React.FC<{
                 isSelected ? 'ring-2 ring-white ring-offset-2' : ''
               } ${isCorrect ? 'ring-2 ring-green-400 ring-offset-2' : ''}`}
             >
-              {/* Fixed: Display option text with proper spacing */}
               <span className="relative z-10 line-clamp-2">{option.optionText?.replaceAll("_", " ")}</span>
               {isCorrect && (
                 <div className="absolute top-1 right-1 w-3 h-3 bg-green-400 rounded-full flex items-center justify-center">
@@ -178,6 +177,7 @@ const QuizDetailPage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
   const quizId = params?.id as string;
+  const { data: session } = useSession();
 
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -185,6 +185,17 @@ const QuizDetailPage: React.FC = () => {
   const [showAnswers, setShowAnswers] = useState(false);
   const [isFavorited, setIsFavorited] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
+
+  // Get user display name and avatar from session (same as Navbar)
+  const displayName = session?.user?.name
+    ? session.user.name.split(" ")[0]
+    : session?.user?.email
+    ? session.user.email.split("@")[0]
+    : "Player";
+
+  const avatarUrl = session?.user?.name
+    ? `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(session.user.name)}`
+    : "/avatar2.svg";
 
   const progressPercentage = useMemo(() => {
     if (!quizData?.questions?.length) return 0;
@@ -231,13 +242,27 @@ const QuizDetailPage: React.FC = () => {
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8">
           <div className="flex items-start gap-3 sm:gap-4 flex-1">
-            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
-              <span className="text-white font-bold text-sm sm:text-lg">E</span>
+            {/* Dynamic Avatar */}
+            <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
+              {session ? (
+                <Image 
+                  src={avatarUrl} 
+                  alt={displayName}
+                  width={64}
+                  height={64}
+                  className="w-full h-full object-cover"
+                />
+              ) : (
+                <span className="text-white font-bold text-sm sm:text-lg">E</span>
+              )}
             </div>
 
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
-                <h2 className="font-semibold text-slate-800 text-sm sm:text-base">Evano</h2>
+                {/* Dynamic User Name */}
+                <h2 className="font-semibold text-slate-800 text-sm sm:text-base">
+                  {displayName}
+                </h2>
                 <div className="flex items-center gap-2">
                   {/* Header Edit Button */}
                   <button
@@ -258,8 +283,6 @@ const QuizDetailPage: React.FC = () => {
                     <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isFavorited ? 'fill-current' : ''}`} />
                     <span className="hidden sm:inline">Add to favorite</span>
                   </button>
-
-                  <DropdownMenu />
                 </div>
               </div>
             </div>
@@ -303,7 +326,7 @@ const QuizDetailPage: React.FC = () => {
               <div className="space-y-3 mb-6">
                 <Link
                   href={`/startquiz_org/${quizId}`}
-                  className="w-full flex items-center justify-between px-4 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                  className="w-full flex items-center justify-between px-4 py-3 btn-secondary btn-text text-white rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
                 >
                   <div className="flex items-center gap-2"><Play className="w-4 h-4" /><span className="font-medium">Host live</span></div>
                   <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
@@ -314,7 +337,7 @@ const QuizDetailPage: React.FC = () => {
 
               <h4 className="font-semibold text-slate-800 mb-3 text-sm">StackQuiz Self-Study</h4>
               <button 
-                className="w-full flex items-center justify-between px-4 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="w-full flex items-center justify-between px-4 py-3 btn-secondary btn-text text-white rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 onClick={() => router.push(`/play`)}
               >
                 <div className="flex items-center gap-2"><Trophy className="w-4 h-4" /><span className="font-medium">Play solo</span></div>

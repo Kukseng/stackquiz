@@ -56,7 +56,8 @@ export default function QuizMainContent({
   const activeQuestion = questions?.find((q) => q.id === activeQuestionId);
 
   return (
-    <div className="flex-1 flex items-center justify-center p-8 ">
+    <div className="flex-1 items-start  flex
+     justify-center p-8 ">
       <div
         className="w-full max-w-4xl rounded-2xl p-6 min-h-[400px] flex flex-col justify-center shadow-xl bg-cover bg-center transition-all"
         style={{ backgroundImage: `url(${themeCardImages[theme]})` }}

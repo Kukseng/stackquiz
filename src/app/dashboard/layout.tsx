@@ -76,7 +76,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   className="object-contain"
                 />
               </div>
-              <span className="font-bold text-base sm:text-xl text-gray-800">STACKQUIZ</span>
+              <span className="font-bold text-base sm:text-xl text-gray-800">STACK<span className='text-yellow'>QUIZ</span></span>
             </Link>
             <button 
               onClick={onClose}
@@ -106,28 +106,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             ))}
           </div>
 
-          <div className="mt-6 sm:mt-8">
-            <h3 className="px-3 sm:px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2 sm:mb-3">
-              ACCOUNT PAGES
-            </h3>
-            <div className="space-y-1 sm:space-y-2">
-              {accountItems.map((item, index) => (
-                <Link
-                  key={index}
-                  href={item.href}
-                  onClick={() => setSidebarOpen(false)}
-                  className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-colors ${
-                    isActiveRoute(item.path)
-                      ? 'bg-[#f97316] text-white shadow-lg'
-                      : 'text-gray-600 hover:bg-gray-100'
-                  }`}
-                >
-                  <item.icon className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />
-                  <span className="font-medium text-sm sm:text-base">{item.label}</span>
-                </Link>
-              ))}
-            </div>
-          </div>
+
         </nav>
 
         {/* Documentation Card */}

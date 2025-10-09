@@ -22,6 +22,8 @@ export interface QuizRequest {
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
   difficulty: "EASY" | "MEDIUM" | "HARD";
   categoryIds: string[];
+  status?: string; // e.g., "PUBLISHED" | "DRAFT"
+  questionTimeLimit?: string; // e.g., "FIVE" | backend-defined enum
 }
 
 export const quizApi = baseApi.injectEndpoints({

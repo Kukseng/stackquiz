@@ -7,16 +7,13 @@ import Link from "next/link";
 import {
   Edit,
   Heart,
-  MoreHorizontal,
   X,
   Play,
   Users,
   Eye,
   EyeOff,
   UserPlus,
-  Settings,
-  Share2,
-  Download,
+ 
   ChevronDown,
   Trophy,
 } from "lucide-react";
@@ -125,22 +122,10 @@ const DropdownMenu: React.FC = () => (
       className="flex items-center gap-1 px-2 py-1 text-xs sm:text-sm text-slate-600 hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
       aria-label="More options"
     >
-      <MoreHorizontal className="w-3 h-3 sm:w-4 sm:h-4" />
-      <span className="hidden sm:inline">Option</span>
+ 
     </button>
     <div className="absolute right-0 top-full mt-1 w-48 bg-white rounded-lg shadow-lg border border-slate-200 py-1 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-10">
-      <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-        <Share2 className="w-4 h-4" />
-        Share Quiz
-      </button>
-      <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-        <Download className="w-4 h-4" />
-        Export
-      </button>
-      <button className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors">
-        <Settings className="w-4 h-4" />
-        Settings
-      </button>
+    
     </div>
   </div>
 );
@@ -295,14 +280,14 @@ const QuizDetailPage: React.FC = () => {
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
                 <h2 className="font-semibold text-slate-800 text-sm sm:text-base">Evano</h2>
                 <div className="flex items-center gap-2">
-                  <button 
+               <Link href={`/quizbuilder`}>   <button 
                     className="flex items-center gap-1 px-2 py-1 text-xs sm:text-sm text-slate-600 hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
                     aria-label="Edit quiz"
                   >
                     <Edit className="w-3 h-3 sm:w-4 sm:h-4" />
                     <span className="hidden sm:inline">Edit</span>
-                  </button>
-                  <button 
+                  </button></Link>
+                <Link href={`/dashboard/library`}>  <button 
                     onClick={toggleFavorite}
                     className={`flex items-center gap-1 px-2 py-1 text-xs sm:text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded ${
                       isFavorited ? 'text-red-500' : 'text-slate-600 hover:text-red-500'
@@ -311,7 +296,7 @@ const QuizDetailPage: React.FC = () => {
                   >
                     <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isFavorited ? 'fill-current' : ''}`} />
                     <span className="hidden sm:inline">Add to favorite</span>
-                  </button>
+                  </button></Link>
                   <DropdownMenu />
                 </div>
               </div>

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { QuizSidebar } from "./quizsidebar";
 import QuizMainContent from "./quizmaincontent";
 import { QuizHeader } from "./quizheader";
-import { ThemeSidebar } from "./themeSidebar";
+import ThemeSelector from "./themeSidebar";
 import { useQuizStore } from "./hooks/useQuizbuilder";
 import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
@@ -54,7 +54,7 @@ export function QuizBuilderLayout() {
       <QuizHeader
         questions={questions}
         onPublish={() => setShowPublishModal(true)}
-        onSave={() => console.log("Save quiz", questions)}
+        
       />
 
       <div className="flex w-full">
@@ -79,7 +79,7 @@ export function QuizBuilderLayout() {
         />
 
         {/* ✅ Sidebar Right (Themes) */}
-        <ThemeSidebar
+        <ThemeSelector
           selectedTheme={selectedTheme}
           onThemeChange={setSelectedTheme}
         />

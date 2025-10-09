@@ -7,11 +7,11 @@ import { useRouter } from "next/navigation";
 interface QuizHeaderProps {
   questions: unknown[];
   onPublish: () => void;
-  onSave: () => void;
+
 }
 
-export function QuizHeader({ onPublish, onSave }: QuizHeaderProps) {
-  const router = useRouter(); // ✅ initialize router
+export function QuizHeader({ onPublish }: QuizHeaderProps) {
+  const router = useRouter(); 
 
   return (
     <div className="fixed top-0 left-0 right-0 z-40 flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
@@ -25,7 +25,7 @@ export function QuizHeader({ onPublish, onSave }: QuizHeaderProps) {
       </Link>
 
       {/* Buttons */}
-      <div className="flex items-center space-x-3">
+      <div className="flex items-center space-x-4">
         {/* Publish */}
         <button
           onClick={onPublish}
@@ -36,19 +36,13 @@ export function QuizHeader({ onPublish, onSave }: QuizHeaderProps) {
 
         {/* Exit*/}
         <button
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/dashboard/library")}
           className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
         >
           Exit
         </button>
 
-        {/* Save */}
-        <button
-          onClick={onSave}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
-        >
-          Save
-        </button>
+    
       </div>
     </div>
   );

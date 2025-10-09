@@ -9,9 +9,8 @@ export interface Option {
 
 export interface CreateOptionRequest {
   optionText: string;
-  optionOrder: number;
   isCorrected: boolean;
-  questionId: string;
+  questionId?: string;
 }
 
 export interface UpdateOptionRequest {
@@ -22,13 +21,13 @@ export interface UpdateOptionRequest {
 
 export const optionApi =  baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Get all 
+    // Get all
     getOptions: builder.query<Option[], void>({
       query: () => `/options`,
       providesTags: ["Option"],
     }),
 
-    //Get options 
+    //Get options
     getOptionsByQuestion: builder.query<Option[], string>({
       query: (questionId) => `/options/questions/${questionId}/public`,
       providesTags: (result, error, questionId) => [{ type: "Option", id: questionId }],

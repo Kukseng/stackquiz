@@ -117,7 +117,7 @@ const CardQuizComponent: React.FC<CardQuizComponentProps> = ({
         {/* Content */}
         <div className="p-6">
           <div className="flex items-start justify-between mb-3">
-            <h3 className="font-bold text-lg text-gray-900 line-clamp-2 group-hover:text-gray-700 transition-colors leading-tight">
+            <h3 className="font-bold text-lg text-gray-900 line-clamp-1 group-hover:text-gray-700 transition-colors leading-tight">
               {challenge.title}
             </h3>
           </div>

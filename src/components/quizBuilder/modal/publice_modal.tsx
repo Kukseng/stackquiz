@@ -3,7 +3,11 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
+import { useCreateQuizMutation } from "@/lib/api/quizApi";
+import { useCreateQuestionMutation } from "@/lib/api/questionApi";
+import { useAddOptionsToQuestionMutation } from "@/lib/api/optionApi";
 
 interface Option {
   id: number;
@@ -19,24 +23,43 @@ interface Question {
   options: Option[];
 }
 
-interface Category {
-  id: string;
-  name: string;
-  description: string;
-}
-
 interface PublishModalProps {
   onClose: () => void;
   quizData: Question[];
+  onPublishSuccess?: () => void; // Callback after successful publish
 }
 
-export default function PublishModal({ onClose, quizData }: PublishModalProps) {
+// API Types
+interface ApiOption {
+  optionText: string;
+  isCorrected: boolean;
+}
+
+interface ApiQuestion {
+  text: string;
+  type: "MCQ" | "TF" | "FILL_THE_BLANK";
+  imageUrl?: string;
+  options: ApiOption[];
+}
+
+interface ApiQuizPayload {
+  title: string;
+  description: string;
+  thumbnailUrl?: string;
+  categoryIds: string[];
+  visibility: "PUBLIC" | "PRIVATE";
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  questions: ApiQuestion[];
+}
+
+export default function PublishModal({ onClose, quizData, onPublishSuccess }: PublishModalProps) {
   const { data: session, status } = useSession();
+  const router = useRouter();
   const isAuthed = status === "authenticated" && !!(session as any)?.apiAccessToken;
 
   const {
     data: categories,
-    isLoading,
+    isLoading: loadingCategories,
     isError,
     refetch,
   } = useGetCategoriesQuery(undefined, {
@@ -54,23 +77,203 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
 
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
-  const [loadingCategories, setLoadingCategories] = useState(false);
-  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [isPublishing, setIsPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
+
+  // API mutations
+  const [createQuiz] = useCreateQuizMutation();
+  const [createQuestion] = useCreateQuestionMutation();
+  const [addOptionsToQuestion] = useAddOptionsToQuestionMutation();
+
+  // ✅ Transform UI data to API format
+  const transformQuizData = (): ApiQuizPayload => {
+    const apiQuestions: ApiQuestion[] = quizData.map((question, index) => {
+      // Determine question type based on UI type
+      let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
+      if (question.type === "truefalse" || question.type === "TF") questionType = "TF";
+      else if (question.type === "multiple" || question.type === "MCQ") questionType = "MCQ";
+      else if (question.type === "fillblank" || question.type === "FILL_THE_BLANK") questionType = "FILL_THE_BLANK";
+
+      // Transform options
+      const apiOptions: ApiOption[] = question.options.map((option, optIndex) => ({
+        optionText: option.text || `Option ${optIndex + 1}`,
+        isCorrected: !!option.correct,
+      }));
+
+      return {
+        text: question.question || `Question ${index + 1}`,
+        type: questionType,
+        imageUrl: undefined,
+        options: apiOptions,
+      };
+    });
+
+    return {
+      title: formData.tag,
+      description: formData.description,
+      thumbnailUrl: "",
+      categoryIds: [formData.category],
+      visibility: formData.visibility.toUpperCase() as "PUBLIC" | "PRIVATE",
+      difficulty: formData.difficulty.toUpperCase() as "EASY" | "MEDIUM" | "HARD",
+      questions: apiQuestions,
+    };
+  };
+
+  // ✅ Upload cover image to your backend
+  const uploadCoverImage = async (file: File): Promise<string> => {
+    try {
+      const imageFormData = new FormData();
+      imageFormData.append("file", file);
+
+      // Replace with your actual upload endpoint
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${(session as any)?.apiAccessToken}`,
+        },
+        body: imageFormData,
+      });
+
+      if (!response.ok) {
+        console.warn("Image upload failed, continuing without image");
+        return "";
+      }
+
+      const data = await response.json();
+      return data.imageUrl || data.url || data.thumbnailUrl || "";
+    } catch (error) {
+      console.warn("Image upload error:", error);
+      return "";
+    }
+  };
+
+  // ✅ Main publish function (Create Quiz -> Create Questions -> Add Options)
+  const handleSubmit = async () => {
+    // Reset error
+    setPublishError(null);
+
+    // Validation
+    if (!formData.tag.trim()) {
+      setPublishError("Please enter a quiz title");
+      return;
+    }
+    if (!formData.description.trim()) {
+      setPublishError("Please enter a quiz description");
+      return;
+    }
+    if (!formData.category) {
+      setPublishError("Please select a category");
+      return;
+    }
+    if (quizData.length === 0) {
+      setPublishError("You must add at least one question before publishing");
+      return;
+    }
+
+    // Validate questions have text
+    const emptyQuestions = quizData.filter(q => !q.question.trim());
+    if (emptyQuestions.length > 0) {
+      setPublishError("All questions must have text");
+      return;
+    }
+
+    // Validate each question has at least one correct answer
+    const questionsWithoutCorrect = quizData.filter(
+      q => !q.options.some(opt => opt.correct)
+    );
+    if (questionsWithoutCorrect.length > 0) {
+      setPublishError("Each question must have at least one correct answer");
+      return;
+    }
+
+    setIsPublishing(true);
+
+    try {
+      // Step 1: Upload cover image if exists
+      let thumbnailUrl: string | undefined;
+      if (formData.coverImage) {
+        console.log("Uploading cover image...");
+        thumbnailUrl = await uploadCoverImage(formData.coverImage);
+        console.log("Cover image uploaded:", thumbnailUrl);
+      }
+
+      // Step 2: Create Quiz first
+      const payload = transformQuizData();
+      if (thumbnailUrl) payload.thumbnailUrl = thumbnailUrl;
+
+      console.log("Creating quiz...");
+      const createdQuiz = await createQuiz({
+        title: payload.title,
+        description: payload.description,
+        thumbnailUrl: payload.thumbnailUrl ?? "",
+        visibility: payload.visibility,
+        status: "PUBLISHED",
+        questionTimeLimit: "FIVE",
+        difficulty: payload.difficulty,
+        categoryIds: payload.categoryIds,
+      }).unwrap();
+
+      // Step 3: For each question, create question then add options
+      for (let i = 0; i < payload.questions.length; i += 1) {
+        const q = payload.questions[i];
+        console.log(`Creating question ${i + 1} / ${payload.questions.length}`);
+
+        const createdQuestion = await createQuestion({
+          text: q.text,
+          type: q.type,
+          imageUrl: q.imageUrl,
+          quizId: createdQuiz.id,
+        }).unwrap();
+
+        if (q.options && q.options.length > 0) {
+          console.log(`Adding ${q.options.length} options to question ${createdQuestion.id}`);
+          await addOptionsToQuestion({
+            questionId: createdQuestion.id,
+            data: q.options.map((opt) => ({
+              optionText: opt.optionText,
+              isCorrected: opt.isCorrected,
+              questionId: createdQuestion.id,
+            })),
+          }).unwrap();
+        }
+      }
+
+      // Step 4: Show success message
+      alert("✅ Quiz published successfully!");
+
+      // Step 5: Call success callback if provided
+      if (onPublishSuccess) {
+        onPublishSuccess();
+      }
+
+      // Step 6: Redirect to dashboard
+      router.push("/dashboard");
+      
+      // Close modal
+      onClose();
+    } catch (error) {
+      console.error("Error publishing quiz:", error);
+      setPublishError(error instanceof Error ? error.message : "Unknown error occurred");
+    } finally {
+      setIsPublishing(false);
+    }
+  };
 
   // ✅ Handle image selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       const file = e.target.files[0];
       if (!file.type.startsWith("image/")) {
-        alert("Please select a valid image file");
+        setPublishError("Please select a valid image file");
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert("Image size must be less than 5MB");
+        setPublishError("Image size must be less than 5MB");
         return;
       }
       setFormData((prev) => ({ ...prev, coverImage: file }));
       setPreviewUrl(URL.createObjectURL(file));
+      setPublishError(null);
     }
   };
 
@@ -81,15 +284,16 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       const file = e.dataTransfer.files[0];
       if (!file.type.startsWith("image/")) {
-        alert("Please drop a valid image file");
+        setPublishError("Please drop a valid image file");
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        alert("Image size must be less than 5MB");
+        setPublishError("Image size must be less than 5MB");
         return;
       }
       setFormData((prev) => ({ ...prev, coverImage: file }));
       setPreviewUrl(URL.createObjectURL(file));
+      setPublishError(null);
     }
   };
 
@@ -111,35 +315,6 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
     setPreviewUrl(null);
   };
 
-  // ✅ Handle publish
-  const handleSubmit = async () => {
-    if (!formData.tag.trim()) {
-      alert("Please enter a quiz tag");
-      return;
-    }
-    if (!formData.description.trim()) {
-      alert("Please enter a quiz description");
-      return;
-    }
-    if (!formData.category) {
-      alert("Please select a category");
-      return;
-    }
-    if (quizData.length === 0) {
-      alert("You must add at least one question before publishing.");
-      return;
-    }
-
-    // Here you can send to backend API
-    console.log("Publishing quiz:", {
-      formData,
-      questions: quizData,
-      selectedCategory: categories?.find((cat) => cat.id === formData.category),
-    });
-
-    onClose();
-  };
-
   // ✅ Clean preview URL on unmount
   useEffect(() => {
     return () => {
@@ -147,20 +322,6 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
     };
   }, [previewUrl]);
 
-  // ✅ Retry category fetch
-  const handleRetryCategories = async () => {
-    setLoadingCategories(true);
-    setCategoryError(null);
-    try {
-      await refetch();
-    } catch (err) {
-      setCategoryError("Failed to reload categories.");
-    } finally {
-      setLoadingCategories(false);
-    }
-  };
-
-  // ✅ Show loading screen if user not authenticated
   if (!isAuthed) {
     return (
       <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
@@ -177,24 +338,33 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white/95 rounded-2xl p-8 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
-
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
               Publish Quiz
             </h3>
-            <p className="text-gray-500 text-sm mt-1">Add the final touches to your quiz</p>
+            <p className="text-gray-500 text-sm mt-1">
+              {quizData.length} question{quizData.length !== 1 ? 's' : ''} ready to publish
+            </p>
           </div>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            disabled={isPublishing}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
           >
             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
+
+        {/* Error Message */}
+        {publishError && (
+          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
+            <p className="text-red-800 text-sm font-medium">{publishError}</p>
+          </div>
+        )}
 
         {/* Cover Image */}
         <div className="mb-6">
@@ -206,7 +376,8 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
               </div>
               <button
                 onClick={removeImage}
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
+                disabled={isPublishing}
+                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30"
               >
                 ✕
               </button>
@@ -220,13 +391,14 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
                 isDragging
                   ? "border-purple-400 bg-purple-50"
                   : "border-gray-300 hover:border-purple-400 hover:bg-gray-50"
-              }`}
+              } ${isPublishing ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                className="absolute inset-0 opacity-0 cursor-pointer"
+                disabled={isPublishing}
+                className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
               />
               <div className="p-4 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 mb-3">
                 ➕
@@ -238,40 +410,41 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
           )}
         </div>
 
-        {/* Tag */}
+        {/* Form Fields */}
         <div className="space-y-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Tag *</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
             <input
               type="text"
-              placeholder="Enter a quiz tag"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500"
+              placeholder="Enter a quiz title"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
               value={formData.tag}
               onChange={(e) => setFormData((prev) => ({ ...prev, tag: e.target.value }))}
+              disabled={isPublishing}
             />
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
             <textarea
               placeholder="Describe your quiz"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none h-20"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none h-20 disabled:opacity-50"
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
+              disabled={isPublishing}
             />
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
             <select
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 cursor-pointer"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 cursor-pointer disabled:opacity-50"
               value={formData.category}
               onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
+              disabled={isPublishing || loadingCategories}
             >
               <option value="">Select a category</option>
-              {isLoading ? (
+              {loadingCategories ? (
                 <option disabled>Loading categories...</option>
               ) : isError ? (
                 <option disabled>Error loading categories</option>
@@ -285,23 +458,8 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
                 ))
               )}
             </select>
-
-            {categoryError && (
-              <div className="text-red-500 text-sm mt-1 flex items-center justify-between">
-                <span>{categoryError}</span>
-                <button
-                  type="button"
-                  onClick={handleRetryCategories}
-                  disabled={loadingCategories}
-                  className="ml-2 px-3 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded-md disabled:opacity-50"
-                >
-                  {loadingCategories ? "Retrying..." : "Retry"}
-                </button>
-              </div>
-            )}
           </div>
 
-          {/* Difficulty */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-3">Difficulty Level</label>
             <div className="flex space-x-3">
@@ -310,7 +468,8 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
                   key={level}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, difficulty: level }))}
-                  className={`flex-1 py-2 px-4 rounded-xl font-medium transition ${
+                  disabled={isPublishing}
+                  className={`flex-1 py-2 px-4 rounded-xl font-medium transition disabled:opacity-50 ${
                     formData.difficulty === level
                       ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
@@ -322,7 +481,6 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
             </div>
           </div>
 
-          {/* Visibility */}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-3">Visibility</label>
             <div className="flex space-x-3">
@@ -334,7 +492,8 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
                   key={option.value}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, visibility: option.value }))}
-                  className={`flex-1 p-4 rounded-xl border-2 transition ${
+                  disabled={isPublishing}
+                  className={`flex-1 p-4 rounded-xl border-2 transition disabled:opacity-50 ${
                     formData.visibility === option.value
                       ? "border-purple-500 bg-purple-50"
                       : "border-gray-200 hover:border-gray-300"
@@ -352,17 +511,28 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
         {/* Action Buttons */}
         <div className="flex space-x-3 mt-8">
           <button
-            className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200"
+            className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={onClose}
+            disabled={isPublishing}
           >
             Cancel
           </button>
           <button
-            className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700"
+            className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             onClick={handleSubmit}
-            disabled={isLoading}
+            disabled={isPublishing}
           >
-            {isLoading ? "Loading..." : "Publish Quiz"}
+            {isPublishing ? (
+              <>
+                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Publishing...
+              </>
+            ) : (
+              "Publish Quiz"
+            )}
           </button>
         </div>
       </div>

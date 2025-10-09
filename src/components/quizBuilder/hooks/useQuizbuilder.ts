@@ -29,21 +29,16 @@ export function useQuizStore() {
     const newQuestion: Question = {
       id: Date.now(),
       type,
-      question:
-        type === "multiple"
-          ? ""
-          : type === "truefalse"
-          ? ""
-          : "",
+      question: "",
       options:
-        type === "multiple"
+        type === "mcq"
     ? [
         { id: 1, text: "", correct: false, color: "#e21a3b", icon: "circle" },
         { id: 2, text: "", correct: false, color: "#e77f42", icon: "triangle" },
         { id: 3, text: "", correct: false, color: "#1355b4", icon: "square" },
         { id: 4, text: "", correct: true, color: "#27890d", icon: "diamond" }, // updated color
       ]
-          : type === "truefalse"
+          : type === "tf"
           ? [
               { id: 1, text: "True", correct: false, color: "bg-red-500", icon: "circle" },
               { id: 4, text: "False", correct: true, color: "bg-green-700", icon: "diamond" },
@@ -108,7 +103,7 @@ export function useQuizStore() {
               correct:
                 opt.id === optionId
                   ? !opt.correct
-                  : q.type === "truefalse" || q.type === "fillblank"
+                  : q.type === "tf" || q.type === "fill_the_blank"
                   ? false
                   : opt.correct,
             })),
@@ -121,6 +116,7 @@ export function useQuizStore() {
 
   return {
     questions,
+    setQuestions,
     activeQuestionId,
     setActiveQuestionId,
     addQuestion,

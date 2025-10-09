@@ -43,8 +43,10 @@ interface QuizAPI {
 }
 
 interface ChallengeGridProps {
-  limit?: number; // ✅ optional prop to limit cards
-  selectedDifficulty?: string; // optional filter by difficulty
+  limit?: number;
+  selectedDifficulty?: string;
+  searchTerm?: string;
+  selectedCategory?: string;
 }
 
 const getDifficultyStyle = (difficulty: string) => {
@@ -95,6 +97,8 @@ const getValidImageUrl = (thumbnailUrl: string | null | undefined): string => {
 export default function ChallengeGrid({
   limit,
   selectedDifficulty = "All",
+  searchTerm = "",
+  selectedCategory = "All",
 }: ChallengeGridProps) {
   const [challenges, setChallenges] = useState<Challenge[]>([]);
   const [loading, setLoading] = useState(true);
@@ -143,12 +147,17 @@ export default function ChallengeGrid({
     fetchChallenges();
   }, []);
 
-  const filteredChallenges =
-    selectedDifficulty === "All"
-      ? challenges
-      : challenges.filter((c) => c.difficulty === selectedDifficulty);
+  // Apply all filters
+  const filteredChallenges = challenges
+    .filter((c) =>
+      selectedDifficulty === "All" ? true : c.difficulty === selectedDifficulty
+    )
+    .filter((c) =>
+      searchTerm ? c.title.toLowerCase().includes(searchTerm.toLowerCase()) : true
+    );
+    // Note: selectedCategory filtering would need category data from API
 
-  // ✅ Limit number of cards if `limit` prop is provided
+  // Limit number of cards if `limit` prop is provided
   const displayedChallenges = limit ? filteredChallenges.slice(0, limit) : filteredChallenges;
 
   if (loading)
@@ -172,7 +181,7 @@ export default function ChallengeGrid({
       </div>
     );
 
-  if (challenges.length === 0)
+  if (displayedChallenges.length === 0)
     return <p className="text-center mt-10 text-gray-500">No quizzes available</p>;
 
   return (

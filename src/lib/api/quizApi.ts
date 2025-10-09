@@ -1,9 +1,7 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-
 import { baseApi } from "./baseApi";
 
 export interface Quiz {
-  questions: any;
+  questions: any[];
   id: string;
   title: string;
   description: string;
@@ -38,11 +36,7 @@ export const quizApi = baseApi.injectEndpoints({
       providesTags: ["Quiz"],
     }),
     createQuiz: builder.mutation<Quiz, QuizRequest>({
-      query: (body) => ({
-        url: "/quizzes",
-        method: "POST",
-        body,
-      }),
+      query: (body) => ({ url: "/quizzes", method: "POST", body }),
       invalidatesTags: ["Quiz"],
     }),
     updateQuiz: builder.mutation<Quiz, { quizId: string; data: QuizRequest }>({
@@ -51,13 +45,13 @@ export const quizApi = baseApi.injectEndpoints({
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: (result, error, { quizId }) => [{ type: "Quiz", id: quizId }],
+      invalidatesTags: (result, error, { quizId }) => [
+        { type: "Quiz", id: quizId },
+        "Quiz"
+      ],
     }),
     deleteQuiz: builder.mutation<{ success: boolean }, string>({
-      query: (quizId) => ({
-        url: `/quizzes/${quizId}`,
-        method: "DELETE",
-      }),
+      query: (quizId) => ({ url: `/quizzes/${quizId}`, method: "DELETE" }),
       invalidatesTags: ["Quiz"],
     }),
     getMyQuizzes: builder.query<Quiz[], void>({

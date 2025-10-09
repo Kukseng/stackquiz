@@ -1,18 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useQuizStore } from "./hooks/useQuizbuilder";
 import { QuizSidebar } from "./quizsidebar";
 import QuizMainContent from "./quizmaincontent";
 import { QuizHeader } from "./quizheader";
 import ThemeSelector from "./themeSidebar";
-import { useQuizStore } from "./hooks/useQuizbuilder";
 import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
 import PublishModal from "./modal/publice_modal";
+import { useGetQuizByIdQuery } from "@/lib/api/quizApi";
 
-export function QuizBuilderLayout() {
+interface QuizBuilderLayoutProps {
+  quizId?: string;
+}
+
+export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
   const {
     questions,
+    setQuestions,
     activeQuestionId,
     setActiveQuestionId,
     addQuestion,
@@ -26,18 +32,48 @@ export function QuizBuilderLayout() {
   const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
-
-  // ✅ Theme state
   const [selectedTheme, setSelectedTheme] = useState("pink");
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
 
-  // ✅ Handle delete
-  const handleDelete = (id: number) => {
+  const { data: quiz, isLoading, error, refetch } = useGetQuizByIdQuery(quizId!, {
+    skip: !quizId,
+  });
+
+  useEffect(() => {
+    if (!quiz || isDataLoaded) return;
+
+    const formattedQuestions = quiz.questions.map((q: any) => {
+      const type = q.type === "TF" ? "tf" : q.type.toLowerCase();
+      const colors = type === "mcq"
+        ? ["#e21a3b", "#e77f42", "#1355b4", "#27890d"]
+        : type === "tf"
+        ? ["bg-red-500", "bg-green-700"]
+        : ["bg-blue-500"];
+      return {
+        id: Number(q.id),
+        type,
+        question: q.text.replaceAll("_", " "),
+        options: q.options.map((o: any, index: number) => ({
+          id: Number(o.id),
+          text: o.optionText.replaceAll("_", " "),
+          correct: o.isCorrected,
+          color: colors[index] || colors[0],
+          icon: type === "mcq" ? ["circle", "triangle", "square", "diamond"][index] : undefined,
+        })),
+      };
+    });
+
+    setQuestions(formattedQuestions);
+    setActiveQuestionId(formattedQuestions[0]?.id ?? null);
+    setIsDataLoaded(true);
+  }, [quiz, isDataLoaded, setQuestions, setActiveQuestionId]);
+
+  const handleDelete = (id: number | string) => {
     const remaining = questions.filter((q) => q.id !== id);
-    deleteQuestion(id);
+    deleteQuestion(typeof id === "string" ? Number(id) : id);
     setActiveQuestionId(remaining.length ? remaining[0].id : null);
   };
 
-  // ✅ Tailwind gradient themes
   const themeGradients: Record<string, string> = {
     blue: "from-blue-50 to-blue-100",
     pink: "from-pink-50 to-purple-50",
@@ -46,30 +82,51 @@ export function QuizBuilderLayout() {
     gray: "from-gray-100 to-gray-200",
   };
 
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4" />
+          <p className="text-slate-600 text-lg">Loading quiz...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center">
+        <p className="text-red-500 text-lg mb-4">Failed to load quiz</p>
+        <button
+          onClick={() => refetch()}
+          className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div
       className={`min-h-screen flex flex-col bg-gradient-to-br ${themeGradients[selectedTheme]} relative`}
     >
-      {/* ✅ Navbar */}
       <QuizHeader
         questions={questions}
         onPublish={() => setShowPublishModal(true)}
-        
       />
 
       <div className="flex w-full">
-        {/* ✅ Sidebar Left */}
         <QuizSidebar
-          questions={questions}
-          activeQuestionId={activeQuestionId}
+          questions={questions as any}
+          activeQuestionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
           onQuestionSelect={setActiveQuestionId}
           onAddQuestion={() => setShowAddQuestionModal(true)}
         />
 
-        {/* ✅ Main Content */}
         <QuizMainContent
-          questions={questions}
-          activeQuestionId={activeQuestionId}
+          questions={questions as any}
+          activeQuestionId={activeQuestionId as any}
           onUpdateQuestionText={updateQuestionText}
           onUpdateOptionText={updateOptionText}
           onToggleCorrectAnswer={toggleCorrectAnswer}
@@ -78,35 +135,43 @@ export function QuizBuilderLayout() {
           theme={selectedTheme}
         />
 
-        {/* ✅ Sidebar Right (Themes) */}
         <ThemeSelector
           selectedTheme={selectedTheme}
           onThemeChange={setSelectedTheme}
         />
       </div>
 
-      {/* ✅ Add Question Modal */}
       {showAddQuestionModal && (
-        <QuestionTypeModal
-          onClose={() => setShowAddQuestionModal(false)}
-          addQuestion={addQuestion}
-        />
+        <QuestionTypeModal onClose={() => setShowAddQuestionModal(false)} addQuestion={addQuestion} />
       )}
 
-      {/* ✅ Delete Question Modal */}
       {showDeleteModal && activeQuestionId && (
         <DeleteQuestionModal
-          questionId={activeQuestionId}
+          questionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
           onClose={() => setShowDeleteModal(false)}
           onDelete={handleDelete}
         />
       )}
 
-      {/* ✅ Publish Modal */}
       {showPublishModal && (
         <PublishModal
           onClose={() => setShowPublishModal(false)}
           quizData={questions}
+          quizId={quizId}
+          defaultValues={quiz ? {
+            title: quiz.title,
+            description: quiz.description,
+            categoryIds: quiz.categoryIds,
+            difficulty: quiz.difficulty,
+            visibility: quiz.visibility,
+            thumbnailUrl: quiz.thumbnailUrl,
+          } : undefined}
+          onPublishSuccess={() => {
+            // Optionally refetch quiz data after update
+            if (quizId) {
+              refetch();
+            }
+          }}
         />
       )}
     </div>

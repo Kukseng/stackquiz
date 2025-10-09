@@ -27,11 +27,11 @@ export function QuizSidebar({ questions, activeQuestionId, onQuestionSelect, onA
   // Get question type label
   const getQuestionTypeLabel = (type: string) => {
     switch (type) {
-      case "multiple":
+      case "mcq":
         return "Quiz"
-      case "truefalse":
+      case "tf":
         return "True or False"
-      case "fillblank":
+      case "fill_the_blank":
         return "Type Answer"
       default:
         return "Quiz"
@@ -41,11 +41,11 @@ export function QuizSidebar({ questions, activeQuestionId, onQuestionSelect, onA
   // Get question type icon
   const getQuestionTypeIcon = (type: string) => {
     switch (type) {
-      case "multiple":
+      case "mcq":
         return "🎯"
-      case "truefalse":
+      case "tf":
         return "✓✗"
-      case "fillblank":
+      case "fill_the_blank":
         return "✏️"
       default:
         return "❓"

@@ -5,31 +5,44 @@ import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
-import { useCreateQuizMutation } from "@/lib/api/quizApi";
+import { useCreateQuizMutation, useUpdateQuizMutation } from "@/lib/api/quizApi";
 import { useCreateQuestionMutation } from "@/lib/api/questionApi";
 import { useAddOptionsToQuestionMutation } from "@/lib/api/optionApi";
 
 interface Option {
-  id: number;
+  id: string | number;
   text: string;
   correct: boolean;
   color: string;
 }
 
 interface Question {
-  id: number;
+  id: string | number;
   type: string;
   question: string;
   options: Option[];
 }
 
+interface CategoryResponse {
+  id: string;
+  name: string;
+}
+
 interface PublishModalProps {
   onClose: () => void;
   quizData: Question[];
-  onPublishSuccess?: () => void; // Callback after successful publish
+  onPublishSuccess?: () => void;
+  quizId?: string; // For edit mode
+  defaultValues?: {
+    title?: string;
+    description?: string;
+    categoryIds?: string[];
+    difficulty?: "EASY" | "MEDIUM" | "HARD";
+    visibility?: "PUBLIC" | "PRIVATE" | "UNLISTED";
+    thumbnailUrl?: string;
+  };
 }
 
-// API Types
 interface ApiOption {
   optionText: string;
   isCorrected: boolean;
@@ -47,15 +60,27 @@ interface ApiQuizPayload {
   description: string;
   thumbnailUrl?: string;
   categoryIds: string[];
-  visibility: "PUBLIC" | "PRIVATE";
+  visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
   difficulty: "EASY" | "MEDIUM" | "HARD";
   questions: ApiQuestion[];
 }
 
-export default function PublishModal({ onClose, quizData, onPublishSuccess }: PublishModalProps) {
+export default function PublishModal({ 
+  onClose, 
+  quizData, 
+  onPublishSuccess,
+  quizId,
+  defaultValues 
+}: PublishModalProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const isAuthed = status === "authenticated" && !!(session as any)?.apiAccessToken;
+  const isEditMode = !!quizId;
+
+  const [createQuiz] = useCreateQuizMutation();
+  const [updateQuiz] = useUpdateQuizMutation();
+  const [createQuestion] = useCreateQuestionMutation();
+  const [addOptionsToQuestion] = useAddOptionsToQuestionMutation();
 
   const {
     data: categories,
@@ -67,34 +92,29 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
   });
 
   const [formData, setFormData] = useState({
-    tag: "",
-    description: "",
-    category: "",
-    difficulty: "Easy",
-    visibility: "Public",
+    tag: defaultValues?.title || "",
+    description: defaultValues?.description || "",
+    category: defaultValues?.categoryIds?.[0] || "",
+    difficulty: defaultValues?.difficulty || ("EASY" as "EASY" | "MEDIUM" | "HARD"),
+    visibility: defaultValues?.visibility || ("PUBLIC" as "PUBLIC" | "PRIVATE" | "UNLISTED"),
     coverImage: null as File | null,
   });
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    defaultValues?.thumbnailUrl || null
+  );
   const [isDragging, setIsDragging] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
-  // API mutations
-  const [createQuiz] = useCreateQuizMutation();
-  const [createQuestion] = useCreateQuestionMutation();
-  const [addOptionsToQuestion] = useAddOptionsToQuestionMutation();
-
-  // ✅ Transform UI data to API format
   const transformQuizData = (): ApiQuizPayload => {
     const apiQuestions: ApiQuestion[] = quizData.map((question, index) => {
-      // Determine question type based on UI type
       let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
-      if (question.type === "truefalse" || question.type === "TF") questionType = "TF";
-      else if (question.type === "multiple" || question.type === "MCQ") questionType = "MCQ";
-      else if (question.type === "fillblank" || question.type === "FILL_THE_BLANK") questionType = "FILL_THE_BLANK";
+      if (question.type === "tf" || question.type === "TF") questionType = "TF";
+      else if (question.type === "mcq" || question.type === "MCQ") questionType = "MCQ";
+      else if (question.type === "fill_the_blank" || question.type === "FILL_THE_BLANK") 
+        questionType = "FILL_THE_BLANK";
 
-      // Transform options
       const apiOptions: ApiOption[] = question.options.map((option, optIndex) => ({
         optionText: option.text || `Option ${optIndex + 1}`,
         isCorrected: !!option.correct,
@@ -113,19 +133,17 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
       description: formData.description,
       thumbnailUrl: "",
       categoryIds: [formData.category],
-      visibility: formData.visibility.toUpperCase() as "PUBLIC" | "PRIVATE",
-      difficulty: formData.difficulty.toUpperCase() as "EASY" | "MEDIUM" | "HARD",
+      visibility: formData.visibility,
+      difficulty: formData.difficulty,
       questions: apiQuestions,
     };
   };
 
-  // ✅ Upload cover image to your backend
   const uploadCoverImage = async (file: File): Promise<string> => {
     try {
       const imageFormData = new FormData();
       imageFormData.append("file", file);
 
-      // Replace with your actual upload endpoint
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image`, {
         method: "POST",
         headers: {
@@ -147,9 +165,7 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
     }
   };
 
-  // ✅ Main publish function (Create Quiz -> Create Questions -> Add Options)
   const handleSubmit = async () => {
-    // Reset error
     setPublishError(null);
 
     // Validation
@@ -170,14 +186,12 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
       return;
     }
 
-    // Validate questions have text
     const emptyQuestions = quizData.filter(q => !q.question.trim());
     if (emptyQuestions.length > 0) {
       setPublishError("All questions must have text");
       return;
     }
 
-    // Validate each question has at least one correct answer
     const questionsWithoutCorrect = quizData.filter(
       q => !q.options.some(opt => opt.correct)
     );
@@ -189,7 +203,6 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
     setIsPublishing(true);
 
     try {
-      // Step 1: Upload cover image if exists
       let thumbnailUrl: string | undefined;
       if (formData.coverImage) {
         console.log("Uploading cover image...");
@@ -197,59 +210,74 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
         console.log("Cover image uploaded:", thumbnailUrl);
       }
 
-      // Step 2: Create Quiz first
       const payload = transformQuizData();
       if (thumbnailUrl) payload.thumbnailUrl = thumbnailUrl;
 
-      console.log("Creating quiz...");
-      const createdQuiz = await createQuiz({
-        title: payload.title,
-        description: payload.description,
-        thumbnailUrl: payload.thumbnailUrl ?? "",
-        visibility: payload.visibility,
-        status: "PUBLISHED",
-        questionTimeLimit: "FIVE",
-        difficulty: payload.difficulty,
-        categoryIds: payload.categoryIds,
-      }).unwrap();
-
-      // Step 3: For each question, create question then add options
-      for (let i = 0; i < payload.questions.length; i += 1) {
-        const q = payload.questions[i];
-        console.log(`Creating question ${i + 1} / ${payload.questions.length}`);
-
-        const createdQuestion = await createQuestion({
-          text: q.text,
-          type: q.type,
-          imageUrl: q.imageUrl,
-          quizId: createdQuiz.id,
+      if (isEditMode && quizId) {
+        // UPDATE existing quiz
+        console.log("Updating quiz...");
+        await updateQuiz({
+          quizId,
+          data: {
+            title: payload.title,
+            description: payload.description,
+            thumbnailUrl: payload.thumbnailUrl ?? defaultValues?.thumbnailUrl ?? "",
+            visibility: payload.visibility,
+            status: "PUBLISHED",
+            questionTimeLimit: "FIVE",
+            difficulty: payload.difficulty,
+            categoryIds: payload.categoryIds,
+          },
         }).unwrap();
 
-        if (q.options && q.options.length > 0) {
-          console.log(`Adding ${q.options.length} options to question ${createdQuestion.id}`);
-          await addOptionsToQuestion({
-            questionId: createdQuestion.id,
-            data: q.options.map((opt) => ({
-              optionText: opt.optionText,
-              isCorrected: opt.isCorrected,
-              questionId: createdQuestion.id,
-            })),
+        alert("✅ Quiz updated successfully!");
+      } else {
+        // CREATE new quiz
+        console.log("Creating quiz...");
+        const createdQuiz = await createQuiz({
+          title: payload.title,
+          description: payload.description,
+          thumbnailUrl: payload.thumbnailUrl ?? "",
+          visibility: payload.visibility,
+          status: "PUBLISHED",
+          questionTimeLimit: "FIVE",
+          difficulty: payload.difficulty,
+          categoryIds: payload.categoryIds,
+        }).unwrap();
+
+        // Create questions and options
+        for (let i = 0; i < payload.questions.length; i += 1) {
+          const q = payload.questions[i];
+          console.log(`Creating question ${i + 1} / ${payload.questions.length}`);
+
+          const createdQuestion = await createQuestion({
+            text: q.text,
+            type: q.type,
+            imageUrl: q.imageUrl,
+            quizId: createdQuiz.id,
           }).unwrap();
+
+          if (q.options && q.options.length > 0) {
+            console.log(`Adding ${q.options.length} options to question ${createdQuestion.id}`);
+            await addOptionsToQuestion({
+              questionId: createdQuestion.id,
+              data: q.options.map((opt) => ({
+                optionText: opt.optionText,
+                isCorrected: opt.isCorrected,
+                questionId: createdQuestion.id,
+              })),
+            }).unwrap();
+          }
         }
+
+        alert("✅ Quiz published successfully!");
       }
 
-      // Step 4: Show success message
-      alert("✅ Quiz published successfully!");
-
-      // Step 5: Call success callback if provided
       if (onPublishSuccess) {
         onPublishSuccess();
       }
 
-      // Step 6: Redirect to dashboard
       router.push("/dashboard");
-      
-      // Close modal
       onClose();
     } catch (error) {
       console.error("Error publishing quiz:", error);
@@ -259,9 +287,8 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
     }
   };
 
-  // ✅ Handle image selection
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
+    if (e.target.files?.[0]) {
       const file = e.target.files[0];
       if (!file.type.startsWith("image/")) {
         setPublishError("Please select a valid image file");
@@ -272,16 +299,18 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
         return;
       }
       setFormData((prev) => ({ ...prev, coverImage: file }));
+      if (previewUrl && !defaultValues?.thumbnailUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setPreviewUrl(URL.createObjectURL(file));
       setPublishError(null);
     }
   };
 
-  // ✅ Handle drag & drop
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
     setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+    if (e.dataTransfer.files?.[0]) {
       const file = e.dataTransfer.files[0];
       if (!file.type.startsWith("image/")) {
         setPublishError("Please drop a valid image file");
@@ -292,6 +321,9 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
         return;
       }
       setFormData((prev) => ({ ...prev, coverImage: file }));
+      if (previewUrl && !defaultValues?.thumbnailUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
       setPreviewUrl(URL.createObjectURL(file));
       setPublishError(null);
     }
@@ -308,19 +340,20 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
   };
 
   const removeImage = () => {
-    if (previewUrl) {
+    if (previewUrl && !defaultValues?.thumbnailUrl) {
       URL.revokeObjectURL(previewUrl);
     }
     setFormData((prev) => ({ ...prev, coverImage: null }));
     setPreviewUrl(null);
   };
 
-  // ✅ Clean preview URL on unmount
   useEffect(() => {
     return () => {
-      if (previewUrl) URL.revokeObjectURL(previewUrl);
+      if (previewUrl && !defaultValues?.thumbnailUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
     };
-  }, [previewUrl]);
+  }, [previewUrl, defaultValues?.thumbnailUrl]);
 
   if (!isAuthed) {
     return (
@@ -338,14 +371,13 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white/95 rounded-2xl p-8 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
-        {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Publish Quiz
+              {isEditMode ? "Update Quiz" : "Publish Quiz"}
             </h3>
             <p className="text-gray-500 text-sm mt-1">
-              {quizData.length} question{quizData.length !== 1 ? 's' : ''} ready to publish
+              {quizData.length} question{quizData.length !== 1 ? 's' : ''} ready to {isEditMode ? 'update' : 'publish'}
             </p>
           </div>
           <button
@@ -359,14 +391,12 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
           </button>
         </div>
 
-        {/* Error Message */}
         {publishError && (
           <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
             <p className="text-red-800 text-sm font-medium">{publishError}</p>
           </div>
         )}
 
-        {/* Cover Image */}
         <div className="mb-6">
           <label className="block text-sm font-semibold text-gray-700 mb-3">Cover Image</label>
           {previewUrl ? (
@@ -410,7 +440,6 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
           )}
         </div>
 
-        {/* Form Fields */}
         <div className="space-y-5">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
@@ -451,10 +480,8 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
               ) : !categories || categories.length === 0 ? (
                 <option disabled>No categories available</option>
               ) : (
-                categories.map((cat) => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
+                categories.map((cat: CategoryResponse) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))
               )}
             </select>
@@ -463,7 +490,7 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-3">Difficulty Level</label>
             <div className="flex space-x-3">
-              {["Easy", "Medium", "Hard"].map((level) => (
+              {(["EASY", "MEDIUM", "HARD"] as const).map((level) => (
                 <button
                   key={level}
                   type="button"
@@ -485,8 +512,9 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
             <label className="block text-sm font-semibold text-gray-700 mb-3">Visibility</label>
             <div className="flex space-x-3">
               {[
-                { value: "Public", icon: "🌍", desc: "Everyone can see" },
-                { value: "Private", icon: "🔒", desc: "Only you can see" },
+                { value: "PUBLIC" as const, icon: "🌍", desc: "Everyone can see" },
+                { value: "PRIVATE" as const, icon: "🔒", desc: "Only you can see" },
+                { value: "UNLISTED" as const, icon: "🙈", desc: "Accessible via link" },
               ].map((option) => (
                 <button
                   key={option.value}
@@ -508,7 +536,6 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex space-x-3 mt-8">
           <button
             className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
@@ -528,10 +555,10 @@ export default function PublishModal({ onClose, quizData, onPublishSuccess }: Pu
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                 </svg>
-                Publishing...
+                {isEditMode ? "Updating..." : "Publishing..."}
               </>
             ) : (
-              "Publish Quiz"
+              isEditMode ? "Update Quiz" : "Publish Quiz"
             )}
           </button>
         </div>

@@ -3,7 +3,7 @@
 import React, { useEffect } from "react";
 import Image from "next/image";
 import Stage from "./Stage";
-import { motion } from "framer-motion";
+import { motion, Variants } from "framer-motion";
 import { useRouter } from "next/navigation";
 
 export default function WaitStart() {
@@ -11,7 +11,7 @@ export default function WaitStart() {
   const letters = ["Q", "u", "i", "z"];
 
   // Parent animation (controls stagger)
-  const container = {
+  const container: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -22,12 +22,15 @@ export default function WaitStart() {
   };
 
   // Child animation (each letter)
-  const item = {
+  const item: Variants = {
     hidden: { opacity: 0, y: 30 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.6, ease: "easeOut" },
+      transition: { 
+        duration: 0.6, 
+        ease: [0.42, 0, 0.58, 1] // cubic-bezier for easeOut
+      },
     },
   };
 

@@ -27,7 +27,7 @@ export default function JoinRoomHero() {
     router.push(`/room/${encodeURIComponent(clean)}`);
   };
 
-  // ✅ បង្កើត particles តែម្ដងនៅ client (មិន SSR)
+  // ✅ Create particles only once on client (no SSR)
   React.useEffect(() => {
     const randomParticles = Array.from({ length: 6 }).map(() => ({
       left: `${Math.random() * 100}%`,
@@ -62,9 +62,9 @@ export default function JoinRoomHero() {
         <Image src="/wavy.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
-      {/* Pulsing circles */}
+      {/* Pulsing circles - hidden on mobile */}
       <motion.div
-        className="absolute left-[-340px] top-[-100px] w-[620px] h-[620px] opacity-40 pointer-events-none select-none -z-10"
+        className="absolute left-[-340px] top-[-100px] w-[620px] h-[620px] opacity-40 pointer-events-none select-none -z-10 hidden md:block"
         animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.6, 0.4] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
@@ -72,14 +72,14 @@ export default function JoinRoomHero() {
       </motion.div>
 
       <motion.div
-        className="absolute right-[-240px] bottom-[-220px] w-[620px] h-[620px] opacity-40 pointer-events-none select-none -z-10"
+        className="absolute right-[-240px] bottom-[-220px] w-[620px] h-[620px] opacity-40 pointer-events-none select-none -z-10 hidden md:block"
         animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       >
         <Image src="/circle3d.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
-      {/* ✅ floating particles បង្កើតតែម្ដងនៅ client */}
+      {/* Floating particles */}
       {particles.map((pos, i) => (
         <motion.div
           key={i}
@@ -181,18 +181,18 @@ export default function JoinRoomHero() {
             animate={{ opacity: 1 }}
             transition={{ delay: 1, duration: 0.6 }}
           >
-            <div className="flex items-center justify-center gap-8 text-white/60">
+            <div className="flex flex-wrap items-center justify-center  gap-6 text-white/90">
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-sm">Live Quizzes</span>
+                <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse" />
+                <span className="text-md">Live Quizzes</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-blue-400 rounded-full animate-pulse" />
-                <span className="text-sm">Real-time Results</span>
+                <div className="w-4 h-4 bg-blue-400 rounded-full animate-pulse" />
+                <span className="text-md">Real-time Results</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-3 h-3 bg-purple-400 rounded-full animate-pulse" />
-                <span className="text-sm">Multiplayer Fun</span>
+                <div className="w-4 h-4 bg-purple-400 rounded-full animate-pulse" />
+                <span className="text-md">Multiplayer Fun</span>
               </div>
             </div>
           </motion.div>
@@ -202,8 +202,7 @@ export default function JoinRoomHero() {
       {/* Custom styles */}
       <style jsx>{`
         @keyframes shake {
-          0%,
-          100% {
+          0%, 100% {
             transform: translateX(0);
           }
           25% {

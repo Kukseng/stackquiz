@@ -182,16 +182,25 @@ export default function PublishModal({
       if (isEditMode) {
         result = await updateQuiz({ quizId, data: payload }).unwrap();
         console.log("Quiz updated successfully:", result);
+        
+        // Close modal first
+        onClose();
+        
+        // Force a hard refresh to ensure all data is updated
+        // This will reload the entire page with fresh data from the server
+        window.location.href = `/quizDetail/${quizId}`;
       } else {
         result = await createQuiz(payload).unwrap();
         console.log("Quiz created successfully:", result);
-      }
-      
-      onClose();
-      
-      const targetQuizId = isEditMode ? quizId : result?.id;
-      if (targetQuizId) {
-        window.location.href = `/quiz/${targetQuizId}`;
+        
+        // Close modal
+        onClose();
+        
+        // Navigate to the newly created quiz
+        const targetQuizId = result?.id;
+        if (targetQuizId) {
+          router.push(`/dashboard/${targetQuizId}`);
+        }
       }
     } catch (error: any) {
       console.error("Failed to publish quiz - Full error:", error);
@@ -199,7 +208,7 @@ export default function PublishModal({
       const errorMessage = 
         error?.data?.message || 
         error?.message || 
-        (error?.status ? `Error ${error.status}: Failed to publish quiz` : "Failed to publish quiz. Please try again.");
+        (error?.status ? `Error ${error.status}: Failed to ${isEditMode ? 'update' : 'publish'} quiz` : `Failed to ${isEditMode ? 'update' : 'publish'} quiz. Please try again.`);
       
       setPublishError(errorMessage);
     }
@@ -415,7 +424,7 @@ export default function PublishModal({
             onClick={handleSubmit}
             disabled={isCreating || isUpdating}
           >
-            {isCreating || isUpdating ? "Publishing..." : isEditMode ? "Update Quiz" : "Publish Quiz"}
+            {isCreating || isUpdating ? (isEditMode ? "Updating..." : "Publishing...") : isEditMode ? "Update Quiz" : "Publish Quiz"}
           </button>
         </div>
       </div>

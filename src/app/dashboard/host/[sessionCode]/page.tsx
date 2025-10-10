@@ -150,7 +150,7 @@ const getWebSocketUrl = () => {
     
     // Local development URLs
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:9999/ws'; // Your local backend WebSocket URL
+      return 'https://stackquiz-api.stackquiz.me/ws'; // Your local backend WebSocket URL
     }
   }
   
@@ -172,7 +172,7 @@ const getApiBaseUrl = () => {
     
     // Local development URLs
     if (hostname === 'localhost' || hostname === '127.0.0.1') {
-      return 'http://localhost:9999/api'; // Your local backend API URL
+      return 'https://stackquiz-api.stackquiz.me/api'; // Your local backend API URL
     }
   }
   

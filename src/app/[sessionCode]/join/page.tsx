@@ -93,7 +93,7 @@ interface AnswerFeedback {
 
 // Configuration
 const WEBSOCKET_CONFIG = {
-  url: process.env.NEXT_PUBLIC_WEBSOCKET_URL || "http://localhost:9999/ws",
+  url: process.env.NEXT_PUBLIC_WEBSOCKET_URL || "https://stackquiz-api.stackquiz.me/ws",
   reconnectDelay: 3000,
   heartbeatIncoming: 4000,
   heartbeatOutgoing: 4000,
@@ -859,7 +859,7 @@ export default function ParticipantQuizFixed() {
 
     setIsSubmitting(true);
     try {
-      const res = await axios.post("http://localhost:9999/api/v1/participants/join", {
+      const res = await axios.post("https://stackquiz-api.stackquiz.me/api/v1/participants/join", {
         quizCode: sessionCode,
         nickname: nickname.trim(),
         avatarId: avatarId.trim(),

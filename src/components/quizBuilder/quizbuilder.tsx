@@ -29,7 +29,7 @@ export default function QuizBuilder() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const handleDelete = (id: number | string) => {
-    deleteQuestion(id);
+    deleteQuestion(Number(id));
   };
 
   return (

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Clock, Users, Trophy, Play, AlertCircle } from "lucide-react"
 import type { Quiz } from "@/app/play/[id]/page"
+import Image from "next/image"
 
 interface QuizSelectionProps {
   onQuizSelect: (quiz: Quiz) => void
@@ -73,9 +74,8 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
       </div>
     )
   }
-
   return (
-    <div className="container mx-auto lg:px-20 py-12">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-20 py-8 sm:py-10 lg:py-12">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {quizzes.map((quiz) => (
           <Card
@@ -85,8 +85,10 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
             <CardHeader>
               {quiz.thumbnailUrl && quiz.thumbnailUrl !== "string" && (
                 <div className="w-full h-32 mb-4 rounded-lg overflow-hidden">
-                    <img
+                    <Image
                         src={quiz.thumbnailUrl}
+                        width={400}
+                        height={200}
                         alt={`${quiz.title} Thumbnail`}
                         className="w-full h-full object-cover"
                     />  

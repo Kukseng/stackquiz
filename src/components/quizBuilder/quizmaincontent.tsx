@@ -75,7 +75,7 @@ export default function QuizMainContent({
               type="text"
               value={activeQuestion.question}
               onChange={(e) =>
-                onUpdateQuestionText(activeQuestion.id, e.target.value)
+                onUpdateQuestionText(Number(activeQuestion.id), e.target.value)
               }
               placeholder="Enter your question..."
               className="w-full text-center text-xl font-semibold p-3 mb-6 rounded border-2 text-gray-900 bg-white border-yellow-400  placeholder-black/50 focus:outline-none"
@@ -96,8 +96,8 @@ export default function QuizMainContent({
                       value={option.text}
                       onChange={(e) =>
                         onUpdateOptionText(
-                          activeQuestion.id,
-                          option.id,
+                          Number(activeQuestion.id),
+                          Number(option.id),
                           e.target.value
                         )
                       }
@@ -109,7 +109,7 @@ export default function QuizMainContent({
                       option.correct ? "bg-green-500" : "bg-white/30"
                     } cursor-pointer`}
                     onClick={() =>
-                      onToggleCorrectAnswer(activeQuestion.id, option.id)
+                      onToggleCorrectAnswer(Number(activeQuestion.id), Number(option.id))
                     }
                   >
                     {option.correct && (
@@ -123,7 +123,7 @@ export default function QuizMainContent({
             {/* Action Buttons */}
             <div className="flex justify-end space-x-4 mt-6">
               <button
-                onClick={() => onDeleteQuestion(activeQuestion.id)}
+                onClick={() => onDeleteQuestion(Number(activeQuestion.id))}
                 className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium shadow-md"
               >
                 Delete

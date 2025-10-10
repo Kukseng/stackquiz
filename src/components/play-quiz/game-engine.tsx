@@ -144,9 +144,9 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
 
   if (showFeedback) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-20 py-8 sm:py-10 lg:py-12 flex items-center justify-center min-h-screen">
         <Card
-          className={`w-full max-w-md text-center bg-white/70 ${lastAnswerCorrect ? "animate-pulse-success border-green-500" : "animate-shake-error border-red-500"}`}
+          className={`w-full max-w-md text-center bg-white/50 ${lastAnswerCorrect ? "animate-pulse-success border-green-500" : "animate-shake-error border-red-500"}`}
         >
           <CardContent className="p-8">
             <div
@@ -155,14 +155,14 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
               {lastAnswerCorrect ?    
               <Image 
               className="mx-auto mb-0"
-              src="play/correct.svg" 
+              src="correct.svg" 
               alt="Banner" 
               width={80} 
               height={80} 
             /> :    
             <Image 
               className="mx-auto mb-0"
-              src="play/wrong.svg" 
+              src="wrong.svg" 
               alt="Banner" 
               width={80} 
               height={80} 
@@ -184,95 +184,106 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
   }
 
  return (
-  <div className="min-h-screen p-6">
-    <div className="container mx-auto max-w-4xl">
-      
+  <div className="min-h-screen ">
+    <div className="container mx-auto max-w-3xl space-y-8">
+
       {/* Header */}
-      <div className="mb-8">
-        <Card className="border bg-white/70 backdrop-blur-md shadow-lg p-4 rounded-xl">
-          <div className="flex items-center justify-between">
-            {/* Left: Quiz Info */}
-            <div>
-              <h1 className="text-3xl font-bold text-indigo-600">{quiz.title}</h1>
-              <p className="text-xl text-gray-500">Playing as: {playerNickname}</p>
-            </div>
-
-            {/* Right: Score + Online */}
-            <div className="flex items-center gap-3">
-              <Badge
-                className="px-4 py-1 text-lg font-semibold bg-gradient-to-r from-indigo-500 to-purple-600 text-white shadow-md"
-              >
-                {score}/{totalPossiblePoints}
-              </Badge>
-              <Badge
-                variant="secondary"
-                className="px-4 py-1 text-gray-700 border animate-pulse"
-              >
-                {participants.length} online
-              </Badge>
-            </div>
+      <Card className="bg-white/50 shadow-xl rounded-2xl p-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-indigo-700">{quiz.title}</h1>
+            <p className="text-lg text-gray-600">Playing as: <span className="font-medium text-gray-800">{playerNickname}</span></p>
           </div>
-
-          {/* Progress + Timer */}
-          <div className="mt-4 space-y-2">
-            <div className="flex items-center justify-between text-2xl text-gray-600">
-              <span>
-                Question {currentQuestionIndex + 1} of {quiz.questions.length}
-              </span>
-              <div className="flex items-center gap-2">
-                <Clock className="w-7 h-7" />
-                <span className={`font-semibold ${timeLeft <= 10 ? "text-red-500 text-2xl animate-pulse" : "text-gray-800"}`}>
-                  {timeLeft}s
-                </span>
-              </div>
-            </div>
-            <Progress
-              value={progress}
-              className="h-2 rounded-full bg-gray-200 [&>div]:bg-gradient-to-r [&>div]:from-indigo-500 [&>div]:to-purple-600"
-            />
+          <div className="flex items-center gap-4">
+            <Badge className="px-4 py-2 text-white bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full shadow-md">
+              {score}/{totalPossiblePoints}
+            </Badge>
+            <Badge variant="secondary" className="px-4 py-2 text-gray-700 border rounded-full animate-pulse">
+              {participants.length} online
+            </Badge>
           </div>
-        </Card>
-      </div>
+        </div>
+
+        {/* Progress + Timer */}
+        <div className="mt-6 flex justify-between items-center text-xl text-gray-700">
+          <span>
+            Question {currentQuestionIndex + 1} of {quiz.questions.length}
+          </span>
+          <div className="flex items-center gap-2">
+            <Clock className="w-6 h-6 text-indigo-500" />
+            <span className={`text-3xl font-bold ${timeLeft <= 10 ? "text-red-500 animate-pulse" : "text-gray-800"}`}>
+              {timeLeft}
+            </span>
+          </div>
+        </div>
+        <Progress
+          value={progress}
+          className="mt-2 h-2 rounded-full bg-gray-300 [&>div]:bg-gradient-to-r [&>div]:from-indigo-500 [&>div]:to-purple-500"
+        />
+      </Card>
 
       {/* Question */}
-      <Card className="mb-8 border-2 border-gray-100 bg-white/80 backdrop-blur-md shadow-xl rounded-2xl overflow-hidden">
-        <CardHeader>
-          {/* {currentQuestion.imageUrl && currentQuestion.imageUrl !== "string" && (
-            <div className="w-full h-56 mb-4 overflow-hidden rounded-lg">
-              <Image
-                src={currentQuestion.imageUrl || "/ourImage/heng.svg"}
-                alt="Question"
-                width={800}
-                height={300}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-500"
-              />
-            </div>
-          )} */}
-          <CardTitle className="text-2xl font-semibold text-gray-800 leading-snug">
-            {currentQuestion.text.replace(/_/g, " ")}
-          </CardTitle>
-          <div className="flex items-center gap-2 mt-2 text-sm text-gray-600">
-            <Badge variant="secondary">{currentQuestion.points} pts</Badge>
-            <Badge variant="outline">{currentQuestion.timeLimit}s</Badge>
-          </div>
-        </CardHeader>
+      <Card className="bg-white/50 shadow-lg rounded-2xl p-6">
+        <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+          {currentQuestion.text.replace(/_/g, " ")}
+        </h2>
+        <div className="flex gap-3 text-sm text-gray-600 mb-6">
+          <Badge variant="secondary">{currentQuestion.points} pts</Badge>
+          <Badge variant="outline">{currentQuestion.timeLimit}s</Badge>
+        </div>
 
-        <CardContent>
-          {currentQuestion.type === "MCQ" && (
-            <MultipleChoiceQuestion question={currentQuestion} onAnswer={handleAnswer} timeLeft={timeLeft} />
-          )}
-          {currentQuestion.type === "TF" && (
-            <TrueFalseQuestion question={currentQuestion} onAnswer={handleAnswer} timeLeft={timeLeft} />
-          )}
-          {currentQuestion.type === "FB" && (
-            <FillBlankQuestion question={currentQuestion} onAnswer={handleAnswer} timeLeft={timeLeft} />
-          )}
-        </CardContent>
+        {/* Answer Options */}
+       {currentQuestion.type === "MCQ" && (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            {currentQuestion.options.map((opt, index) => {
+              const styles = [
+                { color: "bg-yellow-500", icon: "🟨" },
+                { color: "bg-red-500", icon: "♦️" },
+                { color: "bg-blue-500", icon: "🌕" },
+                { color: "bg-green-500", icon: "🔺" },
+              ]
+              const { color, icon } = styles[index % styles.length]
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(index)}
+                  className={`flex items-center justify-center gap-3 text-white text-lg font-semibold py-6 px-4 rounded-xl shadow-md hover:scale-105 transition-transform duration-300 ${color}`}
+                >
+                  <span className="text-2xl">{icon}</span>
+                  <span>{opt.optionText}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+
+       {currentQuestion.type === "TF" && (
+          <div className="grid grid-cols-2 gap-6">
+            {currentQuestion.options.map((opt, index) => {
+              const isTrue = opt.optionText.toLowerCase() === "true"
+              const color = isTrue ? "bg-green-500" : "bg-red-500"
+              const icon = isTrue ? "🟢" : "🟥"
+              return (
+                <button
+                  key={index}
+                  onClick={() => handleAnswer(opt.optionText)}
+                  className={`flex items-center justify-center gap-3 text-white text-xl font-semibold py-6 px-4 rounded-xl shadow-md hover:scale-105 transition-transform duration-300 ${color}`}
+                >
+                  <span className="text-2xl">{icon}</span>
+                  <span>{opt.optionText}</span>
+                </button>
+              )
+            })}
+          </div>
+        )}
+
+
+        {currentQuestion.type === "FB" && (
+          <FillBlankQuestion question={currentQuestion} onAnswer={handleAnswer} timeLeft={timeLeft} />
+        )}
       </Card>
     </div>
-
-    {/* Time Up Alert */}
-    <TimeUpAlert show={showTimeUpAlert} onClose={() => setShowTimeUpAlert(false)} />
   </div>
 )
 }

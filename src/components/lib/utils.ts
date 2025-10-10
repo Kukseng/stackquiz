@@ -1,29 +1,37 @@
-import { clsx } from "clsx";
+import { clsx, ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+
 // Utility function to merge class names with Tailwind
-export function cn(...inputs) {
+export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
+
 // Utility function to format a number with currency
-export function formatCurrency(amount, currency = "USD", options) {
+export function formatCurrency(
+    amount: number, 
+    currency: string = "USD", 
+    options?: Intl.NumberFormatOptions
+) {
     return new Intl.NumberFormat("en-US", {
         style: "currency",
         currency,
         ...options,
     }).format(amount);
 }
+
 // Utility function to generate a unique ID
-export function generateUniqueId(prefix = "id") {
+export function generateUniqueId(prefix: string = "id"): string {
     return `${prefix}-${Math.random().toString(36).substring(2, 9)}`;
 }
+
 // Utility function to truncate text
-export function truncateText(text, maxLength) {
-    if (text.length <= maxLength)
-        return text;
+export function truncateText(text: string, maxLength: number): string {
+    if (text.length <= maxLength) return text;
     return text.substring(0, maxLength) + "...";
 }
+
 // Utility function to format date
-export function formatDate(date, options) {
+export function formatDate(date: Date, options?: Intl.DateTimeFormatOptions): string {
     return new Intl.DateTimeFormat("en-US", {
         day: "numeric",
         month: "short",
@@ -31,10 +39,14 @@ export function formatDate(date, options) {
         ...options,
     }).format(date);
 }
+
 // Utility function to debounce function calls
-export function debounce(func, wait) {
-    let timeout = null;
-    return function (...args) {
+export function debounce<T extends (...args: any[]) => any>(
+    func: T, 
+    wait: number
+): (...args: Parameters<T>) => void {
+    let timeout: NodeJS.Timeout | null = null;
+    return function (...args: Parameters<T>) {
         const later = () => {
             timeout = null;
             func(...args);
@@ -45,10 +57,14 @@ export function debounce(func, wait) {
         timeout = setTimeout(later, wait);
     };
 }
+
 // Utility function to throttle function calls
-export function throttle(func, limit) {
+export function throttle<T extends (...args: any[]) => any>(
+    func: T, 
+    limit: number
+): (...args: Parameters<T>) => void {
     let inThrottle = false;
-    return function (...args) {
+    return function (...args: Parameters<T>) {
         if (!inThrottle) {
             func(...args);
             inThrottle = true;

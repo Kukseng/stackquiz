@@ -165,7 +165,7 @@ export function TeamsSection() {
               {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
             </h3>
             <p className="text-sm sm:text-base text-gray-300">
-              {t.teams[member.id as keyof typeof t.teams]?.name || member.id}
+              {t.teams[member.id as keyof typeof t.teams]?.role || member.id}
             </p>
 
             {/* Social Icons */}

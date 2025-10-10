@@ -19,7 +19,7 @@ export function NicknameEntry({ onNicknameSet }: NicknameEntryProps) {
   const {id} = useParams() as {id: string}
   const [nickname, setNickname] = useState("")
   // const [roomId] = useState("quiz-room")
-  const { joinRoom, participants, isConnected } = useWebSocket()
+  const { joinRoom } = useWebSocket()
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -31,7 +31,7 @@ export function NicknameEntry({ onNicknameSet }: NicknameEntryProps) {
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 ">
-      <Card className="w-full max-w-md bg-white/20 backdrop-blur-lg shadow-2xl border border-white/30 rounded-2xl overflow-hidden">
+      <Card className="w-full max-w-md bg-gradient-to-br from-white/10 to-white/30 backdrop-blur-xl border border-white/20 shadow-2xl rounded-2xl overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-white/5 pointer-events-none"></div>
         
         <CardHeader className="text-center relative z-10 pb-4">

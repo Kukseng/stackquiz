@@ -1,10 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useEffect } from "react";
 import Pill from "./Pill";
 import Stage from "./Stage";
+import { useRouter } from "next/navigation";
 
 export default function QuestionList() {
+  const router = useRouter();
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      router.push("/startquiz_org/choice");
+    }, 3000); // redirect after 3s
+
+    return () => clearTimeout(timer);
+  }, [router]);
+
   return (
     <Stage>
       <div className="mx-auto grid max-w-[820px] gap-4">

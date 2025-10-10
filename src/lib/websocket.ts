@@ -1,17 +1,19 @@
-// WebSocket service for real-time quiz communication
+// QuizWebSocket.ts
 export class QuizWebSocket {
   private ws: WebSocket | null = null
   private url: string
-  private participantId: string
-  private sessionId: string
   private reconnectAttempts = 0
   private maxReconnectAttempts = 5
   private reconnectDelay = 1000
   private isMockMode = false
+  private role: "participant" | "organizer"
+  private participantId?: string
+  private sessionId: string
 
-  constructor(participantId: string, sessionId: string) {
-    this.participantId = participantId
+  constructor(role: "participant" | "organizer", sessionId: string, participantId?: string) {
+    this.role = role
     this.sessionId = sessionId
+    this.participantId = participantId
 
     const isDevelopment =
       process.env.NODE_ENV === "development" ||
@@ -22,7 +24,12 @@ export class QuizWebSocket {
       this.url = "" // Not needed for mock mode
       console.log("Starting in mock WebSocket mode for development")
     } else {
-      this.url = `wss://stackquiz-api.stackquiz.me/ws?participantId=${participantId}&sessionId=${sessionId}`
+      const baseUrl = `wss://stackquiz-api.stackquiz.me/ws`
+      if (role === "participant" && participantId) {
+        this.url = `${baseUrl}?role=participant&participantId=${participantId}&sessionId=${sessionId}`
+      } else {
+        this.url = `${baseUrl}?role=organizer&sessionId=${sessionId}`
+      }
     }
   }
 
@@ -39,7 +46,7 @@ export class QuizWebSocket {
         this.ws = new WebSocket(this.url)
 
         this.ws.onopen = () => {
-          console.log("WebSocket connected")
+          console.log(`[v0] ${this.role} WebSocket connected`)
           this.reconnectAttempts = 0
           resolve()
         }
@@ -54,18 +61,18 @@ export class QuizWebSocket {
         }
 
         this.ws.onclose = () => {
-          console.log("WebSocket disconnected")
+          console.log(`[v0] ${this.role} WebSocket disconnected`)
           if (!this.isMockMode) {
             this.attemptReconnect()
           }
         }
 
         this.ws.onerror = () => {
-          console.log("WebSocket connection failed, switching to mock mode")
+          console.log(`[v0] ${this.role} WebSocket error, switching to mock mode`)
           this.ws = null
           this.isMockMode = true
           this.setupMockWebSocket()
-          resolve() // Resolve with mock mode instead of rejecting
+          resolve()
         }
 
         setTimeout(() => {
@@ -88,25 +95,37 @@ export class QuizWebSocket {
   }
 
   private handleMessage(data: { type: string; [key: string]: unknown }) {
-    // Handle different message types from the server
-    switch (data.type) {
-      case "quiz_start":
-        window.dispatchEvent(new CustomEvent("quiz_start", { detail: data }))
-        break
-      case "question":
-        window.dispatchEvent(new CustomEvent("new_question", { detail: data }))
-        break
-      case "time_up":
-        window.dispatchEvent(new CustomEvent("time_up", { detail: data }))
-        break
-      case "answer_result":
-        window.dispatchEvent(new CustomEvent("answer_result", { detail: data }))
-        break
-      case "quiz_end":
-        window.dispatchEvent(new CustomEvent("quiz_end", { detail: data }))
-        break
-      default:
-        console.log("Unknown message type:", data.type)
+    if (this.role === "participant") {
+      switch (data.type) {
+        case "quiz_start":
+          window.dispatchEvent(new CustomEvent("quiz_start", { detail: data }))
+          break
+        case "new_question":
+          window.dispatchEvent(new CustomEvent("new_question", { detail: data }))
+          break
+        case "answer_result":
+          window.dispatchEvent(new CustomEvent("answer_result", { detail: data }))
+          break
+        case "quiz_end":
+          window.dispatchEvent(new CustomEvent("quiz_end", { detail: data }))
+          break
+        default:
+          console.log("Unknown participant message:", data.type)
+      }
+    } else if (this.role === "organizer") {
+      switch (data.type) {
+        case "participant_join":
+          window.dispatchEvent(new CustomEvent("participant_join", { detail: data }))
+          break
+        case "leaderboard":
+          window.dispatchEvent(new CustomEvent("leaderboard", { detail: data }))
+          break
+        case "quiz_end":
+          window.dispatchEvent(new CustomEvent("quiz_end", { detail: data }))
+          break
+        default:
+          console.log("Unknown organizer message:", data.type)
+      }
     }
   }
 
@@ -114,7 +133,7 @@ export class QuizWebSocket {
     if (this.reconnectAttempts < this.maxReconnectAttempts) {
       this.reconnectAttempts++
       setTimeout(() => {
-        console.log(`Attempting to reconnect... (${this.reconnectAttempts}/${this.maxReconnectAttempts})`)
+        console.log(`[v0] Attempting reconnect ${this.reconnectAttempts}/${this.maxReconnectAttempts}`)
         this.connect()
       }, this.reconnectDelay * this.reconnectAttempts)
     }
@@ -154,11 +173,8 @@ export class QuizWebSocket {
       }, 1000)
       return
     }
-
     if (this.ws && this.ws.readyState === WebSocket.OPEN) {
       this.ws.send(JSON.stringify(message))
-    } else {
-      console.error("WebSocket is not connected")
     }
   }
 
@@ -171,12 +187,16 @@ export class QuizWebSocket {
   }
 }
 
-// Singleton instance
+// Singleton
 let wsInstance: QuizWebSocket | null = null
 
-export const getWebSocketInstance = (participantId?: string, sessionId?: string): QuizWebSocket | null => {
-  if (!wsInstance && participantId && sessionId) {
-    wsInstance = new QuizWebSocket(participantId, sessionId)
+export const getWebSocketInstance = (
+  role: "participant" | "organizer",
+  sessionId: string,
+  participantId?: string
+): QuizWebSocket => {
+  if (!wsInstance) {
+    wsInstance = new QuizWebSocket(role, sessionId, participantId)
   }
   return wsInstance
 }

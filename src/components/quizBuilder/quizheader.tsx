@@ -1,26 +1,31 @@
-"use client"
-import Link from "next/link"
-import Image from "next/image"
+"use client";
+
+import Link from "next/link";
+import Image from "next/image";
+import { useRouter } from "next/navigation"; 
 
 interface QuizHeaderProps {
-  questions: unknown[]
-  onPublish: () => void
-  onSave: () => void
-  onExit: () => void
+  questions: unknown[];
+  onPublish: () => void;
+  onSave: () => void;
 }
 
-export function QuizHeader({ onPublish, onSave, onExit }: QuizHeaderProps) {
+export function QuizHeader({ onPublish, onSave }: QuizHeaderProps) {
+  const router = useRouter(); // ✅ initialize router
+
   return (
     <div className="fixed top-0 left-0 right-0 z-40 flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-      <Link href="/" className="flex items-center gap-2">
-          <Image src="/logo-sq.png" width={45} height={45} alt="Logo" />
-          <span className="hidden md:inline text-2xl font-extrabold">
-            <span className="text-blue-950">STACK</span>
-            <span className="text-yellow">QUIZ</span>
-          </span>
-        </Link>
-      <div className="flex items-center space-x-3">
+      {/* Logo */}
+      <Link href="/dashboard" className="flex items-center gap-2">
+        <Image src="/logo-sq.png" width={45} height={45} alt="Logo" />
+        <span className="hidden md:inline text-2xl font-extrabold">
+          <span className="text-blue-950">STACK</span>
+          <span className="text-yellow">QUIZ</span>
+        </span>
+      </Link>
 
+      {/* Buttons */}
+      <div className="flex items-center space-x-3">
         {/* Publish */}
         <button
           onClick={onPublish}
@@ -29,9 +34,9 @@ export function QuizHeader({ onPublish, onSave, onExit }: QuizHeaderProps) {
           Publish
         </button>
 
-        {/* Exit */}
+        {/* Exit*/}
         <button
-          onClick={onExit}
+          onClick={() => router.push("/dashboard")}
           className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors"
         >
           Exit
@@ -46,5 +51,5 @@ export function QuizHeader({ onPublish, onSave, onExit }: QuizHeaderProps) {
         </button>
       </div>
     </div>
-  )
+  );
 }

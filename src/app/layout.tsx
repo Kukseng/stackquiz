@@ -42,3 +42,41 @@ export default function RootLayout({
     </html>
   );
 }
+
+// import type { Metadata } from "next"
+// import { DM_Sans, Kantumruy_Pro } from "next/font/google"
+// import "./globals.css"
+// import Providers from "./Providers"   // new file
+// import { Toaster } from "@/components/ui/toaster"
+
+// const dmSans = DM_Sans({
+//   subsets: ["latin"],
+//   display: "swap",
+//   variable: "--font-dm-sans",
+// })
+
+// const kantumruyPro = Kantumruy_Pro({
+//   subsets: ["khmer"],
+//   display: "swap",
+//   variable: "--font-kantumruy",
+// })
+
+// export const metadata: Metadata = {
+//   title: "StackQuiz - Interactive Real-time Quiz Platform",
+//   description:
+//     "Create and participate in engaging real-time quizzes with live leaderboards and instant feedback",
+// }
+
+// export default function RootLayout({
+//   children,
+// }: {
+//   children: React.ReactNode
+// }) {
+//   return (
+//     <html lang="en" className={`${dmSans.variable} ${kantumruyPro.variable} antialiased`}>
+//       <body className="cosmic-bg overflow-hidden">
+//         <Providers>{children}</Providers>
+//       </body>
+//     </html>
+//   )
+// }

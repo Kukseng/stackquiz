@@ -1,188 +1,254 @@
-"use client"
-import { useState, useEffect } from "react"
-import Image from "next/image"
+"use client";
+
+import { useState, useEffect } from "react";
+import Image from "next/image";
+import { useSession } from "next-auth/react";
+import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
+import { useCreateQuizMutation, useUpdateQuizMutation } from "@/lib/api/quizApi";
+import { useRouter } from "next/navigation";
 
 interface Option {
-  id: number
-  text: string
-  correct: boolean
-  color: string
+  id: string | number;
+  text: string;
+  correct: boolean;
+  color: string;
 }
 
 interface Question {
-  id: number
-  type: string
-  question: string
-  options: Option[]
+  id: string | number;
+  type: string;
+  question: string;
+  options: Option[];
 }
 
-// Updated Category interface to match API response
 interface Category {
-  id: string // Changed from number to string
-  name: string
-  description: string // Added description field from API
+  id: string;
+  name: string;
+  description: string;
+}
+
+interface CategoryResponse {
+  id: string;
+  name: string;
+  description?: string;
+}
+
+interface DefaultValues {
+  title: string;
+  description: string;
+  categoryIds: string[];
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
+  thumbnailUrl?: string;
 }
 
 interface PublishModalProps {
-  onClose: () => void
-  quizData: Question[]
+  onClose: () => void;
+  quizData: Question[];
+  quizId?: string;
+  defaultValues?: DefaultValues;
 }
 
-export default function PublishModal({ onClose, quizData }: PublishModalProps) {
+export default function PublishModal({ 
+  onClose, 
+  quizData, 
+  quizId,
+  defaultValues 
+}: PublishModalProps) {
+  const router = useRouter();
+  const { data: session, status } = useSession();
+  const isAuthed = status === "authenticated" && !!(session as any)?.apiAccessToken;
+
+  const [createQuiz, { isLoading: isCreating }] = useCreateQuizMutation();
+  const [updateQuiz, { isLoading: isUpdating }] = useUpdateQuizMutation();
+
+  const {
+    data: categories,
+    isLoading: isLoadingCategories,
+    isError,
+    refetch,
+  } = useGetCategoriesQuery(undefined, {
+    skip: !isAuthed,
+  });
+
   const [formData, setFormData] = useState({
-    tag: "",
-    description: "",
-    category: "",
-    level: "Beginner",
-    difficulty: "Easy",
-    visibility: "Public",
+    tag: defaultValues?.title || "",
+    description: defaultValues?.description || "",
+    category: defaultValues?.categoryIds?.[0] || "",
+    difficulty: defaultValues?.difficulty || ("EASY" as "EASY" | "MEDIUM" | "HARD"),
+    visibility: defaultValues?.visibility || ("PUBLIC" as "PUBLIC" | "PRIVATE" | "UNLISTED"),
     coverImage: null as File | null,
-  })
+  });
 
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loadingCategories, setLoadingCategories] = useState(true)
-  const [categoryError, setCategoryError] = useState<string | null>(null)
+  const [previewUrl, setPreviewUrl] = useState<string | null>(
+    defaultValues?.thumbnailUrl || null
+  );
+  const [isDragging, setIsDragging] = useState(false);
+  const [loadingCategories, setLoadingCategories] = useState(false);
+  const [categoryError, setCategoryError] = useState<string | null>(null);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null)
-  const [isDragging, setIsDragging] = useState(false)
-
-  // 🔹 Fetch categories from API when modal opens
-  useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoadingCategories(true)
-        setCategoryError(null)
-        
-        console.log("Fetching categories...")
-        const res = await fetch("https://stackquiz-api.stackquiz.me/api/v1/categories", {
-          method: 'GET',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        })
-        
-        if (!res.ok) {
-          throw new Error(`Failed to fetch categories: ${res.status} ${res.statusText}`)
-        }
-        
-        const data: Category[] = await res.json()
-        console.log("Categories fetched:", data)
-        
-        // The API returns an array directly, not wrapped in a data property
-        setCategories(data)
-      } catch (err) {
-        console.error("Error fetching categories:", err)
-        setCategoryError(err instanceof Error ? err.message : "Failed to load categories")
-      } finally {
-        setLoadingCategories(false)
-      }
-    }
-    
-    fetchCategories()
-  }, [])
+  const isEditMode = !!quizId;
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0]
-      
-      // Validate file type
+    if (e.target.files?.[0]) {
+      const file = e.target.files[0];
       if (!file.type.startsWith("image/")) {
-        alert("Please select a valid image file")
-        return
+        alert("Please select a valid image file");
+        return;
       }
-      
-      // Validate file size (5MB limit)
       if (file.size > 5 * 1024 * 1024) {
-        alert("Image size must be less than 5MB")
-        return
+        alert("Image size must be less than 5MB");
+        return;
       }
-      
-      setFormData(prev => ({ ...prev, coverImage: file }))
-      setPreviewUrl(URL.createObjectURL(file))
+      setFormData((prev) => ({ ...prev, coverImage: file }));
+      if (previewUrl && !defaultValues?.thumbnailUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setPreviewUrl(URL.createObjectURL(file));
     }
-  }
+  };
 
   const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0]
-      if (file.type.startsWith("image/")) {
-        if (file.size > 5 * 1024 * 1024) {
-          alert("Image size must be less than 5MB")
-          return
-        }
-        setFormData(prev => ({ ...prev, coverImage: file }))
-        setPreviewUrl(URL.createObjectURL(file))
-      } else {
-        alert("Please drop a valid image file")
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files?.[0]) {
+      const file = e.dataTransfer.files[0];
+      if (!file.type.startsWith("image/")) {
+        alert("Please drop a valid image file");
+        return;
       }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Image size must be less than 5MB");
+        return;
+      }
+      setFormData((prev) => ({ ...prev, coverImage: file }));
+      if (previewUrl && !defaultValues?.thumbnailUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+      setPreviewUrl(URL.createObjectURL(file));
     }
-  }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(true)
-  }
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
   const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault()
-    setIsDragging(false)
-  }
+    e.preventDefault();
+    setIsDragging(false);
+  };
 
   const removeImage = () => {
-    if (previewUrl) {
-      URL.revokeObjectURL(previewUrl)
+    if (previewUrl && !defaultValues?.thumbnailUrl) {
+      URL.revokeObjectURL(previewUrl);
     }
-    setFormData(prev => ({ ...prev, coverImage: null }))
-    setPreviewUrl(null)
-  }
+    setFormData((prev) => ({ ...prev, coverImage: null }));
+    setPreviewUrl(null);
+  };
 
-  const handleSubmit = () => {
-    // Basic validation
-    if (!formData.tag.trim()) {
-      alert("Please enter a quiz tag")
-      return
-    }
-    if (!formData.description.trim()) {
-      alert("Please enter a quiz description")
-      return
-    }
-    if (!formData.category) {
-      alert("Please select a category")
-      return
-    }
+  const handleSubmit = async () => {
+    setPublishError(null);
 
-    console.log("Publishing quiz:", { 
-      formData, 
-      questions: quizData,
-      selectedCategory: categories.find(cat => cat.id === formData.category)
-    })
-    
-    // Here you would typically make an API call to publish the quiz
-    onClose()
-  }
+    if (!formData.tag.trim()) return alert("Please enter a quiz tag");
+    if (!formData.description.trim()) return alert("Please enter a quiz description");
+    if (!formData.category) return alert("Please select a category");
+    if (quizData.length === 0) return alert("You must add at least one question before publishing.");
 
-  // Cleanup preview URL on unmount
+    const transformedQuestions = quizData.map((q) => ({
+      text: q.question,
+      type: q.type.toUpperCase() === "TRUEFALSE" ? "TF" : q.type.toUpperCase(),
+      options: q.options.map((opt) => ({
+        optionText: opt.text,
+        isCorrected: opt.correct,
+      })),
+    }));
+
+    const payload = {
+      title: formData.tag,
+      description: formData.description,
+      thumbnailUrl: previewUrl || "",
+      visibility: formData.visibility,
+      difficulty: formData.difficulty,
+      categoryIds: [formData.category],
+      questions: transformedQuestions,
+    };
+
+    console.log("Publishing payload:", payload);
+
+    try {
+      let result;
+      if (isEditMode) {
+        result = await updateQuiz({ quizId, data: payload }).unwrap();
+        console.log("Quiz updated successfully:", result);
+      } else {
+        result = await createQuiz(payload).unwrap();
+        console.log("Quiz created successfully:", result);
+      }
+      
+      onClose();
+      
+      const targetQuizId = isEditMode ? quizId : result?.id;
+      if (targetQuizId) {
+        window.location.href = `/quiz/${targetQuizId}`;
+      }
+    } catch (error: any) {
+      console.error("Failed to publish quiz - Full error:", error);
+      
+      const errorMessage = 
+        error?.data?.message || 
+        error?.message || 
+        (error?.status ? `Error ${error.status}: Failed to publish quiz` : "Failed to publish quiz. Please try again.");
+      
+      setPublishError(errorMessage);
+    }
+  };
+
+  const handleRetryCategories = async () => {
+    setLoadingCategories(true);
+    setCategoryError(null);
+    try {
+      await refetch();
+    } catch (err) {
+      setCategoryError("Failed to reload categories.");
+    } finally {
+      setLoadingCategories(false);
+    }
+  };
+
   useEffect(() => {
     return () => {
-      if (previewUrl) {
-        URL.revokeObjectURL(previewUrl)
+      if (previewUrl && !defaultValues?.thumbnailUrl) {
+        URL.revokeObjectURL(previewUrl);
       }
-    }
-  }, [previewUrl])
+    };
+  }, [previewUrl, defaultValues?.thumbnailUrl]);
+
+  if (!isAuthed) {
+    return (
+      <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
+        <div className="bg-white/95 rounded-2xl p-8 w-full max-w-md shadow-2xl">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Authenticating...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white/95 backdrop-blur-sm rounded-2xl p-8 w-full max-w-md shadow-2xl border border-white/20 max-h-[90vh] overflow-y-auto">
-        
-        {/* Header */}
+      <div className="bg-white/95 rounded-2xl p-8 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              Publish Quiz
+              {isEditMode ? "Update Quiz" : "Publish Quiz"}
             </h3>
-            <p className="text-gray-500 text-sm mt-1">Add the final touches to your quiz</p>
+            <p className="text-gray-500 text-sm mt-1">
+              {isEditMode ? "Update your quiz details" : "Add the final touches to your quiz"}
+            </p>
           </div>
           <button
             onClick={onClose}
@@ -194,28 +260,24 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
           </button>
         </div>
 
-        {/* Cover Image Upload */}
+        {publishError && (
+          <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-600 text-sm">
+            {publishError}
+          </div>
+        )}
+
         <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">
-            Cover Image
-          </label>
+          <label className="block text-sm font-semibold text-gray-700 mb-3">Cover Image</label>
           {previewUrl ? (
             <div className="relative group">
               <div className="relative w-full h-40 rounded-xl overflow-hidden border-2 border-gray-200">
-                <Image
-                  src={previewUrl}
-                  alt="Cover Preview"
-                  fill
-                  className="object-cover"
-                />
+                <Image src={previewUrl} alt="Cover Preview" fill className="object-cover" />
               </div>
               <button
                 onClick={removeImage}
                 className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                ✕
               </button>
             </div>
           ) : (
@@ -223,23 +285,12 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
               onDrop={handleDrop}
               onDragOver={handleDragOver}
               onDragLeave={handleDragLeave}
-              className={`relative border-2 border-dashed rounded-xl h-40 flex flex-col items-center justify-center cursor-pointer transition-all duration-200 ${
-                isDragging
-                  ? "border-purple-400 bg-purple-50"
-                  : "border-gray-300 hover:border-purple-400 hover:bg-gray-50"
+              className={`relative border-2 border-dashed rounded-xl h-40 flex flex-col items-center justify-center cursor-pointer transition-all ${
+                isDragging ? "border-purple-400 bg-purple-50" : "border-gray-300 hover:border-purple-400 hover:bg-gray-50"
               }`}
             >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-              />
-              <div className="p-4 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 mb-3">
-                <svg className="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                </svg>
-              </div>
+              <input type="file" accept="image/*" onChange={handleImageChange} className="absolute inset-0 opacity-0 cursor-pointer" />
+              <div className="p-4 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 mb-3">➕</div>
               <p className="text-gray-600 font-medium">Drop an image here</p>
               <p className="text-gray-400 text-sm">or click to browse</p>
               <p className="text-gray-400 text-xs mt-1">JPG, PNG up to 5MB</p>
@@ -247,89 +298,74 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
           )}
         </div>
 
-        {/* Form Fields */}
         <div className="space-y-5">
-          {/* Tag */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="tag">
-              Tag *
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Tag *</label>
             <input
-              id="tag"
               type="text"
               placeholder="Enter a quiz tag"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500"
               value={formData.tag}
-              onChange={e => setFormData(prev => ({ ...prev, tag: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, tag: e.target.value }))}
             />
           </div>
 
-          {/* Description */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="description">
-              Description *
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
             <textarea
-              id="description"
               placeholder="Describe your quiz"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all resize-none h-20"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none h-20"
               value={formData.description}
-              onChange={e => setFormData(prev => ({ ...prev, description: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
             />
           </div>
 
-          {/* Category - FIXED */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2" htmlFor="category">
-              Category *
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
             <select
-              id="category"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all appearance-none cursor-pointer"
+              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 cursor-pointer"
               value={formData.category}
-              onChange={e => setFormData(prev => ({ ...prev, category: e.target.value }))}
+              onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
             >
               <option value="">Select a category</option>
-              {loadingCategories ? (
+              {isLoadingCategories ? (
                 <option disabled>Loading categories...</option>
-              ) : categoryError ? (
+              ) : isError ? (
                 <option disabled>Error loading categories</option>
-              ) : categories.length === 0 ? (
+              ) : !categories || categories.length === 0 ? (
                 <option disabled>No categories available</option>
               ) : (
-                categories.map(cat => (
-                  <option key={cat.id} value={cat.id}>
-                    {cat.name}
-                  </option>
+                categories.map((cat: CategoryResponse) => (
+                  <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))
               )}
             </select>
             {categoryError && (
-              <p className="text-red-500 text-sm mt-1">
-                Failed to load categories. Please try again.
-              </p>
-            )}
-            {!loadingCategories && !categoryError && (
-              <p className="text-gray-500 text-sm mt-1">
-                {categories.length} categories available
-              </p>
+              <div className="text-red-500 text-sm mt-1 flex items-center justify-between">
+                <span>{categoryError}</span>
+                <button
+                  type="button"
+                  onClick={handleRetryCategories}
+                  disabled={loadingCategories}
+                  className="ml-2 px-3 py-1 text-xs bg-red-500 hover:bg-red-600 text-white rounded-md disabled:opacity-50"
+                >
+                  {loadingCategories ? "Retrying..." : "Retry"}
+                </button>
+              </div>
             )}
           </div>
 
-          {/* Difficulty */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Difficulty Level
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">Difficulty Level</label>
             <div className="flex space-x-3">
-              {["Easy", "Medium", "Hard"].map(level => (
+              {["EASY", "MEDIUM", "HARD"].map((level) => (
                 <button
                   key={level}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, difficulty: level }))}
-                  className={`flex-1 py-2 px-4 rounded-xl font-medium transition-all ${
+                  onClick={() => setFormData((prev) => ({ ...prev, difficulty: level as any }))}
+                  className={`flex-1 py-2 px-4 rounded-xl font-medium transition ${
                     formData.difficulty === level
-                      ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white shadow-lg"
+                      ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
                       : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
                 >
@@ -339,21 +375,19 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
             </div>
           </div>
 
-          {/* Visibility */}
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">
-              Visibility
-            </label>
+            <label className="block text-sm font-semibold text-gray-700 mb-3">Visibility</label>
             <div className="flex space-x-3">
               {[
-                { value: "Public", icon: "🌍", desc: "Everyone can see" },
-                { value: "Private", icon: "🔒", desc: "Only you can see" },
-              ].map(option => (
+                { value: "PUBLIC", icon: "🌍", desc: "Everyone can see" },
+                { value: "PRIVATE", icon: "🔒", desc: "Only you can see" },
+                { value: "UNLISTED", icon: "🙈", desc: "Accessible via link" },
+              ].map((option) => (
                 <button
                   key={option.value}
                   type="button"
-                  onClick={() => setFormData(prev => ({ ...prev, visibility: option.value }))}
-                  className={`flex-1 p-4 rounded-xl border-2 transition-all ${
+                  onClick={() => setFormData((prev) => ({ ...prev, visibility: option.value as any }))}
+                  className={`flex-1 p-4 rounded-xl border-2 transition ${
                     formData.visibility === option.value
                       ? "border-purple-500 bg-purple-50"
                       : "border-gray-200 hover:border-gray-300"
@@ -368,22 +402,23 @@ export default function PublishModal({ onClose, quizData }: PublishModalProps) {
           </div>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex space-x-3 mt-8">
           <button
-            className="flex-1 py-3 px-4 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+            className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200"
             onClick={onClose}
+            disabled={isCreating || isUpdating}
           >
             Cancel
           </button>
           <button
-            className="flex-1 py-3 px-4 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 transition-all shadow-lg hover:shadow-xl transform hover:scale-[1.02]"
+            className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={handleSubmit}
+            disabled={isCreating || isUpdating}
           >
-            Publish Quiz
+            {isCreating || isUpdating ? "Publishing..." : isEditMode ? "Update Quiz" : "Publish Quiz"}
           </button>
         </div>
       </div>
     </div>
-  )
+  );
 }

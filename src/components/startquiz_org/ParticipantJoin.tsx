@@ -74,7 +74,7 @@ export default function WaitParticipant() {
           {/* Right: QR block */}
           <div className="flex-[1.2] rounded-[16px]  flex flex-col items-center justify-center">
             <div className="rounded-2xl bg-white p-3">
-              <QRCodeBox className="h-40 w-40" />
+              <QRCodeBox joinUrl={joinUrl} className="h-40 w-40" />
             </div>
             <div className="mt-3 text-sm text-white/90">Scan to join</div>
           </div>

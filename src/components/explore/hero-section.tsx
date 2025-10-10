@@ -43,7 +43,7 @@ export default function Banner() {
         src="explore/hero.png"
         alt="explore Banner"
         fill
-        className="object-contain p-[40px]"
+        className="object-contain  p-[40px]"
         priority
       />
 

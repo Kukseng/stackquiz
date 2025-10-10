@@ -1,8 +1,13 @@
 "use client";
+import React, { useState } from "react";
 import Searchbar from "../leaderboard/Searchbar";
 import TemplatesCardComponent from "../TemplateCardComponent";
 
 export function Explore() {
+  // State for search and filters
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedDifficulty, setSelectedDifficulty] = useState("All");
+  const [selectedCategory, setSelectedCategory] = useState("All");
 
   return (
     <div className="min-h-[800px] bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden rounded-lg">
@@ -27,8 +32,12 @@ export function Explore() {
             <div className="flex items-start gap-8"></div>
           </div>
 
-          {/* Quiz Cards Grid */}
-          <TemplatesCardComponent/>
+          {/* ✅ Quiz Cards Grid with required props */}
+          <TemplatesCardComponent
+            selectedDifficulty={selectedDifficulty}
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+          />
         </div>
       </div>
     </div>

@@ -2,7 +2,18 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import type { Question } from "@/app/play/quizDetail/[id]/page"
+
+interface QuizOption {
+  id: string
+  optionText: string
+  isCorrected: boolean
+}
+
+interface Question {
+  id: string
+  text: string
+  options: QuizOption[]
+}
 
 interface FillBlankQuestionProps {
   question: Question

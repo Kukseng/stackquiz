@@ -241,7 +241,7 @@ const QuizDetailPage: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8">
-          <div className="flex items-start gap-3 sm:gap-4 flex-1">
+          <div className="flex  gap-5 sm:gap-7 items-center flex-1">
             {/* Dynamic Avatar */}
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
               {session ? (

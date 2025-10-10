@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Clock, Users, Trophy, Play, AlertCircle } from "lucide-react"
-import type { Quiz } from "@/app/play/quizDetail/[id]/page"
+import type { Quiz } from "../../../src/lib/types/api"
+import Image from "next/image"
 
 interface QuizSelectionProps {
   onQuizSelect: (quiz: Quiz) => void
@@ -85,7 +86,7 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
             <CardHeader>
               {quiz.thumbnailUrl && quiz.thumbnailUrl !== "string" && (
                 <div className="w-full h-32 mb-4 rounded-lg overflow-hidden">
-                    <img
+                    <Image
                         src={quiz.thumbnailUrl}
                         alt={`${quiz.title} Thumbnail`}
                         className="w-full h-full object-cover"
@@ -104,11 +105,11 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
                 </Badge>
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {Math.round(quiz.questions.reduce((acc, q) => acc + q.timeLimit, 0) / quiz.questions.length)}s avg
+                  {Math.round(quiz.questions.reduce((acc: number, q: { timeLimit: number }) => acc + q.timeLimit, 0) / quiz.questions.length)}s avg
                 </Badge>
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Trophy className="w-3 h-3" />
-                  {quiz.questions.reduce((acc, q) => acc + q.points, 0)} pts
+                  {quiz.questions.reduce((acc: number, q: { points: number }) => acc + q.points, 0)} pts
                 </Badge>
               </div>
 

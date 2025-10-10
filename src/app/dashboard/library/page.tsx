@@ -724,7 +724,7 @@ const DataTable = () => {
           </p>
           <button 
             onClick={() => router.push('/quizbuilder')}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="inline-flex items-center gap-2 px-4 py-2 btn-secondary btn-text rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
           >
             <Plus className="h-4 w-4" />
             Create New Quiz
@@ -742,7 +742,7 @@ const DataTable = () => {
             
             <h3 className="text-xl font-semibold text-gray-900 mb-2">Delete Quiz</h3>
             <p className="text-gray-600 mb-6">
-              Are you sure you want to delete <span className="font-semibold text-gray-900">"{quizToDelete?.title}"</span>? This action cannot be undone.
+              Are you sure you want to delete <span className="font-semibold text-gray-900">{quizToDelete?.title}</span>? This action cannot be undone.
             </p>
 
             <div className="flex gap-3">
@@ -770,3 +770,4 @@ const DataTable = () => {
 }
 
 export default DataTable
+

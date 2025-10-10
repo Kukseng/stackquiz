@@ -37,11 +37,8 @@ interface NeonGradientCardProps extends HTMLAttributes<HTMLDivElement> {
    * Neon gradient colors
    */
   neonColors?: NeonColorsProps;
-<<<<<<< HEAD
-=======
 
   [key: string]: unknown;
->>>>>>> e7d992f6174c4072dfd624510ac0971c77cb3fd9
 }
 
 export const NeonGradientCard: React.FC<NeonGradientCardProps> = ({

@@ -70,7 +70,7 @@ const DashboardPage = () => {
 </div>
 
         {/* Welcome Card */}
-        <div className="bg-slate-100 rounded-2xl p-6 flex items-center gap-2">
+        <div className="bg-[#E5D2F9] rounded-2xl p-6 flex items-center gap-2">
           <div>
             <h2 className="text-2xl font-bold">Hello</h2>
             <h3 className="text-lg font-semibold flex items-center gap-1">
@@ -150,7 +150,7 @@ const DashboardPage = () => {
         <div className="mb-4 flex flex-wrap gap-2">
           {searchTerm && (
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-              Search: "{searchTerm}"
+              Search: {searchTerm}
               <button
                 onClick={() => setSearchTerm("")}
                 className="hover:text-blue-900 font-semibold"

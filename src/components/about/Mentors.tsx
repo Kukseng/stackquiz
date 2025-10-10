@@ -36,7 +36,7 @@ export function MentorsSection() {
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <section className={`relative py-12 sm:py-16 md:py-20 lg:py-24 text-white overflow-hidden ${fontClass}`}>
+    <section className={`relative py-12 sm:py-16 md:py-20 lg:py-24 text-white overflow-hidden mt-[-150px] ${fontClass}`}>
       <style jsx>{`
         @keyframes colorCycle {
           0% { border-color: var(--color-0); }
@@ -75,7 +75,7 @@ export function MentorsSection() {
       </div>
 
       {/* Mentor Cards */}
-      <div className="max-w-4xl mx-auto py-12 grid grid-cols-1 lg:grid-cols-2 gap-12 sm:gap-16 md:gap-20 lg:gap-24 px-4 sm:px-6 md:px-8">
+      <div className="max-w-4xl mx-auto py-12 grid grid-cols-1 lg:grid-cols-2 gap-16 sm:gap-16 md:gap-20 lg:gap-24 px-4 sm:px-6 md:px-8">
         {mentors.map((mentor, idx) => (
           <motion.div
             key={mentor.key}

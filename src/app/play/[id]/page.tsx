@@ -3,9 +3,10 @@
 import { useState } from "react"
 import { QuizSelection } from "@/components/play-quiz/quiz-selection"
 import { GameEngine } from "@/components/play-quiz/game-engine"
-import { ResultsSystem } from "../../components/play-quiz/result-system"
+import { ResultsSystem } from "../../../components/play-quiz/result-system"
 import { NicknameEntry } from "@/components/play-quiz/nickname-entry"
-import { WebSocketProvider } from "../../context/websocket-context"
+import { WebSocketProvider } from "../../../context/websocket-context"
+import { useParams } from "next/navigation"
 
 export type Quiz = {
   id: string
@@ -56,15 +57,35 @@ export type GameResults = {
 export type GameState = "selection" | "playing" | "results" | "nickname"
 
 export default function QuizApp() {
+  const { id } = useParams() as { id: string } // Quiz room ID from URL
   const [gameState, setGameState] = useState<GameState>("nickname")
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null)
   const [gameResults, setGameResults] = useState<GameResults | null>(null)
   const [playerNickname, setPlayerNickname] = useState<string>("")
 
-  const handleNicknameSet = (nickname: string) => {
-    setPlayerNickname(nickname)
-    setGameState("selection")
+ const handleNicknameSet = async (nickname: string) => {
+  setPlayerNickname(nickname)
+
+  try {
+    console.log("Fetching quiz for id:", id)
+
+    const response = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/quizzes/${id}`
+    )
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch quiz: ${response.status}`)
+    }
+
+    const quizData: Quiz = await response.json()
+    setSelectedQuiz(quizData)
+    setGameState("playing")
+  } catch (error) {
+    console.error("Error loading quiz:", error)
+    alert("Could not load the quiz. Please try again.")
   }
+}
+
 
   const handleQuizSelect = (quiz: Quiz) => {
     setSelectedQuiz(quiz)
@@ -83,14 +104,19 @@ export default function QuizApp() {
   }
 
   return (
-    <WebSocketProvider>
+    // Pass the quiz room ID to the WebSocketProvider
+    <WebSocketProvider roomId={id}>
       <div className="min-h-screen">
         {gameState === "nickname" && <NicknameEntry onNicknameSet={handleNicknameSet} />}
 
         {gameState === "selection" && <QuizSelection onQuizSelect={handleQuizSelect} />}
 
         {gameState === "playing" && selectedQuiz && (
-          <GameEngine quiz={selectedQuiz} onGameComplete={handleGameComplete} playerNickname={playerNickname} />
+          <GameEngine
+            quiz={selectedQuiz}
+            onGameComplete={handleGameComplete}
+            playerNickname={playerNickname}
+          />
         )}
 
         {gameState === "results" && gameResults && selectedQuiz && (
@@ -105,3 +131,4 @@ export default function QuizApp() {
     </WebSocketProvider>
   )
 }
+

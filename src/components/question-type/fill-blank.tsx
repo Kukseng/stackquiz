@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Button } from "@/components/ui/button"
-import type { Question } from "@/app/play/page"
+import type { Question } from "@/app/play/quizDetail/[id]/page"
 
 interface FillBlankQuestionProps {
   question: Question

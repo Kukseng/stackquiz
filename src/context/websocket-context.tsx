@@ -1,7 +1,8 @@
 "use client"
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react"
+import React, { createContext, useContext, useEffect, useState, type ReactNode } from "react"
 
+// --- Types ---
 export type WebSocketMessage = {
   type: "participant_joined" | "participant_left" | "question_sync" | "answer_submitted" | "time_sync"
   data: unknown
@@ -13,82 +14,87 @@ export type Participant = {
   isReady: boolean
 }
 
-type WebSocketContextType = {
+export type WebSocketContextType = {
   socket: WebSocket | null
   isConnected: boolean
   participants: Participant[]
   currentQuestionIndex: number
   timeLeft: number
   sendMessage: (message: WebSocketMessage) => void
-  joinRoom: (roomId: string, nickname: string) => void
+  joinRoom: (nickname: string) => void
+  roomId: string | null
 }
 
+// --- Context ---
 const WebSocketContext = createContext<WebSocketContextType | null>(null)
 
 export function useWebSocket() {
   const context = useContext(WebSocketContext)
-  if (!context) {
-    throw new Error("useWebSocket must be used within a WebSocketProvider")
-  }
+  if (!context) throw new Error("useWebSocket must be used within a WebSocketProvider")
   return context
 }
 
+// --- Provider Props ---
 interface WebSocketProviderProps {
   children: ReactNode
+  roomId: string
 }
 
-export function WebSocketProvider({ children }: WebSocketProviderProps) {
+// --- Provider ---
+export function WebSocketProvider({ children, roomId }: WebSocketProviderProps) {
   const [socket, setSocket] = useState<WebSocket | null>(null)
   const [isConnected, setIsConnected] = useState(false)
   const [participants, setParticipants] = useState<Participant[]>([])
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [timeLeft, setTimeLeft] = useState(30)
 
+  // Send message helper
   const sendMessage = (message: WebSocketMessage) => {
     if (socket && socket.readyState === WebSocket.OPEN) {
       socket.send(JSON.stringify(message))
     }
   }
 
-  const joinRoom = (roomId: string, nickname: string) => {
-    // For demo purposes, we'll simulate WebSocket connection
-    // In a real app, you'd connect to your WebSocket server
-    const mockSocket = {
-      send: (data: string) => {
-        console.log("[v0] Mock WebSocket send:", data)
-      },
-      readyState: WebSocket.OPEN,
-      close: () => {},
-    } as WebSocket
+  // Join room
+  const joinRoom = (nickname: string) => {
+    if (!roomId) return
 
-    setSocket(mockSocket)
-    setIsConnected(true)
+    // Replace with actual WebSocket URL
+    const ws = new WebSocket(`wss://yourserver.com/quiz?room=${roomId}`)
 
-    // Simulate joining room
-    const newParticipant: Participant = {
-      id: Math.random().toString(36).substr(2, 9),
-      nickname,
-      isReady: true,
+    ws.onopen = () => {
+      console.log(`Connected to room: ${roomId}`)
+      setIsConnected(true)
+
+      // Notify server we're joining (optional)
+      sendMessage({ type: "participant_joined", data: { nickname } })
+
+      // Add self as participant
+      const self: Participant = { id: Math.random().toString(36).substr(2, 9), nickname, isReady: true }
+      setParticipants([self])
     }
 
-    setParticipants([newParticipant])
+    ws.onmessage = (event) => {
+      const msg: WebSocketMessage = JSON.parse(event.data)
+      // Example: handle participant_joined
+      if (msg.type === "participant_joined" && typeof msg.data === "object") {
+        setParticipants((prev) => [...prev, msg.data as Participant])
+      }
+      // Add other message handling here
+    }
 
-    // Simulate other participants joining
-    setTimeout(() => {
-      const mockParticipants: Participant[] = [
-        { id: "user1", nickname: "QuizMaster", isReady: true },
-        { id: "user2", nickname: "BrainBox", isReady: true },
-        { id: "user3", nickname: "Thinker", isReady: true },
-      ]
-      setParticipants((prev) => [...prev, ...mockParticipants])
-    }, 2000)
+    ws.onclose = () => {
+      console.log("Disconnected from server")
+      setIsConnected(false)
+    }
+
+    setSocket(ws)
   }
 
   useEffect(() => {
+    // Cleanup socket on unmount
     return () => {
-      if (socket) {
-        socket.close()
-      }
+      if (socket) socket.close()
     }
   }, [socket])
 
@@ -100,6 +106,7 @@ export function WebSocketProvider({ children }: WebSocketProviderProps) {
     timeLeft,
     sendMessage,
     joinRoom,
+    roomId,
   }
 
   return <WebSocketContext.Provider value={value}>{children}</WebSocketContext.Provider>

@@ -1,7 +1,7 @@
 "use client"
 
 import { Button } from "@/components/ui/button"
-import type { Question } from "@/app/play/page"
+import type { Question } from "@/app/play/quizDetail/[id]/page"
 
 interface MultipleChoiceQuestionProps {
   question: Question

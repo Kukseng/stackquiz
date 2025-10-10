@@ -5,7 +5,7 @@ import { useQuizStore } from "./hooks/useQuizbuilder";
 import { QuizSidebar } from "./quizsidebar";
 import QuizMainContent from "./quizmaincontent";
 import { QuizHeader } from "./quizheader";
-import { ThemeSidebar } from "./themeSidebar";
+import  ThemeSidebar from "./themeSidebar";
 import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
 import PublishModal from "./modal/publice_modal";

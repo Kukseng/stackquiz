@@ -3,29 +3,21 @@ import { baseApi } from "./baseApi";
 export interface Question {
   id: string;
   text: string;
-  type: "TF" | "MCQ"; 
-  questionOrder: number;
-  timeLimit: number;
-  points: number;
+  type: "TF" | "MCQ" | "FILL_THE_BLANK"; 
   imageUrl?: string;
   quizId?: string;
 }
 
 export interface CreateQuestionRequest {
   text: string;
-  type: "TF" | "MCQ";
-  timeLimit: number;
-  points: number;
+  type: "TF" | "MCQ" | "FILL_THE_BLANK";
   imageUrl?: string;
   quizId: string;
 }
 
 export interface UpdateQuestionRequest {
   text?: string;
-  type?: "TF" | "MCQ";
-  questionOrder?: number;
-  timeLimit?: number;
-  points?: number;
+  type?: "TF" | "MCQ" | "FILL_THE_BLANK";
   imageUrl?: string;
 }
 

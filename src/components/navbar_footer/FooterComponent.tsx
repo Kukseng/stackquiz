@@ -8,11 +8,11 @@ export default function Footer() {
   return (
     <footer className="w-screen bg-footer text-white relative left-1/2 right-1/2 -ml-[50vw] -mr-[50vw]">
       {/* Main Footer Content */}
-      <div className="max-w-7xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-5 gap-4 text-center md:text-left">
+      <div className="max-w-7xl mx-auto py-12 grid grid-cols-1 md:grid-cols-5 gap-4 text-center md:text-left">
         {/* Organized and Sponsored By */}
         <div className="space-y-4">
           <h3 className="text-sm font-bold uppercase tracking-wider text-white">
-            ORGANIZED AND SPONSORED BY
+            SPONSORED AND ORGANIZED BY
           </h3>
           <div className="flex items-center justify-center md:justify-start">
             <Image
@@ -22,23 +22,23 @@ export default function Footer() {
               alt="Logo"
             />
           </div>
-          <p className="text-[16px] text-gray-300 leading-relaxed">
+          <p className="text-[16px] text-center text-gray-300 leading-relaxed">
             Institute of Science and Technology Advanced Development
           </p>
         </div>
 
         {/* About This Site */}
-        <div className="space-y-4">
+        <div className="space-y-4 text-center">
           <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
             ABOUT THIS SITE
           </h3>
-          <div className="flex items-center justify-center md:justify-start space-x-3">
+          <div className="flex items-center justify-center  space-x-3 ">
             <div className="w-12 h-12 flex items-center justify-center">
               <Image src="/logo-sq.png" width={45} height={45} alt="logo" />
             </div>
             <div>
               <div className="text-xl font-bold">
-                STACK <span className="text-yellow">QUIZZ</span>
+                STACK <span className="text-yellow">QUIZ</span>
               </div>
             </div>
           </div>
@@ -46,15 +46,15 @@ export default function Footer() {
         </div>
 
         {/* Links */}
-        <div className="space-y-4">
-          <h3 className="text-sm font-semibold uppercase tracking-wider text-white">
+        <div className="space-y-4  ">
+          <h3 className="text-sm  font-semibold uppercase tracking-wider text-white">
             LINKS
           </h3>
-          <nav className="space-y-2">
+          <nav className="space-y-2 ">
             {[
               { name: "Home", href: "/" },
               { name: "Explore", href: "/explore" },
-              { name: "Join Room", href: "/join-room" },
+              { name: "Live Quiz", href: "/join-room" },
               { name: "About Us", href: "/about" },
             ].map((link) => (
               <Link

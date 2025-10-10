@@ -43,7 +43,7 @@ export function PlatformSection() {
       className={`px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 sm:py-6 md:py-9 lg:py-10 xl:py-11 ${fontClass}`}
     >
       <div className="max-w-7xl mx-auto py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
           {/* Text on Top (mobile), Right (desktop) */}
           <motion.div
             ref={textRef}
@@ -53,7 +53,7 @@ export function PlatformSection() {
           >
             <div className="mb-12">
               {/* Section Title */}
-              <h2 className="text-3xl sm:text-4xl md:text-4xl lg:text-5xl font-bold text-white">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[58px] font-bold text-white">
                 <span className="text-yellow text-underline">
                   {t.platform.title}
                 </span>
@@ -84,8 +84,8 @@ export function PlatformSection() {
             <Image
               src="/second.png"
               alt="People engaging with quiz platform"
-              width={500}
-              height={500}
+              width={300}
+              height={350}
               className="w-full max-w-xs sm:max-w-sm md:max-w-md lg:max-w-full h-auto object-contain"
             />
           </motion.div>

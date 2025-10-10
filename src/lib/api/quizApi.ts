@@ -20,14 +20,8 @@ export interface QuizRequest {
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
   difficulty: "EASY" | "MEDIUM" | "HARD";
   categoryIds: string[];
-  questions: Array<{
-    text: string;
-    type: string;
-    options: Array<{
-      optionText: string;
-      isCorrected: boolean;
-    }>;
-  }>;
+  status?: string; // e.g., "PUBLISHED" | "DRAFT"
+  questionTimeLimit?: string; // e.g., "FIVE" | backend-defined enum
 }
 
 export const quizApi = baseApi.injectEndpoints({

@@ -9,9 +9,9 @@ interface QuestionTypeModalProps {
 
 export function QuestionTypeModal({ onClose, addQuestion }: QuestionTypeModalProps) {
   const questionTypes = [
-    { id: "multiple", label: "Multiple choice", icon: <FaCircle className="w-6 h-6 text-blue-500" /> },
-    { id: "truefalse", label: "True/false", icon: <FaCheck className="w-6 h-6 text-green-500" /> },
-    { id: "fillblank", label: "Fill the blank", icon: <FaRegSquare className="w-6 h-6 text-purple-500" /> },
+    { id: "mcq", label: "Multiple choice", icon: <FaCircle className="w-6 h-6 text-blue-500" /> },
+    { id: "tf", label: "True/false", icon: <FaCheck className="w-6 h-6 text-green-500" /> },
+    { id: "fill_the_blank", label: "Fill the blank", icon: <FaRegSquare className="w-6 h-6 text-purple-500" /> },
   ]
 
   const handleAddQuestion = (type: string) => {

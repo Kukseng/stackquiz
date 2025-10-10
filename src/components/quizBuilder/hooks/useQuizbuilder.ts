@@ -1,110 +1,129 @@
-"use client";
+"use client"
+import { useState } from "react"
 
-import { create } from "zustand";
-
-export type IconType = "circle" | "triangle" | "square" | "diamond";
+// Icon type
+export type IconType = "circle" | "triangle" | "square" | "diamond"
 
 export interface QuizOption {
-  id: number | string;
-  text: string;
-  correct: boolean;
-  color: string;
-  icon?: IconType;
+  id: number
+  text: string
+  correct: boolean
+  color: string
+  icon?: IconType
 }
+
 
 export interface Question {
-  id: number | string;
-  type: string;
-  question: string;
-  options: QuizOption[];
+  id: number
+  type: string
+  question: string
+  options: QuizOption[]
 }
 
-interface QuizState {
-  questions: Question[];
-  activeQuestionId: number | string | null;
+export function useQuizStore() {
+  const [questions, setQuestions] = useState<Question[]>([])
+  const [activeQuestionId, setActiveQuestionId] = useState<number | null>(null)
 
-  setQuestions: (questions: Question[]) => void;
-  setActiveQuestionId: (id: number | string | null) => void;
-  addQuestion: (type: string) => void;
-  deleteQuestion: (id: number | string) => void;
-  duplicateQuestion: (question: Question) => void;
-  updateQuestionText: (questionId: number | string, newText: string) => void;
-  updateOptionText: (questionId: number | string, optionId: number | string, newText: string) => void;
-  toggleCorrectAnswer: (questionId: number | string, optionId: number | string) => void;
-}
-
-export const useQuizStore = create<QuizState>((set, get) => ({
-  questions: [],
-  activeQuestionId: null,
-
-  setQuestions: (questions) => set({ questions }),
-  setActiveQuestionId: (id) => set({ activeQuestionId: id }),
-
-  addQuestion: (type: string) => {
+  // Add new question
+  const addQuestion = (type: string) => {
     const newQuestion: Question = {
       id: Date.now(),
       type,
       question: "",
       options:
-        type === "multiple"
+        type === "mcq"
+    ? [
+        { id: 1, text: "", correct: false, color: "#e21a3b", icon: "circle" },
+        { id: 2, text: "", correct: false, color: "#e77f42", icon: "triangle" },
+        { id: 3, text: "", correct: false, color: "#1355b4", icon: "square" },
+        { id: 4, text: "", correct: true, color: "#27890d", icon: "diamond" }, // updated color
+      ]
+          : type === "tf"
           ? [
-              { id: 1, text: "", correct: false, color: "#e21a3b", icon: "circle" },
-              { id: 2, text: "", correct: false, color: "#e77f42", icon: "triangle" },
-              { id: 3, text: "", correct: false, color: "#1355b4", icon: "square" },
-              { id: 4, text: "", correct: true, color: "#27890d", icon: "diamond" },
+              { id: 1, text: "True", correct: false, color: "bg-red-500", icon: "circle" },
+              { id: 4, text: "False", correct: true, color: "bg-green-700", icon: "diamond" },
             ]
-          : type === "truefalse"
-          ? [
-              { id: 1, text: "True", correct: false, color: "#e21a3b", icon: "circle" },
-              { id: 2, text: "False", correct: true, color: "#27890d", icon: "diamond" },
-            ]
-          : [{ id: 1, text: "", correct: true, color: "#1355b4" }],
-    };
-    set({ questions: [...get().questions, newQuestion], activeQuestionId: newQuestion.id });
-  },
+          : [{ id: 1, text: "", correct: true, color: "bg-blue-500" }],
+    }
+    setQuestions((prev) => [...prev, newQuestion])
+    setActiveQuestionId(newQuestion.id)
+  }
 
-  deleteQuestion: (id) => {
-    const remaining = get().questions.filter((q) => q.id !== id);
-    set({
-      questions: remaining,
-      activeQuestionId: remaining.length ? remaining[0].id : null,
-    });
-  },
+  // Delete question
+  const deleteQuestion = (id: number) => {
+    const newQuestions = questions.filter((q) => q.id !== id)
+    setQuestions(newQuestions)
+    setActiveQuestionId(newQuestions.length ? newQuestions[0].id : null)
+  }
 
-  duplicateQuestion: (question) => {
-    const duplicate = { ...question, id: Date.now(), options: question.options.map((o) => ({ ...o })) };
-    set({ questions: [...get().questions, duplicate], activeQuestionId: duplicate.id });
-  },
+  // Duplicate question
+  const duplicateQuestion = (question: Question) => {
+    const duplicate: Question = {
+      ...question,
+      id: Date.now(),
+      options: question.options.map((opt) => ({ ...opt })),
+    }
+    setQuestions((prev) => [...prev, duplicate])
+    setActiveQuestionId(duplicate.id)
+  }
 
-  updateQuestionText: (questionId, newText) => {
-    set({
-      questions: get().questions.map((q) => (q.id === questionId ? { ...q, question: newText } : q)),
-    });
-  },
+  // Update question text
+  const updateQuestionText = (questionId: number, newText: string) => {
+    setQuestions((prev) =>
+      prev.map((q) => (q.id === questionId ? { ...q, question: newText } : q))
+    )
+  }
 
-  updateOptionText: (questionId, optionId, newText) => {
-    set({
-      questions: get().questions.map((q) =>
-        q.id === questionId
-          ? { ...q, options: q.options.map((o) => (o.id === optionId ? { ...o, text: newText } : o)) }
-          : q
-      ),
-    });
-  },
+  // Update option text
+  const updateOptionText = (questionId: number, optionId: number, newText: string) => {
+    setQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id === questionId) {
+          return {
+            ...q,
+            options: q.options.map((opt) =>
+              opt.id === optionId ? { ...opt, text: newText } : opt
+            ),
+          }
+        }
+        return q
+      })
+    )
+  }
 
-  toggleCorrectAnswer: (questionId, optionId) => {
-    set({
-      questions: get().questions.map((q) =>
-        q.id === questionId
-          ? {
-              ...q,
-              options: q.options.map((o) => ({
-                ...o,
-                correct: q.type === "truefalse" || q.type === "fillblank" ? o.id === optionId : o.id === optionId ? !o.correct : o.correct,
-              })),
-            }
-          : q
-      ),
-    });
-  },
-}));
+  // Toggle correct answer
+  const toggleCorrectAnswer = (questionId: number, optionId: number) => {
+    setQuestions((prev) =>
+      prev.map((q) => {
+        if (q.id === questionId) {
+          return {
+            ...q,
+            options: q.options.map((opt) => ({
+              ...opt,
+              correct:
+                opt.id === optionId
+                  ? !opt.correct
+                  : q.type === "tf" || q.type === "fill_the_blank"
+                  ? false
+                  : opt.correct,
+            })),
+          }
+        }
+        return q
+      })
+    )
+  }
+
+  return {
+    questions,
+    setQuestions,
+    activeQuestionId,
+    setActiveQuestionId,
+    addQuestion,
+    deleteQuestion,
+    duplicateQuestion,
+    updateQuestionText,
+    updateOptionText,
+    toggleCorrectAnswer,
+  }
+}

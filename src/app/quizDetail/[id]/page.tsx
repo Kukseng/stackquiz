@@ -8,16 +8,13 @@ import { useSession } from "next-auth/react";
 import {
   Edit,
   Heart,
-  MoreHorizontal,
   X,
   Play,
   Users,
   Eye,
   EyeOff,
   UserPlus,
-  Settings,
-  Share2,
-  Download,
+ 
   ChevronDown,
   Trophy,
 } from "lucide-react";
@@ -110,6 +107,17 @@ const QuizThumbnail: React.FC<{ quiz: QuizData }> = ({ quiz }) => (
   </div>
 );
 
+const DropdownMenu: React.FC = () => (
+  <div className="relative group">
+    <button 
+      className="flex items-center gap-1 px-2 py-1 text-xs sm:text-sm text-slate-600 hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
+      aria-label="More options"
+    >
+ 
+    </button>
+
+  </div>
+);
 
 const QuestionCard: React.FC<{
   question: QuizQuestion;
@@ -323,6 +331,8 @@ const QuizDetailPage: React.FC = () => {
                   <div className="flex items-center gap-2"><Play className="w-4 h-4" /><span className="font-medium">Host live</span></div>
                   <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
                 </Link>
+
+             
               </div>
 
               <h4 className="font-semibold text-slate-800 mb-3 text-sm">StackQuiz Self-Study</h4>

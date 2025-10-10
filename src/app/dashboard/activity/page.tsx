@@ -104,7 +104,7 @@ const ActivityDashboard = () => {
           <h2 className="text-xl lg:text-2xl font-bold text-gray-700 mb-6">
             Created
           </h2>
-          <p className="text-gray-500">No additional cards to show.</p>
+        
         </section>
       </div>
     </div>

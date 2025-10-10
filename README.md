@@ -1,10 +1,10 @@
-# 🎯 Welcome to StackQuiz
+# 🎯 Welcome to STACKQUIZ
 
-`StackQuiz` is an online learning and assessment platform designed to provide students with a seamless and interactive way to take quizzes, while giving instructors and admins the tools to manage, edit, and evaluate quizzes efficiently. Our platform ensures a smooth experience for learners, organizers, and administrators with an intuitive interface, secure authentication, and robust features.
+`STACKQUIZ` is an online learning and assessment platform designed to provide students with a seamless and interactive way to take quizzes, while giving instructors and admins the tools to manage, edit, and evaluate quizzes efficiently. Our platform ensures a smooth experience for learners, organizers, and administrators with an intuitive interface, secure authentication, and robust features.
 
 We focus on **reliability, simplicity, and flexibility** so you can focus on learning, teaching, and managing without distractions.
 
-## 📢 StackQuiz Logo
+## 📢 STACKQUIZ Logo
 <p align="center">
   <img src="./public/logo-sq.png" alt="StackQuiz Logo" width="200"/>
 </p>
@@ -55,7 +55,7 @@ We focus on **reliability, simplicity, and flexibility** so you can focus on lea
 
 Access our production-ready platform:
 
-**🌐 [StackQuiz Live Platform](https://app.stackquiz.me/)**
+**🌐 [STACKQUIZ Live Platform](https://app.stackquiz.me/)**
 
 ---
 
@@ -83,7 +83,7 @@ npm run dev
 
 ## 🛠 Technology Stack
 
-StackQuiz leverages cutting-edge technologies for optimal performance, security, and user experience.
+STACKQUIZ leverages cutting-edge technologies for optimal performance, security, and user experience.
 
 ### 🎨 Frontend Technologies
 
@@ -195,7 +195,7 @@ Their invaluable guidance, patience, and unwavering support have been instrument
 
 ## 💡 Our Mission
 
-### 😍 **"Stack Up Your Knowledge with StackQuiz"**
+### 😍 **"Stack Up Your Knowledge with STACKQUIZ"**
 
 *Empowering education through innovative, interactive, and accessible quiz experiences.*
 
@@ -203,5 +203,5 @@ Their invaluable guidance, patience, and unwavering support have been instrument
 
 <p align="center">
   <strong>🚀 Ready to transform your learning experience?</strong><br/>
-  <a href="https://app.stackquiz.me/">🌐 Visit StackQuiz Today!</a>
+  <a href="https://app.stackquiz.me/">🌐 Visit STACKQUIZ Today!</a>
 </p>

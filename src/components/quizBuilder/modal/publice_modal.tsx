@@ -6,8 +6,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
 import { useCreateQuizMutation, useUpdateQuizMutation } from "@/lib/api/quizApi";
-import { useCreateQuestionMutation } from "@/lib/api/questionApi";
-import { useAddOptionsToQuestionMutation } from "@/lib/api/optionApi";
+import { useCreateQuestionMutation, useUpdateQuestionMutation } from "@/lib/api/questionApi";
+import { useAddOptionsToQuestionMutation, useUpdateOptionMutation } from "@/lib/api/optionApi";
 
 interface Option {
   id: string | number;
@@ -43,18 +43,6 @@ interface PublishModalProps {
   };
 }
 
-interface ApiOption {
-  optionText: string;
-  isCorrected: boolean;
-}
-
-interface ApiQuestion {
-  text: string;
-  type: "MCQ" | "TF" | "FILL_THE_BLANK";
-  imageUrl?: string;
-  options: ApiOption[];
-}
-
 export default function PublishModal({ 
   onClose, 
   quizData, 
@@ -70,13 +58,14 @@ export default function PublishModal({
   const [createQuiz, { isLoading: isCreating }] = useCreateQuizMutation();
   const [updateQuiz, { isLoading: isUpdating }] = useUpdateQuizMutation();
   const [createQuestion] = useCreateQuestionMutation();
+  const [updateQuestion] = useUpdateQuestionMutation();
   const [addOptionsToQuestion] = useAddOptionsToQuestionMutation();
+  const [updateOption] = useUpdateOptionMutation();
 
   const {
     data: categories,
     isLoading: loadingCategories,
     isError,
-    refetch,
   } = useGetCategoriesQuery(undefined, {
     skip: !isAuthed,
   });
@@ -96,6 +85,24 @@ export default function PublishModal({
   const [isDragging, setIsDragging] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+
+  // Helper function to determine if question is new
+  const isNewQuestion = (id: string | number): boolean => {
+    if (typeof id === 'number') return true;
+    if (typeof id === 'string') {
+      return id.length < 20 || !id.includes('-');
+    }
+    return false;
+  };
+
+  // Helper function to determine if option is new
+  const isNewOption = (id: string | number): boolean => {
+    if (typeof id === 'number') return true;
+    if (typeof id === 'string') {
+      return id.length < 20 || !id.includes('-');
+    }
+    return false;
+  };
 
   const uploadCoverImage = async (file: File): Promise<string> => {
     try {
@@ -163,7 +170,6 @@ export default function PublishModal({
     try {
       let thumbnailUrl = defaultValues?.thumbnailUrl || "";
       
-      // Upload cover image if a new one was selected
       if (formData.coverImage) {
         console.log("Uploading cover image...");
         const uploadedUrl = await uploadCoverImage(formData.coverImage);
@@ -174,8 +180,8 @@ export default function PublishModal({
       }
 
       if (isEditMode && quizId) {
-        // UPDATE existing quiz
-        console.log("Updating quiz...");
+        // UPDATE EXISTING QUIZ
+        console.log("Updating quiz metadata...");
         await updateQuiz({
           quizId,
           data: {
@@ -190,33 +196,9 @@ export default function PublishModal({
           },
         }).unwrap();
 
-        console.log("Quiz updated successfully!");
+        console.log("Quiz metadata updated successfully!");
         
-        if (onPublishSuccess) {
-          onPublishSuccess();
-        }
-        
-        onClose();
-        
-        // Force refresh to show updated data
-        window.location.href = `/quizDetail/${quizId}`;
-      } else {
-        // CREATE new quiz
-        console.log("Creating quiz...");
-        const createdQuiz = await createQuiz({
-          title: formData.tag,
-          description: formData.description,
-          thumbnailUrl: thumbnailUrl,
-          visibility: formData.visibility,
-          status: "PUBLISHED",
-          questionTimeLimit: "FIVE",
-          difficulty: formData.difficulty,
-          categoryIds: [formData.category],
-        }).unwrap();
-
-        console.log("Quiz created, now adding questions...");
-
-        // Create questions and options
+        // Process all questions
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
           
@@ -231,7 +213,114 @@ export default function PublishModal({
             questionType = "FILL_THE_BLANK";
           }
 
-          console.log(`Creating question ${i + 1} / ${quizData.length}`);
+          if (isNewQuestion(q.id)) {
+            // CREATE NEW QUESTION
+            console.log(`Creating new question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
+
+            const createdQuestion = await createQuestion({
+              text: q.question,
+              type: questionType,
+              imageUrl: undefined,
+              quizId: quizId,
+            }).unwrap();
+
+            if (q.options && q.options.length > 0) {
+              console.log(`Adding ${q.options.length} options to new question ${createdQuestion.id}`);
+              await addOptionsToQuestion({
+                questionId: createdQuestion.id,
+                data: q.options.map((opt) => ({
+                  optionText: opt.text,
+                  isCorrected: opt.correct,
+                  questionId: createdQuestion.id,
+                })),
+              }).unwrap();
+            }
+          } else {
+            // UPDATE EXISTING QUESTION
+            console.log(`Updating existing question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
+            
+            // FIXED: Changed from 'questionId' to 'id' to match API definition
+            await updateQuestion({
+              id: String(q.id),
+              data: {
+                text: q.question,
+                type: questionType,
+              },
+            }).unwrap();
+
+            // Process options for existing question
+            if (q.options && q.options.length > 0) {
+              for (const opt of q.options) {
+                if (isNewOption(opt.id)) {
+                  // CREATE NEW OPTION
+                  console.log(`Adding new option to question ${q.id}`);
+                  await addOptionsToQuestion({
+                    questionId: String(q.id),
+                    data: [{
+                      optionText: opt.text,
+                      isCorrected: opt.correct,
+                      questionId: String(q.id),
+                    }],
+                  }).unwrap();
+                } else {
+                  // UPDATE EXISTING OPTION
+                  console.log(`Updating option ${opt.id} for question ${q.id}`);
+                  await updateOption({
+                    optionId: String(opt.id),
+                    data: {
+                      optionText: opt.text,
+                      isCorrected: opt.correct,
+                    },
+                  }).unwrap();
+                }
+              }
+            }
+          }
+        }
+        
+        console.log("All questions and options updated successfully!");
+
+        if (onPublishSuccess) {
+          onPublishSuccess();
+        }
+        
+        onClose();
+        
+        // Redirect to quiz detail page
+        setTimeout(() => {
+          window.location.href = `/quizDetail/${quizId}`;
+        }, 100);
+
+      } else {
+        // CREATE NEW QUIZ
+        console.log("Creating new quiz...");
+        const createdQuiz = await createQuiz({
+          title: formData.tag,
+          description: formData.description,
+          thumbnailUrl: thumbnailUrl,
+          visibility: formData.visibility,
+          status: "PUBLISHED",
+          questionTimeLimit: "FIVE",
+          difficulty: formData.difficulty,
+          categoryIds: [formData.category],
+        }).unwrap();
+
+        console.log("Quiz created, now adding questions...");
+
+        for (let i = 0; i < quizData.length; i++) {
+          const q = quizData[i];
+          
+          let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
+          const typeUpper = q.type.toUpperCase();
+          if (typeUpper === "TF" || typeUpper === "TRUEFALSE") {
+            questionType = "TF";
+          } else if (typeUpper === "MCQ") {
+            questionType = "MCQ";
+          } else if (typeUpper === "FILL_THE_BLANK") {
+            questionType = "FILL_THE_BLANK";
+          }
+
+          console.log(`Creating question ${i + 1}/${quizData.length}`);
 
           const createdQuestion = await createQuestion({
             text: q.question,

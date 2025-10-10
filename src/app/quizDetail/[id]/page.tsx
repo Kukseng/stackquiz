@@ -241,7 +241,7 @@ const QuizDetailPage: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8">
-          <div className="flex items-start gap-3 sm:gap-4 flex-1">
+          <div className="flex  gap-5 sm:gap-7 items-center flex-1">
             {/* Dynamic Avatar */}
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
               {session ? (
@@ -337,7 +337,7 @@ const QuizDetailPage: React.FC = () => {
 
               <h4 className="font-semibold text-slate-800 mb-3 text-sm">StackQuiz Self-Study</h4>
               <button 
-                className="w-full flex items-center justify-between px-4 py-3 btn-secondary btn-text text-white rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+                className="w-full flex items-center justify-between px-4 py-3 bg-gray-200 btn-text text-white rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 onClick={() => router.push(`/play`)}
               >
                 <div className="flex items-center gap-2"><Trophy className="w-4 h-4" /><span className="font-medium">Play solo</span></div>

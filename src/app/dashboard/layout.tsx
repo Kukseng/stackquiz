@@ -115,7 +115,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 />
               </div>
               <span className="font-bold text-base sm:text-xl text-gray-800">
-                STACKQUIZ
+                STACK<span className="text-yellow">QUIZ</span>
               </span>
             </Link>
             <button
@@ -136,7 +136,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 ${
                   isActiveRoute(item.path)
-                    ? "btn-secondary btn-text shadow-lg"
+                    ? "btn-secondary btn-text  shadow-lg"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
@@ -151,7 +151,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         {/* 📘 Need Help Card - bottom left */}
         <div className="absolute bottom-4 left-0 w-full px-3 sm:px-4">
-          <div className="bg-gradient-to-r btn-secondary rounded-2xl p-5 text-white shadow-lg hover:shadow-xl transition-all">
+          <div className="btn-secondary btn-text  rounded-2xl p-5  shadow-lg hover:shadow-xl transition-all">
             <h4 className="font-semibold text-center text-base sm:text-lg mb-4">
               Need help?
             </h4>
@@ -212,18 +212,18 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <input
                   type="text"
                   placeholder="Type here..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-2xl focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent w-48 lg:w-64"
+                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-transparent w-48 lg:w-64"
                 />
                 <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 transform -translate-y-1/2" />
               </div>
 
-              <button className="md:hidden p-2 rounded-2xl hover:bg-gray-100">
+              <button className="md:hidden p-2 rounded-full hover:bg-gray-100">
                 <Search className="w-5 h-5 text-gray-600" />
               </button>
 
               <Link
                 href="/quizbuilder"
-                className=" btn-secondary btn-text px-3 sm:px-4 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-200 flex items-center gap-1 sm:gap-2"
+                className="btn-secondary btn-text px-3 sm:px-4 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-200 flex items-center gap-1 sm:gap-2"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">Create Quiz</span>

@@ -353,7 +353,7 @@ function QuestionTimer({
           <p className={`text-sm font-semibold ${
             isCritical ? "text-red-400" : "text-yellow-400"
           }`}>
-            {isCritical ? "⚠️ Time s almost up!" : "⏰ Hurry up!"}
+            {isCritical ? "⚠️ Time's almost up!" : "⏰ Hurry up!"}
           </p>
         </motion.div>
       )}
@@ -1020,7 +1020,7 @@ export default function ParticipantQuizFixed() {
 
   // Handle time up
   function handleTimeUp() {
-    console.log("⏰ Time s up!");
+    console.log("⏰ Time's up!");
     setShowFeedback(true);
     setFeedback({ timeUp: true });
     // Don't transition to answer reveal yet - wait for server feedback

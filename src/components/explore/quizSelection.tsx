@@ -5,7 +5,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Clock, Users, Trophy, Play, AlertCircle } from "lucide-react"
-import type { Quiz } from "@/app/play/page"
+import type { Quiz } from "../../../src/lib/types/api"
+import Image from "next/image"
 
 interface QuizSelectionProps {
   onQuizSelect: (quiz: Quiz) => void
@@ -56,32 +57,6 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
         return "bg-gray-100 text-gray-800 border-gray-200"
     }
   }
-
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary mb-4">QuizMaster</h1>
-          <p className="text-muted-foreground text-lg">Loading awesome quizzes...</p>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="animate-pulse">
-              <CardHeader>
-                <div className="h-6 bg-muted rounded mb-2"></div>
-                <div className="h-4 bg-muted rounded w-3/4"></div>
-              </CardHeader>
-              <CardContent>
-                <div className="h-20 bg-muted rounded mb-4"></div>
-                <div className="h-10 bg-muted rounded"></div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      </div>
-    )
-  }
-
   if (error) {
     return (
       <div className="container mx-auto px-4 py-8">
@@ -111,7 +86,7 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
             <CardHeader>
               {quiz.thumbnailUrl && quiz.thumbnailUrl !== "string" && (
                 <div className="w-full h-32 mb-4 rounded-lg overflow-hidden">
-                    <img
+                    <Image
                         src={quiz.thumbnailUrl}
                         alt={`${quiz.title} Thumbnail`}
                         className="w-full h-full object-cover"
@@ -130,11 +105,11 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
                 </Badge>
                 <Badge variant="secondary" className="flex items-center gap-1">
                   <Clock className="w-3 h-3" />
-                  {Math.round(quiz.questions.reduce((acc, q) => acc + q.timeLimit, 0) / quiz.questions.length)}s avg
+                  {Math.round(quiz.questions.reduce((acc: number, q: { timeLimit: number }) => acc + q.timeLimit, 0) / quiz.questions.length)}s avg
                 </Badge>
                 <Badge variant="outline" className="flex items-center gap-1">
                   <Trophy className="w-3 h-3" />
-                  {quiz.questions.reduce((acc, q) => acc + q.points, 0)} pts
+                  {quiz.questions.reduce((acc: number, q: { points: number }) => acc + q.points, 0)} pts
                 </Badge>
               </div>
 

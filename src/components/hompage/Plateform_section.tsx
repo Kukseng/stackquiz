@@ -40,10 +40,10 @@ export function PlatformSection() {
 
   return (
     <section
-      className={`px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 sm:py-6 md:py-9 lg:py-10 xl:py-11 ${fontClass}`}
+      className={`px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 sm:py-6 md:py-9 lg:py-6 xl:py-11 ${fontClass}`}
     >
-      <div className="max-w-7xl mx-auto py-12">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 items-center">
+      <div className="max-w-7xl mx-auto py-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Text on Top (mobile), Right (desktop) */}
           <motion.div
             ref={textRef}
@@ -82,7 +82,7 @@ export function PlatformSection() {
             className="order-2 lg:order-1 relative w-full h-64 sm:h-80 md:h-96 flex items-center justify-center"
           >
             <Image
-              src="/second.svg"
+              src="/second.png"
               alt="People engaging with quiz platform"
               width={300}
               height={350}

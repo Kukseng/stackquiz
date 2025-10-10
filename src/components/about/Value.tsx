@@ -131,7 +131,7 @@ export function ValuesSection() {
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <section className={`container mx-auto px-4 sm:px-8 lg:px-16 py-20 ${fontClass}`}>
+    <section className={`container mx-auto px-4 sm:px-8 lg:px-16 py-20 mt-[-150px] ${fontClass}`}>
       <SectionTitle>{t.heroAbout.value}</SectionTitle>
 
       <motion.div

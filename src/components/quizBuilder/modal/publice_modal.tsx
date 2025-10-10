@@ -6,8 +6,8 @@ import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
 import { useCreateQuizMutation, useUpdateQuizMutation } from "@/lib/api/quizApi";
-import { useCreateQuestionMutation } from "@/lib/api/questionApi";
-import { useAddOptionsToQuestionMutation } from "@/lib/api/optionApi";
+import { useCreateQuestionMutation, useUpdateQuestionMutation } from "@/lib/api/questionApi";
+import { useAddOptionsToQuestionMutation, useUpdateOptionMutation } from "@/lib/api/optionApi";
 
 interface Option {
   id: string | number;
@@ -32,7 +32,7 @@ interface PublishModalProps {
   onClose: () => void;
   quizData: Question[];
   onPublishSuccess?: () => void;
-  quizId?: string; // For edit mode
+  quizId?: string;
   defaultValues?: {
     title?: string;
     description?: string;
@@ -41,28 +41,6 @@ interface PublishModalProps {
     visibility?: "PUBLIC" | "PRIVATE" | "UNLISTED";
     thumbnailUrl?: string;
   };
-}
-
-interface ApiOption {
-  optionText: string;
-  isCorrected: boolean;
-}
-
-interface ApiQuestion {
-  text: string;
-  type: "MCQ" | "TF" | "FILL_THE_BLANK";
-  imageUrl?: string;
-  options: ApiOption[];
-}
-
-interface ApiQuizPayload {
-  title: string;
-  description: string;
-  thumbnailUrl?: string;
-  categoryIds: string[];
-  visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
-  difficulty: "EASY" | "MEDIUM" | "HARD";
-  questions: ApiQuestion[];
 }
 
 export default function PublishModal({ 
@@ -77,16 +55,17 @@ export default function PublishModal({
   const isAuthed = status === "authenticated" && !!(session as any)?.apiAccessToken;
   const isEditMode = !!quizId;
 
-  const [createQuiz] = useCreateQuizMutation();
-  const [updateQuiz] = useUpdateQuizMutation();
+  const [createQuiz, { isLoading: isCreating }] = useCreateQuizMutation();
+  const [updateQuiz, { isLoading: isUpdating }] = useUpdateQuizMutation();
   const [createQuestion] = useCreateQuestionMutation();
+  const [updateQuestion] = useUpdateQuestionMutation();
   const [addOptionsToQuestion] = useAddOptionsToQuestionMutation();
+  const [updateOption] = useUpdateOptionMutation();
 
   const {
     data: categories,
     isLoading: loadingCategories,
     isError,
-    refetch,
   } = useGetCategoriesQuery(undefined, {
     skip: !isAuthed,
   });
@@ -107,36 +86,22 @@ export default function PublishModal({
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
-  const transformQuizData = (): ApiQuizPayload => {
-    const apiQuestions: ApiQuestion[] = quizData.map((question, index) => {
-      let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
-      if (question.type === "tf" || question.type === "TF") questionType = "TF";
-      else if (question.type === "mcq" || question.type === "MCQ") questionType = "MCQ";
-      else if (question.type === "fill_the_blank" || question.type === "FILL_THE_BLANK") 
-        questionType = "FILL_THE_BLANK";
+  // Helper function to determine if question is new
+  const isNewQuestion = (id: string | number): boolean => {
+    if (typeof id === 'number') return true;
+    if (typeof id === 'string') {
+      return id.length < 20 || !id.includes('-');
+    }
+    return false;
+  };
 
-      const apiOptions: ApiOption[] = question.options.map((option, optIndex) => ({
-        optionText: option.text || `Option ${optIndex + 1}`,
-        isCorrected: !!option.correct,
-      }));
-
-      return {
-        text: question.question || `Question ${index + 1}`,
-        type: questionType,
-        imageUrl: undefined,
-        options: apiOptions,
-      };
-    });
-
-    return {
-      title: formData.tag,
-      description: formData.description,
-      thumbnailUrl: "",
-      categoryIds: [formData.category],
-      visibility: formData.visibility,
-      difficulty: formData.difficulty,
-      questions: apiQuestions,
-    };
+  // Helper function to determine if option is new
+  const isNewOption = (id: string | number): boolean => {
+    if (typeof id === 'number') return true;
+    if (typeof id === 'string') {
+      return id.length < 20 || !id.includes('-');
+    }
+    return false;
   };
 
   const uploadCoverImage = async (file: File): Promise<string> => {
@@ -203,57 +168,164 @@ export default function PublishModal({
     setIsPublishing(true);
 
     try {
-      let thumbnailUrl: string | undefined;
+      let thumbnailUrl = defaultValues?.thumbnailUrl || "";
+      
       if (formData.coverImage) {
         console.log("Uploading cover image...");
-        thumbnailUrl = await uploadCoverImage(formData.coverImage);
+        const uploadedUrl = await uploadCoverImage(formData.coverImage);
+        if (uploadedUrl) {
+          thumbnailUrl = uploadedUrl;
+        }
         console.log("Cover image uploaded:", thumbnailUrl);
       }
 
-      const payload = transformQuizData();
-      if (thumbnailUrl) payload.thumbnailUrl = thumbnailUrl;
-
       if (isEditMode && quizId) {
-        // UPDATE existing quiz
-        console.log("Updating quiz...");
+        // UPDATE EXISTING QUIZ
+        console.log("Updating quiz metadata...");
         await updateQuiz({
           quizId,
           data: {
-            title: payload.title,
-            description: payload.description,
-            thumbnailUrl: payload.thumbnailUrl ?? defaultValues?.thumbnailUrl ?? "",
-            visibility: payload.visibility,
+            title: formData.tag,
+            description: formData.description,
+            thumbnailUrl: thumbnailUrl,
+            visibility: formData.visibility,
             status: "PUBLISHED",
             questionTimeLimit: "FIVE",
-            difficulty: payload.difficulty,
-            categoryIds: payload.categoryIds,
+            difficulty: formData.difficulty,
+            categoryIds: [formData.category],
           },
         }).unwrap();
 
-        alert("✅ Quiz updated successfully!");
+        console.log("Quiz metadata updated successfully!");
+        
+        // Process all questions
+        for (let i = 0; i < quizData.length; i++) {
+          const q = quizData[i];
+          
+          // Normalize question type
+          let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
+          const typeUpper = q.type.toUpperCase();
+          if (typeUpper === "TF" || typeUpper === "TRUEFALSE") {
+            questionType = "TF";
+          } else if (typeUpper === "MCQ") {
+            questionType = "MCQ";
+          } else if (typeUpper === "FILL_THE_BLANK") {
+            questionType = "FILL_THE_BLANK";
+          }
+
+          if (isNewQuestion(q.id)) {
+            // CREATE NEW QUESTION
+            console.log(`Creating new question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
+
+            const createdQuestion = await createQuestion({
+              text: q.question,
+              type: questionType,
+              imageUrl: undefined,
+              quizId: quizId,
+            }).unwrap();
+
+            if (q.options && q.options.length > 0) {
+              console.log(`Adding ${q.options.length} options to new question ${createdQuestion.id}`);
+              await addOptionsToQuestion({
+                questionId: createdQuestion.id,
+                data: q.options.map((opt) => ({
+                  optionText: opt.text,
+                  isCorrected: opt.correct,
+                  questionId: createdQuestion.id,
+                })),
+              }).unwrap();
+            }
+          } else {
+            // UPDATE EXISTING QUESTION
+            console.log(`Updating existing question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
+            
+            // FIXED: Changed from 'questionId' to 'id' to match API definition
+            await updateQuestion({
+              id: String(q.id),
+              data: {
+                text: q.question,
+                type: questionType,
+              },
+            }).unwrap();
+
+            // Process options for existing question
+            if (q.options && q.options.length > 0) {
+              for (const opt of q.options) {
+                if (isNewOption(opt.id)) {
+                  // CREATE NEW OPTION
+                  console.log(`Adding new option to question ${q.id}`);
+                  await addOptionsToQuestion({
+                    questionId: String(q.id),
+                    data: [{
+                      optionText: opt.text,
+                      isCorrected: opt.correct,
+                      questionId: String(q.id),
+                    }],
+                  }).unwrap();
+                } else {
+                  // UPDATE EXISTING OPTION
+                  console.log(`Updating option ${opt.id} for question ${q.id}`);
+                  await updateOption({
+                    optionId: String(opt.id),
+                    data: {
+                      optionText: opt.text,
+                      isCorrected: opt.correct,
+                    },
+                  }).unwrap();
+                }
+              }
+            }
+          }
+        }
+        
+        console.log("All questions and options updated successfully!");
+
+        if (onPublishSuccess) {
+          onPublishSuccess();
+        }
+        
+        onClose();
+        
+        // Redirect to quiz detail page
+        setTimeout(() => {
+          window.location.href = `/quizDetail/${quizId}`;
+        }, 100);
+
       } else {
-        // CREATE new quiz
-        console.log("Creating quiz...");
+        // CREATE NEW QUIZ
+        console.log("Creating new quiz...");
         const createdQuiz = await createQuiz({
-          title: payload.title,
-          description: payload.description,
-          thumbnailUrl: payload.thumbnailUrl ?? "",
-          visibility: payload.visibility,
+          title: formData.tag,
+          description: formData.description,
+          thumbnailUrl: thumbnailUrl,
+          visibility: formData.visibility,
           status: "PUBLISHED",
           questionTimeLimit: "FIVE",
-          difficulty: payload.difficulty,
-          categoryIds: payload.categoryIds,
+          difficulty: formData.difficulty,
+          categoryIds: [formData.category],
         }).unwrap();
 
-        // Create questions and options
-        for (let i = 0; i < payload.questions.length; i += 1) {
-          const q = payload.questions[i];
-          console.log(`Creating question ${i + 1} / ${payload.questions.length}`);
+        console.log("Quiz created, now adding questions...");
+
+        for (let i = 0; i < quizData.length; i++) {
+          const q = quizData[i];
+          
+          let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
+          const typeUpper = q.type.toUpperCase();
+          if (typeUpper === "TF" || typeUpper === "TRUEFALSE") {
+            questionType = "TF";
+          } else if (typeUpper === "MCQ") {
+            questionType = "MCQ";
+          } else if (typeUpper === "FILL_THE_BLANK") {
+            questionType = "FILL_THE_BLANK";
+          }
+
+          console.log(`Creating question ${i + 1}/${quizData.length}`);
 
           const createdQuestion = await createQuestion({
-            text: q.text,
-            type: q.type,
-            imageUrl: q.imageUrl,
+            text: q.question,
+            type: questionType,
+            imageUrl: undefined,
             quizId: createdQuiz.id,
           }).unwrap();
 
@@ -262,26 +334,32 @@ export default function PublishModal({
             await addOptionsToQuestion({
               questionId: createdQuestion.id,
               data: q.options.map((opt) => ({
-                optionText: opt.optionText,
-                isCorrected: opt.isCorrected,
+                optionText: opt.text,
+                isCorrected: opt.correct,
                 questionId: createdQuestion.id,
               })),
             }).unwrap();
           }
         }
 
-        alert("✅ Quiz published successfully!");
-      }
+        console.log("Quiz published successfully!");
+        
+        if (onPublishSuccess) {
+          onPublishSuccess();
+        }
 
-      if (onPublishSuccess) {
-        onPublishSuccess();
+        onClose();
+        router.push("/dashboard");
       }
-
-      router.push("/dashboard");
-      onClose();
-    } catch (error) {
-      console.error("Error publishing quiz:", error);
-      setPublishError(error instanceof Error ? error.message : "Unknown error occurred");
+    } catch (error: any) {
+      console.error("Error publishing/updating quiz:", error);
+      
+      const errorMessage = 
+        error?.data?.message || 
+        error?.message || 
+        (error?.status ? `Error ${error.status}: Failed to ${isEditMode ? 'update' : 'publish'} quiz` : `Failed to ${isEditMode ? 'update' : 'publish'} quiz. Please try again.`);
+      
+      setPublishError(errorMessage);
     } finally {
       setIsPublishing(false);
     }
@@ -368,6 +446,8 @@ export default function PublishModal({
     );
   }
 
+  const isLoading = isPublishing || isCreating || isUpdating;
+
   return (
     <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
       <div className="bg-white/95 rounded-2xl p-8 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
@@ -382,7 +462,7 @@ export default function PublishModal({
           </div>
           <button
             onClick={onClose}
-            disabled={isPublishing}
+            disabled={isLoading}
             className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
           >
             <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -406,7 +486,7 @@ export default function PublishModal({
               </div>
               <button
                 onClick={removeImage}
-                disabled={isPublishing}
+                disabled={isLoading}
                 className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30"
               >
                 ✕
@@ -421,13 +501,13 @@ export default function PublishModal({
                 isDragging
                   ? "border-purple-400 bg-purple-50"
                   : "border-gray-300 hover:border-purple-400 hover:bg-gray-50"
-              } ${isPublishing ? "opacity-50 cursor-not-allowed" : ""}`}
+              } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
             >
               <input
                 type="file"
                 accept="image/*"
                 onChange={handleImageChange}
-                disabled={isPublishing}
+                disabled={isLoading}
                 className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
               />
               <div className="p-4 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 mb-3">
@@ -449,7 +529,7 @@ export default function PublishModal({
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
               value={formData.tag}
               onChange={(e) => setFormData((prev) => ({ ...prev, tag: e.target.value }))}
-              disabled={isPublishing}
+              disabled={isLoading}
             />
           </div>
 
@@ -460,7 +540,7 @@ export default function PublishModal({
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none h-20 disabled:opacity-50"
               value={formData.description}
               onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              disabled={isPublishing}
+              disabled={isLoading}
             />
           </div>
 
@@ -470,7 +550,7 @@ export default function PublishModal({
               className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 cursor-pointer disabled:opacity-50"
               value={formData.category}
               onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-              disabled={isPublishing || loadingCategories}
+              disabled={isLoading || loadingCategories}
             >
               <option value="">Select a category</option>
               {loadingCategories ? (
@@ -495,7 +575,7 @@ export default function PublishModal({
                   key={level}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, difficulty: level }))}
-                  disabled={isPublishing}
+                  disabled={isLoading}
                   className={`flex-1 py-2 px-4 rounded-xl font-medium transition disabled:opacity-50 ${
                     formData.difficulty === level
                       ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
@@ -520,7 +600,7 @@ export default function PublishModal({
                   key={option.value}
                   type="button"
                   onClick={() => setFormData((prev) => ({ ...prev, visibility: option.value }))}
-                  disabled={isPublishing}
+                  disabled={isLoading}
                   className={`flex-1 p-4 rounded-xl border-2 transition disabled:opacity-50 ${
                     formData.visibility === option.value
                       ? "border-purple-500 bg-purple-50"
@@ -540,21 +620,18 @@ export default function PublishModal({
           <button
             className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={onClose}
-            disabled={isPublishing}
+            disabled={isLoading}
           >
             Cancel
           </button>
           <button
             className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
             onClick={handleSubmit}
-            disabled={isPublishing}
+            disabled={isLoading}
           >
-            {isPublishing ? (
+            {isLoading ? (
               <>
-                <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
                 {isEditMode ? "Updating..." : "Publishing..."}
               </>
             ) : (

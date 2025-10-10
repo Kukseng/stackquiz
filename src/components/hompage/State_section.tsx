@@ -16,7 +16,7 @@ export function StatsSection() {
   ];
 
   return (
-    <section className={`relative w-full py-12 bg-footer ${fontClass}`}>
+    <section className={`relative w-full py-3 bg-footer ${fontClass}`}>
       <div className="relative max-w-7xl mx-auto z-10 flex items-center justify-center px-4">
         <div className="w-full grid md:grid-cols-3 gap-8 text-center">
           {stats.map((stat, index) => (
@@ -24,7 +24,7 @@ export function StatsSection() {
               key={index}
               className="flex flex-col items-center p-4 transition-transform duration-500 ease-in-out hover:scale-110"
             >
-              <div className="relative w-12 h-12 mb-4">
+              <div className="relative w-20 h-20 mb-4">
                 <Image
                   src={stat.icon}
                   alt={stat.label}
@@ -32,8 +32,8 @@ export function StatsSection() {
                   className="object-contain"
                 />
               </div>
-              <h2 className="text-yellow-400 text-2xl font-bold">{stat.number}</h2>
-              <p className="mt-1 text-gray-300">{stat.label}</p>
+              <h2 className="text-yellow-400 text-4xl font-bold">{stat.number}</h2>
+              <p className="mt-1 text-2xl text-gray-300">{stat.label}</p>
             </div>
           ))}
         </div>

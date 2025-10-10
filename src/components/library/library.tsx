@@ -1,3 +1,5 @@
+"use client";
+import { useState } from "react";
 import CardQuizComponent from "../CardQuizComponent";
 import Searchbar from "../leaderboard/Searchbar";
 import TemplatesCardComponent from "../TemplateCardComponent";
@@ -8,10 +10,18 @@ interface LibraryProps {
 }
 
 export function Library({ myQuizzes }: LibraryProps) {
+  // State for filters
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");
+  const [searchTerm, setSearchTerm] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<string>("All");
 
   return (
     <div className="min-h-[800px] bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900 relative overflow-hidden rounded-lg">
-      <Searchbar />
+      <Searchbar 
+        onSearch={setSearchTerm}
+        onDifficultyChange={setSelectedDifficulty}
+        onCategoryChange={setSelectedCategory}
+      />
 
       <div className="relative flex">
         {/* Main Content */}
@@ -50,7 +60,11 @@ export function Library({ myQuizzes }: LibraryProps) {
           </div>
 
           {/* Quiz Cards Grid */}
-          <TemplatesCardComponent/>
+          <TemplatesCardComponent
+            selectedDifficulty={selectedDifficulty}
+            searchTerm={searchTerm}
+            selectedCategory={selectedCategory}
+          />
         </div>
       </div>
     </div>

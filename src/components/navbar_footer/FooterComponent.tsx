@@ -116,53 +116,68 @@ export default function Footer() {
 
       {/* Bottom Section */}
       <div className="w-full border-t border-gray-600 py-4">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-center md:justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
-          <div className="text-[16px] text-gray-300">
-            © 2025 StackQuizz Inc. All rights reserved.
-          </div>
-          <div className="flex justify-center md:justify-start space-x-2">
-            <Image
-              src="/social_media_icon/fb.svg"
-              width={28}
-              height={30}
-              alt="Facebook"
-            />
+  <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-center md:justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
+    <div className="text-[16px] text-gray-300">
+      © 2025 StackQuizz Inc. All rights reserved.
+    </div>
 
-            <Image
-              src="/social_media_icon/github.svg"
-              width={28}
-              height={30}
-              alt="Github"
-            />
-            <Image
-              src="/social_media_icon/telegram.svg"
-              width={28}
-              height={30}
-              alt="Telegram"
-            />
+    <div className="flex justify-center md:justify-start space-x-2">
+      <Image
+        src="/social_media_icon/fb.svg"
+        width={28}
+        height={30}
+        alt="Facebook"
+      />
 
-            <Link
-              href="https://www.instagram.com/team.stackquiz/"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              <Image
-                src="/social_media_icon/ig.svg"
-                width={28}
-                height={30}
-                alt="Instagram"
-              />
-            </Link>
+      <Image
+        src="/social_media_icon/github.svg"
+        width={28}
+        height={30}
+        alt="Github"
+      />
 
-            <Image
-              src="/social_media_icon/youtube.svg"
-              width={28}
-              height={30}
-              alt="Youtube"
-            />
-          </div>
-        </div>
-      </div>
+      {/* ✅ Telegram link added here */}
+      <Link
+        href="https://t.me/stackquiz"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Image
+          src="/social_media_icon/telegram.svg"
+          width={28}
+          height={30}
+          alt="Telegram"
+        />
+      </Link>
+
+      <Link
+        href="https://www.instagram.com/team.stackquiz"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Image
+          src="/social_media_icon/ig.svg"
+          width={28}
+          height={30}
+          alt="Instagram"
+        />
+      </Link>
+      <Link
+        href="https://youtube.com/@stackquizchannel?si=2Xs3Q2mJJSHuD8gx"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+      <Image
+        src="/social_media_icon/youtube.svg"
+        width={28}
+        height={30}
+        alt="Youtube"
+      />
+      </Link>
+    </div>
+  </div>
+</div>
+
     </footer>
   );
 }

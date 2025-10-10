@@ -67,7 +67,7 @@ export default function InputArea({
           relative grid grid-cols-[1fr_auto] items-center gap-4 p-4
           rounded-2xl border-2 backdrop-blur-xl shadow-2xl transition-all duration-300
           ${isFocused 
-            ? 'border-yellow-400 bg-white/10 shadow-yellow-400/20' 
+            ? 'btn-primary border-yellow-400/80 bg-white/10 shadow-[0_0_30px_rgba(250,204,21,0.6)]' 
             : 'border-yellow-400/50 bg-white/5'
           }
           ${hasError 
@@ -149,8 +149,8 @@ export default function InputArea({
             type="submit"
             disabled={buttonDisabled || isLoading}
             className={`
-              h-14 px-8 font-bold text-lg rounded-xl
-              bg-gradient-to-r from-yellow-400 to-orange-400
+              h-12 px-5 font-bold text-lg rounded-xl
+              btn-secondary bg-yellow-400
               text-black shadow-lg hover:shadow-xl
               disabled:opacity-50 disabled:cursor-not-allowed
               transition-all duration-300
@@ -189,7 +189,7 @@ export default function InputArea({
 
       {/* Subtle hint text */}
       <motion.p
-        className="text-center text-white/60 text-sm mt-4"
+        className="text-center text-white/60 text-md mt-4"
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.8 }}

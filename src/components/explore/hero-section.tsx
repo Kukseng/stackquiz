@@ -43,7 +43,7 @@ export default function Banner() {
         src="explore/hero.png"
         alt="explore Banner"
         fill
-        className="object-contain p-[40px]"
+        className="object-contain  p-[40px]"
         priority
       />
 
@@ -60,7 +60,7 @@ export default function Banner() {
           whileTap={{ scale: 0.95 }}
           className="mt-6  rounded-xl btn-secondary btn-text px-6 py-1 sm:py-1 md:py-2 box-radius text-base sm:text-lg font-semibold shadow-md"
         >
-          <Link href="/joinroom" className="flex items-center gap-2">
+          <Link href="/join-room" className="flex items-center gap-2">
           {t["hero-ex"].play}
           </Link>
         </motion.button>

@@ -69,7 +69,7 @@ const { language } = useLanguage();
           >
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full border-4 border-cyan-400 bg-blue-600 flex items-center justify-center shadow-[0_0_20px_rgba(34,211,238,0.9)]">
               <Image
-                src="/avatar.svg"
+                src="/charater1.svg"
                 alt="Vatani"
                 width={96}
                 height={96}
@@ -79,7 +79,7 @@ const { language } = useLanguage();
                 2
               </div>
             </div>
-            <div className="text-cyan-300 mt-2 sm:mt-3 font-semibold">Vatani</div>
+            <div className="text-cyan-300 mt-2 sm:mt-3 font-semibold">Rak Smey</div>
           </motion.div>
 
           {/* 1st Place (Winner) */}
@@ -94,7 +94,7 @@ const { language } = useLanguage();
               <Image src="/crown.svg" alt="crown" width={90} height={80} />
             </div>
             <div className="relative w-28 h-28 sm:w-36 sm:h-36 mx-auto rounded-full border-4 border-yellow-400 bg-purple-900 flex items-center justify-center shadow-[0_0_35px_rgba(255,215,0,1)] animate-pulse">
-              <Image src="/avatar.svg" alt="Borey" width={90} height={80} className="rounded-full object-cover" />
+              <Image src="/charater3.svg" alt="Borey" width={90} height={80} className="rounded-full object-cover" />
               <div className="absolute -bottom-3 sm:-bottom-4 left-1/2 -translate-x-1/2 w-8 h-8 sm:w-10 sm:h-10 bg-yellow-400 text-black text-xs sm:text-base font-extrabold flex items-center justify-center rounded-full border-2 border-white shadow-[0_0_15px_rgba(255,215,0,0.9)]">
                 1
               </div>
@@ -113,7 +113,7 @@ const { language } = useLanguage();
           >
             <div className="relative w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-full border-4 border-orange-400 bg-orange-600 flex items-center justify-center shadow-[0_0_20px_rgba(249,115,22,0.9)]">
               <Image
-                src="/avatar.svg"
+                src="/charater2.svg"
                 alt="Lina"
                 width={96}
                 height={96}
@@ -123,7 +123,7 @@ const { language } = useLanguage();
                 3
               </div>
             </div>
-            <div className="text-orange-300 mt-2 sm:mt-3 font-semibold">Lina</div>
+            <div className="text-orange-300 mt-2 sm:mt-3 font-semibold">Pich</div>
           </motion.div>
         </div>
       </div>

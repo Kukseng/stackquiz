@@ -40,7 +40,7 @@ export function HeroSection() {
   }, [textInView, imgInView, textControls, imgControls]);
 
   return (
-    <section className="px-4 sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-12 sm:pt-16 lg:pt-20">
+    <section className="px-4  sm:px-6 md:px-7 lg:px-9 xl:px-10 pt-12 sm:pt-16 lg:pt-20">
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           {/* Text Content */}
@@ -69,7 +69,7 @@ export function HeroSection() {
               </span>
             </h1>
 
-            <p className="text-lg sm:text-2xl md:text-2xl text-[var(--cosmic-muted)] mb-8 max-w-lg">
+            <p className="text-lg sm:text-2xl md:text-2xl text-[var(--cosmic-muted)] mb-8 mt-4 max-w-lg">
               {t.hero.description}
             </p>
 

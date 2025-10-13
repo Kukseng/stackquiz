@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { QuizSelection } from "@/components/play-quiz/quiz_section"
-import { GameEngine } from "@/components/play-quiz/Game-engine"
+import { GameEngine } from "@/components/play-quiz/game-engine"
 import { ResultsSystem } from "../../../components/play-quiz/result_system"
 import { NicknameEntry } from "@/components/play-quiz/nickname_entry"
 import { WebSocketProvider } from "../../../context/websocket-context"

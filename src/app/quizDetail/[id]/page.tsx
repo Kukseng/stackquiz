@@ -1,3 +1,4 @@
+
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
@@ -5,6 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import { useSession } from "next-auth/react";
+import { useGetQuizByIdQuery, useToggleFavoriteMutation } from "@/lib/api/quizApi";
 import {
   Edit,
   Heart,
@@ -13,13 +15,10 @@ import {
   Users,
   Eye,
   EyeOff,
-  UserPlus,
- 
   ChevronDown,
   Trophy,
 } from "lucide-react";
 
-// Types
 interface QuizOption {
   id: string;
   optionText: string;
@@ -41,31 +40,11 @@ interface QuizData {
   category?: string;
   plays?: number;
   participants?: number;
+  isFavorite?: boolean;
 }
 
-// Constants
 const OPTION_COLORS = ['bg-red-500', 'bg-blue-500', 'bg-orange-500', 'bg-green-500'] as const;
 
-// API Functions
-const fetchQuizById = async (id: string): Promise<QuizData | null> => {
-  try {
-    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/quizzes/${id}`, { 
-      cache: "no-store",
-      headers: { 'Content-Type': 'application/json' },
-    });
-    
-    if (res.status === 404) return null;
-    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
-
-    const quiz: QuizData = await res.json();
-    return quiz;
-  } catch (error) {
-    console.error("Error fetching quiz:", error);
-    throw error;
-  }
-};
-
-// Components
 const LoadingSpinner: React.FC = () => (
   <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center">
     <div className="text-center">
@@ -104,18 +83,6 @@ const QuizThumbnail: React.FC<{ quiz: QuizData }> = ({ quiz }) => (
     ) : (
       <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600" />
     )}
-  </div>
-);
-
-const DropdownMenu: React.FC = () => (
-  <div className="relative group">
-    <button 
-      className="flex items-center gap-1 px-2 py-1 text-xs sm:text-sm text-slate-600 hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
-      aria-label="More options"
-    >
- 
-    </button>
-
   </div>
 );
 
@@ -179,14 +146,15 @@ const QuizDetailPage: React.FC = () => {
   const quizId = params?.id as string;
   const { data: session } = useSession();
 
-  const [quizData, setQuizData] = useState<QuizData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: quizData, isLoading, error, refetch } = useGetQuizByIdQuery(quizId, {
+    skip: !quizId,
+  });
+
+  const [toggleFavorite] = useToggleFavoriteMutation();
+
   const [showAnswers, setShowAnswers] = useState(false);
-  const [isFavorited, setIsFavorited] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
 
-  // Get user display name and avatar from session (same as Navbar)
   const displayName = session?.user?.name
     ? session.user.name.split(" ")[0]
     : session?.user?.email
@@ -204,26 +172,22 @@ const QuizDetailPage: React.FC = () => {
 
   const answeredCount = useMemo(() => Object.keys(selectedAnswers).length, [selectedAnswers]);
 
-  const loadQuizData = useCallback(async () => {
-    if (!quizId) return;
-    try {
-      setLoading(true);
-      setError(null);
-      const data = await fetchQuizById(quizId);
-      setQuizData(data);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load quiz");
-      console.error("Error loading quiz:", err);
-    } finally {
-      setLoading(false);
-    }
-  }, [quizId]);
-
   const handleAnswerSelect = useCallback((questionId: string, optionId: string) => {
     setSelectedAnswers(prev => ({ ...prev, [questionId]: optionId }));
   }, []);
 
-  const toggleFavorite = useCallback(() => setIsFavorited(prev => !prev), []);
+  const handleToggleFavorite = useCallback(async () => {
+    if (!quizData) return;
+    try {
+      await toggleFavorite({ 
+        quizId: quizData.id, 
+        isFavorite: quizData.isFavorite || false 
+      }).unwrap();
+    } catch (err) {
+      console.error('Error toggling favorite:', err);
+    }
+  }, [quizData, toggleFavorite]);
+
   const toggleShowAnswers = useCallback(() => setShowAnswers(prev => !prev), []);
   const handleGoBack = useCallback(() => router.back(), [router]);
   
@@ -231,9 +195,7 @@ const QuizDetailPage: React.FC = () => {
     router.push(`/quizbuilder/${quizId}`);
   }, [router, quizId]);
 
-  useEffect(() => { loadQuizData(); }, [loadQuizData]);
-
-  if (loading) return <LoadingSpinner />;
+  if (isLoading) return <LoadingSpinner />;
   if (error || !quizData) return <QuizNotFound onGoBack={handleGoBack} />;
 
   return (
@@ -241,8 +203,7 @@ const QuizDetailPage: React.FC = () => {
       <div className="max-w-7xl mx-auto">
         {/* Header */}
         <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 mb-6 sm:mb-8">
-          <div className="flex  gap-5 sm:gap-7 items-center flex-1">
-            {/* Dynamic Avatar */}
+          <div className="flex gap-5 sm:gap-7 items-center flex-1">
             <div className="w-12 h-12 sm:w-16 sm:h-16 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg overflow-hidden">
               {session ? (
                 <Image 
@@ -259,12 +220,10 @@ const QuizDetailPage: React.FC = () => {
 
             <div className="flex-1 min-w-0">
               <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mb-2">
-                {/* Dynamic User Name */}
                 <h2 className="font-semibold text-slate-800 text-sm sm:text-base">
                   {displayName}
                 </h2>
                 <div className="flex items-center gap-2">
-                  {/* Header Edit Button */}
                   <button
                     onClick={handleEditQuiz}
                     className="flex items-center gap-1 px-2 py-1 text-xs sm:text-sm text-slate-600 hover:text-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
@@ -274,14 +233,16 @@ const QuizDetailPage: React.FC = () => {
                   </button>
 
                   <button
-                    onClick={toggleFavorite}
+                    onClick={handleToggleFavorite}
                     className={`flex items-center gap-1 px-2 py-1 text-xs sm:text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded ${
-                      isFavorited ? 'text-red-500' : 'text-slate-600 hover:text-red-500'
+                      quizData.isFavorite ? 'text-red-500' : 'text-slate-600 hover:text-red-500'
                     }`}
-                    aria-label={isFavorited ? "Remove from favorites" : "Add to favorites"}
+                    aria-label={quizData.isFavorite ? "Remove from favorites" : "Add to favorites"}
                   >
-                    <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${isFavorited ? 'fill-current' : ''}`} />
-                    <span className="hidden sm:inline">Add to favorite</span>
+                    <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${quizData.isFavorite ? 'fill-current' : ''}`} />
+                    <span className="hidden sm:inline">
+                      {quizData.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                    </span>
                   </button>
                 </div>
               </div>
@@ -301,7 +262,15 @@ const QuizDetailPage: React.FC = () => {
         <div className="grid grid-cols-1 xl:grid-cols-3 gap-6 sm:gap-8">
           <main className="xl:col-span-2">
             <article className="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-6 sm:mb-8">
-              <QuizThumbnail quiz={quizData} />
+              <QuizThumbnail quiz={{
+                ...quizData,
+                category: typeof quizData.category === 'object' && quizData.category !== null
+                  ? quizData.category.name
+                  : quizData.category ?? '',
+                plays: typeof quizData.plays === 'string'
+                  ? Number(quizData.plays)
+                  : quizData.plays
+              }} />
 
               <div className="p-4 sm:p-6">
                 <div className="mb-4">
@@ -314,7 +283,7 @@ const QuizDetailPage: React.FC = () => {
 
                 <div className="flex items-center gap-4 sm:gap-6 text-sm text-slate-600">
                   <div className="flex items-center gap-1"><Play className="w-4 h-4" /><span className="font-medium">{quizData.plays || "5K"}</span><span>plays</span></div>
-                  <div className="flex items-center gap-1"><Users className="w-4 h-4" /><span className="font-medium">{quizData.participants || "15.5K"}</span><span>participants</span></div>
+                  <div className="flex items-center gap-1"><Users className="w-4 h-4" /><span className="font-medium">{quizData.plays || "15.5K"}</span><span>participants</span></div>
                 </div>
               </div>
             </article>
@@ -331,13 +300,13 @@ const QuizDetailPage: React.FC = () => {
                   <div className="flex items-center gap-2"><Play className="w-4 h-4" /><span className="font-medium">Host live</span></div>
                   <ChevronDown className="w-4 h-4 rotate-[-90deg]" />
                 </Link>
-
-             
               </div>
 
               <h4 className="font-semibold text-slate-800 mb-3 text-sm">StackQuiz Self-Study</h4>
-              <button className="w-full flex items-center justify-between px-4 py-3 btn-secondary btn-text rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-               onClick={() => router.push(`/play/${quizId}`)}>
+              <button 
+                onClick={() => router.push(`/play/${quizId}`)}
+                className="w-full flex items-center justify-between px-4 py-3 btn-secondary btn-text rounded-xl transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
+              >
                 <div className="flex items-center gap-2">
                   <Trophy className="w-4 h-4" />
                   <span className="font-medium">Play solo</span>
@@ -361,7 +330,6 @@ const QuizDetailPage: React.FC = () => {
                 {showAnswers ? 'Hide answers' : 'Show answers'}
               </button>
 
-              {/* Questions Section Edit Button */}
               <button
                 onClick={handleEditQuiz}
                 className="flex items-center gap-2 px-4 py-2 text-sm text-slate-600 hover:text-slate-800 border border-slate-200 hover:bg-slate-50 rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500"

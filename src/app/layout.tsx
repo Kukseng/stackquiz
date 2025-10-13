@@ -6,6 +6,8 @@ import { LanguageProvider } from "../context/LanguageContext";
 import { Provider } from "react-redux";
 import { store } from "../lib/store";
 import { SessionProvider } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -25,19 +27,36 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+        refetchOnReconnect: true,
+        staleTime: 0, // Always fetch fresh data
+        retry: 1,
+      },
+    },
+  }));
+
   return (
     <html
       lang="en"
       className={`${dmSans.variable} ${kantumruyPro.variable} antialiased`}
     >
       <body className="cosmic-bg overflow-hidden">
-        <Provider store={store}>
-          <SessionProvider>
-            <LanguageProvider>
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </LanguageProvider>
-          </SessionProvider>
-        </Provider>
+        <QueryClientProvider client={queryClient}>
+          <Provider store={store}>
+            <SessionProvider 
+              refetchInterval={300} // Refetch session every 5 minutes
+              refetchOnWindowFocus={true} // Refetch when window regains focus
+            >
+              <LanguageProvider>
+                <LayoutWrapper>{children}</LayoutWrapper>
+              </LanguageProvider>
+            </SessionProvider>
+          </Provider>
+        </QueryClientProvider>
       </body>
     </html>
   );

@@ -23,11 +23,6 @@ interface Question {
   options: Option[];
 }
 
-interface CategoryResponse {
-  id: string;
-  name: string;
-}
-
 interface PublishModalProps {
   onClose: () => void;
   quizData: Question[];
@@ -86,7 +81,6 @@ export default function PublishModal({
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
-  // Helper function to determine if question is new
   const isNewQuestion = (id: string | number): boolean => {
     if (typeof id === 'number') return true;
     if (typeof id === 'string') {
@@ -95,7 +89,6 @@ export default function PublishModal({
     return false;
   };
 
-  // Helper function to determine if option is new
   const isNewOption = (id: string | number): boolean => {
     if (typeof id === 'number') return true;
     if (typeof id === 'string') {
@@ -133,7 +126,6 @@ export default function PublishModal({
   const handleSubmit = async () => {
     setPublishError(null);
 
-    // Validation
     if (!formData.tag.trim()) {
       setPublishError("Please enter a quiz title");
       return;
@@ -171,17 +163,14 @@ export default function PublishModal({
       let thumbnailUrl = defaultValues?.thumbnailUrl || "";
       
       if (formData.coverImage) {
-        console.log("Uploading cover image...");
         const uploadedUrl = await uploadCoverImage(formData.coverImage);
         if (uploadedUrl) {
           thumbnailUrl = uploadedUrl;
         }
-        console.log("Cover image uploaded:", thumbnailUrl);
       }
 
       if (isEditMode && quizId) {
         // UPDATE EXISTING QUIZ
-        console.log("Updating quiz metadata...");
         await updateQuiz({
           quizId,
           data: {
@@ -195,14 +184,11 @@ export default function PublishModal({
             categoryIds: [formData.category],
           },
         }).unwrap();
-
-        console.log("Quiz metadata updated successfully!");
         
         // Process all questions
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
           
-          // Normalize question type
           let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
           const typeUpper = q.type.toUpperCase();
           if (typeUpper === "TF" || typeUpper === "TRUEFALSE") {
@@ -214,9 +200,6 @@ export default function PublishModal({
           }
 
           if (isNewQuestion(q.id)) {
-            // CREATE NEW QUESTION
-            console.log(`Creating new question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
-
             const createdQuestion = await createQuestion({
               text: q.question,
               type: questionType,
@@ -225,7 +208,6 @@ export default function PublishModal({
             }).unwrap();
 
             if (q.options && q.options.length > 0) {
-              console.log(`Adding ${q.options.length} options to new question ${createdQuestion.id}`);
               await addOptionsToQuestion({
                 questionId: createdQuestion.id,
                 data: q.options.map((opt) => ({
@@ -236,10 +218,6 @@ export default function PublishModal({
               }).unwrap();
             }
           } else {
-            // UPDATE EXISTING QUESTION
-            console.log(`Updating existing question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
-            
-            // FIXED: Changed from 'questionId' to 'id' to match API definition
             await updateQuestion({
               id: String(q.id),
               data: {
@@ -248,12 +226,9 @@ export default function PublishModal({
               },
             }).unwrap();
 
-            // Process options for existing question
             if (q.options && q.options.length > 0) {
               for (const opt of q.options) {
                 if (isNewOption(opt.id)) {
-                  // CREATE NEW OPTION
-                  console.log(`Adding new option to question ${q.id}`);
                   await addOptionsToQuestion({
                     questionId: String(q.id),
                     data: [{
@@ -263,8 +238,6 @@ export default function PublishModal({
                     }],
                   }).unwrap();
                 } else {
-                  // UPDATE EXISTING OPTION
-                  console.log(`Updating option ${opt.id} for question ${q.id}`);
                   await updateOption({
                     optionId: String(opt.id),
                     data: {
@@ -277,23 +250,19 @@ export default function PublishModal({
             }
           }
         }
-        
-        console.log("All questions and options updated successfully!");
 
+        // Success callback triggers cache invalidation
         if (onPublishSuccess) {
           onPublishSuccess();
         }
         
         onClose();
         
-        // Redirect to quiz detail page
-        setTimeout(() => {
-          window.location.href = `/quizDetail/${quizId}`;
-        }, 100);
+        // Use router.push for better navigation
+        router.push(`/quizDetail/${quizId}`);
 
       } else {
         // CREATE NEW QUIZ
-        console.log("Creating new quiz...");
         const createdQuiz = await createQuiz({
           title: formData.tag,
           description: formData.description,
@@ -304,8 +273,6 @@ export default function PublishModal({
           difficulty: formData.difficulty,
           categoryIds: [formData.category],
         }).unwrap();
-
-        console.log("Quiz created, now adding questions...");
 
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
@@ -320,8 +287,6 @@ export default function PublishModal({
             questionType = "FILL_THE_BLANK";
           }
 
-          console.log(`Creating question ${i + 1}/${quizData.length}`);
-
           const createdQuestion = await createQuestion({
             text: q.question,
             type: questionType,
@@ -330,7 +295,6 @@ export default function PublishModal({
           }).unwrap();
 
           if (q.options && q.options.length > 0) {
-            console.log(`Adding ${q.options.length} options to question ${createdQuestion.id}`);
             await addOptionsToQuestion({
               questionId: createdQuestion.id,
               data: q.options.map((opt) => ({
@@ -341,15 +305,14 @@ export default function PublishModal({
             }).unwrap();
           }
         }
-
-        console.log("Quiz published successfully!");
         
+        // Success callback triggers cache invalidation
         if (onPublishSuccess) {
           onPublishSuccess();
         }
 
         onClose();
-        router.push("/dashboard");
+        router.push("/dashboard/library");
       }
     } catch (error: any) {
       console.error("Error publishing/updating quiz:", error);
@@ -560,7 +523,7 @@ export default function PublishModal({
               ) : !categories || categories.length === 0 ? (
                 <option disabled>No categories available</option>
               ) : (
-                categories.map((cat: CategoryResponse) => (
+                categories.map((cat: any) => (
                   <option key={cat.id} value={cat.id}>{cat.name}</option>
                 ))
               )}

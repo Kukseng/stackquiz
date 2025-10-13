@@ -2,7 +2,7 @@
 "use client";
 
 import React, { useState, FormEvent } from "react";
-import { signIn } from "next-auth/react";
+import { signIn, useSession } from "next-auth/react";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
@@ -34,37 +34,52 @@ const LoginForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
+  const { update } = useSession();
 
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
   };
 
-  // Handle form submit
+  // Handle form submit with optimized flow
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setErrors({});
     setGeneralError(null);
+    setIsLoading(true);
 
     try {
       loginSchema.parse(formData);
 
+      // Sign in without redirect
       const res = await signIn("credentials", {
-        redirect: false, // handle redirect manually
+        redirect: false,
         username: formData.username,
         password: formData.password,
       });
 
       if (!res || res.error) {
         setGeneralError(res?.error || "Login failed");
+        setIsLoading(false);
         return;
       }
 
-    
+      // Update session immediately to get fresh data
+      await update();
+
+      // Small delay to ensure session is fully updated
+      await new Promise(resolve => setTimeout(resolve, 100));
+
+      // Navigate without full page reload
       router.push("/dashboard");
+      router.refresh(); // Refresh server components data without full reload
+      
+      setIsLoading(false);
     } catch (err: any) {
+      setIsLoading(false);
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
         err.issues.forEach((issue) => {
@@ -76,6 +91,19 @@ const LoginForm = () => {
       } else {
         setGeneralError("An unexpected error occurred.");
       }
+    }
+  };
+
+  // Handle OAuth login
+  const handleOAuthLogin = async (provider: string) => {
+    try {
+      await signIn(provider, { 
+        callbackUrl: "/dashboard",
+        redirect: true // OAuth needs redirect to complete flow
+      });
+    } catch (error) {
+      console.error(`Error signing in with ${provider}:`, error);
+      setGeneralError(`Failed to sign in with ${provider}`);
     }
   };
 
@@ -117,6 +145,7 @@ const LoginForm = () => {
             <button
               onClick={toggleLanguage}
               className="px-3 py-1 border rounded-lg text-sm font-semibold hover:bg-gray-200"
+              disabled={isLoading}
             >
               {language === "en" ? "EN" : "ខ្មែរ"}
             </button>
@@ -145,7 +174,8 @@ const LoginForm = () => {
               onChange={handleChange}
               error={errors.username}
               icon={<FaUser className="text-gray-400 h-4 w-4" />}
-                autoComplete="username" 
+              autoComplete="username"
+              disabled={isLoading}
             />
             <FormField
               id="password"
@@ -164,13 +194,15 @@ const LoginForm = () => {
                   <HiOutlineEye className="h-4 w-4 text-gray-400 cursor-pointer" />
                 )
               }
-               autoComplete="current-password"
+              autoComplete="current-password"
+              disabled={isLoading}
             />
             <button
               type="submit"
-              className="w-full py-2.5 rounded-xl btn-primary text-black font-semibold shadow-lg transition-all duration-300"
+              disabled={isLoading}
+              className="w-full py-2.5 rounded-xl btn-primary text-black font-semibold shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {t.loginButton}
+              {isLoading ? "Logging in..." : t.loginButton}
             </button>
           </form>
 
@@ -180,8 +212,9 @@ const LoginForm = () => {
           </div>
           <div className="flex justify-center space-x-2">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/dashboard" })}
-              className="transition-transform duration-200 hover:scale-110"
+              onClick={() => handleOAuthLogin("google")}
+              disabled={isLoading}
+              className="transition-transform duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Image
                 src="/social_media_icon/google.svg"
@@ -191,8 +224,9 @@ const LoginForm = () => {
               />
             </button>
             <button
-              onClick={() => signIn("github", { callbackUrl: "/dashboard" })}
-              className="transition-transform duration-200 hover:scale-110"
+              onClick={() => handleOAuthLogin("github")}
+              disabled={isLoading}
+              className="transition-transform duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Image
                 src="/social_media_icon/github.svg"
@@ -202,8 +236,9 @@ const LoginForm = () => {
               />
             </button>
             <button
-              onClick={() => signIn("facebook", { callbackUrl: "/dashboard" })}
-              className="transition-transform duration-200 hover:scale-110"
+              onClick={() => handleOAuthLogin("facebook")}
+              disabled={isLoading}
+              className="transition-transform duration-200 hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Image
                 src="/social_media_icon/fb.svg"

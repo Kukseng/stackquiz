@@ -29,7 +29,7 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
   const [questionStartTime, setQuestionStartTime] = useState(Date.now());
   const [showTimeUpAlert, setShowTimeUpAlert] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState<string>("");
-  const [isMounted, setIsMounted] = useState(false); // Client-side check
+  const [isMounted, setIsMounted] = useState(false); 
 
   const currentQuestion = quiz.questions[currentQuestionIndex];
   const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
@@ -212,7 +212,7 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
         <Card className="bg-white shadow-xl rounded-2xl p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h1 className="text-3xl font-bold text-orange-400">{quiz.title}</h1>
+              <h1 className="text-2xl font-bold text-orange-400">{quiz.title}</h1>
               <p className="text-lg text-slate-900 mt-2.5">
                 <span>Participant</span> <span className="text-slate-900">{playerNickname}</span>
               </p>
@@ -225,7 +225,7 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
           </div>
 
           {/* Progress + Timer */}
-          <div className="mt-6 flex justify-between items-center text-xl text-slate-900 font-medium">
+          <div className="flex justify-between mt-[-20px] items-center text-xl text-slate-900 font-medium">
             <span>
               Question {currentQuestionIndex + 1} of {quiz.questions.length}
             </span>
@@ -238,25 +238,30 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
           </div>
           <Progress
             value={progress}
-            className="mt-2 h-2 rounded-full bg-gray-300 [&>div]:bg-gradient-to-r [&>div]:from-indigo-500 [&>div]:to-purple-500"
+            className="h-2 rounded-full bg-gray-300 [&>div]:bg-gradient-to-r [&>div]:from-indigo-500 [&>div]:to-purple-500"
           />
         </Card>
 
         {/* Question */}
         <Card className="bg-white shadow-lg rounded-2xl p-6">
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">{currentQuestion.text.replace(/_/g, " ")}</h2>
-          <div className="flex gap-3 text-sm text-white mb-6">
-            <Badge variant="secondary" className="btn-secondary text-white">
+         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+          <span className="inline-flex items-center justify-center w-8 h-8 btn-secondary text-white rounded-full text-sm font-bold mr-3">
+            {currentQuestionIndex + 1}
+          </span>
+          {currentQuestion.text.replace(/_/g, " ")}
+        </h2>
+          <div className="flex gap-3 text-sm mt-[-25px] text-white mb-6">
+            <Badge variant="secondary" className=" py-1.5 btn-secondary text-white rounded-full">
               {currentQuestion.points} pts
             </Badge>
-            <Badge variant="outline" className="text-slate-900">
+            <Badge variant="outline" className=" py-1.5 text-slate-900 rounded-full">
               {currentQuestion.timeLimit}s
             </Badge>
           </div>
 
           {/* Answer Options */}
           {currentQuestion.type === "MCQ" && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 mt-[-25px] gap-6">
               {currentQuestion.options.map((opt, index) => {
                 const styles = [
                   { color: "bg-yellow-600", icon: "circle" },

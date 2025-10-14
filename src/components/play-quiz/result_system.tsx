@@ -37,23 +37,15 @@ return (
     <div className="container mx-auto max-w-4xl">
       {/* Header */}
       <div className="text-center mb-12">
-        <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-white/70 border-2 backdrop-blur-md flex items-center justify-center shadow-lg">
-            <Image 
-              src="avatar.svg" 
-              alt="Banner" 
-              width={100} 
-              height={100} 
-            />
-        </div>
-        <h1 className="text-5xl font-bold text-white">Quiz Complete</h1>
-        <p className="text-amber-500 text-2xl mt-2 font-bold"><span>Topic is:</span>{quiz.title}</p>
+        <h1 className="text-5xl font-bold text-white">Quiz Completed</h1>
+        <p className="text-amber-500 text-2xl mt-2 font-bold"><span>Topic about</span>{quiz.title}</p>
         <Badge variant="outline" className="mt-3 px-4 py-1 text-2xl text-white border-gray-300">
           {playerNickname}
         </Badge>
       </div>
 
       {/* Score Overview */}
-      <Card className="mb-5 border border-gray-200 bg-white/60 backdrop-blur-md shadow-lg rounded-2xl">
+      <Card className="mb-5 border border-gray-200 bg-white backdrop-blur-md shadow-lg rounded-2xl">
         <CardHeader className="text-center space-y-1">
           <CardTitle className="text-5xl font-bold text-indigo-600">
             {results.score}/{totalPossiblePoints}
@@ -61,7 +53,7 @@ return (
           <p className="text-lg text-gray-500">Total Points</p>
           <div className="space-y-3">
             <Progress value={percentage} className="h-3 rounded-full" />
-            <p className="text-lg font-medium text-gray-700">
+            <p className="font-medium text-gray-700">
               {percentage}% — {performance.message}
             </p>
           </div>
@@ -70,7 +62,7 @@ return (
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-        <Card className="border border-gray-200 bg-white/50 backdrop-blur-md shadow-sm p-0.5 rounded-2xl">
+        <Card className="border border-gray-200 bg-white backdrop-blur-md shadow-sm p-0.5 rounded-2xl">
           <CardContent className="text-center">
               <Image 
               className="mx-auto mb-0"
@@ -86,7 +78,7 @@ return (
           </CardContent>
         </Card>
 
-        <Card className="border border-gray-200 bg-white/50 backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
+        <Card className="border border-gray-200 bg-white backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
           <CardContent className="text-center">
                <Image 
               className="mx-auto mt-2"
@@ -100,7 +92,7 @@ return (
           </CardContent>
         </Card>
 
-        <Card className="border border-gray-200 bg-white/50 backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
+        <Card className="border border-gray-200 bg-white backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
           <CardContent className="text-center">
                <Image 
               className="mx-auto mb-0"
@@ -116,7 +108,7 @@ return (
       </div>
 
       {/* Question Breakdown */}
-      <Card className="mb-10 border border-gray-200 bg-white/50 backdrop-blur-md shadow-md rounded-2xl">
+      <Card className="mb-10 border border-gray-200 bg-white backdrop-blur-md shadow-md rounded-2xl">
         <CardHeader>
           <CardTitle className="text-lg font-bold text-gray-800">Question Breakdown</CardTitle>
         </CardHeader>

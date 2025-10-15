@@ -5,6 +5,9 @@ const nextConfig = {
     unoptimized: true,
     domains: ['api.dicebear.com'], // allowed external image domains
   },
+  experimental: {
+    optimizeFonts: false
+  },
   outputFileTracingRoot: __dirname,
   async redirects() {
     return [

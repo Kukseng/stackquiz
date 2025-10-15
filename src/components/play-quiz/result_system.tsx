@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { Progress } from "@/components/ui/progress"
 import { RotateCcw } from "lucide-react"
-import type { Quiz, GameResults } from "@/app/play/page"
+import type { Quiz, GameResults } from "@/app/play/[id]/page"
 import { useWebSocket } from "../../context/websocket-context"
 import Image from "next/image"
 
@@ -39,7 +39,7 @@ return (
       <div className="text-center mb-12">
         <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-white/70 border-2 backdrop-blur-md flex items-center justify-center shadow-lg">
             <Image 
-              src="play/avatar.svg" 
+              src="avatar.svg" 
               alt="Banner" 
               width={100} 
               height={100} 
@@ -74,7 +74,7 @@ return (
           <CardContent className="text-center">
               <Image 
               className="mx-auto mb-0"
-              src="play/correct.svg" 
+              src="correct.svg" 
               alt="Banner" 
               width={80} 
               height={80} 
@@ -90,7 +90,7 @@ return (
           <CardContent className="text-center">
                <Image 
               className="mx-auto mt-2"
-              src="play/clock.svg" 
+              src="clock.svg" 
               alt="Banner" 
               width={70} 
               height={70} 
@@ -104,7 +104,7 @@ return (
           <CardContent className="text-center">
                <Image 
               className="mx-auto mb-0"
-              src="play/totaltime.svg" 
+              src="totaltime.svg" 
               alt="Banner" 
               width={80} 
               height={80} 
@@ -152,10 +152,17 @@ return (
       <div className="flex flex-col sm:flex-row gap-4 justify-center">
         <Button
           onClick={onPlayAgain}
-          className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold py-3 px-8 rounded-xl shadow-md"
+          className="btn-secondary text-gray-800 font-semibold py-3 px-8 rounded-xl shadow-md"
         >
           <RotateCcw className="w-4 h-4 mr-2" />
           Play Again
+        </Button>
+         <Button
+         onClick={() => window.location.href = '/home'}
+          className=" text-white font-semibold py-3 px-8 rounded-xl shadow-md"
+        >
+          <RotateCcw className="w-4 h-4 mr-2" />
+          Exits
         </Button>
       </div>
     </div>

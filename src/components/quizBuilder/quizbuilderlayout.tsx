@@ -252,7 +252,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
 
   const handleDelete = (id: number | string) => {
     const remaining = questions.filter((q) => q.id !== id);
-    deleteQuestion(id);
+    deleteQuestion(typeof id === "string" ? Number(id) : id);
     setActiveQuestionId(remaining.length ? remaining[0].id : null);
   };
 
@@ -296,7 +296,6 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
       <QuizHeader
         questions={questions}
         onPublish={() => setShowPublishModal(true)}
-        onSave={() => console.log("Save quiz", questions)}
       />
 
       <div className="flex w-full">

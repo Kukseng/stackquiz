@@ -2,7 +2,18 @@
 
 import { Button } from "@/components/ui/button"
 import { Check, X } from "lucide-react"
-import type { Question } from "@/app/play/page"
+
+interface QuizOption {
+  id: string
+  optionText: string
+  isCorrected: boolean
+}
+
+interface Question {
+  id: string
+  text: string
+  options: QuizOption[]
+}
 
 interface TrueFalseQuestionProps {
   question: Question

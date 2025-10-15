@@ -1,6 +1,6 @@
 "use client";
 
-import { DM_Sans, Kantumruy_Pro } from "next/font/google";
+import { DM_Sans } from "next/font/google";
 import LayoutWrapper from "./LayoutWrapper";
 import { LanguageProvider } from "../context/LanguageContext";
 import { Provider } from "react-redux";
@@ -14,11 +14,9 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
-const kantumruyPro = Kantumruy_Pro({
-  subsets: ["khmer"],
-  display: "swap",
-  variable: "--font-kantumruy",
-});
+// Note: Kantumruy Pro font was removed from next/font/google imports because
+// the Next font loader failed to fetch it from Google Fonts during build.
+// We keep a CSS fallback in `globals.css` where `--font-kantumruy` is defined.
 
 export default function RootLayout({
   children,
@@ -26,10 +24,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html
-      lang="en"
-      className={`${dmSans.variable} ${kantumruyPro.variable} antialiased`}
-    >
+    <html lang="en" className={`${dmSans.variable} antialiased`}>
       <body className="cosmic-bg overflow-hidden">
         <Provider store={store}>
           <SessionProvider>

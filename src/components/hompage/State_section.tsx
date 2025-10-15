@@ -16,7 +16,7 @@ export function StatsSection() {
   ];
 
   return (
-    <section className={`relative w-full py-12 bg-footer ${fontClass}`}>
+    <section className={`relative w-full py-3 bg-footer ${fontClass}`}>
       <div className="relative max-w-7xl mx-auto z-10 flex items-center justify-center px-4">
         <div className="w-full grid md:grid-cols-3 gap-8 text-center">
           {stats.map((stat, index) => (

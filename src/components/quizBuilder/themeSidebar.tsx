@@ -9,7 +9,19 @@ interface ThemeSelectorProps {
   onDurationChange?: (duration: number) => void
 }
 
-const durations = [5, 10, 15, 20, 25,  30,]
+// 👇 Match backend enum TimeLimitRangeInSecond
+const timeLimits = [
+  { label: "FIVE", value: 5 },
+  { label: "SIX", value: 6 },
+  { label: "SEVEN", value: 7 },
+  { label: "EIGHT", value: 8 },
+  { label: "NINE", value: 9 },
+  { label: "TEN", value: 10 },
+  { label: "FIFTEEN", value: 15 },
+  { label: "TWENTY", value: 20 },
+  { label: "THIRTY", value: 30 },
+]
+
 
 const themes = [
   { id: "blue", name: "Blue Sky", image: "/background/10.png" },
@@ -20,7 +32,7 @@ const themes = [
 ]
 
 export default function ThemeSelector({ selectedTheme, onThemeChange, onDurationChange }: ThemeSelectorProps) {
-  const [selectedDuration, setSelectedDuration] = useState(durations[0])
+  const [selectedDuration, setSelectedDuration] = useState(timeLimits[0].value)
 
   const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = parseInt(e.target.value)
@@ -29,34 +41,20 @@ export default function ThemeSelector({ selectedTheme, onThemeChange, onDuration
   }
 
   return (
-    <div className="w-80 bg-white/80 backdrop-blur-md h-full p-6 border-l border-gray-200 flex flex-col">
-
-             {/* Duration Selector (sticks at bottom) */}
-      <div className="mt-4 ">
- 
-          <h3 className="text-xl font-bold text-gray-800 mb-4"> Time Duration</h3>
-        <select
-          value={selectedDuration}
-          onChange={handleDurationChange}
-          className="w-full p-2 border rounded-md mb-4"
-        >
-          {durations.map((d) => (
-            <option key={d} value={d}>
-              {d} seconds
-            </option>
-          ))}
-        </select>
-      </div>
+    <div className="w-80 h-screen bg-white/80 backdrop-blur-md p-6 border-l border-gray-200 flex flex-col">
+      {/* Header */}
       <h3 className="text-xl font-bold text-gray-800 mb-4">Themes</h3>
-       
-      {/* Scrollable vertical list */}
-      <div className="space-y-4 overflow-y-auto flex-grow pr-2">
+
+      {/* Scrollable Themes */}
+      <div className="space-y-4 overflow-y-auto flex-grow pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
         {themes.map((theme) => (
           <button
             key={theme.id}
             onClick={() => onThemeChange(theme.id)}
-            className={`w-full rounded-xl overflow-hidden transition-all ${
-              selectedTheme === theme.id ? "ring-4 ring-blue-500 shadow-lg" : "hover:shadow-md"
+            className={`w-full rounded-xl overflow-hidden transition-all duration-200 ${
+              selectedTheme === theme.id
+                ? "ring-4 ring-blue-500 shadow-lg scale-[1.02]"
+                : "hover:shadow-md hover:scale-[1.01]"
             }`}
           >
             <div className="relative w-full h-40">
@@ -75,7 +73,21 @@ export default function ThemeSelector({ selectedTheme, onThemeChange, onDuration
         ))}
       </div>
 
-
+      {/* Duration Selector (sticky bottom) */}
+      <div className="pt-4 border-t border-gray-200 sticky bottom-0 bg-white/90 backdrop-blur-md mt-4">
+        <h3 className="text-lg font-bold text-gray-800 mb-2">Time Duration</h3>
+        <select
+          value={selectedDuration}
+          onChange={handleDurationChange}
+          className="w-full p-2 border rounded-md"
+        >
+          {timeLimits.map((limit) => (
+            <option key={limit.value} value={limit.value}>
+              {limit.label} ({limit.value}s)
+            </option>
+          ))}
+        </select>
+      </div>
     </div>
   )
 }

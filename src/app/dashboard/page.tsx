@@ -47,7 +47,7 @@ const DashboardPage = () => {
     selectedDifficulty !== "All";
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="p-4 sm:p-6 lg:p-8 ">
       {/* Hero Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
         {/* Join Quiz Card */}
@@ -150,7 +150,7 @@ const DashboardPage = () => {
         <div className="mb-4 flex flex-wrap gap-2">
           {searchTerm && (
             <span className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-800 rounded-full text-sm">
-              Search: "{searchTerm}"
+              Search: {searchTerm}
               <button
                 onClick={() => setSearchTerm("")}
                 className="hover:text-blue-900 font-semibold"

@@ -48,7 +48,7 @@ export function ContactSection() {
 
   return (
     <section
-      className={`relative max-w-7xl mx-auto py-12 sm:py-16 lg:py-20 text-white overflow-hidden px-4 sm:px-6 lg:px-8 ${fontClass}`}
+      className={`relative max-w-7xl mx-auto py-12 sm:py-16 lg:py-20 text-white overflow-hidden px-4 sm:px-6 lg:px-8 mt-[-100px] mb-[-5px] ${fontClass}`}
     >
       {/* Background */}
       <motion.div

@@ -12,7 +12,8 @@ export function EstablishmentSection() {
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <ContentSection
+    <div className="mt-[-100px]">
+        <ContentSection
       title={t.establishment.title}
       description={t.establishment.description}
       imageSrc="/about_svg/aboutus(goal).svg"
@@ -20,6 +21,8 @@ export function EstablishmentSection() {
       reversed={false}
       className={fontClass} 
     />
+    </div>
+    
   );
 }
 

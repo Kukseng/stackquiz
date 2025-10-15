@@ -156,7 +156,7 @@ export default function TemplateCardComponent({
         }
 
         const mappedChallenges: Challenge[] = data.map((quiz) => {
-          const difficultyStyle = getDifficultyStyle(quiz.difficulty);
+          const difficultyStyle = getDifficultyStyle(quiz.difficulty || "MEDIUM");
           const categoryId = extractCategoryId(quiz);
           
           return {
@@ -164,7 +164,7 @@ export default function TemplateCardComponent({
             title: quiz.title || "Untitled Quiz",
             questions: Array.isArray(quiz.questions) ? quiz.questions.length : 0,
             time: "N/A",
-            difficulty: quiz.difficulty || "MEDIUM",
+            difficulty: (quiz.difficulty || "MEDIUM").toUpperCase(),
             categoryId: categoryId,
             ...difficultyStyle,
             participants: quiz.participants || 0,
@@ -191,16 +191,19 @@ export default function TemplateCardComponent({
 
   const filteredChallenges = challenges.filter((challenge) => {
     const matchesDifficulty =
+      !selectedDifficulty ||
       selectedDifficulty === "All" ||
-      challenge.difficulty.toUpperCase() === selectedDifficulty.toUpperCase();
+      (challenge.difficulty && selectedDifficulty && challenge.difficulty.toUpperCase() === selectedDifficulty.toUpperCase());
 
     const matchesSearch =
+      !searchTerm ||
       searchTerm === "" ||
-      challenge.title.toLowerCase().includes(searchTerm.toLowerCase());
+      (challenge.title && challenge.title.toLowerCase().includes(searchTerm.toLowerCase()));
 
     // If no category data exists, ignore category filter
     const matchesCategory = 
       noCategoryData ||
+      !selectedCategory ||
       selectedCategory === "All" || 
       (challenge.categoryId !== undefined && challenge.categoryId === selectedCategory);
 
@@ -244,24 +247,12 @@ export default function TemplateCardComponent({
 
   return (
     <section className="max-w-7xl mx-auto mt-8 px-4 md:px-1 lg:px-3">
-      {/* Warning if category data is missing */}
-      {noCategoryData && selectedCategory !== "All" && (
-        <div className="mb-4 p-4 bg-orange-50 border border-orange-200 rounded-lg">
-          <p className="text-sm text-orange-800">
-            <strong>⚠️ Category Filtering Not Available</strong>
-            <br />
-            The quiz API does not return category information. Please update your backend API to include a <code className="bg-orange-100 px-1 rounded">categoryId</code> field in the quiz response.
-            <br />
-            <span className="text-xs mt-1 block">Showing all quizzes regardless of category selection.</span>
-          </p>
-        </div>
-      )}
 
       {/* Active filter info */}
       {!noCategoryData && selectedCategory !== "All" && (
         <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
           <p className="text-sm text-blue-800">
-            <strong>Active Filter:</strong> Category ID = "{selectedCategory}"
+            <strong>Active Filter:</strong> Category ID = {selectedCategory}
             <br />
             <strong>Matching Quizzes:</strong> {filteredChallenges.length} of {challenges.length}
           </p>

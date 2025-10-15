@@ -59,7 +59,7 @@ export function QuizSidebar({ questions, activeQuestionId, onQuestionSelect, onA
   }
 
   return (
-    <div className="w-72 bg-white  overflow-y-auto border-r border-gray-200 ">
+    <div className="w-72 h-screen bg-white overflow-y-auto border-r border-gray-200 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100">
       {/* Header */}
       <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
         <h2 className="text-lg font-bold text-gray-800">Quiz</h2>

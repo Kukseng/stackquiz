@@ -11,7 +11,8 @@ export function MissionSection() {
   const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <ContentSection
+    <div className="mt-[-150px]">
+      <ContentSection
       title={t.mission.title}
       description={t.mission.description}
       imageSrc="/about_svg/aboutus(mission).svg"
@@ -19,5 +20,7 @@ export function MissionSection() {
       reversed={true}
       className={fontClass} 
     />
+    </div>
+    
   );
 }

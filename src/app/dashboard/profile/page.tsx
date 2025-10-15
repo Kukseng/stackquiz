@@ -1,10 +1,10 @@
 "use client";
 
 import { useSession } from "next-auth/react";
-import { useEffect, useState, ChangeEvent, useMemo } from "react";
+import { useEffect, useState, ChangeEvent, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { Camera, X } from "lucide-react";
+import { Camera } from "lucide-react";
 
 // ============================================
 // TYPE DEFINITIONS (matching your API exactly)
@@ -42,10 +42,10 @@ type ProfileForm = {
 };
 
 // ============================================
-// MAIN COMPONENT
+// PROFILE CONTENT COMPONENT (uses useSearchParams)
 // ============================================
 
-export default function ProfilePage() {
+function ProfileContent() {
   const { data: session, status, update: updateSession } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -109,7 +109,7 @@ export default function ProfilePage() {
         setIsEditing(true);
       }
     }
-  }, [status, session?.apiAccessToken]);
+  }, [status, session?.apiAccessToken, searchParams]);
 
   // Cleanup preview URL on unmount
   useEffect(() => {
@@ -167,16 +167,6 @@ export default function ProfilePage() {
     }
   };
 
-  // Convert File to base64 (if needed for avatarUrl)
-  const fileToBase64 = (file: File): Promise<string> => {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onload = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(file);
-    });
-  };
-
   const handleSave = async (): Promise<void> => {
     if (!session?.apiAccessToken) {
       alert("No API token available");
@@ -209,8 +199,6 @@ export default function ProfilePage() {
 
       // Handle avatar update
       if (avatarFile) {
-        // Option 1: Try uploading to a dedicated endpoint (if it exists)
-        // Check if your API has POST /users/me/avatar endpoint
         try {
           const formData = new FormData();
           formData.append("file", avatarFile);
@@ -225,7 +213,6 @@ export default function ProfilePage() {
 
           if (uploadRes.ok) {
             const uploadData = await uploadRes.json();
-            // Extract avatar URL from response
             const newAvatarUrl = uploadData.avatarUrl || uploadData.url || uploadData.fileUrl;
             if (newAvatarUrl) {
               payload.avatarUrl = newAvatarUrl;
@@ -238,13 +225,11 @@ export default function ProfilePage() {
           console.warn("⚠️ Avatar upload failed, trying alternative method:", uploadErr);
         }
       } else if (form.avatarUrl?.trim() && form.avatarUrl !== profile?.avatarUrl) {
-        // User manually entered an avatar URL
         payload.avatarUrl = form.avatarUrl.trim();
       }
 
       console.log("📤 Sending update payload:", payload);
 
-      // Send PUT request to update profile
       const res = await fetch(`${API}/users/me`, {
         method: "PUT",
         headers: {
@@ -270,7 +255,6 @@ export default function ProfilePage() {
       const updated: UserProfile = await res.json();
       console.log("✅ Profile updated successfully:", updated);
       
-      // Update all states with fresh data from server
       setProfile(updated);
       setForm({
         firstName: updated.firstName || "",
@@ -282,7 +266,6 @@ export default function ProfilePage() {
         avatarUrl: updated.avatarUrl || "",
       });
       
-      // Clear file selection and preview
       if (avatarPreview) {
         URL.revokeObjectURL(avatarPreview);
       }
@@ -290,7 +273,6 @@ export default function ProfilePage() {
       setAvatarPreview(null);
       setIsEditing(false);
 
-      // Update NextAuth session to refresh Navbar
       try {
         console.log("🔄 Updating NextAuth session...");
         
@@ -332,21 +314,18 @@ export default function ProfilePage() {
     
     if (!file) return;
 
-    // Validate file type
     const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/gif', 'image/webp'];
     if (!validTypes.includes(file.type)) {
       alert('Please select a valid image file (PNG, JPG, JPEG, GIF, or WebP)');
       return;
     }
 
-    // Validate file size (max 5MB)
     const maxSize = 5 * 1024 * 1024;
     if (file.size > maxSize) {
       alert('File size must be less than 5MB');
       return;
     }
 
-    // Clean up old preview URL
     if (avatarPreview) {
       URL.revokeObjectURL(avatarPreview);
     }
@@ -367,7 +346,6 @@ export default function ProfilePage() {
         avatarUrl: profile.avatarUrl || "",
       });
       
-      // Clean up preview URL
       if (avatarPreview) {
         URL.revokeObjectURL(avatarPreview);
       }
@@ -419,10 +397,8 @@ export default function ProfilePage() {
     <div className="bg-gray-50 min-h-screen flex justify-center items-start p-4 pt-20">
       <div className="w-full max-w-5xl bg-white shadow-lg rounded-2xl overflow-hidden">
         
-        {/* COVER IMAGE (gradient placeholder) */}
-        <div className="relative h-48 sm:h-64 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500">
-          {/* You can add cover image upload here if your API supports it */}
-        </div>
+        {/* COVER IMAGE */}
+        <div className="relative h-48 sm:h-64 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />
 
         {/* PROFILE HEADER */}
         <div className="relative px-6 sm:px-10 pb-6">
@@ -583,7 +559,7 @@ export default function ProfilePage() {
               />
             </div>
 
-            {/* Avatar URL (optional manual entry) */}
+            {/* Avatar URL */}
             {isEditing && (
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -605,5 +581,21 @@ export default function ProfilePage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// ============================================
+// MAIN COMPONENT WITH SUSPENSE
+// ============================================
+
+export default function ProfilePage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500"></div>
+      </div>
+    }>
+      <ProfileContent />
+    </Suspense>
   );
 }

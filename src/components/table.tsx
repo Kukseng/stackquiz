@@ -131,7 +131,7 @@ export default function Table() {
                     transition={{ duration: 0.5, delay: index * 0.2 }}
                   >
                     <Image
-                      src={player.avatar || "/placeholder.svg"} // fallback if avatar is missing
+                      src={player.avatar || "1"} // fallback if avatar is missing
                       alt={player.name}
                       width={48} // equivalent to h-12 w-12 (12 * 4px = 48px)
                       height={48}
@@ -139,7 +139,7 @@ export default function Table() {
                       onError={(e) => {
                         // fallback if image fails to load
                         (e.currentTarget as HTMLImageElement).src =
-                          "/placeholder.svg";
+                          "1";
                       }}
                     />
                   </motion.div>

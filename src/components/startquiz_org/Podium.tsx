@@ -66,7 +66,7 @@ export default function Podium() {
                   }}
                 >
                   <Image
-                    src={player.avatar || "/placeholder.svg"}
+                    src={player.avatar || ""}
                     alt={player.name}
                     fill
                     className="rounded-full object-cover"

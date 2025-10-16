@@ -39,7 +39,7 @@ export function SessionStats({
     const fetchStats = async () => {
       try {
         // TODO: Implement getLeaderboardStats API method
-        // For now, we'll use calculated stats from participants
+  // For now, we will use calculated stats from participants
         console.log("Fetching stats for session:", sessionId)
       } catch (error) {
         console.error("Failed to fetch session stats:", error)

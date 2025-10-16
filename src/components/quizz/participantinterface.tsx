@@ -113,7 +113,7 @@ export function ParticipantInterface({ sessionCode, participantId, nickname }: P
               <p className="text-lg">{currentQuestion.text}</p>
               {currentQuestion.imageUrl && (
                 <img
-                  src={currentQuestion.imageUrl || "/placeholder.svg"}
+                  src={currentQuestion.imageUrl || ""}
                   alt="Question"
                   className="max-w-full rounded-lg mx-auto"
                 />

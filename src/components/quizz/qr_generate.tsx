@@ -72,7 +72,7 @@ export function QRCodeGenerator({ sessionCode, sessionName }: QRCodeGeneratorPro
         <div className="text-center">
           <div className="inline-block p-4 bg-white rounded-lg">
             <img
-              src={qrCodeUrl || "/placeholder.svg"}
+              src={qrCodeUrl || ""}
               alt={`QR Code for ${sessionName}`}
               className="w-48 h-48 mx-auto"
             />

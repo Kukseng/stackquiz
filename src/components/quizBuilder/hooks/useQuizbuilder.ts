@@ -1,81 +1,93 @@
-"use client"
-import { useState } from "react"
+"use client";
+
+import { useState } from "react";
 
 // Icon type
-export type IconType = "circle" | "triangle" | "square" | "diamond"
+export type IconType = "circle" | "triangle" | "square" | "diamond";
 
 export interface QuizOption {
-  id: number
-  text: string
-  correct: boolean
-  color: string
-  icon?: IconType
+  id: string;
+  text: string;
+  correct: boolean;
+  color: string;
+  icon?: IconType;
 }
 
-
 export interface Question {
-  id: number
-  type: string
-  question: string
-  options: QuizOption[]
+  id: string;
+  type: string;
+  question: string;
+  options: QuizOption[];
+  isNew?: boolean; // Added for AI-generated question highlighting
 }
 
 export function useQuizStore() {
-  const [questions, setQuestions] = useState<Question[]>([])
-  const [activeQuestionId, setActiveQuestionId] = useState<number | null>(null)
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [activeQuestionId, setActiveQuestionId] = useState<string | null>(null);
 
   // Add new question
-  const addQuestion = (type: string) => {
-    const newQuestion: Question = {
-      id: Date.now(),
-      type,
-      question: "",
-      options:
-        type === "mcq"
-    ? [
-        { id: 1, text: "", correct: false, color: "#e21a3b", icon: "circle" },
-        { id: 2, text: "", correct: false, color: "#e77f42", icon: "triangle" },
-        { id: 3, text: "", correct: false, color: "#1355b4", icon: "square" },
-        { id: 4, text: "", correct: true, color: "#27890d", icon: "diamond" }, // updated color
-      ]
-          : type === "tf"
-          ? [
-              { id: 1, text: "True", correct: false, color: "bg-red-500", icon: "circle" },
-              { id: 4, text: "False", correct: true, color: "bg-green-700", icon: "diamond" },
-            ]
-          : [{ id: 1, text: "", correct: true, color: "bg-blue-500" }],
-    }
-    setQuestions((prev) => [...prev, newQuestion])
-    setActiveQuestionId(newQuestion.id)
-  }
+  const addQuestion = (type: string, questionData?: Partial<Question>) => {
+    const newQuestion: Question = questionData?.id
+      ? {
+          ...questionData,
+          id: questionData.id,
+          type: questionData.type || type,
+          question: questionData.question || "",
+          options: questionData.options || [],
+          isNew: questionData.isNew || false,
+        }
+      : {
+          id: crypto.randomUUID(),
+          type,
+          question: "",
+          options:
+            type === "mcq"
+              ? [
+                  { id: crypto.randomUUID(), text: "", correct: false, color: "#e21a3b", icon: "circle" },
+                  { id: crypto.randomUUID(), text: "", correct: false, color: "#e77f42", icon: "triangle" },
+                  { id: crypto.randomUUID(), text: "", correct: false, color: "#1355b4", icon: "square" },
+                  { id: crypto.randomUUID(), text: "", correct: true, color: "#27890d", icon: "diamond" },
+                ]
+              : type === "tf"
+              ? [
+                  { id: crypto.randomUUID(), text: "True", correct: false, color: "#e21a3b", icon: "circle" },
+                  { id: crypto.randomUUID(), text: "False", correct: true, color: "#27890d", icon: "diamond" },
+                ]
+              : [{ id: crypto.randomUUID(), text: "", correct: true, color: "#1355b4" }],
+          isNew: false,
+        };
+    setQuestions((prev) => [...prev, newQuestion]);
+    setActiveQuestionId(newQuestion.id);
+  };
 
   // Delete question
-  const deleteQuestion = (id: number) => {
-    const newQuestions = questions.filter((q) => q.id !== id)
-    setQuestions(newQuestions)
-    setActiveQuestionId(newQuestions.length ? newQuestions[0].id : null)
-  }
+  const deleteQuestion = (id: string) => {
+    const newQuestions = questions.filter((q) => q.id !== id);
+    setQuestions(newQuestions);
+    setActiveQuestionId(newQuestions.length ? newQuestions[0].id : null);
+  };
 
   // Duplicate question
   const duplicateQuestion = (question: Question) => {
     const duplicate: Question = {
       ...question,
-      id: Date.now(),
-      options: question.options.map((opt) => ({ ...opt })),
-    }
-    setQuestions((prev) => [...prev, duplicate])
-    setActiveQuestionId(duplicate.id)
-  }
+      id: crypto.randomUUID(),
+      options: question.options.map((opt) => ({ ...opt, id: crypto.randomUUID() })),
+      isNew: false,
+    };
+    setQuestions((prev) => [...prev, duplicate]);
+    setActiveQuestionId(duplicate.id);
+  };
 
   // Update question text
-  const updateQuestionText = (questionId: number, newText: string) => {
+  const updateQuestionText = (questionId: string, newText: string) => {
     setQuestions((prev) =>
       prev.map((q) => (q.id === questionId ? { ...q, question: newText } : q))
-    )
-  }
+    );
+  };
 
   // Update option text
-  const updateOptionText = (questionId: number, optionId: number, newText: string) => {
+  const updateOptionText = (questionId: string, optionId: string, newText: string) => {
     setQuestions((prev) =>
       prev.map((q) => {
         if (q.id === questionId) {
@@ -84,15 +96,15 @@ export function useQuizStore() {
             options: q.options.map((opt) =>
               opt.id === optionId ? { ...opt, text: newText } : opt
             ),
-          }
+          };
         }
-        return q
+        return q;
       })
-    )
-  }
+    );
+  };
 
   // Toggle correct answer
-  const toggleCorrectAnswer = (questionId: number, optionId: number) => {
+  const toggleCorrectAnswer = (questionId: string, optionId: string) => {
     setQuestions((prev) =>
       prev.map((q) => {
         if (q.id === questionId) {
@@ -107,12 +119,12 @@ export function useQuizStore() {
                   ? false
                   : opt.correct,
             })),
-          }
+          };
         }
-        return q
+        return q;
       })
-    )
-  }
+    );
+  };
 
   return {
     questions,
@@ -125,5 +137,5 @@ export function useQuizStore() {
     updateQuestionText,
     updateOptionText,
     toggleCorrectAnswer,
-  }
+  };
 }

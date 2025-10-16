@@ -8,6 +8,7 @@ import Card from "./Card";
 import { Button } from "@/components/ui/button";
 import ChallengeGrid from "../GridCardComponent";
 import { getSession } from "next-auth/react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 
 // Types
 interface QuizData {
@@ -43,28 +44,31 @@ interface CreateSessionResponse {
 const getAuthHeaders = async () => {
   try {
     const session = await getSession();
-    
-    console.log("🔍 Checking session...", session ? "Session found" : "No session");
-    
+
+    console.log(
+      "🔍 Checking session...",
+      session ? "Session found" : "No session"
+    );
+
     if (!session) {
-      throw new Error('No session found. Please login first.');
+      throw new Error("No session found. Please login first.");
     }
 
     const token = (session as any)?.apiAccessToken;
-    
+
     if (!token) {
-      console.error('❌ No API access token in session');
-      throw new Error('No authentication token found. Please login again.');
+      console.error("❌ No API access token in session");
+      throw new Error("No authentication token found. Please login again.");
     }
 
-    console.log('✅ Auth token found, length:', token.length);
-    
+    console.log("✅ Auth token found, length:", token.length);
+
     return {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+      "Content-Type": "application/json",
     };
   } catch (error) {
-    console.error('❌ Error getting auth headers:', error);
+    console.error("❌ Error getting auth headers:", error);
     throw error;
   }
 };
@@ -74,14 +78,14 @@ const fetchQuizById = async (id: string): Promise<QuizData | null> => {
   try {
     const res = await fetch(
       `${process.env.NEXT_PUBLIC_API_URL}/quizzes?active=true`,
-      { 
+      {
         cache: "no-store",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
       }
     );
-    
+
     if (!res.ok) {
       throw new Error(`HTTP error! status: ${res.status}`);
     }
@@ -95,43 +99,49 @@ const fetchQuizById = async (id: string): Promise<QuizData | null> => {
 };
 
 // Create quiz session
-const createQuizSession = async (request: CreateSessionRequest): Promise<CreateSessionResponse> => {
+const createQuizSession = async (
+  request: CreateSessionRequest
+): Promise<CreateSessionResponse> => {
   try {
     const headers = await getAuthHeaders();
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9999/api/v1';
-    
+    const apiUrl =
+      process.env.NEXT_PUBLIC_API_URL ||
+      "https://stackquiz-api.stackquiz.me/api/v1";
+
     console.log("📤 Creating quiz session...");
     console.log("   API URL:", `${apiUrl}/quiz-sessions`);
     console.log("   Request:", request);
-    console.log("   Headers:", { ...headers, Authorization: headers.Authorization ? '***' : 'missing' });
-    
+    console.log("   Headers:", {
+      ...headers,
+      Authorization: headers.Authorization ? "***" : "missing",
+    });
+
     const res = await fetch(`${apiUrl}/quiz-sessions`, {
-      method: 'POST',
+      method: "POST",
       headers,
       body: JSON.stringify(request),
     });
-    
+
     console.log("📥 Response status:", res.status, res.statusText);
-    
+
     if (!res.ok) {
       const errorText = await res.text();
       console.error("❌ Session creation failed:", errorText);
-      
-      // Parse error message
+
       let errorMessage = `Failed to create session (${res.status})`;
-      
+
       try {
         const errorJson = JSON.parse(errorText);
         errorMessage = errorJson.message || errorJson.error || errorMessage;
       } catch {
-        // If not JSON, use text
-        if (errorText.includes('User not found')) {
-          errorMessage = 'User not found. Your account may not be properly set up. Please contact support or try logging in again.';
+        if (errorText.includes("User not found")) {
+          errorMessage =
+            "User not found. Your account may not be properly set up. Please contact support or try logging in again.";
         } else if (errorText) {
           errorMessage = errorText;
         }
       }
-      
+
       throw new Error(errorMessage);
     }
 
@@ -148,7 +158,7 @@ export default function StartPage() {
   const params = useParams();
   const router = useRouter();
   const quizId = params?.id as string;
-  
+
   const [quizData, setQuizData] = useState<QuizData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -156,14 +166,16 @@ export default function StartPage() {
   const [authChecked, setAuthChecked] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  // Check authentication on mount
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const session = await getSession();
         const token = (session as any)?.apiAccessToken;
         setIsAuthenticated(!!token);
-        console.log("🔐 Auth check:", token ? "Authenticated" : "Not authenticated");
+        console.log(
+          "🔐 Auth check:",
+          token ? "Authenticated" : "Not authenticated"
+        );
       } catch (error) {
         console.error("❌ Auth check failed:", error);
         setIsAuthenticated(false);
@@ -171,7 +183,7 @@ export default function StartPage() {
         setAuthChecked(true);
       }
     };
-    
+
     checkAuth();
   }, []);
 
@@ -187,7 +199,7 @@ export default function StartPage() {
         setLoading(true);
         setError(null);
         const data = await fetchQuizById(quizId);
-        
+
         if (!data) {
           setError("Quiz not found");
         } else {
@@ -210,10 +222,9 @@ export default function StartPage() {
       return;
     }
 
-    // Check authentication
     if (!isAuthenticated) {
       alert("Please login first to create a quiz session");
-      router.push('/login');
+      router.push("/login");
       return;
     }
 
@@ -221,33 +232,43 @@ export default function StartPage() {
     setError(null);
 
     try {
-      // Generate session name
-      const sessionName = `${quizData?.title || 'Quiz'} - ${new Date().toLocaleString()}`;
-      
+      const sessionName = `${
+        quizData?.title || "Quiz"
+      } - ${new Date().toLocaleString()}`;
+
       console.log("🚀 Starting quiz session creation...");
-      
-      // Create quiz session
+
       const sessionData = await createQuizSession({
         quizId: quizId,
         sessionName: sessionName,
       });
 
-      console.log("🎉 Session created successfully! Navigating to host dashboard...");
+      console.log(
+        "🎉 Session created successfully! Navigating to host dashboard..."
+      );
 
-      // Navigate to host dashboard with session code
       router.push(`/host/${sessionData.sessionCode}`);
-      
     } catch (err) {
       console.error("❌ Failed to create session:", err);
-      const errorMessage = err instanceof Error ? err.message : "Failed to create quiz session. Please try again.";
+      const errorMessage =
+        err instanceof Error
+          ? err.message
+          : "Failed to create quiz session. Please try again.";
       setError(errorMessage);
       setIsCreatingSession(false);
-      
-      // If it's an auth error, suggest re-login
-      if (errorMessage.includes('User not found') || errorMessage.includes('authentication') || errorMessage.includes('token')) {
+
+      if (
+        errorMessage.includes("User not found") ||
+        errorMessage.includes("authentication") ||
+        errorMessage.includes("token")
+      ) {
         setTimeout(() => {
-          if (confirm('There seems to be an authentication issue. Would you like to login again?')) {
-            router.push('/login');
+          if (
+            confirm(
+              "There seems to be an authentication issue. Would you like to login again?"
+            )
+          ) {
+            router.push("/login");
           }
         }, 1000);
       }
@@ -261,10 +282,17 @@ export default function StartPage() {
   if (loading || !authChecked) {
     return (
       <Stage>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-indigo-600 mx-auto mb-4"></div>
-            <p className="text-slate-600">{!authChecked ? "Checking authentication..." : "Loading quiz..."}</p>
+        <div className="flex items-center justify-center min-h-[500px]">
+          <div className="text-center space-y-4">
+            <div className="relative w-16 h-16 mx-auto">
+              <div className="absolute inset-0 rounded-full border-4 border-indigo-200"></div>
+              <div className="absolute inset-0 rounded-full border-4 border-indigo-600 border-t-transparent animate-spin"></div>
+            </div>
+            <p className="text-slate-600 font-medium">
+              {!authChecked
+                ? "Checking authentication..."
+                : "Loading quiz details..."}
+            </p>
           </div>
         </div>
       </Stage>
@@ -274,19 +302,37 @@ export default function StartPage() {
   if (error && !quizData) {
     return (
       <Stage>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center">
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              {error || "Quiz Not Found"}
-            </h1>
-            <p className="text-slate-600 mb-4">
-              The quiz you&apos;re looking for doesn&apos;t exist or couldn&apos;t be loaded.
-            </p>
-            <Button 
-              onClick={handleGoBack}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        <div className="flex items-center justify-center min-h-[500px]">
+          <div className="text-center max-w-md space-y-6">
+            <div className="w-20 h-20 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-10 h-10 text-red-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                />
+              </svg>
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                {error || "Quiz Not Found"}
+              </h1>
+              <p className="text-slate-600">
+                The quiz you&apos;re looking for doesn&apos;t exist or
+                couldn&apos;t be loaded.
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push("/")}
+              className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium shadow-sm"
             >
-              Go Back
+              Back to Home
             </Button>
           </div>
         </div>
@@ -294,127 +340,229 @@ export default function StartPage() {
     );
   }
 
-  // Show login prompt if not authenticated
   if (!isAuthenticated) {
     return (
       <Stage>
-        <div className="flex items-center justify-center min-h-[400px]">
-          <div className="text-center max-w-md">
-            <div className="text-6xl mb-4">🔒</div>
-            <h1 className="text-2xl font-bold text-slate-800 mb-2">
-              Login Required
-            </h1>
-            <p className="text-slate-600 mb-6">
-              You need to be logged in to create a quiz session.
-            </p>
-            <div className="flex gap-3 justify-center">
-              <Button 
-                onClick={() => router.push('/login')}
-                className="px-6 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+        <div className="flex items-center justify-center min-h-[500px]">
+          <div className="text-center max-w-md space-y-6">
+            <div className="w-20 h-20 mx-auto bg-indigo-100 rounded-full flex items-center justify-center">
+              <svg
+                className="w-10 h-10 text-indigo-600"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
               >
-                Login
-              </Button>
-              <Button 
-                onClick={handleGoBack}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
-              >
-                Go Back
-              </Button>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"
+                />
+              </svg>
             </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 mb-2">
+                Login Required
+              </h1>
+              <p className="text-slate-600">
+                You need to be logged in to create and host a quiz session.
+              </p>
+            </div>
+            <Button
+              onClick={() => router.push("/login")}
+              className="px-6 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-all duration-200 font-medium shadow-sm"
+            >
+              Login to Continue
+            </Button>
           </div>
         </div>
       </Stage>
     );
   }
 
-  // Determine difficulty based on number of questions
   const getDifficulty = (questionCount: number) => {
-    if (questionCount <= 10) return { label: "Easy", color: "bg-green-500" };
-    if (questionCount <= 20) return { label: "Medium", color: "bg-yellow-500" };
-    return { label: "Hard", color: "bg-red-500" };
+    if (questionCount <= 10)
+      return { label: "Easy", color: "bg-emerald-500", icon: "○" };
+    if (questionCount <= 20)
+      return { label: "Medium", color: "bg-amber-500", icon: "◐" };
+    return { label: "Hard", color: "bg-rose-500", icon: "●" };
   };
 
   const difficulty = getDifficulty(quizData?.questions?.length || 0);
+  const estimatedTime = Math.ceil((quizData?.questions?.length || 0) * 1.5);
 
   return (
     <Stage>
-      <div className="grid gap-8">
-        {/* Top Section */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-stretch">
-          <Card className="relative overflow-hidden rounded-xl group">
-            {/* Dynamic thumbnail from API */}
-            {quizData?.thumbnailUrl ? (
-              <Image
-                src={quizData.thumbnailUrl}
-                alt={quizData.title}
-                width={600}
-                height={400}
-                className="w-full h-full object-cover rounded-xl transition-transform duration-500 group-hover:scale-105"
-                priority
-              />
-            ) : (
-              <div className="w-full h-full bg-gradient-to-br from-blue-400 via-indigo-500 to-purple-600 rounded-xl transition-transform duration-500 group-hover:scale-105 flex items-center justify-center">
-                <div className="text-white text-6xl font-bold opacity-20">
-                  {quizData?.title?.charAt(0) || 'Q'}
+      <div className="space-y-8">
+        <button
+          onClick={handleGoBack}
+          className="flex items-center gap-2 text-white hover:text-gray-100 transition-colors duration-200 group"
+        >
+          <ArrowLeft className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-200" />
+          <span>Back</span>
+        </button>
+
+        {/* Hero Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          {/* Image Card */}
+          <div className="lg:col-span-2">
+            <Card className="relative overflow-hidden rounded-2xl shadow-xl group h-full min-h-[320px]">
+              {quizData?.thumbnailUrl ? (
+                <div className="relative w-full h-full">
+                  <Image
+                    src={quizData.thumbnailUrl}
+                    alt={quizData.title}
+                    width={600}
+                    height={400}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                    priority
+                  />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                </div>
+              ) : (
+                <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 transition-transform duration-700 group-hover:scale-110 flex items-center justify-center relative overflow-hidden">
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_120%,rgba(255,255,255,0.1),transparent)]"></div>
+                  <div className="text-white text-8xl font-bold opacity-30 relative z-10">
+                    {quizData?.title?.charAt(0) || "Q"}
+                  </div>
+                </div>
+              )}
+            </Card>
+          </div>
+
+          {/* Info Card */}
+          <div className="lg:col-span-3">
+            <Card className="p-8 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl shadow-xl h-full flex flex-col">
+              {/* Category Badge */}
+              {quizData?.category && (
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-200 bg-white/10 px-3 py-1.5 rounded-full w-fit mb-4 backdrop-blur-sm">
+                  <span className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></span>
+                  {quizData.category}
+                </div>
+              )}
+
+              {/* Title and Description */}
+              <div className="flex-1 space-y-4">
+                <h1 className="text-white font-bold text-3xl lg:text-4xl leading-tight">
+                  {quizData?.title}
+                </h1>
+                <p className="text-indigo-100 text-base leading-relaxed max-w-2xl">
+                  {quizData?.description}
+                </p>
+
+                {/* Stats */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
+                      />
+                    </svg>
+                    <span className="font-semibold">
+                      {quizData?.questions?.length || 0}
+                    </span>
+                    <span className="text-indigo-200">Questions</span>
+                  </div>
+
+                  <div
+                    className={`flex items-center gap-2 ${difficulty.color} text-white px-4 py-2 rounded-lg font-semibold shadow-lg`}
+                  >
+                    <span>{difficulty.icon}</span>
+                    {difficulty.label}
+                  </div>
+
+                  <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
+                    </svg>
+                    <span className="text-indigo-200">
+                      ~{estimatedTime} min
+                    </span>
+                  </div>
                 </div>
               </div>
-            )}
-          </Card>
 
-          <Card className="p-6 md:p-8 flex flex-col justify-center bg-[#5a6fb6]/40 rounded-xl">
-            <h2 className="text-white font-extrabold text-2xl md:text-3xl">
-              {quizData?.title}
-            </h2>
-            <p className="mt-2 text-white/80 text-sm leading-relaxed">
-              {quizData?.description}
-            </p>
-
-            <div className="flex items-center gap-3 mt-3">
-              <span className="bg-white/10 text-white text-xs px-3 py-1 rounded-full">
-                {quizData?.questions?.length || 0} questions
-              </span>
-              <span className={`${difficulty.color} text-white text-xs px-3 py-1 rounded-full`}>
-                {difficulty.label}
-              </span>
-            </div>
-
-            {/* Error Message */}
-            {error && quizData && (
-              <div className="mt-4 p-4 bg-red-500/20 border border-red-500/50 rounded-lg">
-                <p className="text-red-200 text-sm font-medium mb-1">⚠️ Error</p>
-                <p className="text-red-100 text-sm">{error}</p>
-              </div>
-            )}
-
-            {/* Start Button */}
-            <div className="mt-7">
-              <div className="text-sm text-white/85 mb-2">Ready to start?</div>
-              <div className="flex items-center gap-3">
-                <div className="rounded-full border border-amber-300 bg-black/30 px-7 py-2 text-white/85">
-                  {quizData?.title || "General"}
+              {/* Error Alert */}
+              {error && quizData && (
+                <div className="mt-4 p-4 bg-red-500/20 border border-red-400/50 rounded-xl backdrop-blur-sm">
+                  <div className="flex items-start gap-3">
+                    <svg
+                      className="w-5 h-5 text-red-200 flex-shrink-0 mt-0.5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                      />
+                    </svg>
+                    <div className="flex-1">
+                      <p className="text-red-200 font-semibold text-sm mb-1">
+                        Unable to Start Quiz
+                      </p>
+                      <p className="text-red-100 text-sm">{error}</p>
+                    </div>
+                  </div>
                 </div>
-                <Button 
-                  size="sm" 
-                  className="h-10 rounded-full px-6 bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
-                  onClick={handleStartQuiz}
-                  disabled={isCreatingSession}
-                >
-                  {isCreatingSession ? (
-                    <>
-                      <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2"></div>
-                      Creating...
-                    </>
-                  ) : (
-                    "Start Quiz"
-                  )}
-                </Button>
+              )}
+
+              {/* Action Section */}
+              <div className="mt-6 pt-6 border-t border-white/20">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-indigo-200 text-md font-medium mb-1">
+                      Ready to begin?
+                    </p>
+                    <p className="text-white/90 text-sm">
+                      Start your quiz session and invite participants
+                    </p>
+                  </div>
+                  <Button
+                    size="lg"
+                    onClick={handleStartQuiz}
+                    disabled={isCreatingSession}
+                    className="flex items-center rounded-2xl gap-2 btn-text btn-secondary transition group"
+                  >
+                    {isCreatingSession ? (
+                      <span>Creating Session...</span>
+                    ) : (
+                      <>
+                        <span className="text-md">Start Quiz</span>
+                        <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" />
+                      </>
+                    )}
+                  </Button>
+                </div>
               </div>
-            </div>
-          </Card>
+            </Card>
+          </div>
         </div>
 
         {/* Bottom Grid */}
-        <ChallengeGrid/>
+        <div className="pt-4">
+          <ChallengeGrid />
+        </div>
       </div>
     </Stage>
   );

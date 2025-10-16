@@ -126,7 +126,7 @@ export function OrganizerDashboard({ sessionCode, hostId }: OrganizerDashboardPr
               <p className="text-lg">{currentQuestion.text}</p>
               {currentQuestion.imageUrl && (
                 <img
-                  src={currentQuestion.imageUrl || "/placeholder.svg"}
+                  src={currentQuestion.imageUrl || ""}
                   alt="Question"
                   className="max-w-md rounded-lg"
                 />

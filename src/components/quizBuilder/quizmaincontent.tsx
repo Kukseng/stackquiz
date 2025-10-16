@@ -1,21 +1,32 @@
 "use client";
 
-import { Question } from "./hooks/useQuizbuilder";
 import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6";
 import { IoTriangle } from "react-icons/io5";
 import { ImCheckmark2 } from "react-icons/im";
 
+interface Option {
+  id: string;
+  text: string;
+  correct: boolean;
+  color?: string;
+  icon?: string;
+}
+
+interface Question {
+  id: string;
+  type: string;
+  question: string;
+  options: Option[];
+  isNew?: boolean;
+}
+
 interface QuizMainContentProps {
   questions: Question[];
-  activeQuestionId: number | null;
-  onUpdateQuestionText: (questionId: number, text: string) => void;
-  onUpdateOptionText: (
-    questionId: number,
-    optionId: number,
-    text: string
-  ) => void;
-  onToggleCorrectAnswer: (questionId: number, optionId: number) => void;
-  onDeleteQuestion: (id: number) => void;
+  activeQuestionId: string | null;
+  onUpdateQuestionText: (questionId: string, text: string) => void;
+  onUpdateOptionText: (questionId: string, optionId: string, text: string) => void;
+  onToggleCorrectAnswer: (questionId: string, optionId: string) => void;
+  onDeleteQuestion: (id: string) => void;
   onDuplicateQuestion: (question: Question) => void;
   theme: string;
 }
@@ -55,9 +66,11 @@ export default function QuizMainContent({
 }: QuizMainContentProps) {
   const activeQuestion = questions?.find((q) => q.id === activeQuestionId);
 
+  console.log("QuizMainContent - activeQuestionId:", activeQuestionId);
+  console.log("QuizMainContent - activeQuestion:", activeQuestion);
+
   return (
-    <div className="flex-1 items-start  flex
-     justify-center p-8 ">
+    <div className="flex-1 items-start flex justify-center p-8">
       <div
         className="w-full max-w-4xl rounded-2xl p-6 min-h-[400px] flex flex-col justify-center shadow-xl bg-cover bg-center transition-all"
         style={{ backgroundImage: `url(${themeCardImages[theme]})` }}
@@ -71,17 +84,15 @@ export default function QuizMainContent({
           </div>
         ) : (
           <>
-            {/* Question Input */}
             <input
               type="text"
               value={activeQuestion.question}
               onChange={(e) =>
-                onUpdateQuestionText(Number(activeQuestion.id), e.target.value)
+                onUpdateQuestionText(activeQuestion.id, e.target.value)
               }
               placeholder="Enter your question..."
-              className="w-full text-center text-xl font-semibold p-3 mb-6 rounded border-2 text-gray-900 bg-white border-yellow-400  placeholder-black/50 focus:outline-none"
+              className="w-full text-center text-xl font-semibold p-3 mb-6 rounded border-2 text-gray-900 bg-white border-yellow-400 placeholder-black/50 focus:outline-none"
             />
-            {/* Options */}
             <div className="space-y-4">
               {activeQuestion.options.map((option) => (
                 <div
@@ -97,8 +108,8 @@ export default function QuizMainContent({
                       value={option.text}
                       onChange={(e) =>
                         onUpdateOptionText(
-                          Number(activeQuestion.id),
-                          Number(option.id),
+                          activeQuestion.id,
+                          option.id,
                           e.target.value
                         )
                       }
@@ -110,7 +121,7 @@ export default function QuizMainContent({
                       option.correct ? "bg-green-500" : "bg-white/30"
                     } cursor-pointer`}
                     onClick={() =>
-                      onToggleCorrectAnswer(Number(activeQuestion.id), Number(option.id))
+                      onToggleCorrectAnswer(activeQuestion.id, option.id)
                     }
                   >
                     {option.correct && (
@@ -121,10 +132,9 @@ export default function QuizMainContent({
               ))}
             </div>
 
-            {/* Action Buttons */}
             <div className="flex justify-end space-x-4 mt-6">
               <button
-                onClick={() => onDeleteQuestion(Number(activeQuestion.id))}
+                onClick={() => onDeleteQuestion(activeQuestion.id)}
                 className="bg-red-500 hover:bg-red-600 text-white px-6 py-2 rounded-lg font-medium shadow-md"
               >
                 Delete

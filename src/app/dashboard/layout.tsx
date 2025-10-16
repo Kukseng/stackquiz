@@ -114,7 +114,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   };
 
   const handleLogout = () => {
-    router.push("/logout");
+    router.push("/dashboard/logout");
   };
 
   const Sidebar = ({

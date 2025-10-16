@@ -40,18 +40,37 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${dmSans.variable} antialiased`}>
       <body className="cosmic-bg overflow-hidden">
-        <QueryClientProvider client={queryClient}>
-          <Provider store={store}>
-            <SessionProvider 
-              refetchInterval={300} // Refetch session every 5 minutes
-              refetchOnWindowFocus={true} // Refetch when window regains focus
-            >
-              <LanguageProvider>
-                <LayoutWrapper>{children}</LayoutWrapper>
-              </LanguageProvider>
-            </SessionProvider>
-          </Provider>
-        </QueryClientProvider>
+        {/* Prevent React DevTools semver runtime error when an empty version string is registered.
+            Some devtools shims register a renderer with an empty version which breaks
+            a semver check in the devtools bundle. We sanitize entries early. */}
+        <script
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const hook = window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
+                if (hook && typeof hook.registerRendererInterface === 'function') {
+                  const original = hook.registerRendererInterface;
+                  hook.registerRendererInterface = function (id, renderer) {
+                    try {
+                      if (renderer && typeof renderer.version === 'string' && renderer.version.trim() === '') {
+                        renderer = { ...renderer, version: '0.0.0' };
+                      }
+                    } catch (e) {}
+                    return original.call(this, id, renderer);
+                  };
+                }
+              } catch (e) {}
+            `,
+          }}
+        />
+        <Provider store={store}>
+          <SessionProvider>
+            <LanguageProvider>
+              <LayoutWrapper>{children}</LayoutWrapper>
+            </LanguageProvider>
+          </SessionProvider>
+        </Provider>
       </body>
     </html>
   );

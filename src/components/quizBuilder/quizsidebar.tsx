@@ -1,5 +1,6 @@
 "use client"
 import Image from "next/image"
+
 interface Option {
   id: number
   text: string
@@ -121,20 +122,36 @@ export function QuizSidebar({ questions, activeQuestionId, onQuestionSelect, onA
               </div>
             </div>
 
-            {/* Question Info Footer */}
-            <div className="bg-white p-2.5 border-t border-gray-100">
-              <div className="flex items-center justify-between text-xs text-gray-500">
+            {/* Answer Options Preview */}
+            <div className="bg-white p-3 border-t border-gray-100">
+              <div className="grid grid-cols-2 gap-2">
+                {question.options?.slice(0, 4).map((option, optIndex) => (
+                  <div
+                    key={option.id}
+                    className={`text-xs py-2 px-2.5 rounded-lg font-medium text-center truncate transition-all ${
+                      option.correct
+                        ? "bg-green-100 text-green-700 ring-1 ring-green-300"
+                        : option.color
+                        ? `text-white`
+                        : "bg-gray-100 text-gray-600"
+                    }`}
+                    style={option.color && !option.correct ? { backgroundColor: option.color } : {}}
+                  >
+                    {option.text || `Option ${optIndex + 1}`}
+                  </div>
+                ))}
+              </div>
+              
+              {/* Question Info Footer */}
+              <div className="flex items-center justify-between text-xs text-gray-500 mt-2.5 pt-2.5 border-t border-gray-100">
                 <span className="flex items-center gap-1">
                   <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                   </svg>
                   {question.timeLimit || 20}s
                 </span>
-                <span className="flex items-center gap-1">
-                  <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  {question.options?.length || 0} options
+                <span className="text-gray-400">
+                  Question {index + 1}/{questions.length}
                 </span>
               </div>
             </div>

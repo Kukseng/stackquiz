@@ -228,7 +228,11 @@
     "playStep2Title": "Start Playing",
     "playStep2Desc": "Enter your name and begin playing."
   }
-
+,
+  "offline":{
+    "noInter":"No Internet Connection",
+    "please":"Check your connection and try again."
+  }
 
 }
 

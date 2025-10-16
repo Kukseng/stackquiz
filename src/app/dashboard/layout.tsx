@@ -16,6 +16,7 @@ import {
   Settings,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -26,9 +27,49 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
+
+  const API = process.env.NEXT_PUBLIC_API_URL;
+
+  // Fetch user profile to get avatarUrl
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.apiAccessToken) return;
+      
+      try {
+        const res = await fetch(`${API}/users/me`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session.apiAccessToken}`,
+            Accept: "*/*",
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+    };
+
+    if (session?.apiAccessToken) {
+      fetchProfile();
+    }
+  }, [session?.apiAccessToken, API]);
+
+  // Get avatar URL with priority: profile.avatarUrl -> session -> DiceBear -> fallback
+  const avatarUrl = 
+    profile?.avatarUrl || 
+    session?.user?.image ||
+    (session?.user?.name 
+      ? `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(session.user.name)}`
+      : "/avatar2.svg");
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -267,7 +308,10 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
               {/* Desktop-only: Avatar Dropdown & Bell */}
               <div className="hidden lg:flex items-center gap-4">
-                <button className="relative p-2 rounded-full hover:bg-gray-100 transition-colors">
+                <button 
+                  onClick={() => router.push("/dashboard/notifications")}
+                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+                >
                   <Bell className="w-6 h-6 text-gray-600" />
                   <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
                 </button>
@@ -275,9 +319,17 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <div className="relative" ref={dropdownRef}>
                   <div
                     onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="w-10 h-10 bg-yellow-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-yellow-600 transition"
+                    className="flex items-center hover:scale-105 cursor-pointer"
                   >
-                    <User className="text-white w-5 h-5" />
+                    <Image
+                      src={avatarUrl}
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-yellow-400 shadow-md"
+                      unoptimized
+                    />
+
                   </div>
 
                   {dropdownOpen && (

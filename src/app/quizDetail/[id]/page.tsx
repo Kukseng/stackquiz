@@ -1,4 +1,3 @@
-
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
@@ -17,6 +16,9 @@ import {
   EyeOff,
   ChevronDown,
   Trophy,
+  Check,
+  AlertCircle,
+  Info,
 } from "lucide-react";
 
 interface QuizOption {
@@ -44,6 +46,113 @@ interface QuizData {
 }
 
 const OPTION_COLORS = ['bg-red-500', 'bg-blue-500', 'bg-orange-500', 'bg-green-500'] as const;
+
+// ============================================
+// TOAST COMPONENT AND HOOK
+// ============================================
+type ToastType = 'success' | 'error' | 'warning' | 'info';
+
+interface ToastProps {
+  message: string;
+  type?: ToastType;
+  duration?: number;
+  onClose?: () => void;
+}
+
+const Toast: React.FC<ToastProps> = ({ 
+  message, 
+  type = 'info', 
+  duration = 3000,
+  onClose 
+}) => {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsVisible(false);
+      setTimeout(() => onClose?.(), 300);
+    }, duration);
+
+    return () => clearTimeout(timer);
+  }, [duration, onClose]);
+
+  const handleClose = () => {
+    setIsVisible(false);
+    setTimeout(() => onClose?.(), 300);
+  };
+
+  const typeConfig = {
+    success: {
+      bg: 'bg-green-100',
+      text: 'text-green-500',
+      darkBg: 'dark:bg-green-800',
+      darkText: 'dark:text-green-200',
+      icon: Check
+    },
+    error: {
+      bg: 'bg-red-100',
+      text: 'text-red-500',
+      darkBg: 'dark:bg-red-800',
+      darkText: 'dark:text-red-200',
+      icon: X
+    },
+    warning: {
+      bg: 'bg-orange-100',
+      text: 'text-orange-500',
+      darkBg: 'dark:bg-orange-700',
+      darkText: 'dark:text-orange-200',
+      icon: AlertCircle
+    },
+    info: {
+      bg: 'bg-blue-100',
+      text: 'text-blue-500',
+      darkBg: 'dark:bg-blue-800',
+      darkText: 'dark:text-blue-200',
+      icon: Info
+    }
+  };
+
+  const config = typeConfig[type];
+  const Icon = config.icon;
+
+  return (
+    <div
+      className={`flex items-center w-full max-w-xs p-4 text-gray-500 bg-white rounded-lg shadow dark:text-gray-400 dark:bg-gray-800 transition-all duration-300 ${
+        isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2'
+      }`}
+      role="alert"
+    >
+      <div className={`inline-flex items-center justify-center flex-shrink-0 w-8 h-8 rounded-lg ${config.bg} ${config.text} ${config.darkBg} ${config.darkText}`}>
+        <Icon className="w-5 h-5" />
+      </div>
+      <div className="ml-3 text-sm font-normal">{message}</div>
+      <button
+        type="button"
+        className="ml-auto -mx-1.5 -my-1.5 bg-white text-gray-400 hover:text-gray-900 rounded-lg focus:ring-2 focus:ring-gray-300 p-1.5 hover:bg-gray-100 inline-flex items-center justify-center h-8 w-8 dark:text-gray-500 dark:hover:text-white dark:bg-gray-800 dark:hover:bg-gray-700"
+        onClick={handleClose}
+        aria-label="Close"
+      >
+        <X className="w-4 h-4" />
+      </button>
+    </div>
+  );
+};
+
+// Toast Manager Hook
+const useToast = () => {
+  const [toasts, setToasts] = useState<Array<{ id: string; message: string; type: ToastType }>>([]);
+
+  const showToast = useCallback((message: string, type: ToastType = 'info') => {
+    const id = Date.now().toString();
+    setToasts(prev => [...prev, { id, message, type }]);
+  }, []);
+
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id));
+  }, []);
+
+  return { toasts, showToast, removeToast };
+};
 
 const LoadingSpinner: React.FC = () => (
   <div className="min-h-screen bg-gradient-to-br from-slate-50 to-indigo-50 flex items-center justify-center">
@@ -146,14 +255,17 @@ const QuizDetailPage: React.FC = () => {
   const quizId = params?.id as string;
   const { data: session } = useSession();
 
-  const { data: quizData, isLoading, error, refetch } = useGetQuizByIdQuery(quizId, {
+  const { data: quizData, isLoading, error } = useGetQuizByIdQuery(quizId, {
     skip: !quizId,
   });
 
-  const [toggleFavorite] = useToggleFavoriteMutation();
+  const [toggleFavorite, { isLoading: isTogglingFavorite }] = useToggleFavoriteMutation();
 
   const [showAnswers, setShowAnswers] = useState(false);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<string, string>>({});
+  
+  // Toast hook
+  const { toasts, showToast, removeToast } = useToast();
 
   const displayName = session?.user?.name
     ? session.user.name.split(" ")[0]
@@ -177,16 +289,51 @@ const QuizDetailPage: React.FC = () => {
   }, []);
 
   const handleToggleFavorite = useCallback(async () => {
-    if (!quizData) return;
+    if (!quizData || isTogglingFavorite) return;
+    
+    if (!session) {
+      showToast('Please log in to favorite quizzes', 'warning');
+      return;
+    }
+    
     try {
-      await toggleFavorite({ 
+      console.log('Toggling favorite for quiz:', quizData.id);
+      console.log('Current favorite status:', quizData.isFavorite);
+      console.log('Action:', quizData.isFavorite ? 'REMOVE' : 'ADD');
+      
+      const result = await toggleFavorite({ 
         quizId: quizData.id, 
         isFavorite: quizData.isFavorite || false 
       }).unwrap();
-    } catch (err) {
-      console.error('Error toggling favorite:', err);
+      
+      console.log('Success:', result);
+      
+      showToast(
+        quizData.isFavorite 
+          ? 'Removed from favorites' 
+          : 'Added to favorites',
+        'success'
+      );
+    } catch (err: any) {
+      console.error('❌ Error details:', {
+        status: err?.status,
+        data: err?.data,
+        error: err?.error,
+        message: err?.message,
+        fullError: err
+      });
+      
+      if (err?.status === 401 || err?.originalStatus === 401) {
+        showToast('Please log in to favorite quizzes', 'error');
+      } else if (err?.status === 404) {
+        showToast('Quiz not found', 'error');
+      } else if (err?.status === 403) {
+        showToast('You do not have permission to favorite this quiz', 'error');
+      } else {
+        showToast('Failed to update favorite status. Please try again.', 'error');
+      }
     }
-  }, [quizData, toggleFavorite]);
+  }, [quizData, toggleFavorite, isTogglingFavorite, session, showToast]);
 
   const toggleShowAnswers = useCallback(() => setShowAnswers(prev => !prev), []);
   const handleGoBack = useCallback(() => router.back(), [router]);
@@ -234,14 +381,18 @@ const QuizDetailPage: React.FC = () => {
 
                   <button
                     onClick={handleToggleFavorite}
+                    disabled={isTogglingFavorite}
                     className={`flex items-center gap-1 px-2 py-1 text-xs sm:text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded ${
                       quizData.isFavorite ? 'text-red-500' : 'text-slate-600 hover:text-red-500'
-                    }`}
+                    } ${isTogglingFavorite ? 'opacity-50 cursor-not-allowed' : ''}`}
                     aria-label={quizData.isFavorite ? "Remove from favorites" : "Add to favorites"}
                   >
-                    <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${quizData.isFavorite ? 'fill-current' : ''}`} />
+                    <Heart className={`w-3 h-3 sm:w-4 sm:h-4 ${quizData.isFavorite ? 'fill-current' : ''} ${isTogglingFavorite ? 'animate-pulse' : ''}`} />
                     <span className="hidden sm:inline">
-                      {quizData.isFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                      {isTogglingFavorite 
+                        ? 'Updating...' 
+                        : (quizData.isFavorite ? 'Favorited' : 'Favorite')
+                      }
                     </span>
                   </button>
                 </div>
@@ -372,6 +523,18 @@ const QuizDetailPage: React.FC = () => {
             />
           </div>
         </section>
+      </div>
+
+      {/* Toast Container */}
+      <div className="fixed top-5 right-5 z-50 flex flex-col gap-2">
+        {toasts.map(toast => (
+          <Toast
+            key={toast.id}
+            message={toast.message}
+            type={toast.type}
+            onClose={() => removeToast(toast.id)}
+          />
+        ))}
       </div>
     </div>
   );

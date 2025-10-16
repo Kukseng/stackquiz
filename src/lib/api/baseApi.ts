@@ -1,83 +1,80 @@
-// src/lib/api/baseApi.ts
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type {
+  BaseQueryFn,
+  FetchArgs,
+  FetchBaseQueryError,
+} from "@reduxjs/toolkit/query";
 import { getSession } from "next-auth/react";
 
-const baseQuery = fetchBaseQuery({
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || "https://stackquiz-api.stackquiz.me/api/v1",
-  prepareHeaders: async (headers) => {
-    const session = await getSession();
-    const token = (session as any)?.apiAccessToken;
-    
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
-    
-    return headers;
-  },
+const raw = fetchBaseQuery({
+  baseUrl: process.env.NEXT_PUBLIC_API_URL,
 });
 
-// Custom base query with error handling and logging
-const baseQueryWithReauth = async (args: any, api: any, extraOptions: any) => {
-  // Log request details in development
-  if (process.env.NODE_ENV === "development") {
-    console.log("[API Request]", {
-      endpoint: typeof args === "string" ? args : args.url,
-      method: typeof args === "object" ? args.method : "GET",
-    });
+const withAuth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError
+> = async (args, api, extra) => {
+  const session = await getSession();
+  const token = (session as any)?.apiAccessToken;
+
+  console.log('🔐 Auth Debug:', {
+    hasSession: !!session,
+    hasToken: !!token,
+    tokenPreview: token ? `${token.substring(0, 20)}...` : 'NO TOKEN'
+  });
+
+  const req =
+    typeof args === "string"
+      ? { url: args, headers: {} as Record<string, string> }
+      : {
+          ...args,
+          headers: { ...((args.headers as Record<string, string>) ?? {}) },
+        };
+
+  if (token) {
+    (req.headers as any)["Authorization"] = `Bearer ${token}`;
+    console.log('✅ Authorization header added');
+  } else {
+    console.warn('⚠️ No token available - request may fail');
+  }
+  
+  if (!(req.headers as any)["Content-Type"] && (req as any).body) {
+    (req.headers as any)["Content-Type"] = "application/json";
   }
 
-  const result = await baseQuery(args, api, extraOptions);
+  console.log('📤 Request:', {
+    url: typeof args === "string" ? args : args.url,
+    method: typeof args === "string" ? 'GET' : args.method || 'GET',
+    hasAuth: !!(req.headers as any)["Authorization"]
+  });
 
-  // Log response in development
-  if (process.env.NODE_ENV === "development") {
-    if (result.error) {
-      console.error("[API Error]", result.error);
-    } else {
-      console.log("[API Success]", typeof args === "string" ? args : args.url);
-    }
-  }
-
-  // Handle 401 Unauthorized
-  if (result.error && result.error.status === 401) {
-    console.warn("Unauthorized request - session may have expired");
-    
-    // Optionally redirect to login or refresh token
-    if (typeof window !== "undefined") {
-      const currentPath = window.location.pathname;
-      if (!currentPath.includes("/login")) {
-        console.log("Redirecting to login...");
-        // window.location.href = "/login";
-      }
-    }
-  }
-
-  // Handle network errors
-  if (result.error && result.error.status === "FETCH_ERROR") {
-    console.error("Network error - check API endpoint and internet connection");
+  const result = await raw(req, api, extra);
+  
+  if (result.error) {
+    console.error('📥 Response Error:', result.error);
+  } else {
+    console.log('📥 Response Success');
   }
 
   return result;
 };
 
 export const baseApi = createApi({
-  reducerPath: "api",
-  baseQuery: baseQueryWithReauth,
+  reducerPath: "baseApi",
+  baseQuery: withAuth,
   tagTypes: [
-    "Quiz",
-    "UserQuizzes",
+    "Auth",
+    "User",
     "Category",
+    "Quiz",
     "Question",
     "Option",
-    "User",
-    "Auth",
-    "Leaderboard",
-    "Session",
     "Participant",
     "ParticipantAnswer",
-    "Statistics",
-    "Report",
+    "Leaderboard",
+    "Session",
   ],
   endpoints: () => ({}),
 });
-
-export default baseApi;

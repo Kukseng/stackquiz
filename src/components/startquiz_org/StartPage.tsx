@@ -8,7 +8,7 @@ import Card from "./Card";
 import { Button } from "@/components/ui/button";
 import ChallengeGrid from "../GridCardComponent";
 import { getSession } from "next-auth/react";
-import { ArrowLeft, ArrowRight } from "lucide-react";
+import { ArrowLeft, ArrowRight,ClipboardList, Clock, AlertTriangle } from "lucide-react";
 
 // Types
 interface QuizData {
@@ -393,10 +393,10 @@ export default function StartPage() {
 
   return (
     <Stage>
-      <div className="space-y-8">
+      <div className="space-y-8 px-4 md:px-8 lg:px-16 py-8 max-w-7xl mx-auto">
         <button
           onClick={handleGoBack}
-          className="flex items-center gap-2 text-white hover:text-gray-100 transition-colors duration-200 group"
+          className="flex items-center btn-secondary btn-text rounded-xl text-lg gap-2 px-3 py-1 transition-colors duration-200 group"
         >
           <ArrowLeft className="w-5 h-5 transform group-hover:-translate-x-1 transition-transform duration-200" />
           <span>Back</span>
@@ -406,7 +406,7 @@ export default function StartPage() {
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
           {/* Image Card */}
           <div className="lg:col-span-2">
-            <Card className="relative overflow-hidden rounded-2xl shadow-xl group h-full min-h-[320px]">
+            <Card className="relative overflow-hidden rounded-xl shadow-xl group h-full min-h-[320px]">
               {quizData?.thumbnailUrl ? (
                 <div className="relative w-full h-full">
                   <Image
@@ -417,7 +417,7 @@ export default function StartPage() {
                     className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
                     priority
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent"></div>
+                  <div className="absolute rounded-xl"></div>
                 </div>
               ) : (
                 <div className="w-full h-full bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 transition-transform duration-700 group-hover:scale-110 flex items-center justify-center relative overflow-hidden">
@@ -432,131 +432,88 @@ export default function StartPage() {
 
           {/* Info Card */}
           <div className="lg:col-span-3">
-            <Card className="p-8 bg-gradient-to-br from-indigo-600 via-indigo-700 to-purple-700 rounded-2xl shadow-xl h-full flex flex-col">
-              {/* Category Badge */}
-              {quizData?.category && (
-                <div className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-200 bg-white/10 px-3 py-1.5 rounded-full w-fit mb-4 backdrop-blur-sm">
-                  <span className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></span>
-                  {quizData.category}
-                </div>
-              )}
+  <Card className="p-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl h-full flex flex-col">
+    {/* Category Badge */}
+    {quizData?.category && (
+      <div className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-200 bg-white/10 px-3 py-1.5 rounded-full w-fit mb-4 backdrop-blur-sm">
+        <span className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></span>
+        {quizData.category}
+      </div>
+    )}
 
-              {/* Title and Description */}
-              <div className="flex-1 space-y-4">
-                <h1 className="text-white font-bold text-3xl lg:text-4xl leading-tight">
-                  {quizData?.title}
-                </h1>
-                <p className="text-indigo-100 text-base leading-relaxed max-w-2xl">
-                  {quizData?.description}
-                </p>
+    {/* Title and Description */}
+    <div className="flex-1 space-y-4">
+      <h1 className="text-white font-bold text-3xl lg:text-4xl leading-tight">
+        {quizData?.title}
+      </h1>
+      <p className="text-indigo-100 text-base leading-relaxed max-w-2xl">
+        {quizData?.description}
+      </p>
 
-                {/* Stats */}
-                <div className="flex flex-wrap items-center gap-3 pt-2">
-                  <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"
-                      />
-                    </svg>
-                    <span className="font-semibold">
-                      {quizData?.questions?.length || 0}
-                    </span>
-                    <span className="text-indigo-200">Questions</span>
-                  </div>
+      {/* Stats */}
+      <div className="flex flex-wrap items-center gap-3 pt-2">
+        <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
+          <ClipboardList className="w-5 h-5" />
+          <span className="font-semibold">
+            {quizData?.questions?.length || 0}
+          </span>
+          <span className="text-indigo-200">Questions</span>
+        </div>
 
-                  <div
-                    className={`flex items-center gap-2 ${difficulty.color} text-white px-4 py-2 rounded-lg font-semibold shadow-lg`}
-                  >
-                    <span>{difficulty.icon}</span>
-                    {difficulty.label}
-                  </div>
+        <div
+          className={`flex items-center gap-2 ${difficulty.color} text-white px-4 py-2 rounded-lg font-semibold shadow-lg`}
+        >
+          <span>{difficulty.icon}</span>
+          {difficulty.label}
+        </div>
+      </div>
+    </div>
 
-                  <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
-                    <svg
-                      className="w-5 h-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
-                      />
-                    </svg>
-                    <span className="text-indigo-200">
-                      ~{estimatedTime} min
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Error Alert */}
-              {error && quizData && (
-                <div className="mt-4 p-4 bg-red-500/20 border border-red-400/50 rounded-xl backdrop-blur-sm">
-                  <div className="flex items-start gap-3">
-                    <svg
-                      className="w-5 h-5 text-red-200 flex-shrink-0 mt-0.5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-                      />
-                    </svg>
-                    <div className="flex-1">
-                      <p className="text-red-200 font-semibold text-sm mb-1">
-                        Unable to Start Quiz
-                      </p>
-                      <p className="text-red-100 text-sm">{error}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
-
-              {/* Action Section */}
-              <div className="mt-6 pt-6 border-t border-white/20">
-                <div className="flex items-center justify-between gap-4">
-                  <div className="flex-1">
-                    <p className="text-indigo-200 text-md font-medium mb-1">
-                      Ready to begin?
-                    </p>
-                    <p className="text-white/90 text-sm">
-                      Start your quiz session and invite participants
-                    </p>
-                  </div>
-                  <Button
-                    size="lg"
-                    onClick={handleStartQuiz}
-                    disabled={isCreatingSession}
-                    className="flex items-center rounded-2xl gap-2 btn-text btn-secondary transition group"
-                  >
-                    {isCreatingSession ? (
-                      <span>Creating Session...</span>
-                    ) : (
-                      <>
-                        <span className="text-md">Start Quiz</span>
-                        <ArrowRight className="w-5 h-5 transform group-hover:translate-x-1 transition-transform duration-200" />
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </Card>
+    {/* Error Alert */}
+    {error && quizData && (
+      <div className="mt-4 p-4 bg-red-500/20 border border-red-400/50 rounded-xl backdrop-blur-sm">
+        <div className="flex items-start gap-3">
+          <AlertTriangle className="w-5 h-5 text-red-200 flex-shrink-0 mt-0.5" />
+          <div className="flex-1">
+            <p className="text-red-200 font-semibold text-sm mb-1">
+              Unable to Start Quiz
+            </p>
+            <p className="text-red-100 text-sm">{error}</p>
           </div>
+        </div>
+      </div>
+    )}
+
+    {/* Action Section */}
+    <div className="mt-6 pt-6 border-t border-white/20">
+      <div className="flex items-center justify-between gap-4">
+        <div className="flex-1">
+          <p className="text-indigo-200 text-lg font-medium mb-1">
+            Ready to begin?
+          </p>
+          <p className="text-white/90 text-md">
+            Start your quiz session and invite participants
+          </p>
+        </div>
+        <Button
+          size="lg"
+          onClick={handleStartQuiz}
+          disabled={isCreatingSession}
+          className="flex items-center rounded-xl gap-2 btn-text btn-secondary transition group"
+        >
+          {isCreatingSession ? (
+            <span>Creating Session...</span>
+          ) : (
+            <>
+              <span className="text-lg">Start Quiz</span>
+              <ArrowRight className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-200" />
+            </>
+          )}
+        </Button>
+      </div>
+    </div>
+  </Card>
+</div>
         </div>
 
         {/* Bottom Grid */}

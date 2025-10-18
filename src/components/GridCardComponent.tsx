@@ -155,9 +155,7 @@ export default function ChallengeGrid({
     .filter((c) =>
       searchTerm ? c.title.toLowerCase().includes(searchTerm.toLowerCase()) : true
     );
-    // Note: selectedCategory filtering would need category data from API
 
-  // Limit number of cards if `limit` prop is provided
   const displayedChallenges = limit ? filteredChallenges.slice(0, limit) : filteredChallenges;
 
   if (loading)
@@ -185,8 +183,8 @@ export default function ChallengeGrid({
     return <p className="text-center mt-10 text-gray-500">No quizzes available</p>;
 
   return (
-    <section className="max-w-7xl mx-auto mt-8 px-4 md:px-1 lg:px-3">
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 lg:gap-10">
+    <section className="max-w-5xl mx-auto  mt-8 px-4 md:px-1 lg:px-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-14">
         {displayedChallenges.map((challenge, i) => (
           <CardQuizComponent key={challenge.id} challenge={challenge} index={i} />
         ))}

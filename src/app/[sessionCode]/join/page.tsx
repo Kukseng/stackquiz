@@ -3069,7 +3069,7 @@
 "use client"
 import type React from "react"
 import { useEffect, useState, useCallback, useRef } from "react"
-import { useParams } from "next/navigation"
+import { useParams, useRouter } from "next/navigation"
 import axios from "axios"
 import { Client } from "@stomp/stompjs"
 import SockJS from "sockjs-client"
@@ -3321,205 +3321,6 @@ function QuestionTimer({
   )
 }
 
-// ===== ENHANCED ANSWER REVEAL COMPONENT =====
-function AnswerRevealPanel({
-  question,
-  selectedOptionId,
-  correctOptionId,
-  answerFeedback,
-  questionStats,
-  onContinue,
-}: {
-  question: any
-  selectedOptionId: string | null
-  correctOptionId: string | null
-  answerFeedback: AnswerFeedback | null
-  questionStats: QuestionStats | null
-  onContinue: () => void
-}) {
-  const [showStats, setShowStats] = useState(false)
-
-  useEffect(() => {
-    // Show stats after a delay
-    const timer = setTimeout(() => setShowStats(true), 1000)
-    return () => clearTimeout(timer)
-  }, [])
-
-  if (!question || !answerFeedback) return null
-
-  const isCorrect = answerFeedback.isCorrect
-  const pointsEarned = answerFeedback.pointsEarned
-
-  return (
-    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl w-full space-y-6">
-      {/* Result Header */}
-      <motion.div
-        initial={{ scale: 0.8, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        transition={{ delay: 0.2 }}
-        className="text-center"
-      >
-        <motion.div
-          initial={{ scale: 0 }}
-          animate={{ scale: 1, rotate: 360 }}
-          transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
-          className={`text-8xl mb-4 ${isCorrect ? "text-green-400" : "text-red-400"}`}
-        >
-          {isCorrect ? "✅" : "❌"}
-        </motion.div>
-
-        <motion.h1
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
-          className={`text-4xl font-bold mb-2 ${isCorrect ? "text-green-400" : "text-red-400"}`}
-        >
-          {isCorrect ? "Correct!" : "Incorrect"}
-        </motion.h1>
-
-        {/* Points Earned */}
-        <motion.div
-          initial={{ opacity: 0, scale: 0.5 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.9, type: "spring", stiffness: 300 }}
-          className="text-white text-2xl font-bold"
-        >
-          {pointsEarned > 0 ? `+${pointsEarned} points` : "0 points"}
-          {answerFeedback.timeBonus && answerFeedback.timeBonus > 0 && (
-            <span className="text-yellow-400 ml-2">⚡ +{answerFeedback.timeBonus} speed bonus</span>
-          )}
-        </motion.div>
-
-        {/* Streak Display */}
-        {answerFeedback.streak && answerFeedback.streak > 1 && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.5 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ delay: 1.1, type: "spring", stiffness: 300 }}
-            className="text-orange-400 text-xl font-bold mt-2"
-          >
-            🔥 {answerFeedback.streak} answer streak!
-          </motion.div>
-        )}
-
-        {/* Encouragement Message */}
-        {answerFeedback.encouragementMessage && (
-          <motion.p
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.3 }}
-            className="text-white text-lg mt-2"
-          >
-            {answerFeedback.encouragementMessage}
-          </motion.p>
-        )}
-      </motion.div>
-
-      {/* Answer Options with Results */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 1.5 }}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
-      >
-        {(question.options || []).map((option: any, index: number) => {
-          const isSelected = selectedOptionId === option.id
-          const isCorrect = correctOptionId === option.id
-          const participantCount = questionStats?.optionStats?.[option.id] || 0
-          const totalParticipants = questionStats?.totalParticipants || 1
-          const percentage = Math.round((participantCount / totalParticipants) * 100)
-
-          return (
-            <motion.div
-              key={option.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: 1.5 + index * 0.1 }}
-              className={`relative p-6 rounded-xl border-2 transition-all duration-500 ${
-                isCorrect
-                  ? "bg-green-100 border-green-500 text-green-800"
-                  : isSelected
-                    ? "bg-red-100 border-red-500 text-red-800"
-                    : "bg-gray-100 border-gray-300 text-gray-600"
-              }`}
-            >
-              <div className="flex items-center space-x-3 mb-2">
-                <span
-                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
-                    isCorrect
-                      ? "bg-green-500 text-white"
-                      : isSelected
-                        ? "bg-red-500 text-white"
-                        : "bg-gray-300 text-gray-600"
-                  }`}
-                >
-                  {String.fromCharCode(65 + index)}
-                </span>
-                <span className="font-semibold text-lg">{option.text || option.optionText}</span>
-                {isSelected && <span className="text-sm font-bold">← Your answer</span>}
-                {isCorrect && <span className="text-sm font-bold">✓ Correct</span>}
-              </div>
-
-              {/* Answer Statistics */}
-              {showStats && (
-                <motion.div
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  transition={{ delay: 2 + index * 0.1 }}
-                  className="mt-3"
-                >
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-sm">Participants who chose this:</span>
-                    <span className="text-sm font-bold">
-                      {participantCount} ({percentage}%)
-                    </span>
-                  </div>
-                  <div className="w-full bg-gray-200 rounded-full h-2">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      animate={{ width: `${percentage}%` }}
-                      transition={{ delay: 2.2 + index * 0.1, duration: 0.8 }}
-                      className={`h-2 rounded-full ${isCorrect ? "bg-green-500" : "bg-gray-400"}`}
-                    />
-                  </div>
-                </motion.div>
-              )}
-            </motion.div>
-          )
-        })}
-      </motion.div>
-
-      {/* Explanation */}
-      {answerFeedback.explanation && (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 2.5 }}
-          className="bg-blue-100 border border-blue-300 rounded-xl p-6 text-center"
-        >
-          <h3 className="text-lg font-bold text-blue-800 mb-2">💡 Explanation</h3>
-          <p className="text-blue-700">{answerFeedback.explanation}</p>
-        </motion.div>
-      )}
-
-      {/* Continue Button */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 3 }}
-        className="text-center"
-      >
-        <button
-          onClick={onContinue}
-          className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg"
-        >
-          Continue ➡️
-        </button>
-      </motion.div>
-    </motion.div>
-  )
-}
-
 // ===== ENHANCED WEBSOCKET HOOK =====
 function useParticipantWebSocket(
   quizCode: string,
@@ -3606,7 +3407,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Participant-specific question queue
           stomp.subscribe(`/user/queue/session/${quizCode}/question`, (msg) => {
             const message = safeJsonParse(msg.body)
             if (message) {
@@ -3621,16 +3421,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Handle TIME_UP notifications from backend
-          stomp.subscribe(`/user/queue/session/${quizCode}/time-up`, (msg) => {
-            const timeUpMessage = safeJsonParse(msg.body)
-            if (timeUpMessage) {
-              console.log("⏰ TIME_UP notification received from server:", timeUpMessage)
-              // Show time-up warning but keep buttons enabled
-              setFeedback({ timeUp: true, canStillAnswer: true })
-            }
-          }),
-          // Broadcast questions for SYNC mode
           stomp.subscribe(`/topic/session/${quizCode}/question`, (msg) => {
             const message = safeJsonParse(msg.body)
             if (message) {
@@ -3640,7 +3430,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Enhanced leaderboard updates
           stomp.subscribe(`/topic/session/${quizCode}/leaderboard`, (msg) => {
             const data = safeJsonParse(msg.body)
             if (data) {
@@ -3661,7 +3450,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Score celebrations
           stomp.subscribe(`/topic/session/${quizCode}/celebration`, (msg) => {
             const celebration = safeJsonParse(msg.body)
             if (celebration && celebration.participantId) {
@@ -3670,7 +3458,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Personal rank updates
           stomp.subscribe(`/user/queue/session/${quizCode}/ranking`, (msg) => {
             const rankUpdate = safeJsonParse(msg.body)
             if (rankUpdate && rankUpdate.participantId) {
@@ -3679,7 +3466,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Question statistics
           stomp.subscribe(`/topic/session/${quizCode}/live-stats`, (msg) => {
             const stats = safeJsonParse(msg.body)
             if (stats) {
@@ -3688,7 +3474,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Personal score updates
           stomp.subscribe(`/user/queue/session/${quizCode}/score`, (msg) => {
             const scoreUpdate = safeJsonParse(msg.body)
             if (scoreUpdate && scoreUpdate.participantId) {
@@ -3697,7 +3482,6 @@ function useParticipantWebSocket(
             }
           }),
 
-          // Enhanced answer feedback - FIXED INTEGRATION
           stomp.subscribe(`/user/queue/session/${quizCode}/feedback`, (msg) => {
             const feedback = safeJsonParse(msg.body)
             if (feedback && feedback.participantId) {
@@ -3714,7 +3498,6 @@ function useParticipantWebSocket(
         console.error("❌ STOMP error:", frame.headers?.message || frame.body)
         setConnectionStatus("Error")
 
-        // Retry connection if not exceeded max attempts
         if (reconnectAttempts < WEBSOCKET_CONFIG.maxReconnectAttempts) {
           setTimeout(() => {
             setReconnectAttempts((prev) => prev + 1)
@@ -3784,6 +3567,7 @@ function useParticipantWebSocket(
 // ===== MAIN COMPONENT =====
 export default function ParticipantQuizFixed() {
   const params = useParams()
+  const router = useRouter()
   const sessionCode = params?.sessionCode as string
 
   // Join form state
@@ -3821,6 +3605,11 @@ export default function ParticipantQuizFixed() {
   const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(null)
   const [streak, setStreak] = useState<number>(0)
   const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false)
+
+  // Handle navigation to join-room
+  const handleNavigateToJoinRoom = () => {
+    router.push('/join-room')
+  }
 
   // Handle join submission
   async function handleSubmit(e: React.FormEvent) {
@@ -3880,19 +3669,17 @@ export default function ParticipantQuizFixed() {
       setFeedback(null)
       setShowFeedback(false)
       setAnswerFeedback(null)
-      setIsSubmittingAnswer(false) // FIXED: Reset submitting state for new question
+      setIsSubmittingAnswer(false)
       setStatus("PLAY")
     },
     (cmsg) => {
       console.log("🎉 Completion message received:", cmsg)
       setStatus("COMPLETED")
     },
-    // Leaderboard update callback
     (leaderboardEntries) => {
       console.log("🏆 Updating leaderboard:", leaderboardEntries)
       setLeaderboard(leaderboardEntries)
 
-      // Update personal rank from leaderboard
       const currentParticipant = leaderboardEntries.find((entry) => entry.participantId === participantId)
       if (currentParticipant) {
         setPersonalRank(currentParticipant.position)
@@ -3902,7 +3689,6 @@ export default function ParticipantQuizFixed() {
         }
       }
     },
-    // Score celebration callback
     (celebration) => {
       console.log("🎉 Score celebration:", celebration)
       setCelebrations((prev) => [...prev, celebration])
@@ -3917,7 +3703,6 @@ export default function ParticipantQuizFixed() {
         setCelebrations((prev) => prev.filter((c) => c.participantId !== celebration.participantId))
       }, 3000)
     },
-    // Rank update callback
     (rankUpdate) => {
       console.log("📈 Rank update:", rankUpdate)
       if (rankUpdate.participantId === participantId) {
@@ -3927,12 +3712,10 @@ export default function ParticipantQuizFixed() {
         setTimeout(() => setRankUpdate(null), 3000)
       }
     },
-    // Question stats callback
     (stats) => {
       console.log("📊 Question stats:", stats)
       setQuestionStats(stats)
     },
-    // Personal score update callback
     (scoreUpdate) => {
       console.log("💰 Personal score update:", scoreUpdate)
       if (scoreUpdate.participantId === participantId) {
@@ -3949,7 +3732,6 @@ export default function ParticipantQuizFixed() {
         }
       }
     },
-    // FIXED: Answer feedback callback - now properly integrated
     (feedback) => {
       console.log("📝 Answer feedback received:", feedback)
       if (feedback.participantId === participantId) {
@@ -3961,7 +3743,6 @@ export default function ParticipantQuizFixed() {
           setStreak(feedback.streak)
         }
 
-        // Transition to answer reveal phase
         setStatus("ANSWER_REVEAL")
         setIsSubmittingAnswer(false)
       }
@@ -4005,13 +3786,11 @@ export default function ParticipantQuizFixed() {
   // Handle time up
   function handleTimeUp() {
     console.log("⏰ Time's up! Participant can still answer for base points.")
-
     setFeedback({ timeUp: true, canStillAnswer: true })
   }
 
   // Enhanced answer handling
   function handleAnswer(optionId: string) {
-    // Only check if already answered or currently submitting
     if (!currentQuestion || answerSelected || isSubmittingAnswer) {
       console.warn("⚠️ Cannot answer: already answered or submitting")
       return
@@ -4031,6 +3810,7 @@ export default function ParticipantQuizFixed() {
       setError("Failed to submit answer. Please try again.")
     }
   }
+
   // Handle continue from answer reveal
   function handleContinueFromReveal() {
     setStatus("PLAY")
@@ -4058,11 +3838,12 @@ export default function ParticipantQuizFixed() {
           <span className="text-gray-800 font-bold text-lg">{sessionCode}</span>
         </motion.div>
 
-        {/* Close button top left */}
+        {/* Close button top left - UPDATED */}
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
+          onClick={handleNavigateToJoinRoom}
+          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
         >
           <span className="text-2xl">✕</span>
         </motion.button>
@@ -4169,8 +3950,11 @@ export default function ParticipantQuizFixed() {
       >
         {connectionIndicator}
 
-        {/* Close button */}
-        <button className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors">
+        {/* Close button - UPDATED */}
+        <button 
+          onClick={handleNavigateToJoinRoom}
+          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
+        >
           <span className="text-2xl">✕</span>
         </button>
 
@@ -4259,6 +4043,7 @@ export default function ParticipantQuizFixed() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
+              onClick={handleNavigateToJoinRoom}
               className="w-full py-4 rounded-2xl font-bold text-xl text-blue-900 shadow-lg"
               style={{
                 background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
@@ -4423,7 +4208,7 @@ export default function ParticipantQuizFixed() {
     )
   }
 
-  // ENHANCED: Answer reveal phase - NEW KAHOOT-STYLE FEATURE
+  // Answer reveal phase
   if (status === "ANSWER_REVEAL" && answerFeedback) {
     const isCorrect = answerFeedback.isCorrect
 
@@ -4492,7 +4277,7 @@ export default function ParticipantQuizFixed() {
             you're on the podium!
           </motion.p>
 
-          {/* Continue button (auto-advance after delay) */}
+          {/* Continue button */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}>
             <button
               onClick={handleContinueFromReveal}
@@ -4652,8 +4437,4 @@ export default function ParticipantQuizFixed() {
   }
 
   return null
-}
-
-function setFeedback(arg0: { timeUp: boolean; canStillAnswer: boolean }) {
-  throw new Error("Function not implemented.")
 }

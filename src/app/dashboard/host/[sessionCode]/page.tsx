@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 "use client";
 import type React from "react";
 import { useCallback, useState, useEffect, useRef } from "react";
@@ -8,6 +9,18 @@ import { QRCodeCanvas } from "qrcode.react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getSession } from "next-auth/react";
 import { Link } from "lucide-react";
+=======
+"use client"
+import type React from "react"
+import { useCallback, useState, useEffect, useRef } from "react"
+import { useParams } from "next/navigation"
+import { Client } from "@stomp/stompjs"
+import SockJS from "sockjs-client"
+import { QRCodeCanvas } from "qrcode.react"
+import { motion, AnimatePresence } from "framer-motion"
+import { getSession } from "next-auth/react"
+import { Link } from "lucide-react"
+>>>>>>> e93bcd0 (update host)
 
 // Enhanced interfaces for better type safety - Updated to match backend DTOs
 interface LeaderboardEntry {
@@ -181,12 +194,17 @@ const getApiBaseUrl = () => {
     }
   }
 
+<<<<<<< HEAD
   const envUrl =
     process.env.NEXT_PUBLIC_API_URL || "https://stackquiz-api.stackquiz.me/api";
+=======
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || "https://stackquiz-api.stackquiz.me/api/v1"
+>>>>>>> e93bcd0 (update host)
   // Remove trailing /v1 if present since all endpoints already include /v1/
   return envUrl.replace(/\/v1\/?$/, "");
 };
 
+<<<<<<< HEAD
 function getRankSuffix(rank: number): string {
   if (rank === 1) return "st";
   if (rank === 2) return "nd";
@@ -194,6 +212,8 @@ function getRankSuffix(rank: number): string {
   return "th";
 }
 
+=======
+>>>>>>> e93bcd0 (update host)
 // Session Code Input Component
 function SessionCodeInput({
   sessionCode,
@@ -265,13 +285,21 @@ function SessionCodeInput({
         <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
           <div className="flex items-center space-x-2">
             <span className="text-yellow-600">⚠️</span>
+<<<<<<< HEAD
             <span className="text-sm text-yellow-800">
               Please make sure you're logged in before connecting
             </span>
+=======
+            <span className="text-sm text-yellow-800">Please make sure you&apos;re logged in before connecting</span>
+>>>>>>> e93bcd0 (update host)
           </div>
         </div>
       )}
 
+<<<<<<< HEAD
+=======
+      {/* Connection Info */}
+>>>>>>> e93bcd0 (update host)
       <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
         <div className="text-sm text-blue-800">
           <div className="font-medium mb-1">🔗 Connection Info:</div>
@@ -321,7 +349,7 @@ function SessionCodeInput({
 
         <div className="text-center">
           <p className="text-xs text-gray-500">
-            Make sure the session exists in your database and you're logged in
+            Make sure the session exists in your database and you&apos;re logged in
           </p>
         </div>
       </div>
@@ -329,7 +357,11 @@ function SessionCodeInput({
   );
 }
 
+<<<<<<< HEAD
 // Enhanced Quiz Settings Modal
+=======
+// Enhanced Quiz Settings Modal - Updated to use backend SessionTimingRequest
+>>>>>>> e93bcd0 (update host)
 function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
   const [settings, setSettings] = useState({
     mode: "SYNC",
@@ -342,6 +374,7 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
     showCorrectAnswers: true,
     showTimer: true,
     maxParticipants: 100,
+<<<<<<< HEAD
   });
 
   if (!isOpen) return null;
@@ -354,22 +387,45 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
       scheduledEndTime: settings.scheduledEndTime
         ? new Date(settings.scheduledEndTime).toISOString()
         : null,
+=======
+  })
+
+  if (!isOpen) return null
+
+  const handleStart = () => {
+    // Convert to backend SessionTimingRequest format
+    const timingRequest = {
+      scheduledStartTime: settings.scheduledStartTime ? new Date(settings.scheduledStartTime).toISOString() : null,
+      scheduledEndTime: settings.scheduledEndTime ? new Date(settings.scheduledEndTime).toISOString() : null,
+>>>>>>> e93bcd0 (update host)
       defaultQuestionTimeLimit: settings.defaultQuestionTimeLimit,
       autoAdvanceQuestions: settings.autoAdvanceQuestions,
       allowLateJoining: settings.allowLateJoining,
       showTimer: settings.showTimer,
+<<<<<<< HEAD
     };
 
     onStart(timingRequest);
     onClose();
   };
+=======
+    }
+
+    onStart(timingRequest)
+    onClose()
+  }
+>>>>>>> e93bcd0 (update host)
 
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
+<<<<<<< HEAD
       className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4"
+=======
+      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+>>>>>>> e93bcd0 (update host)
     >
       <motion.div
         initial={{ scale: 0.9, opacity: 0 }}
@@ -377,6 +433,7 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
         exit={{ scale: 0.9, opacity: 0 }}
         className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
       >
+<<<<<<< HEAD
         <h2 className="text-2xl font-bold mb-6 text-gray-800">
           🎮 Quiz Settings
         </h2>
@@ -391,6 +448,17 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
               onChange={(e) =>
                 setSettings({ ...settings, mode: e.target.value })
               }
+=======
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">🎮 Quiz Settings</h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Quiz Mode */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Quiz Mode</label>
+            <select
+              value={settings.mode}
+              onChange={(e) => setSettings({ ...settings, mode: e.target.value })}
+>>>>>>> e93bcd0 (update host)
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
             >
               <option value="SYNC">🎯 Synchronous (Real-time)</option>
@@ -403,21 +471,31 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
             </p>
           </div>
 
+<<<<<<< HEAD
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Question Time Limit (seconds)
             </label>
+=======
+          {/* Time Settings */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Question Time Limit (seconds)</label>
+>>>>>>> e93bcd0 (update host)
             <input
               type="number"
               min="5"
               max="300"
               value={settings.defaultQuestionTimeLimit}
+<<<<<<< HEAD
               onChange={(e) =>
                 setSettings({
                   ...settings,
                   defaultQuestionTimeLimit: Number.parseInt(e.target.value),
                 })
               }
+=======
+              onChange={(e) => setSettings({ ...settings, defaultQuestionTimeLimit: Number.parseInt(e.target.value) })}
+>>>>>>> e93bcd0 (update host)
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
             />
             <p className="text-xs text-gray-500 mt-1">
@@ -425,6 +503,7 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
             </p>
           </div>
 
+<<<<<<< HEAD
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Scheduled Start Time (Optional)
@@ -435,10 +514,20 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
               onChange={(e) =>
                 setSettings({ ...settings, scheduledStartTime: e.target.value })
               }
+=======
+          {/* Scheduled Start Time */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Scheduled Start Time (Optional)</label>
+            <input
+              type="datetime-local"
+              value={settings.scheduledStartTime}
+              onChange={(e) => setSettings({ ...settings, scheduledStartTime: e.target.value })}
+>>>>>>> e93bcd0 (update host)
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
             />
           </div>
 
+<<<<<<< HEAD
           <div>
             <label className="block text-sm font-medium text-gray-600 mb-1">
               Scheduled End Time (Optional)
@@ -449,16 +538,30 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
               onChange={(e) =>
                 setSettings({ ...settings, scheduledEndTime: e.target.value })
               }
+=======
+          {/* Scheduled End Time */}
+          <div>
+            <label className="block text-sm font-medium text-gray-600 mb-1">Scheduled End Time (Optional)</label>
+            <input
+              type="datetime-local"
+              value={settings.scheduledEndTime}
+              onChange={(e) => setSettings({ ...settings, scheduledEndTime: e.target.value })}
+>>>>>>> e93bcd0 (update host)
               className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
             />
           </div>
         </div>
 
+<<<<<<< HEAD
+=======
+        {/* Enhanced Checkboxes */}
+>>>>>>> e93bcd0 (update host)
         <div className="mt-6 space-y-3">
           <label className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer">
             <input
               type="checkbox"
               checked={settings.allowLateJoining}
+<<<<<<< HEAD
               onChange={(e) =>
                 setSettings({ ...settings, allowLateJoining: e.target.checked })
               }
@@ -471,6 +574,14 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
               <p className="text-xs text-gray-500">
                 Participants can join after the quiz starts
               </p>
+=======
+              onChange={(e) => setSettings({ ...settings, allowLateJoining: e.target.checked })}
+              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+            />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Allow late joins</span>
+              <p className="text-xs text-gray-500">Participants can join after the quiz starts</p>
+>>>>>>> e93bcd0 (update host)
             </div>
           </label>
 
@@ -478,6 +589,7 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
             <input
               type="checkbox"
               checked={settings.autoAdvanceQuestions}
+<<<<<<< HEAD
               onChange={(e) =>
                 setSettings({
                   ...settings,
@@ -493,6 +605,14 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
               <p className="text-xs text-gray-500">
                 Automatically move to next question when time expires
               </p>
+=======
+              onChange={(e) => setSettings({ ...settings, autoAdvanceQuestions: e.target.checked })}
+              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+            />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Auto-advance questions</span>
+              <p className="text-xs text-gray-500">Automatically move to next question when time expires</p>
+>>>>>>> e93bcd0 (update host)
             </div>
           </label>
 
@@ -500,6 +620,7 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
             <input
               type="checkbox"
               checked={settings.showTimer}
+<<<<<<< HEAD
               onChange={(e) =>
                 setSettings({ ...settings, showTimer: e.target.checked })
               }
@@ -512,6 +633,14 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
               <p className="text-xs text-gray-500">
                 Display countdown timer to participants
               </p>
+=======
+              onChange={(e) => setSettings({ ...settings, showTimer: e.target.checked })}
+              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+            />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Show timer</span>
+              <p className="text-xs text-gray-500">Display countdown timer to participants</p>
+>>>>>>> e93bcd0 (update host)
             </div>
           </label>
 
@@ -519,6 +648,7 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
             <input
               type="checkbox"
               checked={settings.showCorrectAnswers}
+<<<<<<< HEAD
               onChange={(e) =>
                 setSettings({
                   ...settings,
@@ -534,10 +664,22 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
               <p className="text-xs text-gray-500">
                 Display correct answers after each question
               </p>
+=======
+              onChange={(e) => setSettings({ ...settings, showCorrectAnswers: e.target.checked })}
+              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
+            />
+            <div>
+              <span className="text-sm font-medium text-gray-700">Show correct answers</span>
+              <p className="text-xs text-gray-500">Display correct answers after each question</p>
+>>>>>>> e93bcd0 (update host)
             </div>
           </label>
         </div>
 
+<<<<<<< HEAD
+=======
+        {/* Buttons */}
+>>>>>>> e93bcd0 (update host)
         <div className="mt-8 flex justify-end space-x-4">
           <button
             onClick={onClose}
@@ -554,10 +696,17 @@ function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
         </div>
       </motion.div>
     </motion.div>
+<<<<<<< HEAD
   );
 }
 
 // Enhanced Leaderboard Component
+=======
+  )
+}
+
+// Enhanced Leaderboard Component with Real-time Animations
+>>>>>>> e93bcd0 (update host)
 function EnhancedLeaderboard({
   leaderboard,
   celebrations,
@@ -589,10 +738,18 @@ function EnhancedLeaderboard({
   };
 
   return (
+<<<<<<< HEAD
     <div className="bg-white rounded-3xl p-6 shadow-2xl border-4 border-purple-200">
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
           <span>🏆</span> Live Leaderboard
+=======
+    <div className="bg-white rounded-2xl p-6 shadow-xl">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
+          <span className="mr-2">🏆</span>
+          Live Leaderboard
+>>>>>>> e93bcd0 (update host)
         </h2>
         <div className="text-right">
           <div className="text-sm text-gray-500 font-semibold">
@@ -600,16 +757,23 @@ function EnhancedLeaderboard({
             {leaderboard.length !== 1 ? "s" : ""}
           </div>
           {questionStats && (
+<<<<<<< HEAD
             <div className="text-xs text-purple-600 font-semibold">
               Q{questionStats.questionNumber}:{" "}
               {questionStats.participantsAnswered}/
               {questionStats.totalParticipants} answered
+=======
+            <div className="text-xs text-purple-600">
+              Q{questionStats.questionNumber}: {questionStats.participantsAnswered}/{questionStats.totalParticipants}{" "}
+              answered
+>>>>>>> e93bcd0 (update host)
             </div>
           )}
         </div>
       </div>
 
       {questionStats && (
+<<<<<<< HEAD
         <div className="mb-4 p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200">
           <div className="flex justify-between items-center mb-3">
             <span className="text-sm font-bold text-purple-800">
@@ -623,6 +787,20 @@ function EnhancedLeaderboard({
           <div className="w-full bg-purple-200 rounded-full h-3">
             <motion.div
               className="bg-gradient-to-r from-purple-500 to-pink-500 h-3 rounded-full"
+=======
+        <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg">
+          <div className="flex justify-between items-center mb-2">
+            <span className="text-sm font-medium text-purple-800">
+              Question {questionStats.questionNumber} Progress
+            </span>
+            <span className="text-sm text-purple-600">
+              {questionStats.participantsAnswered}/{questionStats.totalParticipants}
+            </span>
+          </div>
+          <div className="w-full bg-purple-200 rounded-full h-2">
+            <motion.div
+              className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full"
+>>>>>>> e93bcd0 (update host)
               initial={{ width: 0 }}
               animate={{
                 width: `${
@@ -634,7 +812,11 @@ function EnhancedLeaderboard({
               transition={{ duration: 0.5, ease: "easeOut" }}
             />
           </div>
+<<<<<<< HEAD
           <div className="flex justify-between text-xs text-purple-700 font-semibold mt-2">
+=======
+          <div className="flex justify-between text-xs text-purple-600 mt-1">
+>>>>>>> e93bcd0 (update host)
             <span>Accuracy: {questionStats.accuracyRate.toFixed(1)}%</span>
             <span>
               Avg Time: {questionStats.averageResponseTime.toFixed(1)}s
@@ -643,7 +825,12 @@ function EnhancedLeaderboard({
         </div>
       )}
 
+<<<<<<< HEAD
       <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
+=======
+      {/* Leaderboard Entries */}
+      <div className="space-y-2 max-h-96 overflow-y-auto">
+>>>>>>> e93bcd0 (update host)
         <AnimatePresence>
           {leaderboard.length > 0 ? (
             leaderboard.map((entry, index) => {
@@ -668,6 +855,7 @@ function EnhancedLeaderboard({
                 <motion.div
                   key={entry.participantId}
                   layout
+<<<<<<< HEAD
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 20 }}
@@ -679,17 +867,33 @@ function EnhancedLeaderboard({
                   } ${
                     celebration ? "ring-2 ring-yellow-400 ring-opacity-75" : ""
                   }`}
+=======
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.3 }}
+                  className={`relative p-4 rounded-lg transition-all duration-300 ${
+                    isTop3
+                      ? "bg-gradient-to-r from-purple-100 via-indigo-100 to-purple-100 border-2 border-purple-300 shadow-md"
+                      : "bg-gray-50 hover:bg-gray-100"
+                  } ${celebration ? "ring-2 ring-yellow-400 ring-opacity-75" : ""}`}
+>>>>>>> e93bcd0 (update host)
                 >
                   {celebration && (
                     <motion.div
                       initial={{ scale: 0, opacity: 0 }}
                       animate={{ scale: 1, opacity: 1 }}
                       exit={{ scale: 0, opacity: 0 }}
+<<<<<<< HEAD
                       className="absolute inset-0 bg-gradient-to-r from-yellow-200 to-orange-200 rounded-2xl opacity-30 pointer-events-none"
+=======
+                      className="absolute inset-0 bg-gradient-to-r from-yellow-200 to-orange-200 rounded-lg opacity-30 pointer-events-none"
+>>>>>>> e93bcd0 (update host)
                     />
                   )}
 
                   <div className="flex justify-between items-center relative z-10">
+<<<<<<< HEAD
                     <div className="flex items-center gap-4">
                       <div
                         className={`flex items-center justify-center w-16 h-16 rounded-2xl font-black text-2xl shadow-lg ${
@@ -713,17 +917,52 @@ function EnhancedLeaderboard({
                           </span>
                           {entry.streak && entry.streak > 2 && (
                             <span className="bg-gradient-to-r from-orange-400 to-red-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-md">
+=======
+                    <div className="flex items-center space-x-4">
+                      {/* Position with Medal */}
+                      <div className="flex items-center space-x-2">
+                        <span
+                          className={`text-xl font-bold ${
+                            index === 0
+                              ? "text-yellow-600"
+                              : index === 1
+                                ? "text-gray-600"
+                                : index === 2
+                                  ? "text-orange-600"
+                                  : "text-gray-500"
+                          }`}
+                        >
+                          {index + 1}
+                        </span>
+                        {index === 0 && <span className="text-xl">🥇</span>}
+                        {index === 1 && <span className="text-xl">🥈</span>}
+                        {index === 2 && <span className="text-xl">🥉</span>}
+                      </div>
+
+                      {/* Participant Info */}
+                      <div>
+                        <div className="flex items-center space-x-2">
+                          <span className="font-bold text-gray-800">{entry.nickname}</span>
+                          {entry.streak && entry.streak > 2 && (
+                            <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
+>>>>>>> e93bcd0 (update host)
                               🔥 {entry.streak}
                             </span>
                           )}
                         </div>
+<<<<<<< HEAD
                         <div className="text-sm text-gray-600 font-semibold mt-1">
                           {entry.questionsAnswered || 0} answered •{" "}
                           {entry.correctAnswers || 0} correct
+=======
+                        <div className="text-xs text-gray-500">
+                          {entry.questionsAnswered || 0} answered • {entry.correctAnswers || 0} correct
+>>>>>>> e93bcd0 (update host)
                         </div>
                       </div>
                     </div>
 
+<<<<<<< HEAD
                     <div className="text-right">
                       <div className="flex items-center gap-2">
                         <span className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-purple-600 to-pink-600">
@@ -735,10 +974,19 @@ function EnhancedLeaderboard({
                             animate={{ scale: 1 }}
                             className="text-green-500 text-sm font-bold"
                           >
+=======
+                    {/* Score and Position Change */}
+                    <div className="text-right">
+                      <div className="flex items-center space-x-2">
+                        <span className="text-xl font-bold text-purple-600">{entry.totalScore}</span>
+                        {positionChange > 0 && (
+                          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-green-500 text-sm">
+>>>>>>> e93bcd0 (update host)
                             ↗️ +{positionChange}
                           </motion.span>
                         )}
                         {positionChange < 0 && (
+<<<<<<< HEAD
                           <motion.span
                             initial={{ scale: 0 }}
                             animate={{ scale: 1 }}
@@ -750,10 +998,17 @@ function EnhancedLeaderboard({
                       </div>
                       <div className="text-xs text-gray-500 font-semibold">
                         points
+=======
+                          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-red-500 text-sm">
+                            ↘️ {positionChange}
+                          </motion.span>
+                        )}
+>>>>>>> e93bcd0 (update host)
                       </div>
                     </div>
                   </div>
 
+<<<<<<< HEAD
                   <div className="flex justify-between items-center mt-3 relative z-10">
                     <div className="flex items-center gap-2">
                       <div
@@ -781,6 +1036,34 @@ function EnhancedLeaderboard({
                       <span className="text-xs text-gray-500 font-semibold">
                         Avg: {entry.averageResponseTime.toFixed(1)}s
                       </span>
+=======
+                  {/* Activity Indicator */}
+                  <div className="flex justify-between items-center mt-2">
+                    <div className="flex items-center space-x-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          entry.status === "ACTIVE"
+                            ? "bg-green-500"
+                            : entry.status === "ANSWERING"
+                              ? "bg-blue-500"
+                              : entry.status === "WAITING"
+                                ? "bg-yellow-500"
+                                : "bg-gray-400"
+                        }`}
+                      />
+                      <span className="text-xs text-gray-500">
+                        {entry.status === "ACTIVE"
+                          ? "🟢 Active"
+                          : entry.status === "ANSWERING"
+                            ? "🔵 Answering"
+                            : entry.status === "WAITING"
+                              ? "🟡 Waiting"
+                              : "⚪ Idle"}
+                      </span>
+                    </div>
+                    {entry.averageResponseTime && (
+                      <span className="text-xs text-gray-500">Avg: {entry.averageResponseTime.toFixed(1)}s</span>
+>>>>>>> e93bcd0 (update host)
                     )}
                   </div>
                 </motion.div>
@@ -789,18 +1072,27 @@ function EnhancedLeaderboard({
           ) : (
             <div className="text-center py-12">
               <div className="text-6xl mb-4">👋</div>
+<<<<<<< HEAD
               <p className="text-gray-400 text-lg font-semibold">
                 Waiting for participants...
               </p>
               <p className="text-gray-400 text-sm mt-2">
                 Share the session code or QR code to get started
               </p>
+=======
+              <p className="text-gray-400 text-lg">Waiting for participants...</p>
+              <p className="text-gray-400 text-sm mt-2">Share the session code or QR code to get started</p>
+>>>>>>> e93bcd0 (update host)
             </div>
           )}
         </AnimatePresence>
       </div>
     </div>
+<<<<<<< HEAD
   );
+=======
+  )
+>>>>>>> e93bcd0 (update host)
 }
 
 // Participant Progress Component
@@ -850,17 +1142,28 @@ function ParticipantProgress({
   };
 
   return (
+<<<<<<< HEAD
     <div className="bg-white rounded-3xl p-6 shadow-2xl border-4 border-purple-200">
       <div className="flex items-center justify-between mb-4">
         <h3 className="text-lg font-bold text-gray-800 flex items-center gap-2">
           <span>👥</span>
+=======
+    <div className="bg-white rounded-2xl p-6 shadow-xl">
+      <div className="flex items-center justify-between mb-4">
+        <h3 className="text-lg font-bold text-gray-800 flex items-center">
+          <span className="mr-2">👥</span>
+>>>>>>> e93bcd0 (update host)
           Participants ({participants.length})
         </h3>
 
         <select
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value as any)}
+<<<<<<< HEAD
           className="text-xs px-3 py-2 border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold"
+=======
+          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
+>>>>>>> e93bcd0 (update host)
         >
           <option value="score">Score</option>
           <option value="progress">Progress</option>
@@ -868,7 +1171,12 @@ function ParticipantProgress({
         </select>
       </div>
 
+<<<<<<< HEAD
       <div className="flex items-center gap-3 mb-3 text-xs font-semibold">
+=======
+      {/* Legend */}
+      <div className="flex items-center gap-3 mb-3 text-xs">
+>>>>>>> e93bcd0 (update host)
         <div className="flex items-center gap-1">
           <div className="w-3 h-3 bg-green-500 rounded"></div>
           <span>Correct</span>
@@ -883,7 +1191,11 @@ function ParticipantProgress({
         </div>
       </div>
 
+<<<<<<< HEAD
       <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+=======
+      <div className="space-y-3 max-h-[500px] overflow-y-auto">
+>>>>>>> e93bcd0 (update host)
         {sortedParticipants.length > 0 ? (
           sortedParticipants.map((participant, index) => (
             <motion.div
@@ -891,6 +1203,7 @@ function ParticipantProgress({
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.05 }}
+<<<<<<< HEAD
               className="border-2 border-gray-200 rounded-2xl p-4 hover:shadow-lg transition-shadow"
             >
               <div className="flex items-center justify-between mb-2">
@@ -904,6 +1217,22 @@ function ParticipantProgress({
                         : index === 2
                         ? "bg-orange-600"
                         : "bg-indigo-500"
+=======
+              className="border border-gray-200 rounded-lg p-3"
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-2">
+                  <div
+                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-sm ${
+                      index === 0
+                        ? "bg-yellow-500"
+                        : index === 1
+                          ? "bg-gray-400"
+                          : index === 2
+                            ? "bg-orange-600"
+                            : "bg-indigo-500"
+>>>>>>> e93bcd0 (update host)
                     }`}
                   >
                     {index === 0
@@ -917,6 +1246,7 @@ function ParticipantProgress({
 
                   <div>
                     <div className="flex items-center gap-2">
+<<<<<<< HEAD
                       <span className="font-bold text-gray-800 text-sm">
                         {participant.nickname}
                       </span>
@@ -929,18 +1259,30 @@ function ParticipantProgress({
                     <div className="text-xs text-gray-500 font-semibold">
                       {participant.answeredCount || 0}/{totalQuestions} •{" "}
                       {participant.correctCount || 0} correct •{" "}
+=======
+                      <span className="font-semibold text-gray-800 text-sm">{participant.nickname}</span>
+                      <div className={`w-2 h-2 rounded-full ${getStatusColor(participant.status)}`}></div>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      {participant.answeredCount || 0}/{totalQuestions} •{participant.correctCount || 0} correct •
+>>>>>>> e93bcd0 (update host)
                       {Math.round(participant.accuracy || 0)}% accuracy
                     </div>
                   </div>
                 </div>
 
                 <div className="text-right">
+<<<<<<< HEAD
                   <div className="text-lg font-bold text-indigo-600">
                     {participant.totalScore || 0}
                   </div>
                   <div className="text-xs text-gray-500 font-semibold">
                     points
                   </div>
+=======
+                  <div className="text-lg font-bold text-indigo-600">{participant.totalScore || 0}</div>
+                  <div className="text-xs text-gray-500">points</div>
+>>>>>>> e93bcd0 (update host)
                 </div>
               </div>
 
@@ -990,13 +1332,21 @@ function ParticipantProgress({
           ))
         ) : (
           <div className="text-center py-8 text-gray-500">
+<<<<<<< HEAD
             <p className="text-lg font-semibold">No participants yet</p>
+=======
+            <p className="text-lg">No participants yet</p>
+>>>>>>> e93bcd0 (update host)
             <p className="text-sm">Share the session code to get started!</p>
           </div>
         )}
       </div>
     </div>
+<<<<<<< HEAD
   );
+=======
+  )
+>>>>>>> e93bcd0 (update host)
 }
 
 // Host Controls Component
@@ -1024,13 +1374,20 @@ function HostControls({
   if (!hostDashboard) return null;
 
   return (
+<<<<<<< HEAD
     <div className="bg-white rounded-3xl p-6 shadow-2xl border-4 border-purple-200">
       <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center gap-2">
         <span>🎮</span>
+=======
+    <div className="bg-white rounded-2xl p-6 shadow-xl">
+      <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
+        <span className="mr-2">🎮</span>
+>>>>>>> e93bcd0 (update host)
         Host Controls
       </h3>
 
       <div className="space-y-3">
+<<<<<<< HEAD
         <div className="grid grid-cols-2 gap-2">
           {hostDashboard.canStart && (
             <motion.button
@@ -1085,20 +1442,90 @@ function HostControls({
             >
               🛑 End Session
             </motion.button>
+=======
+        {/* Session Controls */}
+        <div className="grid grid-cols-2 gap-2">
+          {hostDashboard.canStart && (
+            <button
+              onClick={onStartSession}
+              className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition text-sm"
+            >
+              🚀 Start
+            </button>
           )}
-        </div>
 
+          {hostDashboard.canPause && (
+            <button
+              onClick={onPauseSession}
+              className="px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white rounded-lg hover:from-yellow-700 hover:to-yellow-800 transition text-sm"
+            >
+              ⏸️ Pause
+            </button>
+          )}
+
+          {hostDashboard.canResume && (
+            <button
+              onClick={onResumeSession}
+              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition text-sm"
+            >
+              ▶️ Resume
+            </button>
+          )}
+
+          {hostDashboard.canAdvanceQuestion && (
+            <button
+              onClick={onNextQuestion}
+              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition text-sm"
+            >
+              ➡️ Next Q
+            </button>
+          )}
+
+          {hostDashboard.canEnd && (
+            <button
+              onClick={onEndSession}
+              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition text-sm col-span-2"
+            >
+              🛑 End Session
+            </button>
+>>>>>>> e93bcd0 (update host)
+          )}
+
+<<<<<<< HEAD
         {hostDashboard.currentTimer && (
           <div className="p-4 bg-gradient-to-r from-purple-50 to-pink-50 rounded-2xl border-2 border-purple-200">
             <div className="text-sm font-bold text-gray-700 mb-2">
               Current Timer: {hostDashboard.currentTimer.timerType}
             </div>
             <div className="text-3xl font-black text-purple-600">
+=======
+          {/* veiw report */}
+{hostDashboard?.sessionStatus === "COMPLETED" && (
+  <div className="text-center mt-6">
+    <Link href={`/host/${sessionCode}/report`}>
+      <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-indigo-700 shadow-lg">
+        📊 View Session Report
+      </button>
+    </Link>
+  </div>
+)}
+          
+        </div>
+
+        {/* Timer Controls */}
+        {hostDashboard.currentTimer && (
+          <div className="p-3 bg-gray-50 rounded-lg">
+            <div className="text-sm font-medium text-gray-700 mb-2">
+              Current Timer: {hostDashboard.currentTimer.timerType}
+            </div>
+            <div className="text-lg font-bold text-purple-600">
+>>>>>>> e93bcd0 (update host)
               {Math.floor(hostDashboard.currentTimer.remainingSeconds / 60)}:
               {(hostDashboard.currentTimer.remainingSeconds % 60)
                 .toString()
                 .padStart(2, "0")}
             </div>
+<<<<<<< HEAD
             <div className="text-xs text-gray-600 font-semibold mt-1">
               Status: {hostDashboard.currentTimer.timerStatus}
             </div>
@@ -1109,12 +1536,22 @@ function HostControls({
           <label className="block text-sm font-bold text-gray-700 mb-2">
             Set Question Time Limit
           </label>
+=======
+            <div className="text-xs text-gray-500">Status: {hostDashboard.currentTimer.timerStatus}</div>
+          </div>
+        )}
+
+        {/* Custom Time Limit */}
+        <div className="p-3 bg-gray-50 rounded-lg">
+          <label className="block text-sm font-medium text-gray-700 mb-2">Set Question Time Limit</label>
+>>>>>>> e93bcd0 (update host)
           <div className="flex space-x-2">
             <input
               type="number"
               min="5"
               max="300"
               value={customTimeLimit}
+<<<<<<< HEAD
               onChange={(e) =>
                 setCustomTimeLimit(Number.parseInt(e.target.value))
               }
@@ -1128,11 +1565,26 @@ function HostControls({
             >
               Set
             </motion.button>
+=======
+              onChange={(e) => setCustomTimeLimit(Number.parseInt(e.target.value))}
+              className="flex-1 px-3 py-1 border rounded text-sm"
+            />
+            <button
+              onClick={() => onSetQuestionTimeLimit(customTimeLimit)}
+              className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700"
+            >
+              Set
+            </button>
+>>>>>>> e93bcd0 (update host)
           </div>
         </div>
       </div>
     </div>
+<<<<<<< HEAD
   );
+=======
+  )
+>>>>>>> e93bcd0 (update host)
 }
 
 // Main Component
@@ -1166,7 +1618,13 @@ export default function LocalhostHostUI() {
   const [showSettings, setShowSettings] = useState(false);
   const [authError, setAuthError] = useState<string>("");
 
+<<<<<<< HEAD
   const stompRef = useRef<Client | null>(null);
+=======
+  // UI state
+  const [showSettings, setShowSettings] = useState(false)
+  const [authError, setAuthError] = useState<string>("")
+>>>>>>> e93bcd0 (update host)
 
   const handleConnect = useCallback(async () => {
     const hasToken = await checkAuthToken();
@@ -1219,6 +1677,7 @@ export default function LocalhostHostUI() {
         return;
       }
 
+<<<<<<< HEAD
       const baseUrl = getApiBaseUrl();
       const response = await fetch(
         `${baseUrl}/v1/host/dashboard/${sessionCode}`,
@@ -1226,6 +1685,15 @@ export default function LocalhostHostUI() {
           headers,
         }
       );
+=======
+      const baseUrl = getApiBaseUrl()
+      console.log("📊 Fetching host dashboard for session:", sessionCode)
+
+      // Use the correct host dashboard endpoint directly
+      const response = await fetch(`${baseUrl}/v1/host/dashboard/${sessionCode}`, {
+        headers,
+      })
+>>>>>>> e93bcd0 (update host)
 
       if (response.ok) {
         const dashboardData = await response.json();
@@ -1468,8 +1936,10 @@ export default function LocalhostHostUI() {
     }
   }, [hostDashboard?.sessionStatus, sessionCode, fetchDetailedProgress]);
 
+  // FIXED: Enhanced host command sender with correct API URL
   const handleSendHostCommand = useCallback(
     async (command: string, data?: any) => {
+<<<<<<< HEAD
       if (!sessionCode) {
         console.error("❌ Cannot send command: No session code");
         return;
@@ -1480,6 +1950,106 @@ export default function LocalhostHostUI() {
         setAuthError("No authentication token found. Please login first.");
         return;
       }
+=======
+      // FIXED: Always use sessionCode, not sessionId
+      if (!sessionCode) {
+        console.error("❌ Cannot send command: No session code")
+        return
+      }
+
+      const headers = await getAuthHeaders()
+      if (!headers.Authorization) {
+        setAuthError("No authentication token found. Please login first.")
+        return
+      }
+
+      const baseUrl = getApiBaseUrl()
+
+      try {
+        let endpoint = ""
+        let method = "POST"
+        const body = null
+
+        switch (command) {
+          case "START_SESSION":
+            // First, update session timing settings if provided
+            if (data) {
+              // FIXED: Use sessionCode instead of currentSessionId
+              const timingEndpoint = `/v1/host/session/${sessionCode}/timing`
+              const timingResponse = await fetch(`${baseUrl}${timingEndpoint}`, {
+                method: "PUT",
+                headers,
+                body: JSON.stringify(data),
+              })
+              if (!timingResponse.ok) {
+                console.error("❌ Failed to update session timing:", timingResponse.statusText)
+                return
+              }
+              console.log("✅ Session timing updated successfully")
+            }
+
+            // FIXED: Use sessionCode (not sessionId) - backend expects session code
+            endpoint = `/v1/quiz-sessions/${sessionCode}/start`
+            method = "PUT"
+            break
+          case "PAUSE_SESSION":
+            // FIXED: Use sessionCode
+            endpoint = `/v1/host/session/${sessionCode}/timer/pause`
+            break
+          case "RESUME_SESSION":
+            // FIXED: Use sessionCode
+            endpoint = `/v1/host/session/${sessionCode}/timer/resume`
+            break
+          case "END_SESSION":
+            // FIXED: Use correct session end endpoint
+            endpoint = `/v1/quiz-sessions/${sessionCode}/end`
+            method = "PUT"
+            break
+          case "NEXT_QUESTION":
+            // FIXED: Use sessionCode
+            endpoint = `/v1/host/session/${sessionCode}/force-advance`
+            break
+          case "SET_QUESTION_TIME_LIMIT":
+            // FIXED: Use sessionCode
+            endpoint = `/v1/host/session/${sessionCode}/question-time-limit?timeLimit=${data}`
+            break
+          default:
+            console.warn("Unknown command:", command)
+            return
+        }
+
+        const response = await fetch(`${baseUrl}${endpoint}`, {
+          method,
+          headers,
+          body,
+        })
+
+        if (response.ok) {
+          console.log(`✅ Command ${command} executed successfully`)
+
+          // REMOVED: Redundant timer start - backend handles this automatically
+          // The startSession endpoint should start the timer internally
+
+          // Refresh dashboard data
+          fetchHostDashboardByCode()
+        } else if (response.status === 401) {
+          setAuthError("Authentication failed. Please login again.")
+          console.error(`❌ Command ${command} failed: Authentication error`)
+        } else {
+          const errorText = await response.text().catch(() => response.statusText)
+          console.error(`❌ Command ${command} failed:`, errorText)
+          setAuthError(`Failed to execute command ${command}: ${response.status} ${response.statusText} - ${errorText}`)
+        }
+      } catch (error) {
+        console.error(`❌ Error executing command ${command}:`, error)
+        setAuthError(
+          `An error occurred while executing ${command}: ${error instanceof Error ? error.message : String(error)}`,
+        )
+      }
+    },
+    [sessionCode, fetchHostDashboardByCode],
+  )
+>>>>>>> e93bcd0 (update host)
 
       const baseUrl = getApiBaseUrl();
 
@@ -1587,6 +2157,7 @@ export default function LocalhostHostUI() {
     [handleSendHostCommand]
   );
 
+<<<<<<< HEAD
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900 flex items-center justify-center p-6">
@@ -1595,11 +2166,50 @@ export default function LocalhostHostUI() {
           setSessionCode={setSessionCode}
           onConnect={handleConnect}
         />
+=======
+  // Show session code input if not connected
+  if (!isConnected) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900 flex items-center justify-center p-6">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-auto text-center"
+        >
+          <div className="text-6xl mb-4">🎮</div>
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">Host Quiz Dashboard</h2>
+          <p className="text-gray-600 mb-6">Connecting to session...</p>
+
+          <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
+            <div className="text-sm text-purple-800">
+              <div className="font-medium mb-2">📋 Session Code:</div>
+              <div className="text-2xl font-mono font-bold text-purple-900 tracking-wider">
+                {sessionCode || "Loading..."}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-center space-x-2 text-gray-600">
+            <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
+            <span>Connecting to WebSocket...</span>
+          </div>
+
+          {authError && (
+            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="text-sm text-red-800">
+                <div className="font-medium mb-1">⚠️ Authentication Error</div>
+                <div>{authError}</div>
+              </div>
+            </div>
+          )}
+        </motion.div>
+>>>>>>> e93bcd0 (update host)
       </div>
     );
   }
 
   return (
+<<<<<<< HEAD
     <div className="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-900">
       {/* Professional Header */}
       <div className="bg-white/95 backdrop-blur-sm shadow-2xl border-b-4 border-purple-500">
@@ -1662,19 +2272,129 @@ export default function LocalhostHostUI() {
               >
                 🔌 Exit
               </motion.button>
+=======
+    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900">
+      {/* Enhanced Header */}
+      <div className="bg-white shadow-lg p-4">
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-800 flex items-center">
+              <span className="mr-2">🎮</span>
+              Quiz Host Dashboard
+            </h1>
+            <div className="flex items-center space-x-4 mt-2">
+              <div className="flex items-center space-x-2">
+                <div
+                  className={`w-3 h-3 rounded-full ${
+                    connectionStatus === "Connected"
+                      ? "bg-green-500 animate-pulse"
+                      : connectionStatus === "Connecting..."
+                        ? "bg-yellow-500 animate-pulse"
+                        : connectionStatus === "Authentication Error"
+                          ? "bg-red-500"
+                          : "bg-red-500"
+                  }`}
+                />
+                <span className="text-sm text-gray-600 font-medium">{connectionStatus}</span>
+              </div>
+
+              {hostDashboard && (
+                <div className="text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
+                  Q{hostDashboard.currentQuestion}/{hostDashboard.totalQuestions} •{hostDashboard.participantsAnswered}/
+                  {hostDashboard.totalParticipants} answered
+                </div>
+              )}
+            </div>
+
+            {/* Authentication Error Display */}
+            {authError && (
+              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">⚠️ {authError}</div>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-4">
+            <div className="bg-gradient-to-r from-purple-100 to-indigo-100 px-6 py-4 rounded-xl border border-purple-200">
+              <p className="text-xs text-gray-600 mb-1">Session Code</p>
+              <p className="text-2xl font-bold text-purple-800">{sessionCode}</p>
+            </div>
+
+            <div className="flex flex-col space-y-2">
+              <button
+                onClick={() => setShowSettings(true)}
+                className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition shadow-lg"
+                disabled={!!authError}
+              >
+                🚀 Start Quiz
+              </button>
+
+              <button
+                onClick={handleNextQuestion}
+                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition"
+                disabled={connectionStatus !== "Connected" || !!authError}
+              >
+                ➡️ Next Question
+              </button>
+
+              <button
+                onClick={handleDisconnect}
+                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition text-sm"
+              >
+                🔌 Disconnect
+              </button>
+>>>>>>> e93bcd0 (update host)
             </div>
           </div>
         </div>
       </div>
 
+<<<<<<< HEAD
       {authError && (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-4">
           <div className="bg-red-50 border-2 border-red-300 rounded-xl p-4 text-red-700 font-semibold">
             ⚠️ {authError}
           </div>
+=======
+      {/* Main Content */}
+      <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Column - Session Info & Controls */}
+        <div className="space-y-6">
+          {/* QR Code */}
+          <div className="bg-white rounded-2xl p-6 shadow-xl text-center">
+            <h3 className="text-lg font-bold text-gray-800 mb-4">📱 Join Quiz</h3>
+            {joinUrl && (
+              <div className="bg-white p-4 rounded-lg inline-block border-2 border-gray-200">
+                <QRCodeCanvas value={joinUrl} size={150} />
+              </div>
+            )}
+            <p className="text-sm text-gray-600 mt-4">
+              Scan QR code or visit: <br />
+              <span className="font-mono text-purple-600">{joinUrl}</span>
+            </p>
+          </div>
+          <HostControls
+            hostDashboard={hostDashboard}
+            sessionCode={sessionCode}
+            onStartSession={() => setShowSettings(true)}
+            onPauseSession={handlePauseSession}
+            onResumeSession={handleResumeSession}
+            onEndSession={handleEndSession}
+            onNextQuestion={handleNextQuestion}
+            onSetQuestionTimeLimit={handleSetQuestionTimeLimit}
+         
+            // onSetQuestionTimeLimit={handleSetQuestionTimeLimit}
+          />
+
+          {/* Participant Progress */}
+          <ParticipantProgress
+            participants={participants}
+            detailedProgress={detailedProgress}
+            totalQuestions={hostDashboard?.totalQuestions || 10}
+          />
+>>>>>>> e93bcd0 (update host)
         </div>
       )}
 
+<<<<<<< HEAD
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="space-y-6">
@@ -1721,6 +2441,15 @@ export default function LocalhostHostUI() {
         </div>
       </div>
 
+=======
+        {/* Right Columns - Leaderboard */}
+        <div className="lg:col-span-2">
+          <EnhancedLeaderboard leaderboard={leaderboard} celebrations={celebrations} questionStats={questionStats} />
+        </div>
+      </div>
+
+      {/* Quiz Settings Modal */}
+>>>>>>> e93bcd0 (update host)
       <AnimatePresence>
         {showSettings && (
           <QuizSettingsModal

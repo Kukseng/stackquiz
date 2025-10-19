@@ -5,7 +5,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
-import emailjs from "@emailjs/browser";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
@@ -37,27 +36,28 @@ export function ContactSection() {
     setSubmitStatus(null);
 
     try {
-      // Replace these with your actual EmailJS credentials
-      const result = await emailjs.send(
-        "service_v2chbhs",      // Replace with your EmailJS Service ID
-        "template_wnste9c",     // Replace with your EmailJS Template ID
-        {
-          from_name: `${form.firstName} ${form.lastName}`,
-          from_email: form.email,
-          message: form.message,
-          to_email: "rothamom22@gmail.com",
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
         },
-        "87JMzSUgz1PrTdgMP"       // Replace with your EmailJS Public Key
-      );
+        body: JSON.stringify(form),
+      });
 
-      console.log("Email sent successfully:", result.text);
-      setSubmitStatus("success");
-      
-      // Clear form after successful submission
-      setForm({ firstName: "", lastName: "", email: "", message: "" });
+      const data = await response.json();
 
-      // Hide success message after 5 seconds
-      setTimeout(() => setSubmitStatus(null), 5000);
+      if (response.ok) {
+        console.log("Email sent successfully:", data);
+        setSubmitStatus("success");
+        
+        // Clear form after successful submission
+        setForm({ firstName: "", lastName: "", email: "", message: "" });
+
+        // Hide success message after 5 seconds
+        setTimeout(() => setSubmitStatus(null), 5000);
+      } else {
+        throw new Error(data.error || 'Failed to send email');
+      }
     } catch (error) {
       console.error("Email send failed:", error);
       setSubmitStatus("error");
@@ -124,6 +124,7 @@ export function ContactSection() {
               transition={{ duration: 0.8 }}
             />
 
+
             {/* Address */}
             <motion.div
               className="flex items-center gap-3 justify-center md:justify-start"
@@ -176,7 +177,7 @@ export function ContactSection() {
                     onChange={handleChange}
                     required
                     disabled={isSubmitting}
-                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
+                    className="w-full  border border-yellow-400 text-white  text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
                   />
                 </motion.div>
 
@@ -194,10 +195,11 @@ export function ContactSection() {
                     onChange={handleChange}
                     required
                     disabled={isSubmitting}
-                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
+                    className="w-full  border border-yellow-400 text-white  text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
                   />
                 </motion.div>
               </div>
+
 
               {/* Email */}
               <motion.div className="flex flex-col gap-2" variants={itemVariants}>
@@ -213,7 +215,7 @@ export function ContactSection() {
                   onChange={handleChange}
                   required
                   disabled={isSubmitting}
-                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
+                  className="w-full  border border-yellow-400 text-white  text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
                 />
               </motion.div>
 
@@ -231,7 +233,7 @@ export function ContactSection() {
                   required
                   disabled={isSubmitting}
                   rows={6}
-                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base min-h-[10rem] p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none disabled:opacity-50"
+                  className="w-full  border border-yellow-400 text-white  text-sm sm:text-base min-h-[10rem] p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none disabled:opacity-50"
                 />
               </motion.div>
 
@@ -254,7 +256,7 @@ export function ContactSection() {
                   exit={{ opacity: 0 }}
                   className="bg-green-500/20 border border-green-500 text-green-400 px-4 py-3 rounded-lg text-sm"
                 >
-                  ✓ Message sent successfully! We'll get back to you soon.
+                  ✓ Message sent successfully! We all get back to you soon.
                 </motion.div>
               )}
               

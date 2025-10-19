@@ -6,8 +6,7 @@ import axios from "axios";
 import { Client } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { motion, AnimatePresence } from "framer-motion";
-import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6";
-import { IoTriangle } from "react-icons/io5";
+import Rank from "@/components/Poduim/rank";
 
 // ===== INTERFACES =====
 interface LeaderboardEntry {
@@ -113,6 +112,9 @@ const WEBSOCKET_CONFIG = {
   url:
     process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
     "https://stackquiz-api.stackquiz.me/api/v1/ws",
+  url:
+    process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+    "https://stackquiz-api.stackquiz.me/ws",
   reconnectDelay: 3000,
   heartbeatIncoming: 4000,
   heartbeatOutgoing: 4000,
@@ -241,57 +243,90 @@ function QuestionTimer({
   }, [timeRemaining, isActive, onTimeUp]);
 
   return (
-    <motion.div
-      animate={{
-        scale: isCritical ? [1, 1.05, 1] : 1,
-      }}
-      transition={{
-        scale: { duration: 0.5, repeat: isCritical ? Infinity : 0 },
-      }}
-      className="relative w-24 h-24 mx-auto mb-4"
-    >
-      <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-        <circle
-          cx="50"
-          cy="50"
-          r="45"
-          stroke="rgba(255,255,255,0.2)"
-          strokeWidth="8"
-          fill="transparent"
-        />
-        <motion.circle
-          cx="50"
-          cy="50"
-          r="45"
-          stroke={isCritical ? "#ef4444" : isWarning ? "#f59e0b" : "#10b981"}
-          strokeWidth="8"
-          fill="transparent"
-          strokeLinecap="round"
-          strokeDasharray={`${2 * Math.PI * 45}`}
-          strokeDashoffset={`${2 * Math.PI * 45 * (1 - percentage / 100)}`}
-          animate={{
-            strokeDashoffset: 2 * Math.PI * 45 * (1 - percentage / 100),
-          }}
-          transition={{ duration: 0.5 }}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center">
-        <motion.span
-          key={timeRemaining}
-          initial={{ scale: 1.2 }}
-          animate={{ scale: 1 }}
-          className={`text-3xl font-black ${
-            isCritical
-              ? "text-red-400"
-              : isWarning
-              ? "text-yellow-400"
-              : "text-white"
-          }`}
+    <div className="relative">
+      {/* Main Timer Display */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{
+          scale: isCritical ? [1, 1.1, 1] : 1,
+          opacity: 1,
+        }}
+        transition={{
+          scale: {
+            duration: 0.5,
+            repeat: isCritical ? Number.POSITIVE_INFINITY : 0,
+          },
+          opacity: { duration: 0.3 },
+        }}
+        className={`relative w-24 h-24 mx-auto mb-4 ${
+          isCritical ? "animate-pulse" : ""
+        }`}
+      >
+        {/* Background Circle */}
+        <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
+          <circle
+            cx="50"
+            cy="50"
+            r="45"
+            stroke="rgba(255,255,255,0.2)"
+            strokeWidth="8"
+            fill="transparent"
+          />
+          {/* Progress Circle */}
+          <motion.circle
+            cx="50"
+            cy="50"
+            r="45"
+            stroke={isCritical ? "#ef4444" : isWarning ? "#f59e0b" : "#10b981"}
+            strokeWidth="8"
+            fill="transparent"
+            strokeLinecap="round"
+            strokeDasharray={`${2 * Math.PI * 45}`}
+            strokeDashoffset={`${2 * Math.PI * 45 * (1 - percentage / 100)}`}
+            initial={{ strokeDashoffset: 2 * Math.PI * 45 }}
+            animate={{
+              strokeDashoffset: 2 * Math.PI * 45 * (1 - percentage / 100),
+            }}
+            transition={{ duration: 0.5, ease: "easeOut" }}
+          />
+        </svg>
+
+        {/* Timer Text */}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <motion.span
+            key={timeRemaining}
+            initial={{ scale: 1.2 }}
+            animate={{ scale: 1 }}
+            className={`text-2xl font-bold ${
+              isCritical
+                ? "text-red-500"
+                : isWarning
+                ? "text-yellow-500"
+                : "text-white"
+            }`}
+          >
+            {timeRemaining}
+          </motion.span>
+        </div>
+      </motion.div>
+
+      {/* Warning Messages */}
+      {showWarning && isWarning && (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
         >
-          {timeRemaining}
-        </motion.span>
-      </div>
-    </motion.div>
+          <p
+            className={`text-sm font-semibold ${
+              isCritical ? "text-red-400" : "text-yellow-400"
+            }`}
+          >
+            {isCritical ? "⚠️ Time's almost up!" : "⏰ Hurry up!"}
+          </p>
+        </motion.div>
+      )}
+    </div>
   );
 }
 
@@ -525,6 +560,7 @@ export default function ParticipantQuizFixed() {
   const router = useRouter();
   const sessionCode = params?.sessionCode as string;
 
+  // Join form state
   const [joined, setJoined] = useState(false);
   const [nickname, setNickname] = useState("");
   const [avatarId, setAvatarId] = useState("");
@@ -532,6 +568,7 @@ export default function ParticipantQuizFixed() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState("");
 
+  // Game state
   const [gameState, setGameState] = useState<any>(null);
   const [status, setStatus] = useState<
     | "LOBBY"
@@ -542,7 +579,7 @@ export default function ParticipantQuizFixed() {
     | "COMPLETED"
     | "END"
   >("LOBBY");
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [currentQuestion, setCurrentQuestion] = useState<any>(null);
   const [questionNumber, setQuestionNumber] = useState<number>(0);
   const [totalQuestions, setTotalQuestions] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<number>(30);
@@ -550,6 +587,7 @@ export default function ParticipantQuizFixed() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [feedback, setFeedback] = useState<any>(null);
 
+  // Enhanced real-time state
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [celebrations, setCelebrations] = useState<ScoreCelebration[]>([]);
   const [currentCelebration, setCurrentCelebration] =
@@ -561,6 +599,7 @@ export default function ParticipantQuizFixed() {
     null
   );
 
+  // Enhanced personal stats
   const [personalScore, setPersonalScore] = useState<number>(0);
   const [personalRank, setPersonalRank] = useState<number>(0);
   const [scoreChange, setScoreChange] = useState<number | undefined>(undefined);
@@ -569,6 +608,11 @@ export default function ParticipantQuizFixed() {
   );
   const [streak, setStreak] = useState<number>(0);
   const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
+
+  // Handle navigation to join-room
+  const handleNavigateToJoinRoom = () => {
+    router.push("/join-room");
+  };
 
   const handleNavigateToJoinRoom = () => {
     router.push("/join-room");
@@ -621,16 +665,7 @@ export default function ParticipantQuizFixed() {
       const total = qmsg.totalQuestions || 0;
       const timeLimit = qmsg.timeLimit || 30;
 
-      // Assign colors and icons to options
-      const optionsWithStyle = (question.options || []).map(
-        (opt: any, idx: number) => ({
-          ...opt,
-          color: OPTION_COLORS[idx % OPTION_COLORS.length],
-          icon: OPTION_ICONS[idx % OPTION_ICONS.length],
-        })
-      );
-
-      setCurrentQuestion({ ...question, options: optionsWithStyle });
+      setCurrentQuestion(question);
       setQuestionNumber(qNumber);
       setTotalQuestions(total);
       setTimeLeft(timeLimit);
@@ -641,7 +676,10 @@ export default function ParticipantQuizFixed() {
       setIsSubmittingAnswer(false);
       setStatus("PLAY");
     },
-    (cmsg) => setStatus("COMPLETED"),
+    (cmsg) => {
+      console.log("🎉 Completion message received:", cmsg);
+      setStatus("COMPLETED");
+    },
     (leaderboardEntries) => {
       setLeaderboard(leaderboardEntries);
 
@@ -679,7 +717,10 @@ export default function ParticipantQuizFixed() {
         setTimeout(() => setRankUpdate(null), 3000);
       }
     },
-    (stats) => setQuestionStats(stats),
+    (stats) => {
+      console.log("📊 Question stats:", stats);
+      setQuestionStats(stats);
+    },
     (scoreUpdate) => {
       if (scoreUpdate.participantId === participantId) {
         setPersonalScore(scoreUpdate.newScore);
@@ -763,6 +804,7 @@ export default function ParticipantQuizFixed() {
   ]);
 
   function handleTimeUp() {
+    console.log("⏰ Time's up! Participant can still answer for base points.");
     setFeedback({ timeUp: true, canStillAnswer: true });
   }
 
@@ -785,6 +827,7 @@ export default function ParticipantQuizFixed() {
     }
   }
 
+  // Handle continue from answer reveal
   function handleContinueFromReveal() {
     setStatus("PLAY");
     setAnswerFeedback(null);
@@ -813,6 +856,8 @@ export default function ParticipantQuizFixed() {
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
+          onClick={handleNavigateToJoinRoom}
+          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
           onClick={handleNavigateToJoinRoom}
           className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
         >
@@ -1020,6 +1065,7 @@ export default function ParticipantQuizFixed() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={handleNavigateToJoinRoom}
+              onClick={handleNavigateToJoinRoom}
               className="w-full py-4 rounded-2xl font-bold text-xl text-blue-900 shadow-lg"
               style={{
                 background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
@@ -1192,6 +1238,7 @@ export default function ParticipantQuizFixed() {
     );
   }
 
+  // Answer reveal phase
   // Answer reveal phase
   if (status === "ANSWER_REVEAL" && answerFeedback) {
     const isCorrect = answerFeedback.isCorrect;

@@ -1,136 +1,190 @@
-"use client";
+"use client"
 
-import { useState, useEffect, useCallback } from "react";
-import { Card, CardContent } from "@/components/ui/card";
-import { Progress } from "@/components/ui/progress";
-import { Badge } from "@/components/ui/badge";
-import { Clock } from "lucide-react";
-import type { Quiz, GameResults } from "@/app/play/[id]/page";
-import { FillBlankQuestion } from "@/components/question-type/fill-blank";
-import Image from "next/image";
-import { FaCircle, FaSquare } from 'react-icons/fa';
-import { IoTriangle } from 'react-icons/io5';
-import { FaDiamond  } from 'react-icons/fa6';
+import { useState, useEffect, useCallback } from "react"
+import { Card, CardContent } from "@/components/ui/card"
+import { Progress } from "@/components/ui/progress"
+import { Badge } from "@/components/ui/badge"
+import { Clock } from "lucide-react"
+import type { Quiz,Question,Option,FillBlankQuestionProps } from "@/types/quiz"
+import { FillBlankQuestion } from "@/components/question-type/fill-blank"
+import Image from "next/image"
+import { FaCircle, FaSquare } from "react-icons/fa"
+import { IoTriangle } from "react-icons/io5"
+import { FaDiamond } from "react-icons/fa6"
 
-interface GameEngineProps {
-  quiz: Quiz;
-  onGameComplete: (results: GameResults) => void;
-  playerNickname: string;
+export interface GameAnswer {
+  questionId: string
+  userAnswer: string | number
+  correct: boolean
+  timeSpent: number
 }
 
-export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineProps) {
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [timeLeft, setTimeLeft] = useState(quiz.questions[0]?.timeLimit || 30);
-  const [score, setScore] = useState(0);
-  const [answers, setAnswers] = useState<GameResults["answers"]>([]);
-  const [showFeedback, setShowFeedback] = useState(false);
-  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false);
-  const [gameStartTime] = useState(Date.now());
-  const [questionStartTime, setQuestionStartTime] = useState(Date.now());
-  const [showTimeUpAlert, setShowTimeUpAlert] = useState(false);
-  const [correctAnswer, setCorrectAnswer] = useState<string>("");
-  const [isMounted, setIsMounted] = useState(false); 
+export interface GameResults {
+  score: number
+  totalQuestions: number
+  timeSpent: number
+  answers: GameAnswer[]
+}
 
-  const currentQuestion = quiz.questions[currentQuestionIndex];
-  const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1;
+interface GameEngineProps {
+  quiz: Quiz
+  onGameComplete: (results: GameResults) => void
+  playerNickname: string
+}
+
+
+export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineProps) {
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(
+    typeof quiz.questions[0] === "object" && quiz.questions[0] !== null && "timeLimit" in quiz.questions[0]
+      ? (quiz.questions[0] as Question).timeLimit
+      : 30
+  )
+  const [score, setScore] = useState(0)
+  const [answers, setAnswers] = useState<GameResults["answers"]>([])
+  const [showFeedback, setShowFeedback] = useState(false)
+  const [lastAnswerCorrect, setLastAnswerCorrect] = useState(false)
+  const [gameStartTime] = useState(Date.now())
+  const [questionStartTime, setQuestionStartTime] = useState(Date.now())
+  const [isTimeUp, setIsTimeUp] = useState(false)
+  const [correctAnswer, setCorrectAnswer] = useState<string>("")
+  const [isMounted, setIsMounted] = useState(false)
+
+  const currentQuestion = typeof quiz.questions[currentQuestionIndex] === "object" && quiz.questions[currentQuestionIndex] !== null
+    ? (quiz.questions[currentQuestionIndex] as Question)
+    : quiz.questions[currentQuestionIndex]
+  const isLastQuestion = currentQuestionIndex === quiz.questions.length - 1
 
   useEffect(() => {
-    setIsMounted(true); // Set to true after mount
-  }, []);
+    setIsMounted(true)
+  }, [])
 
-  const getCorrectAnswer = useCallback((question: typeof currentQuestion) => {
+  const getCorrectAnswer = useCallback((question: Question | string | undefined) => {
+    if (!question) return ""
+    if (typeof question === "string") return question
+
     if (question.type === "MCQ" || question.type === "TF" || question.type === "FB") {
-      const correctOption = question.options.find((opt) => opt.isCorrected);
-      return correctOption ? correctOption.optionText : "";
+      const correctOption = question.options.find((opt: any) => {
+        // options can be either objects like { optionText, isCorrected } or plain strings depending on question type
+        return typeof opt === "object" && opt !== null && "isCorrected" in opt && !!(opt as any).isCorrected
+      })
+      if (!correctOption) return ""
+      if (typeof correctOption === "object" && correctOption !== null && "optionText" in correctOption) {
+        return (correctOption as { optionText: string }).optionText
+      }
+      return String(correctOption)
     }
-    return "";
-  }, []);
+    return ""
+  }, [])
 
   const renderIcon = (icon?: string) => {
     switch (icon) {
       case "circle":
-        return <FaCircle size={36} className="text-white mr-2" />;
+        return <FaCircle size={36} className="text-white mr-2" />
       case "triangle":
-        return <IoTriangle size={36} className="text-white mr-2" />;
+        return <IoTriangle size={36} className="text-white mr-2" />
       case "square":
-        return <FaSquare size={36} className="text-white mr-2" />;
+        return <FaSquare size={36} className="text-white mr-2" />
       case "diamond":
-        return <FaDiamond  size={36} className="text-white mr-2" />;
+        return <FaDiamond size={36} className="text-white mr-2" />
       default:
-        return null;
+        return null
     }
-  };
+  }
 
-  const isAnswerCorrect = useCallback((userAnswer: string | number, question: typeof currentQuestion) => {
-    if (question.type === "MCQ") {
-      const selectedOption = question.options[userAnswer as number];
-      return selectedOption?.isCorrected || false;
-    } else if (question.type === "TF") {
-      const selectedOption = question.options.find(
-        (opt) => opt.optionText.toLowerCase() === String(userAnswer).toLowerCase(),
-      );
-      return selectedOption?.isCorrected || false;
-    } else if (question.type === "FB") {
-      const selectedOption = question.options[userAnswer as number];
-      return selectedOption?.isCorrected || false;
+  const isAnswerCorrect = useCallback((userAnswer: string | number, question: Question) => {
+    if (userAnswer === "" || userAnswer === null || userAnswer === undefined) {
+      return false
     }
-    return false;
-  }, []);
+
+    if (question.type === "MCQ") {
+      const index = typeof userAnswer === "number" ? userAnswer : Number(userAnswer)
+      if (!Number.isInteger(index) || index < 0 || index >= question.options.length) return false
+      const selectedOption = question.options[index]
+      if (typeof selectedOption === "object" && selectedOption !== null && "isCorrected" in selectedOption) {
+        return (selectedOption as Option).isCorrected || false
+      }
+      // If it's a string, treat as incorrect or handle as needed
+      return false
+    } else if (question.type === "TF") {
+      const selectedOption = question.options.find((opt) => {
+        if (typeof opt === "string") {
+          return opt.toLowerCase() === String(userAnswer).toLowerCase()
+        }
+        return (opt as Option).optionText.toLowerCase() === String(userAnswer).toLowerCase()
+      })
+      if (!selectedOption) return false
+      if (typeof selectedOption === "string") {
+        // If options are plain strings and we found a match, treat it as correct.
+        return true
+      }
+      return (selectedOption as Option).isCorrected || false
+    } else if (question.type === "FB") {
+      const index = typeof userAnswer === "number" ? userAnswer : Number(userAnswer)
+      if (!Number.isInteger(index) || index < 0 || index >= question.options.length) return false
+      const selectedOption = question.options[index]
+      if (typeof selectedOption === "object" && selectedOption !== null && "isCorrected" in selectedOption) {
+        return (selectedOption as Option).isCorrected || false
+      }
+      // If it's a string, treat as incorrect or handle as needed
+      return false
+    }
+    return false
+  }, [])
 
   const handleAnswer = useCallback(
     (userAnswer: string | number) => {
-      const timeSpent = Date.now() - questionStartTime;
-      const isCorrect = isAnswerCorrect(userAnswer, currentQuestion);
-      const correctAns = getCorrectAnswer(currentQuestion);
+      const timeSpent = Date.now() - questionStartTime
+      const isTimedOut = userAnswer === "" || userAnswer === null || userAnswer === undefined
+      const isCorrect = !isTimedOut && isAnswerCorrect(userAnswer, currentQuestion as Question)
+      const correctAns = getCorrectAnswer(currentQuestion)
 
-      setLastAnswerCorrect(isCorrect && userAnswer !== "");
-      setCorrectAnswer(correctAns);
-      setShowFeedback(true);
+      setLastAnswerCorrect(isCorrect)
+      setCorrectAnswer(correctAns)
+      setIsTimeUp(isTimedOut)
+      setShowFeedback(true)
 
-      if (isCorrect) {
-        setScore((prev) => prev + currentQuestion.points);
+      if (isCorrect && typeof currentQuestion !== 'string') {
+        setScore((prev) => prev + (currentQuestion as Question).points)
       }
 
       const answerRecord = {
-        questionId: currentQuestion.id,
-        userAnswer,
+        questionId: typeof currentQuestion === "object" && currentQuestion !== null && "id" in currentQuestion
+          ? currentQuestion.id
+          : "",
+        userAnswer: isTimedOut ? "" : userAnswer,
         correct: isCorrect,
         timeSpent,
-      };
+      }
 
-      setAnswers((prev) => [...prev, answerRecord]);
+      setAnswers((prev) => [...prev, answerRecord])
 
-      // Show feedback for 1.5 seconds before moving to the next question
-     setTimeout(() => {
-  if (isLastQuestion) {
-    // Calculate the total time spent in the game
-    const totalTimeSpent = Date.now() - gameStartTime;
-    
-    // Create the result object with score, total questions, and answers
-    const results: GameResults = {
-      score: isCorrect ? score + currentQuestion.points : score,
-      totalQuestions: quiz.questions.length,
-      timeSpent: totalTimeSpent,
-      answers: [...answers, answerRecord],
-    };
+      setTimeout(() => {
+        if (isLastQuestion) {
+          const totalTimeSpent = Date.now() - gameStartTime
 
-        // Complete the game and return results
-        onGameComplete(results);
-    } else {
-          // Move to the next question after a delay
-          setCurrentQuestionIndex((prev) => prev + 1);
+          const results: GameResults = {
+            score: isCorrect && typeof currentQuestion !== "string" ? score + currentQuestion.points : score,
+            totalQuestions: quiz.questions.length,
+            timeSpent: totalTimeSpent,
+            answers: [...answers, answerRecord],
+          }
 
-          // Set the time left for the next question, with a fallback of 30 seconds
-          setTimeLeft(quiz.questions[currentQuestionIndex + 1]?.timeLimit || 30);
-
-          // Reset feedback display and prepare for the next question
-          setShowFeedback(false);
-
-          // Set the start time for the next question
-          setQuestionStartTime(Date.now());
+          onGameComplete(results)
+        } else {
+          setCurrentQuestionIndex((prev) => prev + 1)
+          setTimeLeft(
+            typeof quiz.questions[currentQuestionIndex + 1] === "object" &&
+            quiz.questions[currentQuestionIndex + 1] !== null &&
+            "timeLimit" in (quiz.questions[currentQuestionIndex + 1] as unknown as object)
+              ? ((quiz.questions[currentQuestionIndex + 1] as unknown) as Question).timeLimit
+              : 30
+          )
+          setShowFeedback(false)
+          setIsTimeUp(false)
+          setQuestionStartTime(Date.now())
         }
-      }, 1500); // Wait 1.5 seconds before transitioning to the next question
-
+      }, 1500)
     },
     [
       currentQuestion,
@@ -141,68 +195,78 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
       quiz,
       onGameComplete,
       gameStartTime,
+      currentQuestionIndex,
       isAnswerCorrect,
       getCorrectAnswer,
     ],
-  );
+  )
 
   // Timer countdown
   useEffect(() => {
-    if (showFeedback) return;
+    if (showFeedback) return
 
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
-          setShowTimeUpAlert(true); // Show time up alert
-          handleAnswer(""); // Time's up, submit empty answer
-          return 0;
+          handleAnswer("")
+          return 0
         }
-        return prev - 1;
-      });
-    }, 1000);
+        return prev - 1
+      })
+    }, 1000)
 
-    return () => clearInterval(timer);
-  }, [handleAnswer, showFeedback]);
+    return () => clearInterval(timer)
+  }, [handleAnswer, showFeedback])
 
-  const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100;
-  const totalPossiblePoints = quiz.questions.reduce((acc, q) => acc + q.points, 0);
+  const progress = ((currentQuestionIndex + 1) / quiz.questions.length) * 100
+  const totalPossiblePoints = quiz.questions.reduce((acc, q) => {
+    return typeof q === "object" && q !== null && "points" in q ? acc + (q as Question).points : acc
+  }, 0)
 
-  if (!isMounted) return null; // Ensure client-side rendering
+  if (!isMounted) return null
 
   if (showFeedback) {
     return (
       <div className="container sm:px-2 lg:px-8 py-4 sm:py-2 lg:py-8 flex items-center justify-center min-h-screen">
         <Card
-          className={`w-full max-w-md text-center bg-white ${lastAnswerCorrect ? "animate-pulse-success border-green-500" : "animate-shake-error border-red-500"}`}
-        >
-         <CardContent className="p-4 sm:p-6 lg:p-8">
-          <div
-            className={`w-20 h-20 mx-auto mb-6 rounded-full flex items-center justify-center ${
-              lastAnswerCorrect ? "bg-green-100 text-green-600" : "bg-red-100 text-red-600"
-            }`}
-          >
-            {showTimeUpAlert ? (
-              <Image className="mx-auto mb-0" src="time-up.svg" alt="Time's Up" width={80} height={80} />
-            ) : lastAnswerCorrect ? (
-              <Image className="mx-auto mb-0" src="correct.svg" alt="Banner" width={80} height={80} />
-            ) : (
-              <Image className="mx-auto mb-0" src="wrong.svg" alt="Banner" width={80} height={80} />
-            )}
-          </div>
-          <h2 className={`text-3xl font-bold mb-4 ${lastAnswerCorrect ? "text-green-600" : "text-red-600"}`}>
-            {showTimeUpAlert ? "Time's Up!" : lastAnswerCorrect ? "Correct!" : "Incorrect!"}
-          </h2>
-          <p className="text-muted-foreground text-lg">
-            {showTimeUpAlert
-              ? "You ran out of time. No points were awarded."
+          className={`w-full max-w-md text-center bg-white ${
+            isTimeUp
+              ? "animate-shake-error border-orange-500"
               : lastAnswerCorrect
-              ? `Great job! +${currentQuestion.points} points`
-              : `The correct answer was: ${correctAnswer}`}
-          </p>
-        </CardContent>
+                ? "animate-pulse-success border-green-500"
+                : "animate-shake-error border-red-500"
+          }`}
+        >
+          <CardContent className="p-4 sm:p-6 lg:p-8">
+            <div
+            
+            >
+              {isTimeUp ? (
+                <Image className="mx-auto mb-0" src="timeup.svg" alt="Time's Up" width={100} height={100} />
+              ) : lastAnswerCorrect ? (
+                <Image className="mx-auto mb-0" src="correct.svg" alt="Correct" width={100} height={100} />
+              ) : (
+                <Image className="mx-auto mb-0" src="wrong.svg" alt="Incorrect" width={80} height={80} />
+              )}
+            </div>
+            <h2
+              className={`text-3xl font-bold mb-4 ${
+                isTimeUp ? "text-orange-600" : lastAnswerCorrect ? "text-green-600" : "text-red-600"
+              }`}
+            >
+              {isTimeUp ? "Time's Up!" : lastAnswerCorrect ? "Correct!" : "Incorrect!"}
+            </h2>
+            <p className="text-muted-foreground text-lg">
+              {isTimeUp
+                ? "You ran out of time. No points were awarded."
+                : lastAnswerCorrect
+                  ? `Great job! +${typeof currentQuestion === "object" && "points" in currentQuestion ? currentQuestion.points : 0} points`
+                  : `The correct answer was: ${correctAnswer}`}
+            </p>
+          </CardContent>
         </Card>
       </div>
-    );
+    )
   }
 
   return (
@@ -244,32 +308,34 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
 
         {/* Question */}
         <Card className="bg-white shadow-lg rounded-2xl p-6">
-         <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-          <span className="inline-flex items-center justify-center w-8 h-8 btn-secondary text-white rounded-full text-sm font-bold mr-3">
-            {currentQuestionIndex + 1}
-          </span>
-          {currentQuestion.text.replace(/_/g, " ")}
-        </h2>
+          <h2 className="text-2xl font-semibold text-gray-800 mb-4">
+            <span className="inline-flex items-center justify-center w-8 h-8 btn-secondary text-white rounded-full text-sm font-bold mr-3">
+              {currentQuestionIndex + 1}
+            </span>
+            {typeof currentQuestion === "object" && currentQuestion !== null && "text" in currentQuestion
+              ? currentQuestion.text.replace(/_/g, " ")
+              : ""}
+          </h2>
           <div className="flex gap-3 text-sm mt-[-25px] text-white mb-6">
             <Badge variant="secondary" className=" py-1.5 btn-secondary text-white rounded-full">
-              {currentQuestion.points} pts
+              {typeof currentQuestion === "object" && currentQuestion !== null && "points" in currentQuestion ? currentQuestion.points : ""} pts
             </Badge>
             <Badge variant="outline" className=" py-1.5 text-slate-900 rounded-full">
-              {currentQuestion.timeLimit}s
+              {typeof currentQuestion === "object" && currentQuestion !== null && "timeLimit" in currentQuestion ? currentQuestion.timeLimit : ""}s
             </Badge>
           </div>
 
           {/* Answer Options */}
-          {currentQuestion.type === "MCQ" && (
+          {typeof currentQuestion === "object" && currentQuestion !== null && "type" in currentQuestion && currentQuestion.type === "MCQ" && Array.isArray(currentQuestion.options) && currentQuestion.options.every(opt => typeof opt === "object" && opt !== null && "optionText" in opt) && (
             <div className="grid grid-cols-1 sm:grid-cols-2 mt-[-25px] gap-6">
-              {currentQuestion.options.map((opt, index) => {
+              {(currentQuestion.options as Option[]).map((opt, index) => {
                 const styles = [
                   { color: "bg-yellow-600", icon: "circle" },
                   { color: "bg-red-600", icon: "triangle" },
                   { color: "bg-blue-600", icon: "square" },
                   { color: "bg-green-600", icon: "diamond" },
-                ];
-                const { color, icon } = styles[index % styles.length];
+                ]
+                const { color, icon } = styles[index % styles.length]
 
                 return (
                   <button
@@ -277,44 +343,42 @@ export function GameEngine({ quiz, onGameComplete, playerNickname }: GameEngineP
                     onClick={() => handleAnswer(index)}
                     className={`flex items-center justify-start gap-3 text-white text-lg font-semibold py-6 px-4 rounded-xl shadow-md hover:scale-105 transition-transform duration-300 ${color}`}
                   >
-                    {renderIcon(icon)} {/* Rendering the icon here */}
+                    {renderIcon(icon)}
                     <span>{opt.optionText}</span>
                   </button>
-                );
+                )
               })}
             </div>
           )}
 
-         {currentQuestion.type === "TF" && (
-          <div className="grid grid-cols-2 gap-6">
-            {currentQuestion.options.map((opt, index) => {
-              const isTrue = opt.optionText.toLowerCase() === "true";
-              const styles = [
-                { color: "bg-green-600", icon: "circle" },  // True option, green
-                { color: "bg-red-600", icon: "triangle" },  // False option, red
-              ];
-              const { color, icon } = styles[index % styles.length];
+          {typeof currentQuestion === "object" && currentQuestion !== null && "type" in currentQuestion && currentQuestion.type === "TF" && (
+            <div className="grid grid-cols-2 gap-6">
+              {(currentQuestion.options as (Option | string)[]).map((opt, index) => {
+                const styles = [
+                  { color: "bg-green-600", icon: "circle" },
+                  { color: "bg-red-600", icon: "triangle" },
+                ]
+                const { color, icon } = styles[index % styles.length]
 
-              return (
-                <button
-                  key={index}
-                  onClick={() => handleAnswer(opt.optionText)}
-                  className={`flex items-center justify-start gap-3 text-white text-xl font-semibold py-6 px-4 rounded-xl shadow-md hover:scale-105 transition-transform duration-300 ${color}`}
-                >
-                  {renderIcon(icon)} {/* Render the correct icon */}
-                  <span>{opt.optionText}</span>
-                </button>
-              );
-            })}
-          </div>
-        )}
+                return (
+                  <button
+                    key={index}
+                    onClick={() => handleAnswer(typeof opt === "object" && opt !== null && "optionText" in opt ? (opt as Option).optionText : opt)}
+                    className={`flex items-center justify-start gap-3 text-white text-xl font-semibold py-6 px-4 rounded-xl shadow-md hover:scale-105 transition-transform duration-300 ${color}`}
+                  >
+                    {renderIcon(icon)}
+                    <span>{typeof opt === "object" && opt !== null && "optionText" in opt ? (opt as Option).optionText : String(opt)}</span>
+                  </button>
+                )
+              })}
+            </div>
+          )}
 
-
-          {currentQuestion.type === "FB" && (
+          {typeof currentQuestion === "object" && currentQuestion !== null && "type" in currentQuestion && currentQuestion.type === "FB" && (
             <FillBlankQuestion question={currentQuestion} onAnswer={handleAnswer} timeLeft={timeLeft} />
           )}
         </Card>
       </div>
     </div>
-  );
+  )
 }

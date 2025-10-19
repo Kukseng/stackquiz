@@ -166,7 +166,7 @@ export default function AnalyticsDashboard() {
     console.log(`⏳ Fetching ${range} from API...`)
     setLoading(true)
     try {
-      const res = await fetch(`http://localhost:9999/api/v1/analytics/activity/${range}`, {
+      const res = await fetch(`https://stackquiz-api.stackquiz.me/api/v1/analytics/activity/${range}`, {
         headers: await getAuthHeaders(),
       })
       if (!res.ok) throw new Error(`HTTP ${res.status}`)

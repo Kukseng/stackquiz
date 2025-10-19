@@ -3836,7 +3836,7 @@ export default function ParticipantQuizFixed() {
 
     setIsSubmitting(true)
     try {
-      const res = await axios.post("http://localhost:9999/api/v1/participants/join", {
+      const res = await axios.post("https://stackquiz-api.stackquiz.me/api/v1/participants/join", {
         quizCode: sessionCode,
         nickname: nickname.trim(),
         avatarId: avatarId.trim(),

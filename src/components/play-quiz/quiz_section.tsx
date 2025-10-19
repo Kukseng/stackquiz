@@ -76,7 +76,7 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
   }
   return (
     <div className="container mx-auto px-4 sm:px-6 lg:px-20 py-8 sm:py-10 lg:py-12">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {quizzes.map((quiz) => (
           <Card
             key={quiz.id}
@@ -86,7 +86,7 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
               {quiz.thumbnailUrl && quiz.thumbnailUrl !== "string" && (
                 <div className="w-full h-32 mb-4 rounded-lg overflow-hidden">
                     <Image
-                        src={quiz.thumbnailUrl}
+                        src={quiz.thumbnailUrl && quiz.thumbnailUrl !== "string" ? quiz.thumbnailUrl : "/background/10.png"}
                         width={400}
                         height={200}
                         alt={`${quiz.title} Thumbnail`}
@@ -94,8 +94,8 @@ export function QuizSelection({ onQuizSelect }: QuizSelectionProps) {
                     />  
                 </div>
               )}
-              <CardTitle className="text-xl text-balance">{quiz.title}</CardTitle>
-              <CardDescription className="text-pretty">{quiz.description}</CardDescription>
+              <CardTitle className="text-xl text-balance line-clamp-1">{quiz.title}</CardTitle>
+              <CardDescription className="text-pretty line-clamp-1">{quiz.description}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-wrap gap-2">

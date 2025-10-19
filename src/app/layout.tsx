@@ -6,6 +6,8 @@ import { LanguageProvider } from "../context/LanguageContext";
 import { Provider } from "react-redux";
 import { store } from "../lib/store";
 import { SessionProvider } from "next-auth/react";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useState } from "react";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -23,6 +25,18 @@ export default function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
+  const [queryClient] = useState(() => new QueryClient({
+    defaultOptions: {
+      queries: {
+        refetchOnWindowFocus: true,
+        refetchOnMount: true,
+        refetchOnReconnect: true,
+        staleTime: 0, // Always fetch fresh data
+        retry: 1,
+      },
+    },
+  }));
+
   return (
     <html lang="en" className={`${dmSans.variable} antialiased`}>
       <body className="cosmic-bg overflow-hidden">

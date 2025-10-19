@@ -292,7 +292,6 @@ function ProfileContent() {
       } catch (sessionErr) {
         console.warn("⚠️ Session update failed, but profile was saved:", sessionErr);
         alert("✅ Profile updated! Refreshing page to sync all components...");
-        setTimeout(() => window.location.reload(), 1000);
       }
 
     } catch (err) {

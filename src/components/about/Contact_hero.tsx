@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
 import { motion } from "framer-motion";
 import { useLanguage } from "@/context/LanguageContext";
+import emailjs from "@emailjs/browser";
 
 import en from "@/locales/en.json";
 import kh from "@/locales/km.json";
@@ -21,15 +22,51 @@ export function ContactSection() {
     message: "",
   });
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitStatus, setSubmitStatus] = useState<"success" | "error" | null>(null);
+
   const handleChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e: FormEvent) => {
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", form);
+    setIsSubmitting(true);
+    setSubmitStatus(null);
+
+    try {
+      // Replace these with your actual EmailJS credentials
+      const result = await emailjs.send(
+        "service_v2chbhs",      // Replace with your EmailJS Service ID
+        "template_wnste9c",     // Replace with your EmailJS Template ID
+        {
+          from_name: `${form.firstName} ${form.lastName}`,
+          from_email: form.email,
+          message: form.message,
+          to_email: "rothamom22@gmail.com",
+        },
+        "87JMzSUgz1PrTdgMP"       // Replace with your EmailJS Public Key
+      );
+
+      console.log("Email sent successfully:", result.text);
+      setSubmitStatus("success");
+      
+      // Clear form after successful submission
+      setForm({ firstName: "", lastName: "", email: "", message: "" });
+
+      // Hide success message after 5 seconds
+      setTimeout(() => setSubmitStatus(null), 5000);
+    } catch (error) {
+      console.error("Email send failed:", error);
+      setSubmitStatus("error");
+
+      // Hide error message after 5 seconds
+      setTimeout(() => setSubmitStatus(null), 5000);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const containerVariants = {
@@ -137,7 +174,9 @@ export function ContactSection() {
                     placeholder={t.contact.placeholder.firstName}
                     value={form.firstName}
                     onChange={handleChange}
-                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    required
+                    disabled={isSubmitting}
+                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
                   />
                 </motion.div>
 
@@ -153,7 +192,9 @@ export function ContactSection() {
                     placeholder={t.contact.placeholder.lastName}
                     value={form.lastName}
                     onChange={handleChange}
-                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                    required
+                    disabled={isSubmitting}
+                    className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
                   />
                 </motion.div>
               </div>
@@ -170,7 +211,9 @@ export function ContactSection() {
                   placeholder={t.contact.placeholder.email}
                   value={form.email}
                   onChange={handleChange}
-                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400"
+                  required
+                  disabled={isSubmitting}
+                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base h-12 pl-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 disabled:opacity-50"
                 />
               </motion.div>
 
@@ -185,20 +228,46 @@ export function ContactSection() {
                   placeholder={t.contact.placeholder.message}
                   value={form.message}
                   onChange={handleChange}
+                  required
+                  disabled={isSubmitting}
                   rows={6}
-                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base min-h-[10rem] p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none"
+                  className="w-full bg-transparent border border-yellow-400 text-white placeholder:text-gray-400 text-sm sm:text-base min-h-[10rem] p-4 rounded-lg focus:outline-none focus:ring-2 focus:ring-yellow-400 resize-none disabled:opacity-50"
                 />
               </motion.div>
 
               {/* Submit Button */}
               <motion.button
                 type="submit"
-                className="w-full sm:w-auto bg-yellow-400 btn-text btn-secondary text-black font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-yellow-300 transition-all text-base sm:text-lg"
-                whileHover={{ scale: 0.98 }}
-                whileTap={{ scale: 0.95 }}
+                disabled={isSubmitting}
+                className="w-full sm:w-auto bg-yellow-400 btn-text btn-secondary text-black font-semibold px-8 py-3 rounded-xl shadow-md hover:bg-yellow-300 transition-all text-base sm:text-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                whileHover={!isSubmitting ? { scale: 0.98 } : {}}
+                whileTap={!isSubmitting ? { scale: 0.95 } : {}}
               >
-                {t.contact.button}
+                {isSubmitting ? "Sending..." : t.contact.button}
               </motion.button>
+
+              {/* Status Messages */}
+              {submitStatus === "success" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-green-500/20 border border-green-500 text-green-400 px-4 py-3 rounded-lg text-sm"
+                >
+                  ✓ Message sent successfully! We'll get back to you soon.
+                </motion.div>
+              )}
+              
+              {submitStatus === "error" && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0 }}
+                  className="bg-red-500/20 border border-red-500 text-red-400 px-4 py-3 rounded-lg text-sm"
+                >
+                  ✗ Failed to send message. Please try again or email us directly.
+                </motion.div>
+              )}
             </motion.form>
           </CardContent>
         </Card>

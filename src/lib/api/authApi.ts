@@ -1,8 +1,6 @@
+
 import { RegisterRequest, RegisterResponse, LoginResponse, LoginRequest } from "./types/auth";
 import { baseApi } from "./baseApi";
-
-// Define Login types
-
 
 export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
@@ -13,7 +11,7 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Auth"],
+      invalidatesTags: ["User"],
     }),
 
     // Login
@@ -23,9 +21,22 @@ export const authApi = baseApi.injectEndpoints({
         method: "POST",
         body,
       }),
-      invalidatesTags: ["Auth"],
+      invalidatesTags: ["User"],
+    }),
+
+    // Logout (optional)
+    logout: builder.mutation<void, void>({
+      query: () => ({
+        url: "auth/logout",
+        method: "POST",
+      }),
+      invalidatesTags: ["User", "UserQuizzes"],
     }),
   }),
 });
 
-export const { useRegisterMutation, useLoginMutation } = authApi;
+export const { 
+  useRegisterMutation, 
+  useLoginMutation,
+  useLogoutMutation 
+} = authApi;

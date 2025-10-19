@@ -16,6 +16,7 @@ import {
   Settings,
 } from "lucide-react";
 import { usePathname, useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -26,9 +27,49 @@ interface DashboardLayoutProps {
 const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [profile, setProfile] = useState<any>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+  const { data: session } = useSession();
+
+  const API = process.env.NEXT_PUBLIC_API_URL;
+
+  // Fetch user profile to get avatarUrl
+  useEffect(() => {
+    const fetchProfile = async () => {
+      if (!session?.apiAccessToken) return;
+      
+      try {
+        const res = await fetch(`${API}/users/me`, {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${session.apiAccessToken}`,
+            Accept: "*/*",
+          },
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setProfile(data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch profile:", err);
+      }
+    };
+
+    if (session?.apiAccessToken) {
+      fetchProfile();
+    }
+  }, [session?.apiAccessToken, API]);
+
+  // Get avatar URL with priority: profile.avatarUrl -> session -> DiceBear -> fallback
+  const avatarUrl = 
+    profile?.avatarUrl || 
+    session?.user?.image ||
+    (session?.user?.name 
+      ? `https://api.dicebear.com/7.x/bottts/svg?seed=${encodeURIComponent(session.user.name)}`
+      : "/avatar2.svg");
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -72,9 +113,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
     return pathname.startsWith(path);
   };
 
-  //Redirect directly to logout page
   const handleLogout = () => {
-    router.push("/logout");
+    router.push("/dashboard/logout");
   };
 
   const Sidebar = ({
@@ -96,6 +136,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
         className={`
         fixed lg:static inset-y-0 left-0 z-50 lg:z-auto
         w-64 bg-white shadow-lg transform transition-transform duration-300 ease-in-out
+        flex flex-col
         ${isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"}
       `}
       >
@@ -136,7 +177,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 onClick={() => setSidebarOpen(false)}
                 className={`flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg transition-all duration-200 ${
                   isActiveRoute(item.path)
-                    ? "btn-secondary btn-text  shadow-lg"
+                    ? "btn-secondary btn-text shadow-lg"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
@@ -146,12 +187,45 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 </span>
               </Link>
             ))}
+
+            {/* Mobile-only: Profile & Notifications */}
+            <div className="lg:hidden pt-4 mt-4 border-t border-gray-200 space-y-2">
+              <button
+                onClick={() => {
+                  router.push("/dashboard/notifications");
+                  setSidebarOpen(false);
+                }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 w-full transition-all duration-200"
+              >
+                <Bell className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium text-base">Notifications</span>
+              </button>
+
+              <button
+                onClick={() => {
+                  router.push("/dashboard/profile");
+                  setSidebarOpen(false);
+                }}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-100 w-full transition-all duration-200"
+              >
+                <User className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium text-base">Profile</span>
+              </button>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 w-full transition-all duration-200"
+              >
+                <LogOut className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium text-base">Logout</span>
+              </button>
+            </div>
           </div>
         </nav>
 
-        {/* 📘 Need Help Card - bottom left */}
-        <div className="absolute bottom-4 left-0 w-full px-3 sm:px-4">
-          <div className="btn-secondary btn-text  rounded-2xl p-5  shadow-lg hover:shadow-xl transition-all">
+        {/* 📘 Need Help Card - bottom */}
+        <div className="p-3 sm:p-4 mt-auto">
+          <div className="btn-secondary btn-text rounded-2xl p-5 shadow-lg hover:shadow-xl transition-all">
             <h4 className="font-semibold text-center text-base sm:text-lg mb-4">
               Need help?
             </h4>
@@ -203,6 +277,8 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                   ? "Activity"
                   : pathname === "/dashboard/profile"
                   ? "Profile"
+                  : pathname === "/dashboard/notifications"
+                  ? "Notifications"
                   : "Dashboard"}
               </h1>
             </div>
@@ -230,38 +306,54 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <span className="sm:hidden text-xs">Create</span>
               </Link>
 
-              {/* 👇 Avatar Dropdown */}
-              <div className="relative" ref={dropdownRef}>
-                <div
-                  onClick={() => setDropdownOpen(!dropdownOpen)}
-                  className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-500 rounded-full flex items-center justify-center cursor-pointer hover:bg-yellow-600 transition"
+              {/* Desktop-only: Avatar Dropdown & Bell */}
+              <div className="hidden lg:flex items-center gap-4">
+                <button 
+                  onClick={() => router.push("/dashboard/notifications")}
+                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
                 >
-                  <User className="text-white w-5 h-5" />
-                </div>
+                  <Bell className="w-6 h-6 text-gray-600" />
+                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                </button>
 
-                {dropdownOpen && (
-                  <div className="absolute right-0 mt-2 w-44 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                    <button
-                      onClick={() => {
-                        router.push("/dashboard/profile");
-                        setDropdownOpen(false);
-                      }}
-                      className="w-full flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition"
-                    >
-                      <Settings className="w-4 h-4 mr-2" /> Profile Settings
-                    </button>
-                    <hr className="my-1 border-gray-200" />
-                    <button
-                      onClick={handleLogout}
-                      className="w-full flex items-center px-4 py-2 text-sm text-red-600 hover:bg-red-100 transition"
-                    >
-                      <LogOut className="w-4 h-4 mr-2" /> Logout
-                    </button>
+                <div className="relative" ref={dropdownRef}>
+                  <div
+                    onClick={() => setDropdownOpen(!dropdownOpen)}
+                    className="flex items-center hover:scale-105 cursor-pointer"
+                  >
+                    <Image
+                      src={avatarUrl}
+                      alt="User Avatar"
+                      width={40}
+                      height={40}
+                      className="rounded-full border-2 border-yellow-400 shadow-md"
+                      unoptimized
+                    />
+
                   </div>
-                )}
-              </div>
 
-              <Bell className="w-5 h-5 sm:w-6 sm:h-6 text-gray-600" />
+                  {dropdownOpen && (
+                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                      <button
+                        onClick={() => {
+                          router.push("/dashboard/profile");
+                          setDropdownOpen(false);
+                        }}
+                        className="w-full flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+                      >
+                        <Settings className="w-4 h-4 mr-3" /> Profile Settings
+                      </button>
+                      <hr className="my-1 border-gray-200" />
+                      <button
+                        onClick={handleLogout}
+                        className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
+                      >
+                        <LogOut className="w-4 h-4 mr-3" /> Logout
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
         </header>

@@ -44,6 +44,7 @@ const DataTable = () => {
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
+  const [dropdownPosition, setDropdownPosition] = useState<'bottom' | 'top'>('bottom')
   const [deleteModalOpen, setDeleteModalOpen] = useState(false)
   const [quizToDelete, setQuizToDelete] = useState<{ id: string; title: string } | null>(null)
 
@@ -99,6 +100,7 @@ const DataTable = () => {
         const token = (session as any)?.apiAccessToken
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
         
+        // Try the correct endpoint first
         let response = await fetch(`${apiUrl}/quizzes/users/me`, {
           method: 'GET',
           headers: {
@@ -108,6 +110,7 @@ const DataTable = () => {
           cache: 'no-store'
         })
 
+        // Fallback to alternative endpoints if first fails
         if (!response.ok) {
           response = await fetch(`${apiUrl}/quizzes?userId=me`, {
             method: 'GET',
@@ -160,8 +163,51 @@ const DataTable = () => {
     return categories.map(c => c.name).join(', ')
   }
 
+  const refetch = () => {
+    const fetchQuizzes = async () => {
+      if (!isAuthed) return
+
+      try {
+        setIsLoading(true)
+        setError(null)
+
+        const token = (session as any)?.apiAccessToken
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
+        
+        const response = await fetch(`${apiUrl}/quizzes/users/me`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          cache: 'no-store'
+        })
+
+        if (!response.ok) throw new Error(`Failed to fetch quizzes: ${response.status}`)
+
+        const data = await response.json()
+        const quizzesArray = Array.isArray(data) ? data : (data.quizzes || data.data || [])
+        
+        // Add favorite status to each quiz
+        const quizzesWithFavorites = quizzesArray.map((quiz: Quiz) => ({
+          ...quiz,
+          isFavorite: favoriteIds.has(quiz.id)
+        }))
+        
+        setQuizzes(quizzesWithFavorites)
+      } catch (err) {
+        console.error('Error fetching quizzes:', err)
+        setError(err instanceof Error ? err.message : 'Failed to load quizzes')
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchQuizzes()
+  }
+
   const getFilteredQuizzes = () => {
-    let filtered = quizzes
+    let filtered = [...quizzes]
 
     switch (activeTab) {
       case 'recent':
@@ -173,6 +219,7 @@ const DataTable = () => {
         filtered = filtered.filter(q => q.status === 'DRAFT')
         break
       case 'favorites':
+        // Show both published AND draft favorites
         filtered = filtered.filter(q => favoriteIds.has(q.id))
         break
     }
@@ -196,7 +243,7 @@ const DataTable = () => {
   const tabs: TabItem[] = [
     { id: 'recent', label: 'Recent', count: quizzes.filter(q => q.status === 'PUBLISHED').length },
     { id: 'draft', label: 'Draft', count: quizzes.filter(q => q.status === 'DRAFT').length },
-    { id: 'favorites', label: 'Favorites', count: favoriteIds.size }
+    { id: 'favorites', label: 'Favorites', count: quizzes.filter(q => favoriteIds.has(q.id)).length }
   ]
 
   const handleSelectAll = () => {
@@ -305,8 +352,29 @@ const DataTable = () => {
     }
   }
 
-  const toggleDropdown = (quizId: string) => {
-    setOpenDropdownId(openDropdownId === quizId ? null : quizId)
+  const toggleDropdown = (quizId: string, event?: React.MouseEvent) => {
+    if (openDropdownId === quizId) {
+      setOpenDropdownId(null)
+      return
+    }
+
+    // Calculate if dropdown should open above or below
+    if (event) {
+      const buttonRect = event.currentTarget.getBoundingClientRect()
+      const viewportHeight = window.innerHeight
+      const spaceBelow = viewportHeight - buttonRect.bottom
+      const spaceAbove = buttonRect.top
+      const dropdownHeight = 280 // Approximate height of dropdown
+
+      // If not enough space below but more space above, open upward
+      if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+        setDropdownPosition('top')
+      } else {
+        setDropdownPosition('bottom')
+      }
+    }
+
+    setOpenDropdownId(quizId)
   }
 
   useEffect(() => {
@@ -357,6 +425,40 @@ const DataTable = () => {
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-gray-600">Loading your quizzes...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12">
+        <div className="text-center max-w-md mx-auto">
+          <div className="mx-auto h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
+            <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+            </svg>
+          </div>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Failed to Load Quizzes</h3>
+          <p className="text-gray-600 mb-6">{error}</p>
+          
+          <div className="flex flex-col gap-3">
+            <button
+              onClick={refetch}
+              className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-medium"
+            >
+              Try Again
+            </button>
+            
+            {!isAuthed && (
+              <button
+                onClick={() => router.push('/login')}
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors font-medium"
+              >
+                Sign In
+              </button>
+            )}
+          </div>
         </div>
       </div>
     )
@@ -433,6 +535,14 @@ const DataTable = () => {
                 <Grid className="h-4 w-4" />
               </button>
             </div>
+
+            <button 
+              onClick={() => router.push('/quizbuilder')}
+              className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+            >
+              <Plus className="h-4 w-4" />
+              New Quiz
+            </button>
           </div>
         </div>
       </div>
@@ -471,43 +581,62 @@ const DataTable = () => {
                       <button 
                         onClick={(e) => {
                           e.stopPropagation()
-                          toggleDropdown(quiz.id)
+                          toggleDropdown(quiz.id, e)
                         }}
-                        className="p-2 bg-white/80 backdrop-blur-sm rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white transition-colors shadow-lg"
+                        className="p-2 bg-white/90 backdrop-blur-sm rounded-lg text-gray-600 hover:text-gray-900 hover:bg-white transition-all duration-200 shadow-md hover:shadow-lg"
                       >
                         <MoreHorizontal className="h-4 w-4" />
                       </button>
                       {openDropdownId === quiz.id && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                          <button
-                            onClick={() => handleView(quiz.id)}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          >
-                            <Eye className="h-4 w-4" />
-                            View Details
-                          </button>
-                          <button
-                            onClick={() => handleEdit(quiz.id)}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          >
-                            <Edit className="h-4 w-4" />
-                            Edit Quiz
-                          </button>
-                          <button
-                            onClick={() => handleToggleFavorite(quiz.id, favoriteIds.has(quiz.id))}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                          >
-                            <Heart className={`h-4 w-4 ${favoriteIds.has(quiz.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                            {favoriteIds.has(quiz.id) ? 'Remove from Favorites' : 'Add to Favorites'}
-                          </button>
+                        <div className={`absolute right-0 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20 animate-in fade-in duration-200 ${
+                          dropdownPosition === 'top' 
+                            ? 'bottom-full mb-2 slide-in-from-bottom-2' 
+                            : 'top-full mt-2 slide-in-from-top-2'
+                        }`}>
+                          <div className="px-3 py-2 border-b border-gray-100">
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</p>
+                          </div>
+                          <div className="py-1">
+                            <button
+                              onClick={() => handleView(quiz.id)}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                <Eye className="h-4 w-4 text-blue-600" />
+                              </div>
+                              <span className="font-medium">View Details</span>
+                            </button>
+                            <button
+                              onClick={() => handleEdit(quiz.id)}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors">
+                                <Edit className="h-4 w-4 text-purple-600" />
+                              </div>
+                              <span className="font-medium">Edit Quiz</span>
+                            </button>
+                            <button
+                              onClick={() => handleToggleFavorite(quiz.id, quiz.isFavorite || false)}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 transition-colors group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center transition-colors">
+                                <Heart className={`h-4 w-4 ${quiz.isFavorite ? 'fill-pink-600 text-pink-600' : 'text-pink-600'}`} />
+                              </div>
+                              <span className="font-medium">{quiz.isFavorite ? 'Remove Favorite' : 'Add Favorite'}</span>
+                            </button>
+                          </div>
                           <div className="border-t border-gray-100 my-1"></div>
-                          <button
-                            onClick={() => openDeleteModal(quiz)}
-                            className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                            Delete Quiz
-                          </button>
+                          <div className="py-1">
+                            <button
+                              onClick={() => openDeleteModal(quiz)}
+                              className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group"
+                            >
+                              <div className="w-8 h-8 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center transition-colors">
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </div>
+                              <span className="font-semibold">Delete Quiz</span>
+                            </button>
+                          </div>
                         </div>
                       )}
                     </div>
@@ -524,6 +653,11 @@ const DataTable = () => {
                   </p>
                   
                   <div className="flex flex-wrap gap-2 mb-4">
+                    {quiz.status === 'DRAFT' && (
+                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                        DRAFT
+                      </span>
+                    )}
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(quiz.difficulty)}`}>
                       {quiz.difficulty}
                     </span>
@@ -562,6 +696,7 @@ const DataTable = () => {
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Visibility</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Last Modified</th>
                   <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
@@ -600,6 +735,17 @@ const DataTable = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4">
+                      {quiz.status === 'DRAFT' ? (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                          DRAFT
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
+                          PUBLISHED
+                        </span>
+                      )}
+                    </td>
+                    <td className="px-6 py-4">
                       <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getVisibilityBadge(quiz.visibility)}`}>
                         {getVisibilityIcon(quiz.visibility)} {quiz.visibility}
                       </span>
@@ -610,43 +756,62 @@ const DataTable = () => {
                         <button 
                           onClick={(e) => {
                             e.stopPropagation()
-                            toggleDropdown(quiz.id)
+                            toggleDropdown(quiz.id, e)
                           }}
-                          className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                          className="p-2.5 text-gray-400 hover:text-gray-600 hover:bg-gray-50 rounded-lg transition-all duration-200"
                         >
                           <MoreHorizontal className="h-5 w-5" />
                         </button>
                         {openDropdownId === quiz.id && (
-                          <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                            <button
-                              onClick={() => handleView(quiz.id)}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                              <Eye className="h-4 w-4" />
-                              View Details
-                            </button>
-                            <button
-                              onClick={() => handleEdit(quiz.id)}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                              <Edit className="h-4 w-4" />
-                              Edit Quiz
-                            </button>
-                            <button
-                              onClick={() => handleToggleFavorite(quiz.id, favoriteIds.has(quiz.id))}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                            >
-                              <Heart className={`h-4 w-4 ${favoriteIds.has(quiz.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                              {favoriteIds.has(quiz.id) ? 'Remove from Favorites' : 'Add to Favorites'}
-                            </button>
+                          <div className={`absolute right-0 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20 animate-in fade-in duration-200 ${
+                            dropdownPosition === 'top' 
+                              ? 'bottom-full mb-2 slide-in-from-bottom-2' 
+                              : 'top-full mt-2 slide-in-from-top-2'
+                          }`}>
+                            <div className="px-3 py-2 border-b border-gray-100">
+                              <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</p>
+                            </div>
+                            <div className="py-1">
+                              <button
+                                onClick={() => handleView(quiz.id)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                  <Eye className="h-4 w-4 text-blue-600" />
+                                </div>
+                                <span className="font-medium">View Details</span>
+                              </button>
+                              <button
+                                onClick={() => handleEdit(quiz.id)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors group"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors">
+                                  <Edit className="h-4 w-4 text-purple-600" />
+                                </div>
+                                <span className="font-medium">Edit Quiz</span>
+                              </button>
+                              <button
+                                onClick={() => handleToggleFavorite(quiz.id, quiz.isFavorite || false)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 transition-colors group"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center transition-colors">
+                                  <Heart className={`h-4 w-4 ${quiz.isFavorite ? 'fill-pink-600 text-pink-600' : 'text-pink-600'}`} />
+                                </div>
+                                <span className="font-medium">{quiz.isFavorite ? 'Remove Favorite' : 'Add Favorite'}</span>
+                              </button>
+                            </div>
                             <div className="border-t border-gray-100 my-1"></div>
-                            <button
-                              onClick={() => openDeleteModal(quiz)}
-                              className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                              Delete Quiz
-                            </button>
+                            <div className="py-1">
+                              <button
+                                onClick={() => openDeleteModal(quiz)}
+                                className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group"
+                              >
+                                <div className="w-8 h-8 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center transition-colors">
+                                  <Trash2 className="h-4 w-4 text-red-600" />
+                                </div>
+                                <span className="font-semibold">Delete Quiz</span>
+                              </button>
+                            </div>
                           </div>
                         )}
                       </div>
@@ -697,43 +862,62 @@ const DataTable = () => {
                           <button 
                             onClick={(e) => {
                               e.stopPropagation()
-                              toggleDropdown(quiz.id)
+                              toggleDropdown(quiz.id, e)
                             }}
-                            className="text-gray-400 hover:text-gray-600 p-1"
+                            className="text-gray-400 hover:text-gray-600 hover:bg-gray-50 p-1.5 rounded-lg transition-all duration-200"
                           >
                             <MoreHorizontal className="h-5 w-5" />
                           </button>
                           {openDropdownId === quiz.id && (
-                            <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
-                              <button
-                                onClick={() => handleView(quiz.id)}
-                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                              >
-                                <Eye className="h-4 w-4" />
-                                View Details
-                              </button>
-                              <button
-                                onClick={() => handleEdit(quiz.id)}
-                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                              >
-                                <Edit className="h-4 w-4" />
-                                Edit Quiz
-                              </button>
-                              <button
-                                onClick={() => handleToggleFavorite(quiz.id, favoriteIds.has(quiz.id))}
-                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50"
-                              >
-                                <Heart className={`h-4 w-4 ${favoriteIds.has(quiz.id) ? 'fill-red-500 text-red-500' : ''}`} />
-                                {favoriteIds.has(quiz.id) ? 'Remove from Favorites' : 'Add to Favorites'}
-                              </button>
+                            <div className={`absolute right-0 w-56 bg-white rounded-xl shadow-xl border border-gray-100 py-2 z-20 animate-in fade-in duration-200 ${
+                              dropdownPosition === 'top' 
+                                ? 'bottom-full mb-2 slide-in-from-bottom-2' 
+                                : 'top-full mt-2 slide-in-from-top-2'
+                            }`}>
+                              <div className="px-3 py-2 border-b border-gray-100">
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider">Actions</p>
+                              </div>
+                              <div className="py-1">
+                                <button
+                                  onClick={() => handleView(quiz.id)}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-blue-50 hover:text-blue-700 transition-colors group"
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-blue-50 group-hover:bg-blue-100 flex items-center justify-center transition-colors">
+                                    <Eye className="h-4 w-4 text-blue-600" />
+                                  </div>
+                                  <span className="font-medium">View Details</span>
+                                </button>
+                                <button
+                                  onClick={() => handleEdit(quiz.id)}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-purple-50 hover:text-purple-700 transition-colors group"
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-purple-50 group-hover:bg-purple-100 flex items-center justify-center transition-colors">
+                                    <Edit className="h-4 w-4 text-purple-600" />
+                                  </div>
+                                  <span className="font-medium">Edit Quiz</span>
+                                </button>
+                                <button
+                                  onClick={() => handleToggleFavorite(quiz.id, quiz.isFavorite || false)}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-700 transition-colors group"
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-pink-50 group-hover:bg-pink-100 flex items-center justify-center transition-colors">
+                                    <Heart className={`h-4 w-4 ${quiz.isFavorite ? 'fill-pink-600 text-pink-600' : 'text-pink-600'}`} />
+                                  </div>
+                                  <span className="font-medium">{quiz.isFavorite ? 'Remove Favorite' : 'Add Favorite'}</span>
+                                </button>
+                              </div>
                               <div className="border-t border-gray-100 my-1"></div>
-                              <button
-                                onClick={() => openDeleteModal(quiz)}
-                                className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                                Delete Quiz
-                              </button>
+                              <div className="py-1">
+                                <button
+                                  onClick={() => openDeleteModal(quiz)}
+                                  className="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-colors group"
+                                >
+                                  <div className="w-8 h-8 rounded-lg bg-red-50 group-hover:bg-red-100 flex items-center justify-center transition-colors">
+                                    <Trash2 className="h-4 w-4 text-red-600" />
+                                  </div>
+                                  <span className="font-semibold">Delete Quiz</span>
+                                </button>
+                              </div>
                             </div>
                           )}
                         </div>
@@ -744,6 +928,11 @@ const DataTable = () => {
                       </p>
 
                       <div className="flex flex-wrap gap-2 mb-3">
+                        {quiz.status === 'DRAFT' && (
+                          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
+                            DRAFT
+                          </span>
+                        )}
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(quiz.difficulty)}`}>
                           {quiz.difficulty}
                         </span>
@@ -777,7 +966,7 @@ const DataTable = () => {
               : activeTab === 'draft'
               ? "Start creating a quiz and save it as draft to see it here."
               : activeTab === 'favorites'
-              ? "Mark quizzes as favorites to see them here."
+              ? "Mark quizzes (including drafts) as favorites to see them here."
               : "Create your first quiz to get started!"}
           </p>
           <button 
@@ -792,7 +981,7 @@ const DataTable = () => {
 
       {/* Delete Confirmation Modal */}
       {deleteModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">
             <div className="flex items-center justify-center w-12 h-12 rounded-full bg-red-100 mb-4">
               <Trash2 className="h-6 w-6 text-red-600" />

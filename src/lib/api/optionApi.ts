@@ -1,72 +1,79 @@
 import { baseApi } from "./baseApi";
+
 export interface Option {
   id: string;
   optionText: string;
-  optionOrder: number;
-  createdAt: string;
   isCorrected: boolean;
+  questionId: string;
 }
 
-export interface CreateOptionRequest {
+export interface OptionRequest {
   optionText: string;
   isCorrected: boolean;
-  questionId?: string;
+  questionId: string;
 }
 
-export interface UpdateOptionRequest {
-  optionText?: string;
-  optionOrder?: number;
-  isCorrected?: boolean;
+export interface OptionUpdateRequest {
+  optionText: string;
+  isCorrected: boolean;
 }
 
-export const optionApi =  baseApi.injectEndpoints({
+export const optionApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
-    // Get all
-    getOptions: builder.query<Option[], void>({
+    // GET /api/v1/options - Get all options
+    getAllOptions: builder.query<Option[], void>({
       query: () => `/options`,
       providesTags: ["Option"],
     }),
 
-    //Get options
-    getOptionsByQuestion: builder.query<Option[], string>({
+    // GET /api/v1/options/questions/{questionId}/public - Get options by questionId
+    getOptionsByQuestionId: builder.query<Option[], string>({
       query: (questionId) => `/options/questions/${questionId}/public`,
-      providesTags: (result, error, questionId) => [{ type: "Option", id: questionId }],
+      providesTags: (result, error, questionId) => [
+        { type: "Option", id: questionId }
+      ],
     }),
 
-    //Add options
-    addOptionsToQuestion: builder.mutation<Option[], { questionId: string; data: CreateOptionRequest[] }>({
+    // POST /api/v1/options/questions/{questionId} - Add options to a question
+    addOptionsToQuestion: builder.mutation<Option[], { questionId: string; data: OptionRequest[] }>({
       query: ({ questionId, data }) => ({
         url: `/options/questions/${questionId}`,
         method: "POST",
         body: data,
       }),
-      invalidatesTags: ["Option"],
+      invalidatesTags: (result, error, { questionId }) => [
+        { type: "Option", id: questionId },
+        "Option",
+        "Question",
+        "Quiz",
+        "UserQuizzes"
+      ],
     }),
 
-    //Update an option
-    updateOption: builder.mutation<Option, { optionId: string; data: UpdateOptionRequest }>({
+    // PUT /api/v1/options/{optionId} - Update an option
+    updateOption: builder.mutation<Option, { optionId: string; data: OptionUpdateRequest }>({
       query: ({ optionId, data }) => ({
         url: `/options/${optionId}`,
         method: "PUT",
         body: data,
       }),
-      invalidatesTags: (result, error, { optionId }) => [{ type: "Option", id: optionId }],
+      invalidatesTags: ["Option", "Question", "Quiz", "UserQuizzes"],
     }),
 
-    //Delete an option
+    // DELETE /api/v1/options/{optionId} - Delete an option
     deleteOption: builder.mutation<void, string>({
       query: (optionId) => ({
         url: `/options/${optionId}`,
         method: "DELETE",
       }),
-      invalidatesTags: (result, error, optionId) => [{ type: "Option", id: optionId }],
+      invalidatesTags: ["Option", "Question", "Quiz", "UserQuizzes"],
     }),
   }),
 });
 
 export const {
-  useGetOptionsQuery,
-  useGetOptionsByQuestionQuery,
+  useGetAllOptionsQuery,
+  useGetOptionsByQuestionIdQuery,
   useAddOptionsToQuestionMutation,
   useUpdateOptionMutation,
   useDeleteOptionMutation,

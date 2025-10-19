@@ -19,6 +19,12 @@ const withAuth: BaseQueryFn<
   const session = await getSession();
   const token = (session as any)?.apiAccessToken;
 
+  console.log('🔐 Auth Debug:', {
+    hasSession: !!session,
+    hasToken: !!token,
+    tokenPreview: token ? `${token.substring(0, 20)}...` : 'NO TOKEN'
+  });
+
   const req =
     typeof args === "string"
       ? { url: args, headers: {} as Record<string, string> }
@@ -27,12 +33,32 @@ const withAuth: BaseQueryFn<
           headers: { ...((args.headers as Record<string, string>) ?? {}) },
         };
 
-  if (token) (req.headers as any)["Authorization"] = `Bearer ${token}`;
+  if (token) {
+    (req.headers as any)["Authorization"] = `Bearer ${token}`;
+    console.log('✅ Authorization header added');
+  } else {
+    console.warn('⚠️ No token available - request may fail');
+  }
+  
   if (!(req.headers as any)["Content-Type"] && (req as any).body) {
     (req.headers as any)["Content-Type"] = "application/json";
   }
 
-  return raw(req, api, extra);
+  console.log('📤 Request:', {
+    url: typeof args === "string" ? args : args.url,
+    method: typeof args === "string" ? 'GET' : args.method || 'GET',
+    hasAuth: !!(req.headers as any)["Authorization"]
+  });
+
+  const result = await raw(req, api, extra);
+  
+  if (result.error) {
+    console.error('📥 Response Error:', result.error);
+  } else {
+    console.log('📥 Response Success');
+  }
+
+  return result;
 };
 
 export const baseApi = createApi({

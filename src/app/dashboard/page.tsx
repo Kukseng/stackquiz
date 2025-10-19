@@ -70,7 +70,7 @@ const DashboardPage = () => {
 </div>
 
         {/* Welcome Card */}
-        <div className="bg-[#E5D2F9] rounded-2xl p-6 flex items-center gap-2">
+        <div className="bg-sky-100 rounded-2xl p-6 flex items-center gap-2">
           <div>
             <h2 className="text-2xl font-bold">Hello</h2>
             <h3 className="text-lg font-semibold flex items-center gap-1">

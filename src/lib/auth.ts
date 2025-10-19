@@ -1,41 +1,12 @@
-// src/app/api/auth/[...nextauth]/route.ts
-/* eslint-disable @typescript-eslint/no-explicit-any */
-import NextAuth, { type NextAuthOptions } from "next-auth";
+// src/lib/auth.ts or src/auth.ts
+import { type NextAuthOptions } from "next-auth";
+import { getServerSession } from "next-auth/next";
 import GoogleProvider from "next-auth/providers/google";
 import GitHubProvider from "next-auth/providers/github";
 import FacebookProvider from "next-auth/providers/facebook";
 import CredentialsProvider from "next-auth/providers/credentials";
 
-/** Force runtime execution */
-export const dynamic = "force-dynamic";
-export const revalidate = 0;
-export const runtime = "nodejs";
-
-// ============================================================
-// Environment Variable Validation
-// ============================================================
-const requiredEnvVars = [
-  "GOOGLE_CLIENT_ID",
-  "GOOGLE_CLIENT_SECRET",
-  "GH_CLIENT_ID",
-  "GH_CLIENT_SECRET",
-  "FACEBOOK_CLIENT_ID",
-  "FACEBOOK_CLIENT_SECRET",
-  "NEXTAUTH_SECRET",
-  "NEXT_PUBLIC_API_URL",
-];
-
-requiredEnvVars.forEach((varName) => {
-  if (!process.env[varName]) {
-    console.error(
-      `[NextAuth Config] Missing required environment variable: ${varName}`
-    );
-  }
-});
-
-// ============================================================
 // Helper Functions
-// ============================================================
 function resolveApiBase(): string {
   const base = process.env.NEXT_PUBLIC_API_URL;
   if (!base) {
@@ -73,7 +44,6 @@ async function post(path: string, body: unknown) {
   }
 }
 
-// Token refresh helper
 async function refreshAccessToken(token: any) {
   try {
     const base = resolveApiBase();
@@ -110,14 +80,11 @@ async function refreshAccessToken(token: any) {
   }
 }
 
-// ============================================================
-// NextAuth Configuration
-// ============================================================
-const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   secret: process.env.NEXTAUTH_SECRET,
   session: { 
     strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 days
+    maxAge: 30 * 24 * 60 * 60,
   },
   providers: [
     GoogleProvider({
@@ -158,7 +125,6 @@ const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.username || !credentials?.password) {
-          console.error("[CredentialsProvider] Missing credentials");
           return null;
         }
 
@@ -172,18 +138,12 @@ const authOptions: NextAuthOptions = {
             }),
           });
 
-          if (!res.ok) {
-            console.error(`[CredentialsProvider] Login failed: ${res.status}`);
-            return null;
-          }
+          if (!res.ok) return null;
 
           const json = await res.json();
           const data = json.data;
 
-          if (!data || !data.access_token) {
-            console.error("[CredentialsProvider] No access token in response");
-            return null;
-          }
+          if (!data || !data.access_token) return null;
 
           return {
             id: data.userId ?? data.email ?? credentials.username,
@@ -208,53 +168,30 @@ const authOptions: NextAuthOptions = {
   },
   callbacks: {
     async jwt({ token, account, profile, user }) {
-      // Handle initial sign-in
       if (account && user) {
-        const email =
-          (user as any)?.email ??
-          (profile as any)?.email ??
-          token.email ??
-          null;
+        const email = (user as any)?.email ?? (profile as any)?.email ?? token.email ?? null;
 
-        // Credentials provider - token already in user object
         if (account.provider === "credentials") {
           token.apiAccessToken = (user as any).apiAccessToken;
           token.apiRefreshToken = (user as any).apiRefreshToken;
           token.apiAccessTokenExpires = Date.now() + ((user as any).expiresIn ?? 3600) * 1000;
           token.userId = (user as any).id;
           token.email = email;
-          
-          console.log(`[NextAuth] Credentials login success for: ${email}`);
           return token;
         }
 
-        // OAuth providers - register/exchange with backend
         if (email) {
-          const givenName =
-            (profile as any)?.given_name ??
-            (profile as any)?.first_name ??
-            (user as any)?.name?.split(" ")?.[0] ??
-            "";
-          const familyName =
-            (profile as any)?.family_name ??
-            (profile as any)?.last_name ??
-            (user as any)?.name?.split(" ")?.slice(1).join(" ") ??
-            "";
-          const baseUsername =
-            token.name ?? (user as any)?.name ?? email.split("@")[0];
-          const provider = account.provider;
+          const givenName = (profile as any)?.given_name ?? (profile as any)?.first_name ?? (user as any)?.name?.split(" ")?.[0] ?? "";
+          const familyName = (profile as any)?.family_name ?? (profile as any)?.last_name ?? (user as any)?.name?.split(" ")?.slice(1).join(" ") ?? "";
+          const baseUsername = token.name ?? (user as any)?.name ?? email.split("@")[0];
 
           try {
-            console.log(
-              `[NextAuth] Registering OAuth user: ${email} with provider: ${provider}`
-            );
-            
             const r = await post("auth/oauth/register", {
               email,
               firstName: givenName,
               lastName: familyName,
               username: baseUsername,
-              provider,
+              provider: account.provider,
               providerId: account.providerAccountId,
               image: (user as any)?.image ?? null,
             });
@@ -262,36 +199,27 @@ const authOptions: NextAuthOptions = {
             if (r.ok) {
               const data = await r.json();
               const payload = (data as any).data ?? data;
-              
               token.apiAccessToken = payload.accessToken ?? payload.access_token ?? null;
               token.apiRefreshToken = payload.refreshToken ?? payload.refresh_token ?? null;
               token.apiAccessTokenExpires = Date.now() + (payload.expiresIn ?? payload.expires_in ?? 3600) * 1000;
               token.email = email;
               token.userId = payload.userId ?? payload.user_id ?? null;
-              
-              console.log(`[NextAuth] OAuth registration success for: ${email}`);
             } else {
-              console.error(`[NextAuth] OAuth registration failed for: ${email}`);
               token.error = "OAuthRegistrationError";
             }
           } catch (e) {
-            console.error(`[NextAuth] OAuth registration exception for: ${email}`, e);
             token.error = "OAuthRegistrationError";
           }
         }
       }
 
-      // Handle token refresh
       if (token.apiAccessTokenExpires && Date.now() > (token.apiAccessTokenExpires as number)) {
-        console.log("[NextAuth] Token expired, refreshing...");
         return refreshAccessToken(token);
       }
 
       return token;
     },
-
     async session({ session, token }) {
-      // Pass token data to session
       (session as any).apiAccessToken = token.apiAccessToken ?? null;
       (session as any).apiRefreshToken = token.apiRefreshToken ?? null;
       (session as any).userId = token.userId ?? null;
@@ -299,7 +227,6 @@ const authOptions: NextAuthOptions = {
       (session as any).email = token.email ?? session.user?.email ?? null;
       (session as any).error = token.error ?? null;
 
-      // Update user info
       if (session.user) {
         session.user.email = token.email as string ?? session.user.email;
         (session.user as any).id = token.userId ?? (session.user as any).id;
@@ -307,34 +234,9 @@ const authOptions: NextAuthOptions = {
 
       return session;
     },
-
-    async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url;
-      return baseUrl;
-    },
-  },
-  events: {
-    async signIn({ user, account }) {
-      console.log(`[NextAuth] User signed in:`, {
-        userId: user.id,
-        email: user.email,
-        provider: account?.provider,
-      });
-    },
-    async signOut({ token }) {
-      console.log(`[NextAuth] User signed out:`, {
-        userId: (token as any)?.userId,
-        email: (token as any)?.email,
-      });
-    },
   },
   debug: process.env.NODE_ENV === "development",
 };
 
-const handler = NextAuth(authOptions);
-
-// Only export GET and POST handlers for Next.js App Router
-export { handler as GET, handler as POST };
+// Helper function to get session in Server Components
+export const getSession = () => getServerSession(authOptions);

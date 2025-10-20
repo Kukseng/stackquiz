@@ -1,0 +1,44 @@
+User-agent: *
+Allow: /
+Disallow: /(test)/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /private/
+
+# Specific crawling directives
+Allow: /
+
+# Prevent crawling of certain paths
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /dashboard/private/
+
+# Allow specific endpoints
+Allow: /explore
+Allow: /leaderboard
+Allow: /about
+Allow: /quiz/
+
+# Crawl-delay for respectful indexing
+Crawl-delay: 1
+
+# Request rate (pages per second)
+Request-rate: 10/1s
+
+# Sitemap location
+Sitemap: https://stackquiz-two.vercel.app/sitemap.xml
+Sitemap: https://stackquiz-two.vercel.app/sitemap-pages.xml
+Sitemap: https://stackquiz-two.vercel.app/sitemap-quizzes.xml
+
+# Google specific
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
+Request-rate: 100/1s
+
+# Bing specific
+User-agent: Bingbot
+Allow: /
+Crawl-delay: 1
+Request-rate: 10/1s

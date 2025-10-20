@@ -1,12 +1,14 @@
 import { configureStore } from "@reduxjs/toolkit";
-import { authApi } from "@/features/auth/authApiSlice";
+import { baseApi } from "@/lib/api/baseApi";
 
 export const store = configureStore({
   reducer: {
-    [authApi.reducerPath]: authApi.reducer,
+    [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware().concat(authApi.middleware),
+    getDefaultMiddleware({
+      serializableCheck: false, // Disable serializable check for NextAuth compatibility
+    }).concat(baseApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

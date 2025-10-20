@@ -323,6 +323,9 @@ function QuestionTimer({
             }`}
           >
             {isCritical ? "⚠️ Time's almost up!" : "⏰ Hurry up!"}
+        <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
+          <p className={`text-sm font-semibold ${isCritical ? "text-red-400" : "text-yellow-400"}`}>
+            {isCritical ? "⚠️ Time almost up!" : "⏰ Hurry up!"}
           </p>
         </motion.div>
       )}
@@ -806,6 +809,8 @@ export default function ParticipantQuizFixed() {
   function handleTimeUp() {
     console.log("⏰ Time's up! Participant can still answer for base points.");
     setFeedback({ timeUp: true, canStillAnswer: true });
+    console.log("⏰ Time up! Participant can still answer for base points.")
+    setFeedback({ timeUp: true, canStillAnswer: true })
   }
 
   function handleAnswer(optionId: string) {
@@ -1311,7 +1316,7 @@ export default function ParticipantQuizFixed() {
             transition={{ delay: 0.8 }}
             className="text-white text-xl mb-8"
           >
-            you're on the podium!
+            you on the podium!
           </motion.p>
 
           {/* Continue button */}
@@ -1463,6 +1468,8 @@ export default function ParticipantQuizFixed() {
               <p className="text-white/80 text-sm mt-1">
                 You can still answer for base points
               </p>
+              <p className="text-white font-semibold">⏰ Time up!</p>
+              <p className="text-white/80 text-sm mt-1">You can still answer for base points</p>
             </motion.div>
           )}
         </div>

@@ -1,10 +1,4 @@
-"use client"
-
-import Rank from "@/components/Poduim/rank";
-export default function LeaderboardPage() {
-  return (
-    <div>
-      <Rank/>  
-    </div>
-  )
+import Podium from "@/components/startquiz_org/Podium";
+export default function Page() {
+  return <Podium />;
 }

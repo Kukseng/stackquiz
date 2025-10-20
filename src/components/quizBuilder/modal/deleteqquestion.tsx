@@ -1,9 +1,9 @@
 "use client"
 
 interface DeleteQuestionModalProps {
-  questionId: number
+  questionId: string
   onClose: () => void
-  onDelete: (id: number) => void
+  onDelete: (id: string) => void
 }
 
 export default function DeleteQuestionModal({ questionId, onClose, onDelete }: DeleteQuestionModalProps) {

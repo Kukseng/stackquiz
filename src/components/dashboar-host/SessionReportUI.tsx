@@ -451,7 +451,7 @@ function SummaryTab({ data }: { data: SessionReportData }) {
             <div className="text-gray-500 text-sm">No one seems to need help</div>
           </div>
           <div className="bg-white rounded-lg p-6 border border-gray-200 text-center">
-            <div className="text-sm text-gray-600 mb-2">Didn't finish (0)</div>
+            <div className="text-sm text-gray-600 mb-2">Didn finish (0)</div>
             <div className="text-gray-500 text-sm">Great! Everyone finished</div>
           </div>
         </div>
@@ -857,10 +857,10 @@ function InsightsTab({ insights }: { insights?: PerformanceInsights }) {
 function FeedbackTab() {
   return (
     <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="text-center py-16">
-      <h3 className="text-2xl font-bold text-gray-900 mb-4">You didn't receive feedback for this StackQuiz.</h3>
+      <h3 className="text-2xl font-bold text-gray-900 mb-4">You didn receive feedback for this StackQuiz.</h3>
       <p className="text-gray-600 max-w-2xl mx-auto">
-        To receive feedback for your next StackQuiz, select "Get feedback" when it finishes. Participants will be
-        prompted to rate the quiz and share how the StackQuiz made them feel. They'll also be asked if they learned
+        To receive feedback for your next StackQuiz, select Get feedback when it finishes. Participants will be
+        prompted to rate the quiz and share how the StackQuiz made them feel. They ll also be asked if they learned
         something and if they would recommend this StackQuiz.
       </p>
     </motion.div>

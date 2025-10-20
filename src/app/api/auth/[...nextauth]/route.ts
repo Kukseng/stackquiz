@@ -61,6 +61,38 @@ async function post(path: string, body: unknown) {
   }
 }
 
+async function refreshAccessToken(refreshToken: string): Promise<any> {
+  try {
+    const base = resolveApiBase();
+    const url = `${base}/auth/refresh`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "NextAuth-Client/1.0",
+      },
+      cache: "no-store",
+      body: JSON.stringify({ refreshToken }),
+    });
+    
+    if (!res.ok) {
+      console.error(`[NextAuth] Token refresh failed: ${res.status} ${res.statusText}`);
+      return null;
+    }
+    
+    const data = await res.json();
+    const payload = data.data ?? data;
+    return {
+      accessToken: payload.accessToken ?? payload.access_token,
+      refreshToken: payload.refreshToken ?? payload.refresh_token ?? refreshToken,
+      expiresIn: payload.expiresIn ?? payload.expires_in ?? 3600,
+    };
+  } catch (error) {
+    console.error("[NextAuth] Token refresh error:", error);
+    return null;
+  }
+}
+
 const authOptions: NextAuthOptions = {
   session: { strategy: "jwt" },
   providers: [
@@ -161,18 +193,26 @@ const authOptions: NextAuthOptions = {
           if (r.ok) {
             const data = await r.json();
             const payload = (data as any).data ?? data;
-            (token as any).apiAccessToken = payload.accessToken ?? null;
-            (token as any).apiRefreshToken = payload.refreshToken ?? null;
+            (token as any).apiAccessToken = payload.accessToken ?? payload.access_token ?? null;
+            (token as any).apiRefreshToken = payload.refreshToken ?? payload.refresh_token ?? null;
             (token as any).apiAccessTokenExpires =
-              Date.now() + (payload.expiresIn ?? 3600) * 1000;
+              Date.now() + (payload.expiresIn ?? payload.expires_in ?? 3600) * 1000;
             (token as any).email = email;
-            (token as any).userId = payload.userId ?? null;
-            console.log(`[NextAuth] Registration API success for: ${email}`);
+            (token as any).userId = payload.userId ?? payload.user_id ?? null;
+            (token as any).isRegistered = true;
+            console.log(`[NextAuth] Registration API success for: ${email}`, {
+              hasAccessToken: !!(token as any).apiAccessToken,
+              hasRefreshToken: !!(token as any).apiRefreshToken,
+            });
           } else {
+            const errText = await r.text();
             (token as any).apiAccessToken = null;
             (token as any).apiRefreshToken = null;
             (token as any).apiAccessTokenExpires = null;
-            console.error(`[NextAuth] Registration failed for: ${email}`);
+            console.error(`[NextAuth] Registration failed for: ${email}`, {
+              status: r.status,
+              error: errText,
+            });
           }
         } catch (e) {
           (token as any).apiAccessToken = null;
@@ -183,9 +223,35 @@ const authOptions: NextAuthOptions = {
       } 
       if (user && (user as any).accessToken) {
         (token as any).apiAccessToken = (user as any).accessToken;
+        (token as any).apiRefreshToken = (user as any).refreshToken;
         (token as any).userId = (user as any).id;
         (token as any).email = (user as any).email;
+        (token as any).apiAccessTokenExpires = Date.now() + ((user as any).expiresIn ?? 3600) * 1000;
       }
+      
+      // Check if token needs refresh (refresh 5 minutes before expiry)
+      if ((token as any).apiAccessTokenExpires) {
+        const now = Date.now();
+        const expiryTime = (token as any).apiAccessTokenExpires;
+        const bufferTime = 5 * 60 * 1000; // 5 minutes
+        
+        if (now > expiryTime - bufferTime && (token as any).apiRefreshToken) {
+          console.log("[NextAuth] Access token expired or expiring soon, refreshing...");
+          const refreshed = await refreshAccessToken((token as any).apiRefreshToken);
+          
+          if (refreshed) {
+            (token as any).apiAccessToken = refreshed.accessToken;
+            (token as any).apiRefreshToken = refreshed.refreshToken;
+            (token as any).apiAccessTokenExpires = Date.now() + refreshed.expiresIn * 1000;
+            console.log("[NextAuth] Token refreshed successfully");
+          } else {
+            console.error("[NextAuth] Failed to refresh token");
+            // Mark token as invalid
+            (token as any).apiAccessToken = null;
+          }
+        }
+      }
+      
       return token;
     },
     async session({ session, token }) {
@@ -194,6 +260,7 @@ const authOptions: NextAuthOptions = {
       (session as any).userId = (token as any).userId ?? null;
       (session as any).isRegistered = !!(token as any).apiAccessToken;
       (session as any).email = (token as any).email ?? null;
+      (session as any).apiAccessTokenExpires = (token as any).apiAccessTokenExpires ?? null;
       return session;
     },
   },
@@ -201,3 +268,7 @@ const authOptions: NextAuthOptions = {
 
 const handler = NextAuth(authOptions);
 export { handler as GET, handler as POST };
+
+
+
+

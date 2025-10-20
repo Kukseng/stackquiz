@@ -19,6 +19,8 @@ export interface Question {
   question: string;
   options: QuizOption[];
   isNew?: boolean; // Added for AI-generated question highlighting
+  imageUrl?: string;
+  timeLimit?: number;
 }
 
 export function useQuizStore() {

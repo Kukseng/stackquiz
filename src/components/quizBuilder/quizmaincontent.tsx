@@ -3,22 +3,7 @@
 import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6";
 import { IoTriangle } from "react-icons/io5";
 import { ImCheckmark2 } from "react-icons/im";
-
-interface Option {
-  id: string;
-  text: string;
-  correct: boolean;
-  color?: string;
-  icon?: string;
-}
-
-interface Question {
-  id: string;
-  type: string;
-  question: string;
-  options: Option[];
-  isNew?: boolean;
-}
+import { Question, QuizOption, IconType } from "./hooks/useQuizbuilder";
 
 interface QuizMainContentProps {
   questions: Question[];
@@ -39,7 +24,7 @@ const themeCardImages: Record<string, string> = {
   gray: "/background/6.png",
 };
 
-const renderIcon = (icon?: string) => {
+const renderIcon = (icon?: IconType) => {
   switch (icon) {
     case "circle":
       return <FaCircle size={36} className="text-white mr-2" />;

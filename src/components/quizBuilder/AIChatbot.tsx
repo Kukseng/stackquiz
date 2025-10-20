@@ -361,7 +361,7 @@ Would you like to generate more questions?`,
                 </button>
               </div>
               <p className="text-xs text-gray-500 mt-2">
-                💡 Try: "Generate 5 medium questions about React"
+                💡 Try: Generate 5 medium questions about React
               </p>
             </div>
           </motion.div>

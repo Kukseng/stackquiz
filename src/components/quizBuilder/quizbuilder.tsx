@@ -29,7 +29,7 @@ export default function QuizBuilder() {
   const [theme, setTheme] = useState<"light" | "dark">("light");
 
   const handleDelete = (id: number | string) => {
-    deleteQuestion(typeof id === "string" ? Number(id) : id);
+    deleteQuestion(typeof id === "number" ? String(id) : id);
   };
 
   return (
@@ -42,16 +42,16 @@ export default function QuizBuilder() {
     >
       {/* Sidebar */}
       <QuizSidebar
-        questions={questions as any}
-        activeQuestionId={activeQuestionId as any}
+        questions={questions}
+        activeQuestionId={activeQuestionId}
         onQuestionSelect={setActiveQuestionId}
         onAddQuestion={() => setShowAddQuestionModal(true)}
       />
 
       {/* Main Content */}
       <QuizMainContent
-        questions={questions as any}
-        activeQuestionId={activeQuestionId as any}
+        questions={questions}
+        activeQuestionId={activeQuestionId}
         onUpdateQuestionText={updateQuestionText}
         onUpdateOptionText={updateOptionText}
         onToggleCorrectAnswer={toggleCorrectAnswer}
@@ -71,7 +71,7 @@ export default function QuizBuilder() {
       {/* Delete Question Modal */}
       {showDeleteModal && activeQuestionId && (
         <DeleteQuestionModal
-          questionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
+          questionId={activeQuestionId}
           onClose={() => setShowDeleteModal(false)}
           onDelete={handleDelete}
         />

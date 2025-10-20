@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Image from "next/image";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
 import { useCreateQuizMutation, useUpdateQuizMutation } from "@/lib/api/quizApi";
 import { useCreateQuestionMutation, useUpdateQuestionMutation } from "@/lib/api/questionApi";
 import { useAddOptionsToQuestionMutation, useUpdateOptionMutation } from "@/lib/api/optionApi";
+import Image from "next/image";
 
 interface Option {
   id: string | number;
@@ -38,12 +38,12 @@ interface PublishModalProps {
   };
 }
 
-export default function PublishModal({ 
-  onClose, 
-  quizData, 
+export default function PublishModal({
+  onClose,
+  quizData,
   onPublishSuccess,
   quizId,
-  defaultValues 
+  defaultValues,
 }: PublishModalProps) {
   const { data: session, status } = useSession();
   const router = useRouter();
@@ -82,17 +82,17 @@ export default function PublishModal({
   const [publishError, setPublishError] = useState<string | null>(null);
 
   const isNewQuestion = (id: string | number): boolean => {
-    if (typeof id === 'number') return true;
-    if (typeof id === 'string') {
-      return id.length < 20 || !id.includes('-');
+    if (typeof id === "number") return true;
+    if (typeof id === "string") {
+      return id.length < 20 || !id.includes("-");
     }
     return false;
   };
 
   const isNewOption = (id: string | number): boolean => {
-    if (typeof id === 'number') return true;
-    if (typeof id === 'string') {
-      return id.length < 20 || !id.includes('-');
+    if (typeof id === "number") return true;
+    if (typeof id === "string") {
+      return id.length < 20 || !id.includes("-");
     }
     return false;
   };
@@ -143,14 +143,14 @@ export default function PublishModal({
       return;
     }
 
-    const emptyQuestions = quizData.filter(q => !q.question.trim());
+    const emptyQuestions = quizData.filter((q) => !q.question.trim());
     if (emptyQuestions.length > 0) {
       setPublishError("All questions must have text");
       return;
     }
 
     const questionsWithoutCorrect = quizData.filter(
-      q => !q.options.some(opt => opt.correct)
+      (q) => !q.options.some((opt) => opt.correct)
     );
     if (questionsWithoutCorrect.length > 0) {
       setPublishError("Each question must have at least one correct answer");
@@ -161,7 +161,7 @@ export default function PublishModal({
 
     try {
       let thumbnailUrl = defaultValues?.thumbnailUrl || "";
-      
+
       if (formData.coverImage) {
         const uploadedUrl = await uploadCoverImage(formData.coverImage);
         if (uploadedUrl) {
@@ -184,11 +184,11 @@ export default function PublishModal({
             categoryIds: [formData.category],
           },
         }).unwrap();
-        
+
         // Process all questions
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
-          
+
           let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
           const typeUpper = q.type.toUpperCase();
           if (typeUpper === "TF" || typeUpper === "TRUEFALSE") {
@@ -231,11 +231,13 @@ export default function PublishModal({
                 if (isNewOption(opt.id)) {
                   await addOptionsToQuestion({
                     questionId: String(q.id),
-                    data: [{
-                      optionText: opt.text,
-                      isCorrected: opt.correct,
-                      questionId: String(q.id),
-                    }],
+                    data: [
+                      {
+                        optionText: opt.text,
+                        isCorrected: opt.correct,
+                        questionId: String(q.id),
+                      },
+                    ],
                   }).unwrap();
                 } else {
                   await updateOption({
@@ -251,16 +253,12 @@ export default function PublishModal({
           }
         }
 
-        // Success callback triggers cache invalidation
         if (onPublishSuccess) {
           onPublishSuccess();
         }
-        
-        onClose();
-        
-        // Use router.push for better navigation
-        router.push(`/quizDetail/${quizId}`);
 
+        onClose();
+        router.push(`/quizDetail/${quizId}`);
       } else {
         // CREATE NEW QUIZ
         const createdQuiz = await createQuiz({
@@ -276,7 +274,7 @@ export default function PublishModal({
 
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
-          
+
           let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
           const typeUpper = q.type.toUpperCase();
           if (typeUpper === "TF" || typeUpper === "TRUEFALSE") {
@@ -305,8 +303,7 @@ export default function PublishModal({
             }).unwrap();
           }
         }
-        
-        // Success callback triggers cache invalidation
+
         if (onPublishSuccess) {
           onPublishSuccess();
         }
@@ -316,12 +313,14 @@ export default function PublishModal({
       }
     } catch (error: any) {
       console.error("Error publishing/updating quiz:", error);
-      
-      const errorMessage = 
-        error?.data?.message || 
-        error?.message || 
-        (error?.status ? `Error ${error.status}: Failed to ${isEditMode ? 'update' : 'publish'} quiz` : `Failed to ${isEditMode ? 'update' : 'publish'} quiz. Please try again.`);
-      
+
+      const errorMessage =
+        error?.data?.message ||
+        error?.message ||
+        (error?.status
+          ? `Error ${error.status}: Failed to ${isEditMode ? "update" : "publish"} quiz`
+          : `Failed to ${isEditMode ? "update" : "publish"} quiz. Please try again.`);
+
       setPublishError(errorMessage);
     } finally {
       setIsPublishing(false);
@@ -409,198 +408,259 @@ export default function PublishModal({
     );
   }
 
-  const isLoading = isPublishing || isCreating || isUpdating;
+  const isLoading = isPublishing || isCreating || isUpdating || loadingCategories;
 
   return (
-    <div className="fixed inset-0 bg-black/60 backdrop-blur-md flex items-center justify-center z-50 p-4">
-      <div className="bg-white/95 rounded-2xl p-8 w-full max-w-md shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h3 className="text-2xl font-bold bg-gradient-to-r from-purple-600 to-blue-600 bg-clip-text text-transparent">
-              {isEditMode ? "Update Quiz" : "Publish Quiz"}
-            </h3>
-            <p className="text-gray-500 text-sm mt-1">
-              {quizData.length} question{quizData.length !== 1 ? 's' : ''} ready to {isEditMode ? 'update' : 'publish'}
-            </p>
-          </div>
-          <button
-            onClick={onClose}
-            disabled={isLoading}
-            className="p-2 hover:bg-gray-100 rounded-full transition-colors disabled:opacity-50"
-          >
-            <svg className="w-6 h-6 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
-        </div>
+    <div className="fixed inset-0 bg-gradient-to-br from-pink-100/40 via-purple-100/30 to-blue-100/40 backdrop-blur-xl flex items-center justify-center z-50 p-4">
+      {/* Decorative background elements */}
+      <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-300/20 to-pink-300/20 rounded-full blur-3xl -z-10"></div>
+      <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-blue-300/20 to-cyan-300/20 rounded-full blur-3xl -z-10"></div>
 
-        {publishError && (
-          <div className="mb-4 p-4 bg-red-50 border border-red-200 rounded-xl">
-            <p className="text-red-800 text-sm font-medium">{publishError}</p>
-          </div>
-        )}
+      <div className="bg-white/70 backdrop-blur-2xl rounded-3xl p-0 w-full max-w-6xl shadow-2xl max-h-[90vh] overflow-y-auto border border-white/40">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-0">
+          {/* Left Section - Image Upload */}
+          <div className="bg-gradient-to-br from-purple-50/80 via-pink-50/60 to-blue-50/40 p-8 md:p-10 border-b md:border-b-0 md:border-r border-white/40 flex flex-col justify-center">
+            <div className="mb-8">
+              <h3 className="text-3xl md:text-4xl font-bold text-black bg-clip-text  mb-2">
+                {isEditMode ? "Update Quiz" : "Adding the final touches"}
+              </h3>
+              <p className="text-gray-500 text-sm">
+                {quizData.length} question{quizData.length !== 1 ? "s" : ""} ready to{" "}
+                {isEditMode ? "update" : "publish"}
+              </p>
+            </div>
 
-        <div className="mb-6">
-          <label className="block text-sm font-semibold text-gray-700 mb-3">Cover Image</label>
-          {previewUrl ? (
-            <div className="relative group">
-              <div className="relative w-full h-40 rounded-xl overflow-hidden border-2 border-gray-200">
-                <Image src={previewUrl} alt="Cover Preview" fill className="object-cover" />
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-4">Cover Image</label>
+              {previewUrl ? (
+                <div className="relative group">
+                  <div className="relative w-full h-56 rounded-2xl overflow-hidden border-2 border-gradient-to-r from-purple-200 to-blue-200 shadow-lg">
+                    <Image
+                      src={previewUrl}
+                      alt="Cover Preview"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <button
+                    onClick={removeImage}
+                    disabled={isLoading}
+                    className="absolute top-3 right-3 bg-white/90 hover:bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg disabled:opacity-30"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <div
+                  onDrop={handleDrop}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  className={`relative border-2 border-dashed rounded-2xl h-56 flex flex-col items-center justify-center cursor-pointer transition-all duration-300 ${
+                    isDragging
+                      ? "border-purple-400 bg-purple-100/50 scale-105"
+                      : "border-purple-200 hover:border-purple-400 hover:bg-purple-50/30"
+                  } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
+                >
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageChange}
+                    disabled={isLoading}
+                    className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                  />
+                  <div className="p-4 rounded-full bg-gradient-to-br from-purple-100 to-blue-100 mb-3 text-3xl">
+                    ➕
+                  </div>
+                  <p className="text-gray-700 font-semibold text-center">Add cover image</p>
+                  <p className="text-gray-400 text-xs mt-2">JPG, PNG up to 5MB</p>
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Right Section - Form Fields */}
+          <div className="p-8 md:p-10 flex flex-col justify-between">
+            <div className="space-y-6">
+              {/* Title */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">Title</label>
+                <input
+                  type="text"
+                  placeholder="Enter a title for your quiz"
+                  className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent disabled:opacity-50 transition-all placeholder:text-gray-400"
+                  value={formData.tag}
+                  onChange={(e) =>
+                    setFormData((prev) => ({ ...prev, tag: e.target.value }))
+                  }
+                  disabled={isLoading}
+                />
               </div>
+
+              {/* Description */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Description
+                </label>
+                <textarea
+                  placeholder="Describe your quiz..."
+                  className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none h-24 disabled:opacity-50 transition-all placeholder:text-gray-400"
+                  value={formData.description}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      description: e.target.value,
+                    }))
+                  }
+                  disabled={isLoading}
+                />
+              </div>
+
+              {/* Category */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Category
+                </label>
+                <select
+                  className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent cursor-pointer disabled:opacity-50 transition-all"
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      category: e.target.value,
+                    }))
+                  }
+                  disabled={isLoading}
+                >
+                  <option value="">Select a category</option>
+                  {loadingCategories ? (
+                    <option disabled>Loading categories...</option>
+                  ) : isError ? (
+                    <option disabled>Error loading categories</option>
+                  ) : !categories || categories.length === 0 ? (
+                    <option disabled>No categories available</option>
+                  ) : (
+                    categories.map((cat: any) => (
+                      <option key={cat.id} value={cat.id}>
+                        {cat.name}
+                      </option>
+                    ))
+                  )}
+                </select>
+              </div>
+
+              {/* Difficulty Level */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Difficulty Level
+                </label>
+                <div className="flex gap-3">
+                  {["Easy", "Medium", "Hard"].map((level) => (
+                    <button
+                      key={level}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          difficulty: level.toUpperCase() as
+                            | "EASY"
+                            | "MEDIUM"
+                            | "HARD",
+                        }))
+                      }
+                      disabled={isLoading}
+                      className={`flex-1 py-2.5 px-4 rounded-lg font-medium transition-all duration-300 disabled:opacity-50 ${
+                        formData.difficulty === level.toUpperCase()
+                          ? "bg-blue-800 text-white shadow-lg scale-105"
+                          : "bg-gray-100/60 text-gray-600 hover:bg-gray-200/60"
+                      }`}
+                    >
+                      {level}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Visibility */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Visibility
+                </label>
+                <div className="flex gap-3">
+                  {[
+                    {
+                      value: "PUBLIC" as const,
+                      icon: "🌍",
+                      label: "Public",
+                      desc: "Visible to everyone",
+                    },
+                    {
+                      value: "PRIVATE" as const,
+                      icon: "🔒",
+                      label: "Private",
+                      desc: "Visible only to you",
+                    },
+                   
+                  ].map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      onClick={() =>
+                        setFormData((prev) => ({
+                          ...prev,
+                          visibility: option.value,
+                        }))
+                      }
+                      disabled={isLoading}
+                      className={`flex-1 p-3 rounded-lg border-2 transition-all duration-300 disabled:opacity-50 ${
+                        formData.visibility === option.value
+                          ? "border-purple-400 bg-purple-50 shadow-md scale-105"
+                          : "border-gray-200 hover:border-purple-200 bg-white/40"
+                      }`}
+                    >
+                      <div className="text-2xl mb-1">{option.icon}</div>
+                      <div className="font-semibold text-gray-800 text-sm">
+                        {option.label}
+                      </div>
+                      <div className="text-xs text-gray-500">{option.desc}</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {publishError && (
+                <div className="p-4 bg-red-50/80 border border-red-200 rounded-xl">
+                  <p className="text-red-700 text-sm font-medium">{publishError}</p>
+                </div>
+              )}
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-4 mt-8 pt-6 border-t border-white/40">
               <button
-                onClick={removeImage}
+                className="flex-1 py-3 bg-red-600 hover:bg-red-600/80 text-white rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 shadow-lg"
+                onClick={onClose}
                 disabled={isLoading}
-                className="absolute top-2 right-2 bg-red-500 hover:bg-red-600 text-white rounded-full w-8 h-8 flex items-center justify-center transition-colors opacity-0 group-hover:opacity-100 disabled:opacity-30"
               >
-                ✕
+                Cancel
+              </button>
+              <button
+                className="flex-1 py-3 btn-secondary text-white rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 shadow-lg"
+                onClick={handleSubmit}
+                disabled={isLoading}
+              >
+                {isLoading ? (
+                  <>
+                    <div className="animate-spin rounded-lg h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    {isEditMode ? "Updating..." : "Publishing..."}
+                  </>
+                ) : isEditMode ? (
+                  "Update Quiz"
+                ) : (
+                  "Publish Quiz"
+                )}
               </button>
             </div>
-          ) : (
-            <div
-              onDrop={handleDrop}
-              onDragOver={handleDragOver}
-              onDragLeave={handleDragLeave}
-              className={`relative border-2 border-dashed rounded-xl h-40 flex flex-col items-center justify-center cursor-pointer transition-all ${
-                isDragging
-                  ? "border-purple-400 bg-purple-50"
-                  : "border-gray-300 hover:border-purple-400 hover:bg-gray-50"
-              } ${isLoading ? "opacity-50 cursor-not-allowed" : ""}`}
-            >
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleImageChange}
-                disabled={isLoading}
-                className="absolute inset-0 opacity-0 cursor-pointer disabled:cursor-not-allowed"
-              />
-              <div className="p-4 rounded-full bg-gradient-to-r from-purple-100 to-blue-100 mb-3">
-                ➕
-              </div>
-              <p className="text-gray-600 font-medium">Drop an image here</p>
-              <p className="text-gray-400 text-sm">or click to browse</p>
-              <p className="text-gray-400 text-xs mt-1">JPG, PNG up to 5MB</p>
-            </div>
-          )}
-        </div>
-
-        <div className="space-y-5">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Title *</label>
-            <input
-              type="text"
-              placeholder="Enter a quiz title"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 disabled:opacity-50"
-              value={formData.tag}
-              onChange={(e) => setFormData((prev) => ({ ...prev, tag: e.target.value }))}
-              disabled={isLoading}
-            />
           </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Description *</label>
-            <textarea
-              placeholder="Describe your quiz"
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 resize-none h-20 disabled:opacity-50"
-              value={formData.description}
-              onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
-              disabled={isLoading}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2">Category *</label>
-            <select
-              className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 cursor-pointer disabled:opacity-50"
-              value={formData.category}
-              onChange={(e) => setFormData((prev) => ({ ...prev, category: e.target.value }))}
-              disabled={isLoading || loadingCategories}
-            >
-              <option value="">Select a category</option>
-              {loadingCategories ? (
-                <option disabled>Loading categories...</option>
-              ) : isError ? (
-                <option disabled>Error loading categories</option>
-              ) : !categories || categories.length === 0 ? (
-                <option disabled>No categories available</option>
-              ) : (
-                categories.map((cat: any) => (
-                  <option key={cat.id} value={cat.id}>{cat.name}</option>
-                ))
-              )}
-            </select>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">Difficulty Level</label>
-            <div className="flex space-x-3">
-              {(["EASY", "MEDIUM", "HARD"] as const).map((level) => (
-                <button
-                  key={level}
-                  type="button"
-                  onClick={() => setFormData((prev) => ({ ...prev, difficulty: level }))}
-                  disabled={isLoading}
-                  className={`flex-1 py-2 px-4 rounded-xl font-medium transition disabled:opacity-50 ${
-                    formData.difficulty === level
-                      ? "bg-gradient-to-r from-purple-500 to-blue-500 text-white"
-                      : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  }`}
-                >
-                  {level}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-3">Visibility</label>
-            <div className="flex space-x-3">
-              {[
-                { value: "PUBLIC" as const, icon: "🌍", desc: "Everyone can see" },
-                { value: "PRIVATE" as const, icon: "🔒", desc: "Only you can see" },
-                { value: "UNLISTED" as const, icon: "🙈", desc: "Accessible via link" },
-              ].map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  onClick={() => setFormData((prev) => ({ ...prev, visibility: option.value }))}
-                  disabled={isLoading}
-                  className={`flex-1 p-4 rounded-xl border-2 transition disabled:opacity-50 ${
-                    formData.visibility === option.value
-                      ? "border-purple-500 bg-purple-50"
-                      : "border-gray-200 hover:border-gray-300"
-                  }`}
-                >
-                  <div className="text-2xl mb-1">{option.icon}</div>
-                  <div className="font-medium text-gray-800">{option.value}</div>
-                  <div className="text-xs text-gray-500">{option.desc}</div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        <div className="flex space-x-3 mt-8">
-          <button
-            className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={onClose}
-            disabled={isLoading}
-          >
-            Cancel
-          </button>
-          <button
-            className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-xl font-semibold hover:from-purple-700 hover:to-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
-            onClick={handleSubmit}
-            disabled={isLoading}
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2"></div>
-                {isEditMode ? "Updating..." : "Publishing..."}
-              </>
-            ) : (
-              isEditMode ? "Update Quiz" : "Publish Quiz"
-            )}
-          </button>
         </div>
       </div>
     </div>

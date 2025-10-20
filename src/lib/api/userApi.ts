@@ -1,5 +1,5 @@
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-
+import { baseApi } from "./baseApi";
 export interface User {
   id: string;
   username: string;
@@ -19,21 +19,10 @@ export interface UpdateUserRequest {
 }
 
 // Create the API
-export const userApi = createApi({
-  reducerPath: "userApi",
-  baseQuery: fetchBaseQuery({
-    baseUrl: process.env.NEXT_PUBLIC_API_URL,
-prepareHeaders: (headers, { getState }) => {
-  const state = getState() as any;
-  const token = state.auth?.token || localStorage.getItem("token");
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
-  }
-  return headers;
-},
+export const userApi =  baseApi.injectEndpoints({
+ 
 
-  }),
-  tagTypes: ["User"],
+
   endpoints: (builder) => ({
     getCurrentUser: builder.query<User, void>({
       query: () => "/users/me",

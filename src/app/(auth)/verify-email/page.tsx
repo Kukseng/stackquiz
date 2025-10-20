@@ -26,7 +26,7 @@ export default function VerifyEmailPage() {
           {/* Hero Illustration */}
           <div className="mt-12">
             <Image
-              src="/signup.svg" // 👉 add this illustration in your public folder
+              src="/signup.svg" // 
               alt="Verify Email illustration"
               width={400}
               height={400}
@@ -57,7 +57,7 @@ export default function VerifyEmailPage() {
           {/* Action buttons */}
           <div className="mt-8 flex flex-col space-y-4">
             <Link
-              href="/"
+              href="/login"
               className="w-full py-3 rounded-xl btn-secondary btn-text font-semibold shadow-lg text-center"
             >
               Back to Login

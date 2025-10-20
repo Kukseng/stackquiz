@@ -34,9 +34,10 @@ const mentors = [
 export function MentorsSection() {
   const { language } = useLanguage();
   const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   return (
-    <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 text-white overflow-hidden">
+    <section className={`relative py-12 sm:py-16 md:py-20 lg:py-24 text-white overflow-hidden ${fontClass}`}>
       <style jsx>{`
         @keyframes colorCycle {
           0% {
@@ -123,11 +124,17 @@ export function MentorsSection() {
       `}</style>
 
       {/* Section Title */}
+<<<<<<< HEAD
       <div className="text-center mb-12">
         <h2 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold text-white">
           <span className="text-yellow text-underline">
             {t.heroAbout.mentor}
           </span>
+=======
+      <div className="text-center mb-12 ">
+        <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+          <span className="text-yellow text-underline">{t.heroAbout.mentor}</span>
+>>>>>>> f2031c89980374a97d275682839a4edba15fbb54
         </h2>
       </div>
 

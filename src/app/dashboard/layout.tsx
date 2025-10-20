@@ -18,6 +18,9 @@ import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
 
+
+ 
+
 interface DashboardLayoutProps {
   children: React.ReactNode;
 }
@@ -154,6 +157,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
       </div>
     </>
   );
+  
 
   return (
     <div className="flex h-screen bg-gray-50 overflow-hidden">
@@ -196,11 +200,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <Search className="w-5 h-5 text-gray-600" />
               </button>
               
-              <button className="bg-[#f97316] text-white px-3 sm:px-4 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-200 flex items-center gap-1 sm:gap-2">
-                <Plus className="w-4 h-4" />
-                <span className="hidden sm:inline">Create Quiz</span>
-                <span className="sm:hidden text-xs">Create</span>
-              </button>
+                 <Link href="/quizbuilder"
+      className="bg-[#f97316] text-white px-3 sm:px-4 py-2 rounded-full font-medium hover:shadow-lg transition-all duration-200 flex items-center gap-1 sm:gap-2"
+    >
+      <Plus className="w-4 h-4" />
+      <span className="hidden sm:inline">Create Quiz</span>
+      <span className="sm:hidden text-xs">Create</span>
+    </Link>
+
               
               <div className="w-8 h-8 sm:w-10 sm:h-10 bg-yellow-500 rounded-full flex items-center justify-center">
                 <span className="text-white font-medium text-sm sm:text-base">    <User />

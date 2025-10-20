@@ -1,49 +1,29 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 
-export interface Category {
-  id: string;
-  name: string;
-  description: string;
-}
+import { baseApi } from "./baseApi";
+import { CategoryRequest, CategoryResponse } from "./types/common";
 
-export interface CategoryRequest {
-  name: string;
-  description?: string;
-}
-
-export const categoryApi = createApi({
-  reducerPath: "categoryApi",
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
-  tagTypes: ["Category"],
-  endpoints: (builder) => ({
-    //Get all 
-    getCategories: builder.query<Category[], void>({
-      query: () => `/categories`,
-      // providesTags: ["Category"],
+export const categoryApi = baseApi.injectEndpoints({
+  endpoints: (b) => ({
+    getCategories: b.query<CategoryResponse[], void>({
+      query: () => "categories",
+      providesTags: (res) =>
+        res
+          ? [
+              ...res.map((c) => ({ type: "Category" as const, id: c.id })),
+              { type: "Category" as const, id: "LIST" },
+            ]
+          : [{ type: "Category" as const, id: "LIST" }],
     }),
-
-    //Create 
-    createCategory: builder.mutation<Category, CategoryRequest>({
-      query: (body) => ({
-        url: `/categories`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Category"],
+    createCategory: b.mutation<CategoryResponse, CategoryRequest>({
+      query: (body) => ({ url: "categories", method: "POST", body }),
+      invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
-
-    //Create  (batch)
-    createCategoriesBatch: builder.mutation<Category[], CategoryRequest[]>({
-      query: (body) => ({
-        url: `/categories/batch`,
-        method: "POST",
-        body,
-      }),
-      invalidatesTags: ["Category"],
+    createCategoriesBatch: b.mutation<CategoryResponse[], CategoryRequest[]>({
+      query: (body) => ({ url: "categories/batch", method: "POST", body }),
+      invalidatesTags: [{ type: "Category", id: "LIST" }],
     }),
   }),
 });
-
 export const {
   useGetCategoriesQuery,
   useCreateCategoryMutation,

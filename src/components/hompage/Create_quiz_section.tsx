@@ -3,9 +3,15 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 export default function CreateQuizSection() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+  const { language } = useLanguage();
+  const t = language === "en" ? en.createQuiz : kh.createQuiz;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -18,14 +24,14 @@ export default function CreateQuizSection() {
   }, []);
 
   return (
-    <div className="w-full px-2 py-12  sm:px-3 md:px-4 lg:px-6">
+    <div className={`w-full px-2 py-12  sm:px-3 md:px-4 lg:px-6 ${fontClass}`}>
       <div ref={sectionRef} className="max-w-3xl mx-auto">
         {/* Main Container */}
         <div
           className={`
             relative
             box-radius overflow-hidden shadow-lg
-            transition-all duration-1000 ease-out
+            transition-all duration-10 ease-out
             ${isVisible ? "opacity-100 translate-y-0 scale-100" : "opacity-0 translate-y-6 scale-95"}
           `}
         >
@@ -34,7 +40,7 @@ export default function CreateQuizSection() {
             <div className="absolute -top-3 -right-3 w-24 h-24 bg-blue-400 bg-opacity-10 rounded-full blur-lg animate-pulse"></div>
             <div
               className="absolute top-1/2 -left-6 w-20 h-20 bg-blue-600 bg-opacity-20 rounded-full blur-md animate-bounce"
-              style={{ animationDelay: "1s", animationDuration: "3s" }}
+              style={{ animationDelay: "1s", animationDuration: "2s" }}
             ></div>
             <div 
               className="absolute bottom-6 right-1/4 w-12 h-12 bg-purple-400 bg-opacity-15 rounded-full blur-sm animate-pulse"
@@ -63,7 +69,7 @@ export default function CreateQuizSection() {
                   `}
                   style={{ transitionDelay: "600ms" }}
                 >
-                  Create Amazing
+                  {t.heading}
                   <span className="block bg-gradient-to-r from-yellow-300 to-orange-300 bg-clip-text text-transparent">
                     Quiz Games
                   </span>
@@ -77,7 +83,7 @@ export default function CreateQuizSection() {
                   `}
                   style={{ transitionDelay: "800ms" }}
                 >
-                  Engage your audience with interactive quizzes.
+                  {t.subheading}
                   <br className="hidden sm:block" />
                   <span className="text-yellow-200 font-medium">Play together, learn together.</span>
                 </p>
@@ -86,14 +92,14 @@ export default function CreateQuizSection() {
               {/* CTA Button */}
               <div
                 className={`
-                  transition-all duration-1000 ease-out 
+                  transition-all duration-100 ease-out 
                   ${isVisible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4"}
                 `}
                 style={{ transitionDelay: "1000ms" }}
               >
                 <Link href="/signup" className="flex items-center gap-2">
                 <Button className="btn-secondary box-radius btn-text px-4 py-3 sm:py-3 rounded-lg font-semibold text-sm sm:text-base">
-                  Get Started
+                  {t.cta}
                 </Button>
                 </Link>
               </div>
@@ -107,7 +113,7 @@ export default function CreateQuizSection() {
                 `}
                 style={{ transitionDelay: "1200ms" }}
               >
-                {["No Setup Required", "Real-time Results", "Mobile Friendly"].map((feature, index) => (
+                {t.features.map((feature, index) => (
                   <div key={feature} className="flex items-center gap-2">
                     <div
                       className="w-3 h-3 bg-green-400 rounded-full animate-pulse"

@@ -7,7 +7,11 @@ import "swiper/css/navigation";
 import "swiper/css/pagination";
 import Image from "next/image";
 import { cn } from "@/components/lib/utils";
+import { useLanguage } from "@/context/LanguageContext";
+import en from "@/locales/en.json";
+import kh from "@/locales/km.json";
 
+  
 const reviews = [
   { name: "Dana", username: "@dana", body: "StackQuizz made our class more interactive than ever!", img: "https://avatar.vercel.sh/jack" },
   { name: "Rita", username: "@rita", body: "I love competing with friends across different subjects. StackQuiz alway provide new plateform and new knowlage to learn it.", img: "https://avatar.vercel.sh/jill" },
@@ -42,16 +46,20 @@ const ReviewCard = ({ img, name, username, body }: { img: string; name: string; 
 );
 
 export function FeedbackQuiz() {
+  const { language } = useLanguage();
+  const t = language === "en" ? en : kh;
+  const fontClass = language === "en" ? "en-font" : "kh-font";
   return (
-    <div className="relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16">
+    <div className={`relative w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-16 ${fontClass}`}>
       {/* Header */}
-      <div className="relative text-center mb-12 sm:mb-16">
-        <h2 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-white">
-          <span className="relative text-yellow-400 text-underline">
-            Feedback players
-          </span>
-        </h2>
-      </div>
+      <div className=" text-center mb-12">
+              {/* Section Title */}
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold text-white">
+                <span className="text-yellow text-underline">
+                  {t.feedback.title}
+                </span>
+              </h2>
+            </div>
 
       {/* Swiper */}
       <div className="relative">

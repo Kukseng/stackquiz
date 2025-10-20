@@ -1,14 +1,18 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
+import { baseApi } from "./baseApi";
 
 export interface Quiz {
+  questions: any;
   id: string;
   title: string;
   description: string;
   thumbnailUrl: string;
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  categoryIds: string[];
   createdAt: string;
   updatedAt: string;
-  difficulty: "EASY" | "MEDIUM" | "HARD";
 }
 
 export interface QuizRequest {
@@ -16,27 +20,22 @@ export interface QuizRequest {
   description: string;
   thumbnailUrl: string;
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
+  difficulty: "EASY" | "MEDIUM" | "HARD";
+  categoryIds: string[];
 }
 
-export const quizApi = createApi({
-  reducerPath: "quizApi",
-  baseQuery: fetchBaseQuery({ baseUrl: process.env.NEXT_PUBLIC_API_URL }),
-  tagTypes: ["Quiz"],
+export const quizApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
        // Get quiz by ID
     getQuizById: builder.query<Quiz, string>({
       query: (quizId) => `/quizzes/${quizId}`,
-      providesTags: (result, error, id) => [{ type: "Quiz", id }],
+      providesTags: (result, error, id) => [{ type: "Quiz" as const, id }],
     }),
-
-    //Get all quizzes
     getAllQuizzes: builder.query<Quiz[], { active?: boolean }>({
       query: ({ active }) =>
         active !== undefined ? `/quizzes?active=${active}` : `/quizzes`,
       providesTags: ["Quiz"],
     }),
-
-    //Create quiz
     createQuiz: builder.mutation<Quiz, QuizRequest>({
       query: (body) => ({
         url: "/quizzes",
@@ -45,8 +44,6 @@ export const quizApi = createApi({
       }),
       invalidatesTags: ["Quiz"],
     }),
-
-    //Update quiz
     updateQuiz: builder.mutation<Quiz, { quizId: string; data: QuizRequest }>({
       query: ({ quizId, data }) => ({
         url: `/quizzes/${quizId}`,
@@ -55,8 +52,6 @@ export const quizApi = createApi({
       }),
       invalidatesTags: (result, error, { quizId }) => [{ type: "Quiz", id: quizId }],
     }),
-
-    //Delete quiz
     deleteQuiz: builder.mutation<{ success: boolean }, string>({
       query: (quizId) => ({
         url: `/quizzes/${quizId}`,
@@ -64,8 +59,6 @@ export const quizApi = createApi({
       }),
       invalidatesTags: ["Quiz"],
     }),
-
-    //Get quizzes created by authenticated user
     getMyQuizzes: builder.query<Quiz[], void>({
       query: () => `/quizzes/users/me`,
       providesTags: ["Quiz"],

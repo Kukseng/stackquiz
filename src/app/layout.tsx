@@ -135,10 +135,10 @@ export default function RootLayout({
         />
 
         {/* Google Search Console verification - Update with your code */}
-        <meta name="google-site-verification" content="" />
+        <meta name="google-site-verification" content="5LoLB2EkdDEg96hS9avM9OuqJX8E_hVpLCma3rAD77A" />
 
         {/* Bing WebMaster Tools - Update with your code */}
-        <meta name="msvalidate.01" content="" />
+        <meta name="msvalidate.01" content="36597519DA34BDEA185B033DA0C5FD3A" />
 
         {/* SEO Meta Tags */}
         <meta name="format-detection" content="telephone=no" />

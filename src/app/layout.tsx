@@ -159,6 +159,24 @@ export default function RootLayout({
         {/* Bing WebMaster Tools - Update with your code */}
         <meta name="msvalidate.01" content="36597519DA34BDEA185B033DA0C5FD3A" />
 
+        {/* Google Analytics */}
+        <script
+          async
+          src="https://www.googletagmanager.com/gtag/js?id=G-TG3TQ0H0Z4"
+        />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              window.dataLayer = window.dataLayer || [];
+              function gtag(){dataLayer.push(arguments);}
+              gtag('js', new Date());
+              gtag('config', 'G-TG3TQ0H0Z4', {
+                page_path: window.location.pathname,
+              });
+            `,
+          }}
+        />
+
         {/* SEO Meta Tags */}
         <meta name="format-detection" content="telephone=no" />
         <meta name="referrer" content="strict-origin-when-cross-origin" />

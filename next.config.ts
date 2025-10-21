@@ -3,15 +3,30 @@ const nextConfig = {
   output: "standalone",
   images: {
     unoptimized: true,
-    domains: ['api.dicebear.com'], // allowed external image domains
+    domains: ['api.dicebear.com'],
+    formats: ['image/avif', 'image/webp'],
+    minimumCacheTTL: 60 * 60 * 24 * 365,
   },
   outputFileTracingRoot: __dirname,
   async redirects() {
     return [
+      // Redirect www to non-www (permanent 301)
       {
-        source: '/',            // When users visit root
-        destination: '/join-room', // Redirect to join-room
-        permanent: false,       // Temporary redirect (307)
+        source: '/:path*',
+        has: [
+          {
+            type: 'host',
+            value: 'www.stackquiz-two.vercel.app',
+          },
+        ],
+        destination: 'https://stackquiz-two.vercel.app/:path*',
+        permanent: true, // 301 permanent redirect
+      },
+      // Redirect root to join-room (temporary 307)
+      {
+        source: '/',
+        destination: '/join-room',
+        permanent: false, // 307 temporary redirect
       },
     ];
   },

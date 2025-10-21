@@ -95,6 +95,7 @@ export function Navbar() {
           <button
             onClick={toggleLanguage}
             className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-lg"
+            aria-label="Toggle language between English and Khmer"
           >
             {language === "en" ? (
               <>
@@ -102,6 +103,8 @@ export function Navbar() {
                   countryCode="US"
                   svg
                   style={{ width: "1.5em", height: "1.5em" }}
+                  title="United States - English"
+                  aria-label="United States flag"
                 />{" "}
                 EN
               </>
@@ -111,6 +114,8 @@ export function Navbar() {
                   countryCode="KH"
                   svg
                   style={{ width: "1.5em", height: "1.5em" }}
+                  title="Cambodia - Khmer"
+                  aria-label="Cambodia flag"
                 />{" "}
                 <span>ខ្មែរ</span>
               </>

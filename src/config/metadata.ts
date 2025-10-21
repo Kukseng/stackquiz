@@ -116,10 +116,21 @@ export const pageMetadata = {
       "Join or create engaging real-time quizzes with live leaderboards and instant feedback. Enter a session code and compete with participants worldwide on StackQuiz.",
     keywords: "join quiz, live quiz, session code, real-time quiz, interactive learning",
     openGraph: {
+      type: "website",
       title: "Join a Live Quiz - StackQuiz",
       description:
         "Join or create engaging real-time quizzes with live leaderboards.",
       url: baseUrl,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Join a Live Quiz",
+          type: "image/png",
+        },
+      ],
     },
   },
   explore: {
@@ -128,10 +139,21 @@ export const pageMetadata = {
       "Discover and explore thousands of interactive quizzes across different categories. Find the perfect quiz to test your knowledge in science, history, technology, and more. Browse by difficulty and rating.",
     keywords: "explore quizzes, browse quizzes, quiz categories, quiz discovery, find quizzes, educational quizzes",
     openGraph: {
+      type: "website",
       title: "Explore Quizzes - StackQuiz",
       description:
         "Discover thousands of quizzes across different categories and topics.",
       url: `${baseUrl}/explore`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Explore Quizzes",
+          type: "image/png",
+        },
+      ],
     },
   },
   dashboard: {
@@ -140,10 +162,21 @@ export const pageMetadata = {
       "Access your quiz statistics, history, created quizzes, and saved quizzes all in one place. Track your progress, performance, and achievements on StackQuiz.",
     keywords: "dashboard, my quizzes, quiz history, statistics, progress tracking, quiz performance, achievements",
     openGraph: {
+      type: "website",
       title: "My Dashboard - StackQuiz",
       description:
         "View your quiz statistics, history, and saved quizzes.",
       url: `${baseUrl}/dashboard`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - My Dashboard",
+          type: "image/png",
+        },
+      ],
     },
   },
   create: {
@@ -152,10 +185,21 @@ export const pageMetadata = {
       "Create your own interactive quiz in minutes using our powerful quiz builder. Add questions, options, set difficulty levels, and share with friends and students. Start creating engaging quizzes now!",
     keywords: "create quiz, quiz builder, quiz creator, make quiz, question builder, quiz designer, quiz templates",
     openGraph: {
+      type: "website",
       title: "Create Quiz - StackQuiz",
       description:
         "Create your own interactive quiz with our powerful quiz builder.",
       url: `${baseUrl}/quizbuilder`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Create Quiz",
+          type: "image/png",
+        },
+      ],
     },
   },
   joinLive: {
@@ -164,9 +208,20 @@ export const pageMetadata = {
       "Join a live quiz session with other participants in real-time. Enter the session code and start competing now on StackQuiz. Compete with friends or participants worldwide.",
     keywords: "join quiz, live quiz session, session code, real-time competition, quiz competition, online quiz",
     openGraph: {
+      type: "website",
       title: "Join Live Quiz - StackQuiz",
       description: "Join a live quiz session and compete with other participants.",
       url: `${baseUrl}/join-room`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Join Live Quiz",
+          type: "image/png",
+        },
+      ],
     },
   },
   play: {
@@ -175,9 +230,20 @@ export const pageMetadata = {
       "Answer quiz questions in real-time and compete with others. Get instant feedback on your answers, track your rank on the leaderboard, and improve your knowledge with StackQuiz.",
     keywords: "play quiz, answer questions, quiz game, leaderboard, real-time feedback, competition, quiz challenge",
     openGraph: {
+      type: "website",
       title: "Play Quiz - StackQuiz",
       description: "Answer quiz questions and compete with others on the leaderboard.",
       url: `${baseUrl}/play`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Play Quiz",
+          type: "image/png",
+        },
+      ],
     },
   },
   leaderboard: {
@@ -186,9 +252,20 @@ export const pageMetadata = {
       "Check the leaderboard to see top performers in real-time. Compare your score with others, track your ranking, and see who's winning on StackQuiz. Compete and climb the rankings.",
     keywords: "leaderboard, rankings, scores, top performers, competition, real-time rankings, high scores",
     openGraph: {
+      type: "website",
       title: "Leaderboard - StackQuiz",
       description: "View rankings and top performers on our real-time leaderboard.",
       url: `${baseUrl}/leaderboard`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Leaderboard",
+          type: "image/png",
+        },
+      ],
     },
   },
   about: {
@@ -197,10 +274,21 @@ export const pageMetadata = {
       "Learn more about StackQuiz - our mission to revolutionize interactive learning through real-time quizzes. Meet our team and discover our vision for the future of education and engagement.",
     keywords: "about StackQuiz, company, mission, team, vision, company story, interactive learning revolution",
     openGraph: {
+      type: "website",
       title: "About Us - StackQuiz",
       description:
         "Learn more about StackQuiz and our mission to revolutionize learning.",
       url: `${baseUrl}/about`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - About Us",
+          type: "image/png",
+        },
+      ],
     },
   },
   login: {
@@ -209,9 +297,20 @@ export const pageMetadata = {
       "Sign in to your StackQuiz account to access your quizzes, participate in live sessions, and track your progress. Secure authentication with Google, GitHub, and email.",
     keywords: "login, sign in, account, authentication, user account, StackQuiz login, secure login",
     openGraph: {
+      type: "website",
       title: "Login - StackQuiz",
       description: "Sign in to your StackQuiz account to access your quizzes.",
       url: `${baseUrl}/login`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Login",
+          type: "image/png",
+        },
+      ],
     },
   },
   signup: {
@@ -220,9 +319,20 @@ export const pageMetadata = {
       "Create a new StackQuiz account in seconds using email, Google, or GitHub. Start creating quizzes, participating in live sessions, and competing with others today!",
     keywords: "signup, register, create account, join StackQuiz, new account, free account, user registration",
     openGraph: {
+      type: "website",
       title: "Sign Up - StackQuiz",
       description: "Create a new StackQuiz account and start taking quizzes.",
       url: `${baseUrl}/signup`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Sign Up",
+          type: "image/png",
+        },
+      ],
     },
   },
   quizDetail: {
@@ -231,9 +341,20 @@ export const pageMetadata = {
       "View quiz details including questions, options, difficulty level, and creator information. Start taking this interactive quiz now on StackQuiz!",
     keywords: "quiz detail, quiz info, quiz questions, quiz difficulty, start quiz, take quiz",
     openGraph: {
+      type: "article",
       title: (quizTitle: string) => `${quizTitle} - StackQuiz`,
       description: "View quiz details and start taking this interactive quiz.",
       url: `${baseUrl}/quiz`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Quiz Detail",
+          type: "image/png",
+        },
+      ],
     },
   },
   hostDashboard: {
@@ -242,9 +363,20 @@ export const pageMetadata = {
       "Manage and host your quiz sessions with real-time analytics. View participant data, responses, scores, and results. Control your quiz session and engage with participants on StackQuiz.",
     keywords: "host, quiz session, manage quiz, host dashboard, real-time analytics, participant data, quiz management",
     openGraph: {
+      type: "website",
       title: "Host Dashboard - StackQuiz",
       description: "Manage and host your quiz sessions with real-time analytics.",
       url: `${baseUrl}/dashboard/host`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Host Dashboard",
+          type: "image/png",
+        },
+      ],
     },
   },
   report: {
@@ -253,9 +385,20 @@ export const pageMetadata = {
       "View detailed analysis and reports of your quiz sessions. Track participant performance, response time, answer accuracy, and detailed insights. Download reports for further analysis.",
     keywords: "report, analytics, quiz results, performance analysis, participant data, quiz insights, detailed report",
     openGraph: {
+      type: "article",
       title: "Quiz Report - StackQuiz",
       description: "View detailed analysis and reports of your quiz sessions.",
       url: `${baseUrl}/report`,
+      siteName: brandName,
+      images: [
+        {
+          url: defaultImage,
+          width: 1200,
+          height: 630,
+          alt: "StackQuiz - Quiz Report",
+          type: "image/png",
+        },
+      ],
     },
   },
 };

@@ -17,7 +17,7 @@ interface ResultsSystemProps {
 }
 
 export function ResultsSystem({ results, quiz, onPlayAgain, playerNickname }: ResultsSystemProps) {
-  const { participants } = useWebSocket()
+  // const { participants } = useWebSocket()
   const totalPossiblePoints = quiz.questions.reduce((acc, q) => acc + q.points, 0)
   const percentage = totalPossiblePoints > 0 ? Math.round((results.score / totalPossiblePoints) * 100) : 0
   const averageTimePerQuestion = Math.round(results.timeSpent / results.totalQuestions / 1000)
@@ -36,32 +36,39 @@ return (
   <div className="min-h-screen p-8 ">
     <div className="container mx-auto max-w-4xl">
       {/* Header */}
-      <div className="text-center mb-12">
-        <div className="w-28 h-28 mx-auto mb-6 rounded-full bg-white/70 border-2 backdrop-blur-md flex items-center justify-center shadow-lg">
-            <Image 
-              src="avatar.svg" 
-              alt="Banner" 
-              width={100} 
-              height={100} 
-            />
-        </div>
-        <h1 className="text-5xl font-bold text-white">Quiz Complete</h1>
-        <p className="text-amber-500 text-2xl mt-2 font-bold"><span>Topic is:</span>{quiz.title}</p>
-        <Badge variant="outline" className="mt-3 px-4 py-1 text-2xl text-white border-gray-300">
-          {playerNickname}
-        </Badge>
-      </div>
+     <div className="text-center mb-12 px-4">
+ 
+  {/* Main Heading */}
+  <h1 className="text-4xl font-bold text-white mb-4 bg-gradient-to-r from-white to-gray-200 bg-clip-text">
+    Quiz Completed!
+  </h1>
 
+  {/* Topic Section */}
+  <div className="inline-flex items-center gap-3 bg-white/10 backdrop-blur-sm rounded-2xl px-6 py-4 mb-6 border border-white/20">
+    <span className="text-white text-lg font-medium">Topic:</span>
+    <span className=" text-xl text-white tracking-wide">{quiz.title}</span>
+  </div>
+  {/* Player Badge */}
+  <div className="flex justify-center">
+    <div className="btn-secondary rounded-full px-8 py-3 shadow-2xl">
+      <div className="flex items-center gap-3">
+        <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+          <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z"/>
+        </svg>
+        <span className="text-white text-xl font-semibold">{playerNickname}</span>
+      </div>
+    </div>
+  </div>
+</div>
       {/* Score Overview */}
-      <Card className="mb-5 border border-gray-200 bg-white/60 backdrop-blur-md shadow-lg rounded-2xl">
+      <Card className="mb-5 mt-[-23px] border border-gray-200 bg-white backdrop-blur-md shadow-lg rounded-2xl">
         <CardHeader className="text-center space-y-1">
-          <CardTitle className="text-5xl font-bold text-indigo-600">
+          <CardTitle className="text-4xl font-bold text-slate-900">
             {results.score}/{totalPossiblePoints}
           </CardTitle>
-          <p className="text-lg text-gray-500">Total Points</p>
           <div className="space-y-3">
             <Progress value={percentage} className="h-3 rounded-full" />
-            <p className="text-lg font-medium text-gray-700">
+            <p className="font-medium text-gray-700">
               {percentage}% — {performance.message}
             </p>
           </div>
@@ -70,7 +77,7 @@ return (
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-5">
-        <Card className="border border-gray-200 bg-white/50 backdrop-blur-md shadow-sm p-0.5 rounded-2xl">
+        <Card className="border border-gray-200 bg-white backdrop-blur-md shadow-sm p-0.5 rounded-2xl">
           <CardContent className="text-center">
               <Image 
               className="mx-auto mb-0"
@@ -86,7 +93,7 @@ return (
           </CardContent>
         </Card>
 
-        <Card className="border border-gray-200 bg-white/50 backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
+        <Card className="border border-gray-200 bg-white backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
           <CardContent className="text-center">
                <Image 
               className="mx-auto mt-2"
@@ -100,7 +107,7 @@ return (
           </CardContent>
         </Card>
 
-        <Card className="border border-gray-200 bg-white/50 backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
+        <Card className="border border-gray-200 bg-white backdrop-blur-md p-0.5 shadow-sm rounded-2xl">
           <CardContent className="text-center">
                <Image 
               className="mx-auto mb-0"
@@ -116,7 +123,7 @@ return (
       </div>
 
       {/* Question Breakdown */}
-      <Card className="mb-10 border border-gray-200 bg-white/50 backdrop-blur-md shadow-md rounded-2xl">
+      <Card className="mb-10 border border-gray-200 bg-white backdrop-blur-md shadow-md rounded-2xl">
         <CardHeader>
           <CardTitle className="text-lg font-bold text-gray-800">Question Breakdown</CardTitle>
         </CardHeader>
@@ -159,9 +166,8 @@ return (
         </Button>
          <Button
          onClick={() => window.location.href = '/home'}
-          className=" text-white font-semibold py-3 px-8 rounded-xl shadow-md"
+          className="font-semibold py-3 px-8 rounded-xl bg-red-800 shadow-md"
         >
-          <RotateCcw className="w-4 h-4 mr-2" />
           Exits
         </Button>
       </div>

@@ -23,6 +23,11 @@ interface Question {
   options: Option[];
 }
 
+interface CategoryResponse {
+  id: string;
+  name: string;
+}
+
 interface PublishModalProps {
   onClose: () => void;
   quizData: Question[];
@@ -35,8 +40,41 @@ interface PublishModalProps {
     difficulty?: "EASY" | "MEDIUM" | "HARD";
     visibility?: "PUBLIC" | "PRIVATE" | "UNLISTED";
     thumbnailUrl?: string;
+    questionTimeLimit?: string;
   };
 }
+
+// Helper to convert numeric seconds to API string format
+const convertSecondsToAPIFormat = (seconds: number): string => {
+  const mapping: { [key: number]: string } = {
+    5: "FIVE",
+    6: "SIX",
+    7: "SEVEN",
+    8: "EIGHT",
+    9: "NINE",
+    10: "TEN",
+    15: "FIFTEEN",
+    20: "TWENTY",
+    30: "THIRTY",
+  };
+  return mapping[seconds] || "FIVE";
+};
+
+// Helper to convert API string format to numeric seconds
+const convertAPIFormatToSeconds = (apiFormat: string): number => {
+  const mapping: { [key: string]: number } = {
+    FIVE: 5,
+    SIX: 6,
+    SEVEN: 7,
+    EIGHT: 8,
+    NINE: 9,
+    TEN: 10,
+    FIFTEEN: 15,
+    TWENTY: 20,
+    THIRTY: 30,
+  };
+  return mapping[apiFormat] || 5;
+};
 
 export default function PublishModal({
   onClose,
@@ -65,12 +103,27 @@ export default function PublishModal({
     skip: !isAuthed,
   });
 
+  const timeLimits = [
+    { label: "5s", value: 5 },
+    { label: "6s", value: 6 },
+    { label: "7s", value: 7 },
+    { label: "8s", value: 8 },
+    { label: "9s", value: 9 },
+    { label: "10s", value: 10 },
+    { label: "15s", value: 15 },
+    { label: "20s", value: 20 },
+    { label: "30s", value: 30 },
+  ];
+
   const [formData, setFormData] = useState({
     tag: defaultValues?.title || "",
     description: defaultValues?.description || "",
     category: defaultValues?.categoryIds?.[0] || "",
     difficulty: defaultValues?.difficulty || ("EASY" as "EASY" | "MEDIUM" | "HARD"),
     visibility: defaultValues?.visibility || ("PUBLIC" as "PUBLIC" | "PRIVATE" | "UNLISTED"),
+    timeLimit: defaultValues?.questionTimeLimit 
+      ? convertAPIFormatToSeconds(defaultValues.questionTimeLimit)
+      : 5,
     coverImage: null as File | null,
   });
 
@@ -81,6 +134,7 @@ export default function PublishModal({
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
 
+  // Helper function to determine if question is new
   const isNewQuestion = (id: string | number): boolean => {
     if (typeof id === "number") return true;
     if (typeof id === "string") {
@@ -89,6 +143,7 @@ export default function PublishModal({
     return false;
   };
 
+  // Helper function to determine if option is new
   const isNewOption = (id: string | number): boolean => {
     if (typeof id === "number") return true;
     if (typeof id === "string") {
@@ -126,6 +181,7 @@ export default function PublishModal({
   const handleSubmit = async () => {
     setPublishError(null);
 
+    // Validation
     if (!formData.tag.trim()) {
       setPublishError("Please enter a quiz title");
       return;
@@ -163,14 +219,19 @@ export default function PublishModal({
       let thumbnailUrl = defaultValues?.thumbnailUrl || "";
 
       if (formData.coverImage) {
+        console.log("Uploading cover image...");
         const uploadedUrl = await uploadCoverImage(formData.coverImage);
         if (uploadedUrl) {
           thumbnailUrl = uploadedUrl;
         }
+        console.log("Cover image uploaded:", thumbnailUrl);
       }
+
+      const questionTimeLimit = convertSecondsToAPIFormat(formData.timeLimit);
 
       if (isEditMode && quizId) {
         // UPDATE EXISTING QUIZ
+        console.log("Updating quiz metadata...");
         await updateQuiz({
           quizId,
           data: {
@@ -179,7 +240,7 @@ export default function PublishModal({
             thumbnailUrl: thumbnailUrl,
             visibility: formData.visibility,
             status: "PUBLISHED",
-            questionTimeLimit: "FIVE",
+            questionTimeLimit: questionTimeLimit,
             difficulty: formData.difficulty,
             categoryIds: [formData.category],
           },
@@ -200,6 +261,9 @@ export default function PublishModal({
           }
 
           if (isNewQuestion(q.id)) {
+            // CREATE NEW QUESTION
+            console.log(`Creating new question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
+
             const createdQuestion = await createQuestion({
               text: q.question,
               type: questionType,
@@ -208,6 +272,7 @@ export default function PublishModal({
             }).unwrap();
 
             if (q.options && q.options.length > 0) {
+              console.log(`Adding ${q.options.length} options to new question ${createdQuestion.id}`);
               await addOptionsToQuestion({
                 questionId: createdQuestion.id,
                 data: q.options.map((opt) => ({
@@ -218,6 +283,9 @@ export default function PublishModal({
               }).unwrap();
             }
           } else {
+            // UPDATE EXISTING QUESTION
+            console.log(`Updating existing question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
+            
             await updateQuestion({
               id: String(q.id),
               data: {
@@ -226,9 +294,12 @@ export default function PublishModal({
               },
             }).unwrap();
 
+            // Process options for existing question
             if (q.options && q.options.length > 0) {
               for (const opt of q.options) {
                 if (isNewOption(opt.id)) {
+                  // CREATE NEW OPTION
+                  console.log(`Adding new option to question ${q.id}`);
                   await addOptionsToQuestion({
                     questionId: String(q.id),
                     data: [
@@ -240,6 +311,8 @@ export default function PublishModal({
                     ],
                   }).unwrap();
                 } else {
+                  // UPDATE EXISTING OPTION
+                  console.log(`Updating option ${opt.id} for question ${q.id}`);
                   await updateOption({
                     optionId: String(opt.id),
                     data: {
@@ -252,6 +325,8 @@ export default function PublishModal({
             }
           }
         }
+        
+        console.log("All questions and options updated successfully!");
 
         if (onPublishSuccess) {
           onPublishSuccess();
@@ -261,16 +336,19 @@ export default function PublishModal({
         router.push(`/quizDetail/${quizId}`);
       } else {
         // CREATE NEW QUIZ
+        console.log("Creating new quiz...");
         const createdQuiz = await createQuiz({
           title: formData.tag,
           description: formData.description,
           thumbnailUrl: thumbnailUrl,
           visibility: formData.visibility,
           status: "PUBLISHED",
-          questionTimeLimit: "FIVE",
+          questionTimeLimit: questionTimeLimit,
           difficulty: formData.difficulty,
           categoryIds: [formData.category],
         }).unwrap();
+
+        console.log("Quiz created, now adding questions...");
 
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
@@ -285,6 +363,8 @@ export default function PublishModal({
             questionType = "FILL_THE_BLANK";
           }
 
+          console.log(`Creating question ${i + 1}/${quizData.length}`);
+
           const createdQuestion = await createQuestion({
             text: q.question,
             type: questionType,
@@ -293,6 +373,7 @@ export default function PublishModal({
           }).unwrap();
 
           if (q.options && q.options.length > 0) {
+            console.log(`Adding ${q.options.length} options to question ${createdQuestion.id}`);
             await addOptionsToQuestion({
               questionId: createdQuestion.id,
               data: q.options.map((opt) => ({
@@ -309,7 +390,7 @@ export default function PublishModal({
         }
 
         onClose();
-        router.push("/dashboard/library");
+        router.push("/dashboard");
       }
     } catch (error: any) {
       console.error("Error publishing/updating quiz:", error);
@@ -445,7 +526,7 @@ export default function PublishModal({
                   <button
                     onClick={removeImage}
                     disabled={isLoading}
-                    className="absolute top-3 right-3 bg-white/90 hover:bg-white text-red-500 rounded-full w-8 h-8 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg disabled:opacity-30"
+                    className="absolute top-3 right-3 bg-black text-red-500 rounded-full w-8 h-8 flex items-center justify-center transition-all opacity-0 group-hover:opacity-100 shadow-lg disabled:opacity-30"
                   >
                     ✕
                   </button>
@@ -476,12 +557,7 @@ export default function PublishModal({
                 </div>
               )}
             </div>
-          </div>
-
-          {/* Right Section - Form Fields */}
-          <div className="p-8 md:p-10 flex flex-col justify-between">
-            <div className="space-y-6">
-              {/* Title */}
+                         {/* Title */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">Title</label>
                 <input
@@ -515,6 +591,12 @@ export default function PublishModal({
                 />
               </div>
 
+          </div>
+
+          {/* Right Section - Form Fields */}
+          <div className="p-8 md:p-10 flex flex-col justify-between">
+            <div className="space-y-6">
+ 
               {/* Category */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
@@ -578,6 +660,30 @@ export default function PublishModal({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              {/* Time Limit */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-3">
+                  Time Limit per Question
+                </label>
+                <select
+                  className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent cursor-pointer disabled:opacity-50 transition-all"
+                  value={formData.timeLimit}
+                  onChange={(e) =>
+                    setFormData((prev) => ({
+                      ...prev,
+                      timeLimit: Number(e.target.value),
+                    }))
+                  }
+                  disabled={isLoading}
+                >
+                  {timeLimits.map((time) => (
+                    <option key={time.value} value={time.value}>
+                      {time.label}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               {/* Visibility */}
@@ -644,7 +750,7 @@ export default function PublishModal({
                 Cancel
               </button>
               <button
-                className="flex-1 py-3 btn-secondary text-white rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 shadow-lg"
+                className="flex-1 py-3 bg-yellow-500 text-blue-950 rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transform hover:scale-105 active:scale-95 shadow-lg"
                 onClick={handleSubmit}
                 disabled={isLoading}
               >

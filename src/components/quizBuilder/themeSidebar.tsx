@@ -1,10 +1,6 @@
-
-// ============================================
-// THEME SELECTOR COMPONENT
-// ============================================
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import Image from "next/image"
 
 interface ThemeSelectorProps {
@@ -13,20 +9,8 @@ interface ThemeSelectorProps {
   onDurationChange?: (duration: number) => void
 }
 
-const timeLimits = [
-  { label: "5s", value: 5 },
-  { label: "6s", value: 6 },
-  { label: "7s", value: 7 },
-  { label: "8s", value: 8 },
-  { label: "9s", value: 9 },
-  { label: "10s", value: 10 },
-  { label: "15s", value: 15 },
-  { label: "20s", value: 20 },
-  { label: "30s", value: 30 },
-]
-
 const themes = [
-  { id: "blue", name: "Blue Sky", image: "/background/10.png" },
+  { id: "blue", name: "Blue Sky", image: "/background/10.png" }, 
   { id: "pink", name: "Pink Love", image: "/background/8.png" },
   { id: "purple", name: "Purple Night", image: "/background/3.png" },
   { id: "green", name: "Green Forest", image: "/background/5.png" },
@@ -39,6 +23,13 @@ export default function ThemeSelector({
   onDurationChange,
 }: ThemeSelectorProps) {
   const [selectedDuration, setSelectedDuration] = useState(20)
+
+
+  useEffect(() => {
+    if (!selectedTheme || selectedTheme === "") {
+      onThemeChange("gray")
+    }
+  }, [])
 
   const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const value = parseInt(e.target.value)
@@ -73,29 +64,12 @@ export default function ThemeSelector({
               />
             </div>
             <div className="p-4 bg-white">
-              <p className="font-bold text-gray-800 text-lg text-center">{theme.name}</p>
+              <p className="font-bold text-gray-800 text-lg text-center">
+                {theme.name}
+              </p>
             </div>
           </button>
         ))}
-      </div>
-
-      {/* Divider */}
-      <div className="border-t border-gray-300 pt-6 mb-6"></div>
-
-      {/* Duration Selector */}
-      <div>
-        <h3 className="text-xl font-bold text-gray-800 mb-4">Time Duration</h3>
-        <select
-          value={selectedDuration}
-          onChange={handleDurationChange}
-          className="w-full px-4 py-3 text-lg border-2 border-gray-300 rounded-xl focus:ring-4 focus:ring-blue-500 focus:border-blue-500 font-semibold"
-        >
-          {timeLimits.map((limit) => (
-            <option key={limit.value} value={limit.value}>
-              {limit.label}
-            </option>
-          ))}
-        </select>
       </div>
     </div>
   )

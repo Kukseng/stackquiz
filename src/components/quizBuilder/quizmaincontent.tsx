@@ -1,6 +1,4 @@
-// ============================================
-// QUIZ MAIN CONTENT COMPONENT
-// ============================================
+
 "use client"
 
 import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6"

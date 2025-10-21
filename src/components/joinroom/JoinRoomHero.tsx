@@ -24,7 +24,7 @@ export default function JoinRoomHero() {
     if (!clean) return;
     setIsLoading(true);
     await new Promise((resolve) => setTimeout(resolve, 1000));
-    router.push(`/room/${encodeURIComponent(clean)}`);
+    router.push(`${encodeURIComponent(clean)}/join`);
   };
 
   // ✅ Create particles only once on client (no SSR)

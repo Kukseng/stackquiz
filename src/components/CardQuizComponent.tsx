@@ -1,10 +1,7 @@
-
-
-
 "use client";
-import { Clock, Star, Users, BookOpen } from "lucide-react";
+import { Clock, Star, Users, BookOpen, Heart } from "lucide-react";
 import { motion } from "framer-motion";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -36,6 +33,33 @@ const CardQuizComponent: React.FC<CardQuizComponentProps> = ({
   index,
   onQuizClick,
 }) => {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Load favorite state from localStorage
+  useEffect(() => {
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    setIsFavorite(favorites.includes(challenge.id));
+  }, [challenge.id]);
+
+  // Toggle favorite and store in localStorage
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault(); // prevent navigation when clicking the heart
+    e.stopPropagation();
+
+    const favorites = JSON.parse(localStorage.getItem("favorites") || "[]");
+    let updatedFavorites;
+
+    if (favorites.includes(challenge.id)) {
+      updatedFavorites = favorites.filter((id: string | number) => id !== challenge.id);
+      setIsFavorite(false);
+    } else {
+      updatedFavorites = [...favorites, challenge.id];
+      setIsFavorite(true);
+    }
+
+    localStorage.setItem("favorites", JSON.stringify(updatedFavorites));
+  };
+
   const handleClick = () => {
     if (onQuizClick) onQuizClick(challenge);
     try {
@@ -57,7 +81,7 @@ const CardQuizComponent: React.FC<CardQuizComponentProps> = ({
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ amount: 0.2, once: false }} 
+        viewport={{ amount: 0.2, once: false }}
         transition={{
           type: "spring",
           stiffness: 80,
@@ -78,15 +102,32 @@ const CardQuizComponent: React.FC<CardQuizComponentProps> = ({
             sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
             priority={index < 3}
           />
-          <div className="absolute top-3 right-3 z-20 bg-white/95 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
+
+          {/* Favorite Heart */}
+          <motion.button
+            whileTap={{ scale: 0.8 }}
+            onClick={handleFavoriteClick}
+            className="absolute top-3 right-3 z-30 bg-white/90 backdrop-blur-sm rounded-full p-2 shadow-sm hover:bg-white transition"
+          >
+            <Heart
+              size={18}
+              className={`${
+                isFavorite ? "text-red-500 fill-red-500" : "text-gray-400"
+              } transition-colors duration-300`}
+            />
+          </motion.button>
+
+          {/* Rating */}
+          {/* <div className="absolute bottom-3 right-3 z-20 bg-white/95 backdrop-blur-sm rounded-full px-2 py-1 flex items-center gap-1">
             <Star size={12} className="text-yellow-500 fill-current" />
             <span className="text-xs font-semibold text-gray-700">
               {challenge.rating.toFixed(1)}
             </span>
-          </div>
+          </div> */}
 
+          {/* Category */}
           {challenge.category && (
-            <div className="absolute top-3 left-3 z-20 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
+            <div className="absolute bottom-3 left-3 z-20 bg-black/50 backdrop-blur-sm rounded-full px-2 py-1">
               <span className="text-xs font-medium text-white">
                 {challenge.category}
               </span>

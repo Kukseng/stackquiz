@@ -28,11 +28,15 @@ export interface QuizSession {
   host: string
   leaderboardData: string
 }
-
+export interface FillBlankQuestionProps {
+  question: Omit<Question, "options"> & { options: Option[] | string[] }
+  onAnswer: (answer: string | number) => void
+  timeLeft: number
+}
 export interface Question {
   id: string
   text: string
-  type: "TF" | "MULTIPLE_CHOICE"
+  type: "TF" | "FB"|"MCQ"
   questionOrder: number
   timeLimit: number
   points: number
@@ -96,6 +100,17 @@ export interface Leaderboard {
   totalParticipants: number
   lastUpdated: number
   status: string
+}
+export interface Quiz{
+  id: string
+  title: string
+  description: string
+  category: string
+  difficulty: "EASY" | "MEDIUM" | "HARD"
+  createdBy: string
+  createdAt: string
+  updatedAt: string
+  questions: string[]
 }
 
 // WebSocket Message Types

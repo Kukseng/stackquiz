@@ -1715,7 +1715,7 @@ export default function SessionReportUI({ sessionCode }: { sessionCode: string }
     setError("")
     try {
       const headers = await getAuthHeaders()
-      const response = await axios.get(`http://localhost:9999/api/v1/reports/session/${sessionCode}`, {
+      const response = await axios.get(`https://stackquiz-api.stackquiz.me/api/v1/reports/session/${sessionCode}`, {
         params: {
           reportType: "DETAILED",
           includeDetailedAnswers: true,
@@ -1748,7 +1748,7 @@ export default function SessionReportUI({ sessionCode }: { sessionCode: string }
   const handleExport = async () => {
     try {
       const headers = await getAuthHeaders()
-      const response = await axios.get(`http://localhost:9999/api/v1/reports/session/${sessionCode}/export`, {
+      const response = await axios.get(`https://stackquiz-api.stackquiz.me/api/v1/reports/session/${sessionCode}/export`, {
         params: {
           format: exportFormat,
           reportType: "DETAILED",

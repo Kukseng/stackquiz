@@ -266,7 +266,7 @@ export default function ReportsHistoryPage() {
     try {
       const headers = await getAuthHeaders();
       const response = await axios.get(
-        `http://localhost:9999/api/v1/reports-history/my-sessions`,
+        `https://stackquiz-api.stackquiz.me/api/v1/reports-history/my-sessions`,
         { headers }
       );
       setSessions(response.data);

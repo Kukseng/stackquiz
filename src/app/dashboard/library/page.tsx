@@ -50,41 +50,9 @@ const DataTable = () => {
 
   const isAuthed = status === "authenticated" && !!(session as any)?.apiAccessToken
 
-  // Fetch user's favorites
+  // Fetch quizzes and favorites together
   useEffect(() => {
-    const fetchFavorites = async () => {
-      if (!isAuthed) return
-
-      try {
-        const token = (session as any)?.apiAccessToken
-        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
-        
-        const response = await fetch(`${apiUrl}/quizzes/favorites`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          cache: 'no-store'
-        })
-
-        if (response.ok) {
-          const data = await response.json()
-          const favArray = Array.isArray(data) ? data : (data.favorites || data.data || [])
-          const favoriteQuizIds = new Set(favArray.map((fav: any) => fav.quizId))
-          setFavoriteIds(favoriteQuizIds)
-        }
-      } catch (err) {
-        console.error('Error fetching favorites:', err)
-      }
-    }
-
-    fetchFavorites()
-  }, [session, status, isAuthed])
-
-  // Fetch quizzes from API
-  useEffect(() => {
-    const fetchQuizzes = async () => {
+    const fetchData = async () => {
       if (status === 'loading') return
 
       if (!isAuthed) {
@@ -100,7 +68,7 @@ const DataTable = () => {
         const token = (session as any)?.apiAccessToken
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
         
-        // Try the correct endpoint first
+        // Fetch quizzes
         let response = await fetch(`${apiUrl}/quizzes/users/me`, {
           method: 'GET',
           headers: {
@@ -110,7 +78,7 @@ const DataTable = () => {
           cache: 'no-store'
         })
 
-        // Fallback to alternative endpoints if first fails
+        // Fallback endpoints for quizzes
         if (!response.ok) {
           response = await fetch(`${apiUrl}/quizzes?userId=me`, {
             method: 'GET',
@@ -139,24 +107,52 @@ const DataTable = () => {
 
         const data = await response.json()
         const quizzesArray = Array.isArray(data) ? data : (data.quizzes || data.data || [])
-        
-        // Add favorite status to each quiz
+
+        // Fetch favorites
+        let favoriteQuizIds = new Set<string>()
+        try {
+          const favResponse = await fetch(`${apiUrl}/quizzes/favorites`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          })
+
+          if (favResponse.ok) {
+            const favData = await favResponse.json()
+            const favArray = Array.isArray(favData) ? favData : (favData.favorites || favData.data || [])
+            favoriteQuizIds = new Set(
+              favArray.map((fav: any) => {
+                // Handle different response formats
+                return fav.quizId || fav.id
+              })
+            )
+            setFavoriteIds(favoriteQuizIds)
+          }
+        } catch (favErr) {
+          console.error('Error fetching favorites:', favErr)
+          // Continue without favorites if fetch fails
+        }
+
+        // Map quizzes with favorite status
         const quizzesWithFavorites = quizzesArray.map((quiz: Quiz) => ({
           ...quiz,
-          isFavorite: favoriteIds.has(quiz.id)
+          isFavorite: favoriteQuizIds.has(quiz.id)
         }))
-        
+
         setQuizzes(quizzesWithFavorites)
       } catch (err) {
-        console.error('Error fetching quizzes:', err)
+        console.error('Error fetching data:', err)
         setError(err instanceof Error ? err.message : 'Failed to load quizzes')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchQuizzes()
-  }, [session, status, isAuthed, favoriteIds])
+    fetchData()
+  }, [session, status, isAuthed])
 
   const getCategoryNames = (categories?: Category[]): string => {
     if (!categories || categories.length === 0) return 'Uncategorized'
@@ -164,7 +160,7 @@ const DataTable = () => {
   }
 
   const refetch = () => {
-    const fetchQuizzes = async () => {
+    const fetchData = async () => {
       if (!isAuthed) return
 
       try {
@@ -187,23 +183,46 @@ const DataTable = () => {
 
         const data = await response.json()
         const quizzesArray = Array.isArray(data) ? data : (data.quizzes || data.data || [])
-        
-        // Add favorite status to each quiz
+
+        // Fetch favorites
+        let favoriteQuizIds = new Set<string>()
+        try {
+          const favResponse = await fetch(`${apiUrl}/quizzes/favorites`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          })
+
+          if (favResponse.ok) {
+            const favData = await favResponse.json()
+            const favArray = Array.isArray(favData) ? favData : (favData.favorites || favData.data || [])
+            favoriteQuizIds = new Set(
+              favArray.map((fav: any) => fav.quizId || fav.id)
+            )
+            setFavoriteIds(favoriteQuizIds)
+          }
+        } catch (favErr) {
+          console.error('Error fetching favorites:', favErr)
+        }
+
         const quizzesWithFavorites = quizzesArray.map((quiz: Quiz) => ({
           ...quiz,
-          isFavorite: favoriteIds.has(quiz.id)
+          isFavorite: favoriteQuizIds.has(quiz.id)
         }))
-        
+
         setQuizzes(quizzesWithFavorites)
       } catch (err) {
-        console.error('Error fetching quizzes:', err)
+        console.error('Error fetching data:', err)
         setError(err instanceof Error ? err.message : 'Failed to load quizzes')
       } finally {
         setIsLoading(false)
       }
     }
 
-    fetchQuizzes()
+    fetchData()
   }
 
   const getFilteredQuizzes = () => {
@@ -219,7 +238,6 @@ const DataTable = () => {
         filtered = filtered.filter(q => q.status === 'DRAFT')
         break
       case 'favorites':
-        // Show both published AND draft favorites
         filtered = filtered.filter(q => favoriteIds.has(q.id))
         break
     }
@@ -358,15 +376,13 @@ const DataTable = () => {
       return
     }
 
-    // Calculate if dropdown should open above or below
     if (event) {
       const buttonRect = event.currentTarget.getBoundingClientRect()
       const viewportHeight = window.innerHeight
       const spaceBelow = viewportHeight - buttonRect.bottom
       const spaceAbove = buttonRect.top
-      const dropdownHeight = 280 // Approximate height of dropdown
+      const dropdownHeight = 280
 
-      // If not enough space below but more space above, open upward
       if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
         setDropdownPosition('top')
       } else {
@@ -386,38 +402,50 @@ const DataTable = () => {
   }, [openDropdownId])
 
   const handleToggleFavorite = async (quizId: string, isFavorite: boolean) => {
-    try {
-      const token = (session as any)?.apiAccessToken
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
-      const method = isFavorite ? 'DELETE' : 'POST'
-      
-      const response = await fetch(`${apiUrl}/quizzes/${quizId}/favorite`, {
-        method,
-        headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' }
+  try {
+    const token = (session as any)?.apiAccessToken
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
+    const method = isFavorite ? 'DELETE' : 'POST'
+    
+    console.log(`${isFavorite ? 'Removing' : 'Adding'} favorite:`, quizId)
+    
+    const response = await fetch(`${apiUrl}/quizzes/${quizId}/favorite`, {
+      method,
+      headers: { 
+        'Authorization': `Bearer ${token}`, 
+        'Content-Type': 'application/json' 
+      }
+    })
+    
+    if (response.ok) {
+      // ✅ CRITICAL: Update both favoriteIds AND quizzes state
+      setFavoriteIds(prev => {
+        const newSet = new Set(prev)
+        if (isFavorite) {
+          newSet.delete(quizId)
+          console.log('✅ Removed from favorites')
+        } else {
+          newSet.add(quizId)
+          console.log('✅ Added to favorites')
+        }
+        return newSet
       })
       
-      if (response.ok) {
-        // Update favoriteIds set
-        const newFavorites = new Set(favoriteIds)
-        if (isFavorite) {
-          newFavorites.delete(quizId)
-        } else {
-          newFavorites.add(quizId)
-        }
-        setFavoriteIds(newFavorites)
-        
-        // Update quizzes with new favorite status
-        setQuizzes(prev => prev.map(q => 
-          q.id === quizId ? { ...q, isFavorite: !isFavorite } : q
-        ))
-      } else {
-        alert('Failed to update favorite')
-      }
-    } catch (err) {
-      console.error('Error toggling favorite:', err)
-      alert('Failed to update favorite')
+      // Update the quiz list to reflect favorite status
+      setQuizzes(prev => prev.map(q => 
+        q.id === quizId ? { ...q, isFavorite: !isFavorite } : q
+      ))
+      
+      console.log('✅ Favorite toggled successfully')
+    } else {
+      console.error('❌ Failed to update favorite:', response.status, await response.text())
+      alert('Failed to update favorite. Please try again.')
     }
+  } catch (err) {
+    console.error('❌ Error toggling favorite:', err)
+    alert('Failed to update favorite. Please try again.')
   }
+}
 
   if (status === 'loading' || isLoading) {
     return (
@@ -466,10 +494,10 @@ const DataTable = () => {
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-      {/* Modern Header */}
+      {/* Header */}
       <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200 px-6 py-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-          {/* Left Section - Tabs */}
+          {/* Tabs */}
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="flex bg-white rounded-xl p-1 shadow-sm border border-gray-200">
               {tabs.map((tab) => (
@@ -509,7 +537,7 @@ const DataTable = () => {
             </div>
           </div>
 
-          {/* Right Section - Actions */}
+          {/* Actions */}
           <div className="flex items-center gap-3">
             <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
               <Filter className="h-4 w-4" />
@@ -536,13 +564,7 @@ const DataTable = () => {
               </button>
             </div>
 
-            <button 
-              onClick={() => router.push('/quizbuilder')}
-              className="inline-flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
-            >
-              <Plus className="h-4 w-4" />
-              New Quiz
-            </button>
+        
           </div>
         </div>
       </div>
@@ -951,7 +973,7 @@ const DataTable = () => {
         </>
       )}
 
-      {/* Enhanced Empty State */}
+      {/* Empty State */}
       {filteredData.length === 0 && !isLoading && (
         <div className="text-center py-16 px-6">
           <div className="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
@@ -979,7 +1001,7 @@ const DataTable = () => {
         </div>
       )}
 
-      {/* Delete Confirmation Modal */}
+      {/* Delete Modal */}
       {deleteModalOpen && (
         <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6 animate-in fade-in zoom-in duration-200">

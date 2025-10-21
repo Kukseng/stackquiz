@@ -15,6 +15,7 @@ interface Challenge {
   participants: number;
   rating: number;
   image: string;
+  categories: { id: string; name: string }[]; // Added categories
 }
 
 interface QuizAPI {
@@ -28,6 +29,7 @@ interface QuizAPI {
   rating?: number;
   createdAt: string;
   updatedAt: string;
+  categories: { id: string; name: string }[]; // Added categories from API
   questions: {
     id: string;
     text: string;
@@ -132,6 +134,7 @@ export default function ChallengeGrid({
             participants: quiz.participants || 0,
             rating: quiz.rating || 0,
             image: getValidImageUrl(quiz.thumbnailUrl),
+            categories: quiz.categories || [], // Keep categories from API
           };
         });
 
@@ -147,14 +150,21 @@ export default function ChallengeGrid({
     fetchChallenges();
   }, []);
 
-  // Apply all filters
+  // Apply all filters with proper category filtering
   const filteredChallenges = challenges
     .filter((c) =>
       selectedDifficulty === "All" ? true : c.difficulty === selectedDifficulty
     )
     .filter((c) =>
       searchTerm ? c.title.toLowerCase().includes(searchTerm.toLowerCase()) : true
-    );
+    )
+    .filter((c) => {
+      // Category filter - check if quiz has the selected category
+      if (selectedCategory === "All") return true;
+      
+      // Check if any category in the quiz's categories array matches the selected category ID
+      return c.categories?.some(cat => cat.id === selectedCategory) || false;
+    });
 
   const displayedChallenges = limit ? filteredChallenges.slice(0, limit) : filteredChallenges;
 
@@ -180,10 +190,10 @@ export default function ChallengeGrid({
     );
 
   if (displayedChallenges.length === 0)
-    return <p className="text-center mt-10 text-gray-500">No quizzes available</p>;
+    return <p className="text-center mt-10 text-gray-500">No quizzes match your filters</p>;
 
   return (
-    <section className="max-w-5xl mx-auto  mt-8 px-4 md:px-1 lg:px-3">
+    <section className="max-w-5xl mx-auto mt-8 px-4 md:px-1 lg:px-3">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-14">
         {displayedChallenges.map((challenge, i) => (
           <CardQuizComponent key={challenge.id} challenge={challenge} index={i} />

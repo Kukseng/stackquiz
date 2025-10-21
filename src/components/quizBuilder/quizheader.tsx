@@ -68,7 +68,7 @@ export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-40 flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+    <div className="fixed top-0 left-0 right-0 z-90 flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
       <Link href="/dashboard" className="flex items-center gap-2">
         <Image src="/logo-sq.png" width={45} height={45} alt="Logo" />
         <span className="hidden md:inline text-2xl font-extrabold">

@@ -68,7 +68,7 @@ export function QuizSidebar({
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden  fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 p-4 flex items-center justify-between">
+      <div className="md:hidden z-0 fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 p-4 flex items-center justify-between">
         <h2 className="text-lg font-bold text-gray-800">Quiz ({questions.length})</h2>
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}

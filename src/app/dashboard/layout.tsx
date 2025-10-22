@@ -306,54 +306,56 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
                 <span className="sm:hidden text-xs">Create</span>
               </Link>
 
-              {/* Desktop-only: Avatar Dropdown & Bell */}
-              <div className="hidden lg:flex items-center gap-4">
-                <button 
-                  onClick={() => router.push("/dashboard/notifications")}
-                  className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
-                >
-                  <Bell className="w-6 h-6 text-gray-600" />
-                  <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-                </button>
+           {/* Desktop-only: Avatar Dropdown & Bell */}
+<div className="hidden lg:flex items-center gap-4">
+  <button
+    onClick={() => router.push("/dashboard/notifications")}
+    className="relative p-2 rounded-full hover:bg-gray-100 transition-colors"
+  >
+    <Bell className="w-6 h-6 text-gray-600" />
+    <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+  </button>
 
-                <div className="relative" ref={dropdownRef}>
-                  <div
-                    onClick={() => setDropdownOpen(!dropdownOpen)}
-                    className="flex items-center hover:scale-105 cursor-pointer"
-                  >
-                    <Image
-                      src={avatarUrl}
-                      alt="User Avatar"
-                      width={40}
-                      height={40}
-                      className="rounded-full border-2 border-yellow-400 shadow-md"
-                      unoptimized
-                    />
+  <div className="relative" ref={dropdownRef}>
+    <div
+      onClick={() => setDropdownOpen(!dropdownOpen)}
+      className="flex items-center hover:scale-105 cursor-pointer"
+    >
+      <div className="w-[45px] h-[45px] rounded-full overflow-hidden border-2 border-yellow-400 shadow-md">
+        <Image
+          src={avatarUrl}
+          alt="User Avatar"
+          width={45}
+          height={45}
+          className="w-full h-full object-cover" 
+          unoptimized
+        />
+      </div>
+    </div>
 
-                  </div>
+    {dropdownOpen && (
+      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+        <button
+          onClick={() => {
+            router.push("/dashboard/profile");
+            setDropdownOpen(false);
+          }}
+          className="w-full flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
+        >
+          <Settings className="w-4 h-4 mr-3" /> Profile Settings
+        </button>
+        <hr className="my-1 border-gray-200" />
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
+        >
+          <LogOut className="w-4 h-4 mr-3" /> Logout
+        </button>
+      </div>
+    )}
+  </div>
+</div>
 
-                  {dropdownOpen && (
-                    <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                      <button
-                        onClick={() => {
-                          router.push("/dashboard/profile");
-                          setDropdownOpen(false);
-                        }}
-                        className="w-full flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-gray-100 transition"
-                      >
-                        <Settings className="w-4 h-4 mr-3" /> Profile Settings
-                      </button>
-                      <hr className="my-1 border-gray-200" />
-                      <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition"
-                      >
-                        <LogOut className="w-4 h-4 mr-3" /> Logout
-                      </button>
-                    </div>
-                  )}
-                </div>
-              </div>
             </div>
           </div>
         </header>

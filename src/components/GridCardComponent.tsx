@@ -15,7 +15,7 @@ interface Challenge {
   participants: number;
   rating: number;
   image: string;
-  categories: { id: string; name: string }[]; // Added categories
+  categories: { id: string; name: string }[]; 
 }
 
 interface QuizAPI {

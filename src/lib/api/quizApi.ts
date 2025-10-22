@@ -158,6 +158,16 @@ export const quizApi = baseApi.injectEndpoints({
       ],
     }),
 
+    // Fork an existing quiz
+    forkQuiz: builder.mutation<QuizData, { quizId: string; quiz: Partial<QuizData> }>({
+      query: ({ quizId, quiz }) => ({
+        url: `/quizzes/${quizId}/fork`,
+        method: "POST",
+        body: quiz,
+      }),
+      invalidatesTags: ["Quiz"],
+    }),
+
     // Delete a quiz
     deleteQuiz: builder.mutation<void, string>({
       query: (quizId) => ({
@@ -178,5 +188,6 @@ export const {
   useGetDraftQuizzesQuery,
   useCreateQuizMutation,
   useUpdateQuizMutation,
+  useForkQuizMutation,
   useDeleteQuizMutation,
 } = quizApi;

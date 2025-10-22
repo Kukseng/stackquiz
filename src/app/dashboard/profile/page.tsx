@@ -4,7 +4,7 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState, ChangeEvent, useMemo, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { Camera } from "lucide-react";
+import { Camera, Upload, X } from "lucide-react";
 
 // ============================================
 // TYPE DEFINITIONS (matching your API exactly)
@@ -28,7 +28,6 @@ type UpdateProfilePayload = {
   firstName?: string;
   lastName?: string;
   avatarUrl?: string;
-  profileUser?: string;
 };
 
 type ProfileForm = {
@@ -37,8 +36,15 @@ type ProfileForm = {
   username: string;
   email: string;
   password: string;
-  profileUser: string;
   avatarUrl: string;
+};
+
+type MediaUploadResponse = {
+  name: string;
+  extension: string;
+  mimeTypeFile: string;
+  uri: string;
+  size: number;
 };
 
 // ============================================
@@ -54,6 +60,7 @@ function ProfileContent() {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const [isEditing, setIsEditing] = useState<boolean>(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState<boolean>(false);
 
   const [form, setForm] = useState<ProfileForm>({
     firstName: "",
@@ -61,7 +68,6 @@ function ProfileContent() {
     username: "",
     email: "",
     password: "",
-    profileUser: "",
     avatarUrl: "",
   });
 
@@ -122,6 +128,7 @@ function ProfileContent() {
   // API FUNCTIONS
   // ============================================
 
+
   const fetchProfile = async (): Promise<void> => {
     if (!session?.apiAccessToken) return;
     
@@ -154,7 +161,6 @@ function ProfileContent() {
         username: data.username || "",
         email: data.email || "",
         password: "",
-        profileUser: data.profileUser || "",
         avatarUrl: data.avatarUrl || "",
       });
       
@@ -164,6 +170,56 @@ function ProfileContent() {
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const uploadAvatar = async (file: File): Promise<string | null> => {
+    if (!session?.apiAccessToken) {
+      throw new Error("No API token available");
+    }
+
+    setUploadingAvatar(true);
+
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+
+      console.log("📤 Uploading avatar to /medias/upload-single...", { 
+        fileName: file.name, 
+        fileSize: file.size, 
+        fileType: file.type 
+      });
+
+      const uploadRes = await fetch(`${API}/medias/upload-single`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.apiAccessToken}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadRes.ok) {
+        const errorText = await uploadRes.text();
+        console.error("❌ Avatar upload failed:", errorText);
+        throw new Error(`Avatar upload failed: ${uploadRes.status} ${errorText}`);
+      }
+
+      const uploadData: MediaUploadResponse = await uploadRes.json();
+      console.log("✅ Avatar upload response:", uploadData);
+
+      if (!uploadData.uri) {
+        console.warn("⚠️ No URI in response:", uploadData);
+        throw new Error("No avatar URI returned from server");
+      }
+
+      console.log("✅ Avatar uploaded successfully:", uploadData.uri);
+      return uploadData.uri;
+
+    } catch (error) {
+      console.error("❌ Avatar upload error:", error);
+      throw error;
+    } finally {
+      setUploadingAvatar(false);
     }
   };
 
@@ -180,6 +236,26 @@ function ProfileContent() {
       // Prepare payload according to API spec
       const payload: UpdateProfilePayload = {};
 
+      // Handle avatar upload first if there's a file
+      if (avatarFile) {
+        try {
+          const uploadedUrl = await uploadAvatar(avatarFile);
+          if (uploadedUrl) {
+            payload.avatarUrl = uploadedUrl;
+            // Update form to reflect the uploaded URL
+            setForm(prev => ({ ...prev, avatarUrl: uploadedUrl }));
+          }
+        } catch (uploadError) {
+          const errorMsg = uploadError instanceof Error ? uploadError.message : "Avatar upload failed";
+          alert(`⚠️ ${errorMsg}\n\nContinuing to save other profile data...`);
+          console.error("Avatar upload error:", uploadError);
+        }
+      } else if (form.avatarUrl?.trim() && form.avatarUrl !== profile?.avatarUrl) {
+        // User provided a URL directly
+        payload.avatarUrl = form.avatarUrl.trim();
+      }
+
+
       // Only include fields that have changed and are not empty
       if (form.username?.trim() && form.username !== profile?.username) {
         payload.username = form.username.trim();
@@ -193,45 +269,11 @@ function ProfileContent() {
       if (form.lastName?.trim()) {
         payload.lastName = form.lastName.trim();
       }
-      if (form.profileUser?.trim()) {
-        payload.profileUser = form.profileUser.trim();
-      }
-
-      // Handle avatar update
-      if (avatarFile) {
-        try {
-          const formData = new FormData();
-          formData.append("file", avatarFile);
-
-          const uploadRes = await fetch(`${API}/users/me/avatar`, {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${session.apiAccessToken}`,
-            },
-            body: formData,
-          });
-
-          if (uploadRes.ok) {
-            const uploadData = await uploadRes.json();
-            const newAvatarUrl = uploadData.avatarUrl || uploadData.url || uploadData.fileUrl;
-            if (newAvatarUrl) {
-              payload.avatarUrl = newAvatarUrl;
-              console.log("✅ Avatar uploaded via dedicated endpoint:", newAvatarUrl);
-            }
-          } else {
-            console.warn("⚠️ Avatar upload endpoint not available, using direct URL method");
-          }
-        } catch (uploadErr) {
-          console.warn("⚠️ Avatar upload failed, trying alternative method:", uploadErr);
-        }
-      } else if (form.avatarUrl?.trim() && form.avatarUrl !== profile?.avatarUrl) {
-        payload.avatarUrl = form.avatarUrl.trim();
-      }
 
       console.log("📤 Sending update payload:", payload);
 
       const res = await fetch(`${API}/users/me`, {
-        method: "PUT",
+        method: "PATCH",
         headers: {
           Authorization: `Bearer ${session.apiAccessToken}`,
           "Content-Type": "application/json",
@@ -262,7 +304,6 @@ function ProfileContent() {
         username: updated.username || "",
         email: updated.email || "",
         password: "",
-        profileUser: updated.profileUser || "",
         avatarUrl: updated.avatarUrl || "",
       });
       
@@ -291,7 +332,7 @@ function ProfileContent() {
 
       } catch (sessionErr) {
         console.warn("⚠️ Session update failed, but profile was saved:", sessionErr);
-        alert("✅ Profile updated! Refreshing page to sync all components...");
+        alert("✅ Profile updated! Please refresh the page to see all changes.");
       }
 
     } catch (err) {
@@ -319,7 +360,7 @@ function ProfileContent() {
       return;
     }
 
-    const maxSize = 5 * 1024 * 1024;
+    const maxSize = 5 * 1024 * 1024; // 5MB
     if (file.size > maxSize) {
       alert('File size must be less than 5MB');
       return;
@@ -331,7 +372,18 @@ function ProfileContent() {
     
     setAvatarFile(file);
     setAvatarPreview(URL.createObjectURL(file));
+    console.log("✅ Avatar file selected:", file.name);
   };
+
+  const handleRemoveAvatar = (): void => {
+    if (avatarPreview) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+    setAvatarFile(null);
+    setAvatarPreview(null);
+    setForm(prev => ({ ...prev, avatarUrl: "" }));
+  };
+
 
   const handleCancel = (): void => {
     if (profile) {
@@ -341,7 +393,6 @@ function ProfileContent() {
         username: profile.username || "",
         email: profile.email || "",
         password: "",
-        profileUser: profile.profileUser || "",
         avatarUrl: profile.avatarUrl || "",
       });
       
@@ -412,7 +463,7 @@ function ProfileContent() {
                       src={displayAvatar} 
                       alt={displayName} 
                       fill 
-                      className="object-cover" 
+                      className="object-fill" 
                       unoptimized 
                     />
                   ) : (
@@ -420,27 +471,58 @@ function ProfileContent() {
                       {displayName[0]?.toUpperCase()}
                     </div>
                   )}
+                  
+                  {/* Upload indicator */}
+                  {uploadingAvatar && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+                    </div>
+                  )}
                 </div>
                 
                 {isEditing && (
-                  <label className="absolute bottom-2 right-2 cursor-pointer bg-blue-500 hover:bg-blue-600 p-2 rounded-full shadow-lg transition-colors">
-                    <Camera className="w-4 h-4 text-white" />
-                    <input 
-                      type="file" 
-                      accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" 
-                      onChange={handleAvatarFileChange} 
-                      className="hidden" 
-                    />
-                  </label>
+                  <div className="absolute bottom-2 right-2 flex gap-2">
+                    <label className="cursor-pointer bg-blue-500 hover:bg-blue-600 p-2 rounded-full shadow-lg transition-colors">
+                      <Camera className="w-4 h-4 text-white" />
+                      <input 
+                        type="file" 
+                        accept="image/png,image/jpeg,image/jpg,image/gif,image/webp" 
+                        onChange={handleAvatarFileChange} 
+                        className="hidden"
+                        disabled={uploadingAvatar}
+                      />
+                    </label>
+                    {(avatarPreview || avatarFile) && (
+
+                      <button
+                        onClick={handleRemoveAvatar}
+                        className="bg-red-500 hover:bg-red-600 p-2 rounded-full shadow-lg transition-colors"
+                        disabled={uploadingAvatar}
+                      >
+                        <X className="w-4 h-4 text-white" />
+                      </button>
+                    )}
+                  </div>
                 )}
               </div>
 
               <div className="text-center sm:text-left mb-4 sm:mb-0">
                 <h2 className="text-2xl sm:text-3xl font-bold text-gray-800">{displayName}</h2>
                 <p className="text-gray-600">{profile.email}</p>
+                {profile.profileUser && (
+                  <p className="text-sm text-blue-600 mt-1 font-medium">
+                    {profile.profileUser}
+                  </p>
+                )}
                 <p className="text-sm text-gray-400 mt-1">
                   Member since {profile.createdAt ? new Date(profile.createdAt).toLocaleDateString() : "N/A"}
                 </p>
+                {avatarFile && (
+                  <p className="text-xs text-blue-600 mt-1 flex items-center gap-1 justify-center sm:justify-start">
+                    <Upload className="w-3 h-3" />
+                    Ready to upload: {avatarFile.name}
+                  </p>
+                )}
               </div>
             </div>
 
@@ -465,15 +547,15 @@ function ProfileContent() {
                 <>
                   <button 
                     onClick={handleSave} 
-                    disabled={loading} 
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-md"
+                    disabled={loading || uploadingAvatar} 
+                    className="bg-green-600 hover:bg-green-700 disabled:bg-green-400 disabled:cursor-not-allowed text-white px-6 py-2 rounded-full text-sm font-medium transition-colors shadow-md"
                   >
-                    {loading ? "Saving..." : "Save Changes"}
+                    {uploadingAvatar ? "Uploading..." : loading ? "Saving..." : "Save Changes"}
                   </button>
                   <button 
                     onClick={handleCancel} 
-                    disabled={loading} 
-                    className="bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 text-gray-700 px-6 py-2 rounded-full text-sm font-medium transition-colors"
+                    disabled={loading || uploadingAvatar} 
+                    className="bg-gray-200 hover:bg-gray-300 disabled:bg-gray-100 disabled:cursor-not-allowed text-gray-700 px-6 py-2 rounded-full text-sm font-medium transition-colors"
                   >
                     Cancel
                   </button>
@@ -500,6 +582,7 @@ function ProfileContent() {
                 }`}
               />
             </div>
+
 
             {/* Last Name */}
             <div>
@@ -543,26 +626,11 @@ function ProfileContent() {
               />
             </div>
 
-            {/* Profile Type */}
-            <div className="sm:col-span-2">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Profile Type</label>
-              <input
-                type="text"
-                value={form.profileUser}
-                readOnly={!isEditing}
-                onChange={(e) => setForm(p => ({ ...p, profileUser: e.target.value }))}
-                placeholder={isEditing ? "e.g., ORGANIZER, PARTICIPANT" : ""}
-                className={`w-full rounded-xl border px-4 py-3 ${
-                  isEditing ? "bg-white border-gray-300" : "bg-gray-50 border-gray-200 text-gray-600"
-                }`}
-              />
-            </div>
-
             {/* Avatar URL */}
             {isEditing && (
               <div className="sm:col-span-2">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Avatar URL (or upload above)
+                  Avatar URL (optional - or upload using camera icon)
                 </label>
                 <input
                   type="url"
@@ -570,9 +638,12 @@ function ProfileContent() {
                   onChange={(e) => setForm(p => ({ ...p, avatarUrl: e.target.value }))}
                   placeholder="https://example.com/avatar.jpg"
                   className="w-full rounded-xl border border-gray-300 px-4 py-3 bg-white"
+                  disabled={!!avatarFile}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  You can paste an image URL here, or upload a file using the camera icon
+                  {avatarFile 
+                    ? "Clear the selected file to enter a URL instead" 
+                    : "Or use the camera icon above to upload a file"}
                 </p>
               </div>
             )}

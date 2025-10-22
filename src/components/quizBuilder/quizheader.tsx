@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useSession } from "next-auth/react";
+import { useQuizStore } from "./hooks/useQuizStore";
 import Image from "next/image";
+
 interface Option {
   id: string;
   text: string;
@@ -28,7 +31,97 @@ interface QuizHeaderProps {
 
 export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
   const router = useRouter();
+  const { data: session } = useSession();
   const [isSaving, setIsSaving] = useState(false);
+  const { thumbnailUrl } = useQuizStore();
+  const API = process.env.NEXT_PUBLIC_API_URL;
+
+  // ✅ Upload image using FormData (matching profile pattern)
+  const uploadImageToAPI = async (file: File): Promise<string> => {
+    try {
+      if (!file.type.startsWith("image/")) {
+        throw new Error("File must be an image");
+      }
+
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Image size must be less than 5MB");
+      }
+
+      console.log(`📤 Uploading: ${file.name}`);
+
+      const formData = new FormData();
+      formData.append("file", file);
+
+      const response = await fetch(`${API}/medias/upload-single`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${(session as any)?.apiAccessToken}`,
+        },
+        body: formData,
+      });
+
+      if (!response.ok) {
+        let errorMessage = `Upload failed: ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          const errorText = await response.text();
+          if (errorText) errorMessage = errorText;
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      
+      if (!data.uri) {
+        throw new Error("No URI in response");
+      }
+
+      console.log("✅ Upload success:", data.uri);
+      return data.uri;
+    } catch (error) {
+      console.error("❌ Upload error:", error);
+      throw error instanceof Error ? error : new Error("Upload failed");
+    }
+  };
+
+  const uploadQuestionImage = async (imageUrl: string): Promise<string> => {
+    try {
+      // If already a valid URL, return as is
+      if (imageUrl.startsWith('http') && !imageUrl.startsWith('blob:')) {
+        console.log("📌 Using existing URL");
+        return imageUrl;
+      }
+
+      // If empty, return empty
+      if (!imageUrl || imageUrl.trim() === "") {
+        return "";
+      }
+
+      console.log("🔄 Converting blob to file...");
+
+      // Fetch blob and convert to File
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch blob");
+      }
+
+      const blob = await response.blob();
+      
+      if (!blob.type.startsWith("image/")) {
+        throw new Error("Invalid image type");
+      }
+
+      const file = new File([blob], `question-${Date.now()}.jpg`, { type: blob.type });
+
+      // Upload using the main function
+      return await uploadImageToAPI(file);
+    } catch (error) {
+      console.error("❌ Question image upload error:", error);
+      throw error instanceof Error ? error : new Error("Failed to upload question image");
+    }
+  };
 
   const saveDraft = async () => {
     if (questions.length === 0) {
@@ -37,55 +130,123 @@ export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
 
     setIsSaving(true);
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1';
+      console.log("💾 Saving draft with", questions.length, "questions...");
 
-      // Transform questions to API format
-      const apiQuestions = questions.map((q, index) => ({
-        id: q.id,
-        text: q.question,
-        type: (q.type.toUpperCase() as "MCQ" | "TF"),
-        questionOrder: index + 1,
-        timeLimit: q.timeLimit || 20,
-        points: 1,
-        imageUrl: q.imageUrl || null,
-        options: q.options.map((o, oIndex) => ({
-          id: o.id,
-          optionText: o.text,
-          optionOrder: oIndex + 1,
-          createdAt: null,
-          isCorrected: o.correct,
-        })),
-      }));
+      // Process questions and upload images
+      const processedQuestions = [];
+      for (let i = 0; i < questions.length; i++) {
+        const q = questions[i];
+        let uploadedImageUrl = "";
 
-      // Create draft quiz with questions
-      const response = await fetch(`${apiUrl}/quizzes`, {
+        // Upload question image if exists
+        if (q.imageUrl) {
+          try {
+            uploadedImageUrl = await uploadQuestionImage(q.imageUrl);
+            console.log(`✅ Image uploaded for Q${i + 1}`);
+          } catch (error) {
+            console.warn(`⚠️ Image upload failed for Q${i + 1}:`, error);
+            // Continue without image rather than failing
+            uploadedImageUrl = "";
+          }
+        }
+
+        // Transform question to API format
+        const apiQuestion = {
+          text: q.question || "Untitled Question",
+          type: (q.type.toUpperCase() === "TF" || q.type.toUpperCase() === "TRUEFALSE") 
+            ? "TF" 
+            : q.type.toUpperCase() === "FILL_THE_BLANK"
+            ? "FILL_THE_BLANK"
+            : "MCQ",
+          imageUrl: uploadedImageUrl || undefined,
+        };
+
+        processedQuestions.push(apiQuestion);
+      }
+
+      // Create draft quiz
+      const response = await fetch(`${API}/quizzes`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${localStorage.getItem('token')}` // Adjust based on your auth
+          'Authorization': `Bearer ${(session as any)?.apiAccessToken}`,
         },
         body: JSON.stringify({
-          title: "Untitled Draft",
+          title: `Draft of ${new Date().toLocaleDateString()}`,
           description: "Draft quiz - Click edit to complete",
-          thumbnailUrl: "",
-          status: "DRAFT", // ✅ Fixed: Changed from "DRAFF" to "DRAFT"
+          thumbnailUrl: thumbnailUrl || null,
+          status: "DRAFT",
           visibility: "PRIVATE",
           difficulty: "EASY",
           categoryIds: [],
           questionTimeLimit: "FIFTEEN",
-          questions: apiQuestions,
         })
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to save draft: ${response.status}`);
+        const errorText = await response.text();
+        console.error("❌ Draft creation failed:", response.status, errorText);
+        throw new Error(`Failed to save draft: ${response.status} - ${errorText}`);
       }
 
       const draftQuiz = await response.json();
-      console.log("Draft quiz created successfully:", draftQuiz.id);
+      console.log("✅ Draft quiz created:", draftQuiz.id);
+
+      // Thumbnail is already included in the initial creation, no need to update
+
+      // Now add questions to the draft quiz
+      for (let i = 0; i < processedQuestions.length; i++) {
+        const apiQuestion = processedQuestions[i];
+        const originalQuestion = questions[i];
+
+        console.log(`➕ Adding question ${i + 1}/${processedQuestions.length}...`);
+
+        const questionResponse = await fetch(`${API}/questions`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${(session as any)?.apiAccessToken}`,
+          },
+          body: JSON.stringify({
+            ...apiQuestion,
+            quizId: draftQuiz.id,
+          })
+        });
+
+        if (!questionResponse.ok) {
+          console.warn(`⚠️ Failed to add question ${i + 1}`);
+          continue;
+        }
+
+        const createdQuestion = await questionResponse.json();
+
+        // Add options if they exist
+        if (originalQuestion.options && originalQuestion.options.length > 0) {
+          const optionsResponse = await fetch(`${API}/options/${createdQuestion.id}`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${(session as any)?.apiAccessToken}`,
+            },
+            body: JSON.stringify(
+              originalQuestion.options.map((opt) => ({
+                optionText: opt.text,
+                isCorrected: opt.correct,
+                questionId: createdQuestion.id,
+              }))
+            )
+          });
+
+          if (!optionsResponse.ok) {
+            console.warn(`⚠️ Failed to add options for question ${i + 1}`);
+          }
+        }
+      }
+
+      console.log("✅ Draft saved successfully!");
       return draftQuiz;
     } catch (error: any) {
-      console.error("Failed to save draft:", error);
+      console.error("❌ Failed to save draft:", error);
       throw error;
     } finally {
       setIsSaving(false);
@@ -105,34 +266,41 @@ export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
       return;
     }
 
-    // Auto-save as draft without asking
-    try {
-      setIsSaving(true);
-      await saveDraft();
-      router.push("/dashboard/library");
-    } catch (error) {
-      console.error("Failed to auto-save draft on exit:", error);
-      // Show error but still allow exit
-      const shouldExit = confirm("Failed to save draft. Exit without saving?");
-      if (shouldExit) {
+    // Ask user if they want to save
+    const shouldSave = confirm("Save this quiz as draft before exiting?");
+    
+    if (shouldSave) {
+      try {
+        setIsSaving(true);
+        await saveDraft();
+        alert("✅ Draft saved successfully!");
         router.push("/dashboard/library");
+      } catch (error) {
+        console.error("Failed to save draft:", error);
+        const forceExit = confirm("Failed to save draft. Exit without saving?");
+        if (forceExit) {
+          router.push("/dashboard/library");
+        }
+      } finally {
+        setIsSaving(false);
       }
-    } finally {
-      setIsSaving(false);
+    } else {
+      router.push("/dashboard/library");
     }
   };
 
   const handleSaveDraft = async () => {
     if (questions.length === 0) {
-      alert("Please add at least one question before saving as draft");
+      alert("Please add at least one question before saving");
       return;
     }
 
     try {
       await saveDraft();
-      alert("Draft saved successfully!");
+      alert("✅ Draft saved successfully!");
+      router.push("/dashboard/library");
     } catch (error) {
-      alert("Failed to save draft. Please try again.");
+      alert("❌ Failed to save draft. Please try again.");
     }
   };
 
@@ -147,18 +315,11 @@ export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
       </div>
 
       <div className="flex items-center space-x-4">
-        <button
-          onClick={handleSaveDraft}
-          disabled={isSaving}
-          className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
-        >
-          {isSaving ? "Saving..." : "Save Draft"}
-        </button>
 
         <button
           onClick={onPublish}
-          disabled={isSaving}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+          disabled={isSaving || questions.length === 0}
+          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Publish
         </button>
@@ -166,7 +327,7 @@ export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
         <button
           onClick={handleExit}
           disabled={isSaving}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50"
+          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {isSaving ? "Saving..." : "Exit"}
         </button>

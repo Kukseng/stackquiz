@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useQuizStore } from "./hooks/useQuizbuilder";
+import { useQuizStore } from "./hooks/useQuizStore";
 import { QuizSidebar } from "./quizsidebar";
 import QuizMainContent from "./quizmaincontent";
 import { QuizHeader } from "./quizheader";
@@ -35,6 +35,8 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
     setQuestions,
     activeQuestionId,
     setActiveQuestionId,
+    thumbnailUrl,
+    setThumbnailUrl,
     addQuestion,
     deleteQuestion,
     duplicateQuestion,
@@ -149,8 +151,10 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
         <QuizMainContent
           questions={questions as any}
           activeQuestionId={activeQuestionId as any}
+          thumbnailUrl={thumbnailUrl}
           onUpdateQuestionText={updateQuestionText}
           onUpdateQuestionImage={updateQuestionImage}
+          onUpdateThumbnailUrl={setThumbnailUrl}
           onUpdateOptionText={updateOptionText}
           onToggleCorrectAnswer={toggleCorrectAnswer}
           onDeleteQuestion={() => setShowDeleteModal(true)}

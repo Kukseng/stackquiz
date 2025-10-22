@@ -20,8 +20,10 @@ interface Question {
 interface QuizState {
   questions: Question[];
   activeQuestionId: string | number | null;
+  thumbnailUrl: string;
   setQuestions: (questions: Question[]) => void;
   setActiveQuestionId: (id: string | number | null) => void;
+  setThumbnailUrl: (url: string) => void;
   addQuestion: (type: string, questionData?: Partial<Question>) => void;
   deleteQuestion: (id: string | number) => void;
   duplicateQuestion: (question: Question) => void;
@@ -70,10 +72,13 @@ const createDefaultOptions = (type: string): Option[] => {
 export const useQuizStore = create<QuizState>((set, get) => ({
   questions: [],
   activeQuestionId: null,
+  thumbnailUrl: "",
 
   setQuestions: (questions) => set({ questions }),
 
   setActiveQuestionId: (id) => set({ activeQuestionId: id }),
+
+  setThumbnailUrl: (url) => set({ thumbnailUrl: url }),
 
   addQuestion: (type, questionData) => {
     const newQuestion: Question = {

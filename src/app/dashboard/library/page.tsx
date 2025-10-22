@@ -69,19 +69,21 @@ const DataTable = () => {
         const token = (session as any)?.apiAccessToken
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
 
-        // Fetch quizzes
-        let response = await fetch(`${apiUrl}/quizzes/users/me`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          cache: 'no-store'
-        })
-
-        // Fallback endpoints for quizzes
-        if (!response.ok) {
-          response = await fetch(`${apiUrl}/quizzes?userId=me`, {
+        // Fetch quizzes based on active tab
+        let response;
+        if (activeTab === 'draft') {
+          // Fetch draft quizzes
+          response = await fetch(`${apiUrl}/quizzes/draft`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          })
+        } else if (activeTab === 'favorites') {
+          // For favorites, fetch all quizzes and filter client-side
+          response = await fetch(`${apiUrl}/quizzes/users/me`, {
             method: 'GET',
             headers: {
               'Authorization': `Bearer ${token}`,
@@ -90,8 +92,9 @@ const DataTable = () => {
             cache: 'no-store'
           })
 
+          // Fallback endpoints for quizzes
           if (!response.ok) {
-            response = await fetch(`${apiUrl}/users/me/quizzes`, {
+            response = await fetch(`${apiUrl}/quizzes?userId=me`, {
               method: 'GET',
               headers: {
                 'Authorization': `Bearer ${token}`,
@@ -99,6 +102,50 @@ const DataTable = () => {
               },
               cache: 'no-store'
             })
+
+            if (!response.ok) {
+              response = await fetch(`${apiUrl}/users/me/quizzes`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                cache: 'no-store'
+              })
+            }
+          }
+        } else {
+          // Fetch all user quizzes for recent tab
+          response = await fetch(`${apiUrl}/quizzes/users/me`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          })
+
+          // Fallback endpoints for quizzes
+          if (!response.ok) {
+            response = await fetch(`${apiUrl}/quizzes?userId=me`, {
+              method: 'GET',
+              headers: {
+                'Authorization': `Bearer ${token}`,
+                'Content-Type': 'application/json'
+              },
+              cache: 'no-store'
+            })
+
+            if (!response.ok) {
+              response = await fetch(`${apiUrl}/users/me/quizzes`, {
+                method: 'GET',
+                headers: {
+                  'Authorization': `Bearer ${token}`,
+                  'Content-Type': 'application/json'
+                },
+                cache: 'no-store'
+              })
+            }
           }
         }
 
@@ -124,7 +171,7 @@ const DataTable = () => {
     }
 
     fetchData()
-  }, [session, status, isAuthed, favoriteIds])
+  }, [session, status, isAuthed, favoriteIds, activeTab])
 
   // Auto-refresh quizzes when navigating back from quiz builder
   useEffect(() => {
@@ -136,7 +183,7 @@ const DataTable = () => {
 
     window.addEventListener('focus', handleFocus)
     return () => window.removeEventListener('focus', handleFocus)
-  }, [isAuthed])
+  }, [isAuthed, activeTab])
 
   const refetch = () => {
     const fetchData = async () => {
@@ -149,14 +196,37 @@ const DataTable = () => {
         const token = (session as any)?.apiAccessToken
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
 
-        const response = await fetch(`${apiUrl}/quizzes/users/me`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json'
-          },
-          cache: 'no-store'
-        })
+        // Fetch quizzes based on active tab
+        let response;
+        if (activeTab === 'draft') {
+          response = await fetch(`${apiUrl}/quizzes/draft`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          })
+        } else if (activeTab === 'favorites') {
+          // For favorites, fetch all quizzes and filter client-side
+          response = await fetch(`${apiUrl}/quizzes/users/me`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          })
+        } else {
+          response = await fetch(`${apiUrl}/quizzes/users/me`, {
+            method: 'GET',
+            headers: {
+              'Authorization': `Bearer ${token}`,
+              'Content-Type': 'application/json'
+            },
+            cache: 'no-store'
+          })
+        }
 
         if (!response.ok) throw new Error(`Failed to fetch quizzes: ${response.status}`)
 
@@ -190,6 +260,7 @@ const DataTable = () => {
           .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
         break
       case 'draft':
+        // For draft tab, we already fetch only drafts, so just filter if needed
         filtered = filtered.filter(q => q.status === 'DRAFT')
         break
       case 'favorites':
@@ -216,6 +287,11 @@ const DataTable = () => {
     { id: 'draft', label: 'Draft', count: quizzes.filter(q => q.status === 'DRAFT').length },
     { id: 'favorites', label: 'Favorites', count: quizzes.filter(q => favoriteIds.has(q.id)).length }
   ]
+
+  // Update tab counts when quizzes change
+  useEffect(() => {
+    // This will trigger a re-render of tabs with updated counts
+  }, [quizzes, favoriteIds])
 
   const handleSelectAll = () => {
     if (selectedItems.length === filteredData.length) {

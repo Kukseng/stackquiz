@@ -38,11 +38,11 @@ export default function Footer() {
             </div>
             <div>
               <div className="text-xl font-bold">
-                STACK <span className="text-yellow">QUIZ</span>
+                STACK<span className="text-yellow">QUIZ</span>
               </div>
             </div>
           </div>
-          <p className="text-[16px] text-gray-300">Stack Up the Knowledge.</p>
+          <p className="text-[16px] text-gray-300">Learn Hard, Play Smart</p>
         </div>
 
         {/* Links */}
@@ -118,7 +118,7 @@ export default function Footer() {
       <div className="w-full border-t border-gray-600 py-4">
   <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-center md:justify-between items-center space-y-4 md:space-y-0 text-center md:text-left">
     <div className="text-[16px] text-gray-300">
-      © 2025 StackQuizz Inc. All rights reserved.
+      © 2025 STACKUIZ Inc. All rights reserved.
     </div>
 
     <div className="flex justify-center md:justify-start space-x-2">

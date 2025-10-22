@@ -1,10 +1,11 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6"
 import { IoTriangle } from "react-icons/io5"
 import { ImCheckmark2 } from "react-icons/im"
 import Image from "next/image"
+import { useSession } from "next-auth/react"
 
 interface Option {
   id: string
@@ -26,8 +27,10 @@ interface Question {
 interface QuizMainContentProps {
   questions: Question[]
   activeQuestionId: string | null
+  thumbnailUrl: string
   onUpdateQuestionText: (questionId: string, text: string) => void
   onUpdateQuestionImage: (questionId: string, image: string) => void
+  onUpdateThumbnailUrl: (url: string) => void
   onUpdateOptionText: (questionId: string, optionId: string, text: string) => void
   onToggleCorrectAnswer: (questionId: string, optionId: string) => void
   onDeleteQuestion: (id: string) => void
@@ -61,30 +64,206 @@ const renderIcon = (icon?: string) => {
 export default function QuizMainContent({
   questions,
   activeQuestionId,
+  thumbnailUrl,
   onUpdateQuestionText,
   onUpdateQuestionImage,
+  onUpdateThumbnailUrl,
   onUpdateOptionText,
   onToggleCorrectAnswer,
   onDeleteQuestion,
   onDuplicateQuestion,
   theme,
 }: QuizMainContentProps) {
+  const { data: session } = useSession()
   const activeQuestion = questions?.find((q) => q.id === activeQuestionId)
   const [previewImage, setPreviewImage] = useState<string | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null)
+  const [isUploadingThumbnail, setIsUploadingThumbnail] = useState(false)
+  const API = process.env.NEXT_PUBLIC_API_URL
 
-  const handleQuestionImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // ✅ Upload image using FormData (matching profile pattern exactly)
+  const uploadImageToAPI = async (file: File): Promise<string> => {
+    try {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        throw new Error("File must be an image")
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Image size must be less than 5MB")
+      }
+
+      console.log(`📤 Uploading image: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`)
+
+      // Create FormData and append file
+      const formData = new FormData()
+      formData.append("file", file)
+
+      // Upload to API using FormData
+      const response = await fetch(`${API}/medias/upload-single`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${(session as any)?.apiAccessToken}`,
+          // Don't set Content-Type - browser will set it automatically with boundary
+        },
+        body: formData,
+      })
+
+      if (!response.ok) {
+        let errorMessage = `Upload failed with status ${response.status}`
+        try {
+          const errorData = await response.json()
+          errorMessage = errorData.message || errorMessage
+        } catch {
+          const errorText = await response.text()
+          if (errorText) errorMessage = errorText
+        }
+        throw new Error(errorMessage)
+      }
+
+      const data = await response.json()
+      console.log("✅ Upload response:", data)
+
+      // Validate response has URI
+      if (!data.uri) {
+        throw new Error("Upload response missing URI")
+      }
+
+      console.log(`✅ Image uploaded successfully: ${data.uri}`)
+      return data.uri
+    } catch (error) {
+      console.error("❌ Image upload error:", error)
+      throw error instanceof Error ? error : new Error("Failed to upload image")
+    }
+  }
+
+  const handleQuestionImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !activeQuestion) return
     const file = e.target.files[0]
-    const previewUrl = URL.createObjectURL(file)
-    setPreviewImage(previewUrl)
-    onUpdateQuestionImage(activeQuestion.id, previewUrl) 
+
+    // Validate file
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size must be less than 5MB")
+      return
+    }
+
+    try {
+      setIsUploading(true)
+      
+      // Create local preview immediately for better UX
+      const previewUrl = URL.createObjectURL(file)
+      setPreviewImage(previewUrl)
+
+      // Upload to get permanent URL
+      const uploadedUrl = await uploadImageToAPI(file)
+      
+      // Update question with permanent URL
+      onUpdateQuestionImage(activeQuestion.id, uploadedUrl)
+
+      // Clear preview to show permanent image
+      setPreviewImage(null)
+
+      console.log("✅ Question image updated with URL:", uploadedUrl)
+    } catch (error) {
+      console.error("Failed to upload question image:", error)
+      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      // Clear preview on error
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage)
+      }
+      setPreviewImage(null)
+    } finally {
+      setIsUploading(false)
+    }
   }
 
   const handleRemoveImage = () => {
     if (!activeQuestion) return
+
+    // Clean up preview URL if exists
+    if (previewImage) {
+      URL.revokeObjectURL(previewImage)
+    }
+
     setPreviewImage(null)
     onUpdateQuestionImage(activeQuestion.id, "")
   }
+
+  // Reset preview when question changes
+  useEffect(() => {
+    setPreviewImage(null)
+  }, [activeQuestionId])
+
+  const handleThumbnailUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (!e.target.files) return
+    const file = e.target.files[0]
+
+    // Validate file
+    if (!file.type.startsWith("image/")) {
+      alert("Please select a valid image file")
+      return
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      alert("Image size must be less than 5MB")
+      return
+    }
+
+    try {
+      setIsUploadingThumbnail(true)
+
+      // Create local preview immediately for better UX
+      const previewUrl = URL.createObjectURL(file)
+      setThumbnailPreview(previewUrl)
+
+      // Upload to get permanent URL
+      const uploadedUrl = await uploadImageToAPI(file)
+
+      // Update thumbnail
+      onUpdateThumbnailUrl(uploadedUrl)
+
+      console.log("✅ Thumbnail uploaded with URL:", uploadedUrl)
+    } catch (error) {
+      console.error("Failed to upload thumbnail:", error)
+      alert(`Failed to upload image: ${error instanceof Error ? error.message : 'Unknown error'}`)
+      // Clear preview on error
+      if (thumbnailPreview) {
+        URL.revokeObjectURL(thumbnailPreview)
+      }
+      setThumbnailPreview(null)
+    } finally {
+      setIsUploadingThumbnail(false)
+    }
+  }
+
+  const handleRemoveThumbnail = () => {
+    // Clean up preview URL if exists
+    if (thumbnailPreview) {
+      URL.revokeObjectURL(thumbnailPreview)
+    }
+
+    setThumbnailPreview(null)
+    onUpdateThumbnailUrl("")
+  }
+
+  // Clean up preview URLs when component unmounts
+  useEffect(() => {
+    return () => {
+      if (previewImage) {
+        URL.revokeObjectURL(previewImage)
+      }
+      if (thumbnailPreview) {
+        URL.revokeObjectURL(thumbnailPreview)
+      }
+    }
+  }, [])
 
   return (
     <div className="w-full flex-1 flex items-center justify-center bg-gray-50 p-3 min-h-screen">
@@ -93,11 +272,71 @@ export default function QuizMainContent({
         style={{ backgroundImage: `url(${themeCardImages[theme]})` }}
       >
         {!activeQuestion ? (
-          <div className="flex flex-col items-center justify-center text-center text-white py-20">
-            <h2 className="text-3xl font-bold mb-3">No question selected</h2>
-            <p className="text-lg text-white/90">
-              Please select a question from the sidebar or add a new one.
+          <div className="flex flex-col items-center justify-center text-center text-white py-8">
+            <h2 className="text-3xl font-bold mb-3">Quiz Thumbnail</h2>
+            <p className="text-lg text-white/90 mb-8">
+              Upload a cover image for your quiz
             </p>
+
+            {/* Thumbnail Upload */}
+            <div className="mb-8 flex flex-col items-center">
+              {isUploadingThumbnail && (
+                <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
+                    <p className="text-blue-700 text-sm font-medium">Uploading thumbnail...</p>
+                  </div>
+                </div>
+              )}
+              {thumbnailPreview || thumbnailUrl ? (
+                <div className="relative w-full max-w-md rounded-2xl overflow-hidden group">
+                  <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-xl border-4 border-white/40">
+                    <Image
+                      src={thumbnailPreview || thumbnailUrl || ""}
+                      alt="Quiz Thumbnail"
+                      fill
+                      className="object-cover"
+                      unoptimized
+                    />
+                  </div>
+                  <button
+                    onClick={handleRemoveThumbnail}
+                    disabled={isUploadingThumbnail}
+                    className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : (
+                <label className="cursor-pointer w-full max-w-md">
+                  <div className="border-4 border-dashed border-white/50 hover:border-white/80 rounded-2xl p-8 bg-white/10 hover:bg-white/20 transition-all flex flex-col items-center justify-center gap-4">
+                    <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-lg font-semibold text-white mb-1">Add quiz thumbnail</p>
+                      <p className="text-white/70 text-sm">JPG, PNG up to 5MB</p>
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleThumbnailUpload}
+                    className="hidden"
+                    disabled={isUploadingThumbnail}
+                  />
+                </label>
+              )}
+            </div>
+
+            <div className="text-center">
+              <h3 className="text-xl font-bold mb-2">No question selected</h3>
+              <p className="text-white/90">
+                Please select a question from the sidebar or add a new one.
+              </p>
+            </div>
           </div>
         ) : (
           <>
@@ -112,6 +351,14 @@ export default function QuizMainContent({
 
             {/* Image Upload + Preview */}
             <div className="mb-8 flex flex-col items-center">
+              {isUploading && (
+                <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
+                    <p className="text-blue-700 text-sm font-medium">Uploading image...</p>
+                  </div>
+                </div>
+              )}
               {previewImage || activeQuestion.imageUrl ? (
                 <div className="relative w-full max-w-2xl rounded-2xl overflow-hidden group">
                   <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-xl border-4 border-white/40">
@@ -120,11 +367,13 @@ export default function QuizMainContent({
                       alt="Question"
                       fill
                       className="object-cover"
+                      unoptimized
                     />
                   </div>
                   <button
                     onClick={handleRemoveImage}
-                    className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg"
+                    disabled={isUploading}
+                    className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     ✕
                   </button>
@@ -147,6 +396,7 @@ export default function QuizMainContent({
                     accept="image/*"
                     onChange={handleQuestionImageUpload}
                     className="hidden"
+                    disabled={isUploading}
                   />
                 </label>
               )}

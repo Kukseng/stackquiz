@@ -128,8 +128,11 @@ export function QuizSidebar({
                     <Image
                       src={question.imageUrl}
                       alt="Question preview"
+                      width={200}
+                      height={100}
                       className="w-full h-full object-cover absolute inset-0"
                       onError={() => handleImageError(question.id)}
+                      unoptimized
                     />
                   </>
                 ) : (

@@ -4,7 +4,6 @@ import React, { useState } from "react";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import { useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
 import ChallengeGrid from "@/components/GridCardComponent";
 import { useGetCategoriesQuery } from "@/lib/api/categoryApi";
 
@@ -18,11 +17,9 @@ const DashboardPage = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
   const [selectedDifficulty, setSelectedDifficulty] = useState<string>("All");
-  const [isLoading, setIsLoading] = useState(false);
 
-  const { data: categories, isLoading: categoriesLoading, isError } = useGetCategoriesQuery();
+  const { data: categories, isLoading, isError } = useGetCategoriesQuery();
   const { data: session } = useSession();
-  const router = useRouter();
 
   const displayName = session?.user?.name
     ? session.user.name.split(" ")[0]
@@ -35,15 +32,6 @@ const DashboardPage = () => {
         session.user.name
       )}`
     : "/avatar2.svg";
-
-  // Handle join code submission
-  const handleJoinQuiz = async () => {
-    const clean = joinCode.trim();
-    if (!clean) return;
-    setIsLoading(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    router.push(`${encodeURIComponent(clean)}/join`);
-  };
 
   // Clear all filters
   const handleClearFilters = () => {
@@ -59,32 +47,30 @@ const DashboardPage = () => {
     selectedDifficulty !== "All";
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8 ">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Hero Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
         {/* Join Quiz Card */}
         <div className="xl:col-span-2 bg-slate-200 flex justify-center items-center rounded-2xl p-6 sm:p-8">
-          <div className="w-full max-w-lg bg-white rounded-2xl flex items-center gap-3 p-2 border-2 border-yellow-300 shadow-xs">
-            <input
-              type="text"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleJoinQuiz()}
-              placeholder="Enter a join code"
-              className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-800 focus:outline-none text-base placeholder-gray-500 border-none"
-            />
-            <button
-              onClick={handleJoinQuiz}
-              disabled={isLoading}
-              className="btn-secondary btn-text px-6 py-3 rounded-2xl font-semibold text-white shadow hover:shadow-lg transition-all duration-200 disabled:opacity-50"
-            >
-              {isLoading ? "Joining..." : "Join"}
-            </button>
-          </div>
-        </div>
+  <div className="w-full max-w-lg bg-white rounded-2xl flex items-center gap-3 p-2 border-2 border-yellow-300 shadow-xs">
+    <input
+      type="text"
+      value={joinCode}
+      onChange={(e) => setJoinCode(e.target.value)}
+      placeholder="Enter a join code"
+      className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-800 focus:outline-none text-base placeholder-gray-500 border-none"
+    />
+    <button
+      onClick={() => console.log('Join Code:', joinCode)}
+      className="btn-secondary btn-text px-6 py-3 rounded-2xl font-semibold text-white shadow hover:shadow-lg transition-all duration-200"
+    >
+      Join
+    </button>
+  </div>
+</div>
 
         {/* Welcome Card */}
-        <div className="bg-sky-100 rounded-2xl p-6 flex items-center gap-2">
+        <div className="bg-[#E5D2F9] rounded-2xl p-6 flex items-center gap-2">
           <div>
             <h2 className="text-2xl font-bold">Hello</h2>
             <h3 className="text-lg font-semibold flex items-center gap-1">
@@ -126,7 +112,7 @@ const DashboardPage = () => {
             className="flex-1 md:w-48 px-4 py-3 rounded-2xl border border-gray-200 bg-white text-gray-700 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
           >
             <option value="All">All Categories</option>
-            {categoriesLoading && <option disabled>Loading...</option>}
+            {isLoading && <option disabled>Loading...</option>}
             {isError && <option disabled>Error loading categories</option>}
             {categories?.map((cat: Category) => (
               <option key={cat.id} value={cat.id}>

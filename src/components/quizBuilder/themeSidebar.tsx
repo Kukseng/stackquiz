@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Image from "next/image"
+import { useState } from "react";
+import Image from "next/image";
 
 interface ThemeSelectorProps {
-  selectedTheme: string
-  onThemeChange: (theme: string) => void
-  onDurationChange?: (duration: number) => void
+  selectedTheme: string;
+  onThemeChange: (theme: string) => void;
+  onDurationChange?: (duration: number) => void;
 }
 
 // 👇 Match backend enum TimeLimitRangeInSecond
@@ -20,8 +20,7 @@ const timeLimits = [
   { label: "FIFTEEN", value: 15 },
   { label: "TWENTY", value: 20 },
   { label: "THIRTY", value: 30 },
-]
-
+];
 
 const themes = [
   { id: "blue", name: "Blue Sky", image: "/background/10.png" },
@@ -29,16 +28,20 @@ const themes = [
   { id: "purple", name: "Purple Night", image: "/background/3.png" },
   { id: "green", name: "Green Forest", image: "/background/5.png" },
   { id: "gray", name: "Gray Stone", image: "/background/6.png" },
-]
+];
 
-export default function ThemeSelector({ selectedTheme, onThemeChange, onDurationChange }: ThemeSelectorProps) {
-  const [selectedDuration, setSelectedDuration] = useState(timeLimits[0].value)
+export default function ThemeSelector({
+  selectedTheme,
+  onThemeChange,
+  onDurationChange,
+}: ThemeSelectorProps) {
+  const [selectedDuration, setSelectedDuration] = useState(timeLimits[0].value);
 
   const handleDurationChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const value = parseInt(e.target.value)
-    setSelectedDuration(value)
-    onDurationChange?.(value)
-  }
+    const value = parseInt(e.target.value);
+    setSelectedDuration(value);
+    onDurationChange?.(value);
+  };
 
   return (
     <div className="w-80 h-screen bg-white/80 backdrop-blur-md p-6 border-l border-gray-200 flex flex-col">
@@ -86,8 +89,9 @@ export default function ThemeSelector({ selectedTheme, onThemeChange, onDuration
               {limit.label} ({limit.value}s)
             </option>
           ))}
+          console.log(${selectedDuration}s selected);
         </select>
       </div>
     </div>
-  )
+  );
 }

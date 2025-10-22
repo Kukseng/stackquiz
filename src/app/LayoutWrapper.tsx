@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import { Navbar } from "@/components/navbar_footer/NavbarComponent";
 import Footer from "@/components/navbar_footer/FooterComponent";
 import ParticlesBackground from "@/components/ParticlesBackground";
-import StoreProvider from "@/providers/StoreProvider";
+import {StoreProvider} from "@/providers/StoreProvider";
 import OfflineIndicator from "@/components/OfflineIndicator";
 
 interface LayoutWrapperProps {

@@ -13,6 +13,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import en from "@/app/(auth)/login/locales/en.json";
 import kh from "@/app/(auth)/login/locales/km.json";
 import FormField from "@/components/auth/FormField";
+import { useLoginMutation } from "@/lib/api/authApi";
 
 // -------------------- Zod Schema --------------------
 const loginSchema = z.object({
@@ -34,10 +35,10 @@ const LoginForm = () => {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [generalError, setGeneralError] = useState<string | null>(null);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
 
   const router = useRouter();
   const { update } = useSession();
+  const [login, { isLoading }] = useLoginMutation();
 
   // Handle input change
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -49,12 +50,18 @@ const LoginForm = () => {
     e.preventDefault();
     setErrors({});
     setGeneralError(null);
-    setIsLoading(true);
 
     try {
+      // Validate form data
       loginSchema.parse(formData);
 
-      // Sign in without redirect
+      // ✅ Login with RTK Query (this invalidates the "User" tag)
+      await login({
+        username: formData.username,
+        password: formData.password,
+      }).unwrap();
+
+      // ✅ Sign in with NextAuth to create session
       const res = await signIn("credentials", {
         redirect: false,
         username: formData.username,
@@ -63,29 +70,27 @@ const LoginForm = () => {
 
       if (!res || res.error) {
         setGeneralError(res?.error || "Login failed");
-        setIsLoading(false);
         return;
       }
 
-      // Update session immediately to get fresh data
+      // ✅ Update session to get fresh data
       await update();
 
-      // Small delay to ensure session is fully updated
+      // ✅ Small delay to ensure session is fully updated
       await new Promise(resolve => setTimeout(resolve, 100));
 
-      // Navigate without full page reload
+      // ✅ Navigate without full page reload
       router.push("/dashboard");
-      router.refresh(); // Refresh server components data without full reload
-      
-      setIsLoading(false);
+      router.refresh(); // Refresh server components data
     } catch (err: any) {
-      setIsLoading(false);
       if (err instanceof z.ZodError) {
         const newErrors: Record<string, string> = {};
         err.issues.forEach((issue) => {
           newErrors[issue.path[0] as string] = issue.message;
         });
         setErrors(newErrors);
+      } else if (err?.data?.error || err?.data?.message) {
+        setGeneralError(err.data.error || err.data.message);
       } else if (err instanceof Error) {
         setGeneralError(err.message);
       } else {
@@ -200,7 +205,7 @@ const LoginForm = () => {
             <button
               type="submit"
               disabled={isLoading}
-              className="w-full py-2.5 rounded-xl btn-primary text-black font-semibold shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-2.5 rounded-xl btn-primary btn-text btn-secondary font-semibold shadow-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? "Logging in..." : t.loginButton}
             </button>

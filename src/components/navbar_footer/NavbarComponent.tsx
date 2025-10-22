@@ -90,11 +90,11 @@ export function Navbar() {
         </nav>
 
         {/* Actions + Mobile Menu Button */}
-        <div className={`flex items-center gap-4 ${fontClass}`}>
+        <div className={`flex items-center gap-2 sm:gap-4 ${fontClass}`}>
           {/* Language toggle */}
           <button
             onClick={toggleLanguage}
-            className="flex items-center gap-2 text-white hover:bg-white/10 px-3 py-2 rounded-lg"
+            className="flex items-center gap-2 text-white hover:bg-white/10 px-2 sm:px-3 py-2 rounded-lg"
           >
             {language === "en" ? (
               <>
@@ -102,8 +102,8 @@ export function Navbar() {
                   countryCode="US"
                   svg
                   style={{ width: "1.5em", height: "1.5em" }}
-                />{" "}
-                EN
+                />
+                <span className="hidden sm:inline">EN</span>
               </>
             ) : (
               <>
@@ -111,8 +111,8 @@ export function Navbar() {
                   countryCode="KH"
                   svg
                   style={{ width: "1.5em", height: "1.5em" }}
-                />{" "}
-                <span>ខ្មែរ</span>
+                />
+                <span className="hidden sm:inline">ខ្មែរ</span>
               </>
             )}
           </button>
@@ -131,13 +131,13 @@ export function Navbar() {
                       height={30}
                       className="rounded-full"
                     />
-                    <span className="text-gray-800 font-medium text-sm">
+                    <span className="hidden sm:inline text-gray-800 font-medium text-sm">
                       Hi, {displayName}!
                     </span>
                   </div>
                 ) : (
                   // 🎀 Full cute profile for regular users
-                  <div className="hidden sm:flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg">
+                  <div className="flex items-center gap-2 sm:gap-3 px-3 sm:px-4 py-2 bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 rounded-2xl hover:from-pink-500 hover:via-purple-500 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 shadow-lg">
                     <Image
                       src={avatarUrl}
                       alt="User Avatar"
@@ -145,7 +145,7 @@ export function Navbar() {
                       height={30}
                       className="rounded-full border-3 border-white shadow-md"
                     />
-                    <span className="text-white font-bold text-sm leading-tight">
+                    <span className="hidden sm:inline text-white font-bold text-sm leading-tight">
                       Hi, {displayName}!
                     </span>
                   </div>
@@ -154,15 +154,16 @@ export function Navbar() {
             </Link>
           ) : (
             <Link href="/signup">
-              <button className="btn-secondary btn-text flex items-center gap-2 px-6 py-2 box-radius font-semibold">
-                <UserPlus className="w-4 h-4" /> {t.navbar.signup}
+              <button className="btn-secondary btn-text flex items-center gap-2 px-4 sm:px-6 py-2 box-radius font-semibold text-sm sm:text-base">
+                <UserPlus className="w-4 h-4" />
+                <span>{t.navbar.signup}</span>
               </button>
             </Link>
           )}
 
           {/* Mobile menu toggle */}
           <button
-            className="md:hidden text-white ml-2"
+            className="md:hidden text-white ml-1 sm:ml-2"
             onClick={() => setMobileOpen(!mobileOpen)}
           >
             {mobileOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}

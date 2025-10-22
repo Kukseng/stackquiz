@@ -1,5 +1,5 @@
 'use client'
-// 
+
 import { useEffect, useState } from 'react'
 import { Line, Pie, Bar } from 'react-chartjs-2'
 import {
@@ -15,7 +15,8 @@ import {
   Legend,
   Filler
 } from 'chart.js'
-import { getSession } from "next-auth/react";
+import { getSession } from "next-auth/react"
+
 ChartJS.register(
   CategoryScale,
   LinearScale,
@@ -100,29 +101,34 @@ const getAuthHeaders = async () => {
 }
 
 // ===== Components =====
-function StatCard({ title, value, subtitle, trend, icon, color }: { 
+function StatCard({ title, value, subtitle, trend, icon, gradient }: { 
   title: string
   value: string | number
   subtitle?: string
   trend?: string
   icon?: string
-  color: string
+  gradient: string
 }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-      <div className="flex items-start justify-between mb-4">
-        <div className={`w-12 h-12 rounded-lg ${color} flex items-center justify-center text-2xl`}>
-          {icon}
+    <div className="group relative bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/60 p-6 hover:shadow-2xl transition-all duration-300 overflow-hidden">
+      {/* Gradient Background */}
+      <div className={`absolute top-0 right-0 w-32 h-32 bg-gradient-to-br ${gradient} opacity-10 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-500`}></div>
+      
+      <div className="relative z-10">
+        <div className="flex items-start justify-between mb-4">
+          <div className={`w-14 h-14 rounded-2xl bg-gradient-to-br ${gradient} flex items-center justify-center text-2xl shadow-lg`}>
+            {icon}
+          </div>
+          {trend && (
+            <span className="px-3 py-1.5 bg-emerald-50 text-emerald-600 rounded-full text-xs font-bold border border-emerald-200">
+              {trend}
+            </span>
+          )}
         </div>
-        {trend && (
-          <span className="text-sm font-medium text-green-600 bg-green-50 px-2 py-1 rounded-md">
-            {trend}
-          </span>
-        )}
+        <h3 className="text-slate-600 text-sm font-semibold mb-2 uppercase tracking-wide">{title}</h3>
+        <p className="text-4xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent mb-2">{value}</p>
+        {subtitle && <p className="text-sm text-slate-500 font-medium">{subtitle}</p>}
       </div>
-      <h3 className="text-gray-600 text-sm font-medium mb-1">{title}</h3>
-      <p className="text-3xl font-bold text-gray-900 mb-1">{value}</p>
-      {subtitle && <p className="text-sm text-gray-500">{subtitle}</p>}
     </div>
   )
 }
@@ -133,12 +139,12 @@ function ChartCard({ title, children, subtitle }: {
   children: React.ReactNode 
 }) {
   return (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow">
-      <div className="mb-6">
-        <h3 className="text-lg font-semibold text-gray-900">{title}</h3>
-        {subtitle && <p className="text-sm text-gray-500 mt-1">{subtitle}</p>}
+    <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/60 p-8 hover:shadow-2xl transition-all duration-300">
+      <div className="mb-8">
+        <h3 className="text-xl font-bold text-slate-900 mb-1">{title}</h3>
+        {subtitle && <p className="text-sm text-slate-500 font-medium">{subtitle}</p>}
       </div>
-      <div className="h-72">{children}</div>
+      <div className="h-80">{children}</div>
     </div>
   )
 }
@@ -191,19 +197,24 @@ export default function AnalyticsDashboard() {
   }
 
   const timeRangeOptions = [
-    { value: '7days', label: 'Last 7 Days' },
-    { value: '30days', label: 'Last 30 Days' },
-    { value: '90days', label: 'Last 90 Days' },
-    { value: '1year', label: 'Last Year' },
-    { value: 'all', label: 'All Time' }
+    { value: '7days', label: '7D' },
+    { value: '30days', label: '30D' },
+    { value: '90days', label: '90D' },
+    { value: '1year', label: '1Y' },
+    { value: 'all', label: 'All' }
   ]
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600 font-medium">Loading analytics...</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 flex items-center justify-center">
+        {/* Animated Background */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl animate-pulse"></div>
+          <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        </div>
+        <div className="relative text-center">
+          <div className="w-20 h-20 border-4 border-purple-600 border-t-transparent rounded-full animate-spin mx-auto mb-6"></div>
+          <p className="text-slate-700 font-semibold text-lg">Loading analytics...</p>
         </div>
       </div>
     )
@@ -211,11 +222,11 @@ export default function AnalyticsDashboard() {
 
   if (!stats) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center">
-        <div className="text-center bg-white rounded-xl shadow-lg p-8 max-w-md">
-          <div className="text-6xl mb-4">📊</div>
-          <h2 className="text-2xl font-bold text-gray-900 mb-2">No Data Available</h2>
-          <p className="text-gray-600">Unable to load analytics data. Please try again later.</p>
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40 flex items-center justify-center">
+        <div className="text-center bg-white/80 backdrop-blur-xl rounded-3xl shadow-2xl p-12 max-w-md border border-slate-200">
+          <div className="text-7xl mb-6">📊</div>
+          <h2 className="text-3xl font-bold text-slate-900 mb-3">No Data Available</h2>
+          <p className="text-slate-600">Unable to load analytics data. Please try again later.</p>
         </div>
       </div>
     )
@@ -231,26 +242,50 @@ export default function AnalyticsDashboard() {
     return icons[type] || '📌'
   }
 
+  // Normalize difficulty labels to Easy, Medium, Hard
+  const normalizeDifficulty = (difficulty: string): string => {
+    const normalized = difficulty.toLowerCase()
+    if (normalized === 'easy' || normalized === 'beginner') return 'Easy'
+    if (normalized === 'medium' || normalized === 'intermediate') return 'Medium'
+    if (normalized === 'hard' || normalized === 'advanced' || normalized === 'expert') return 'Hard'
+    return difficulty
+  }
+
+  const normalizedDifficulty: Record<string, number> = {}
+  Object.entries(stats.quizzesByDifficulty).forEach(([key, value]) => {
+    const normalized = normalizeDifficulty(key)
+    normalizedDifficulty[normalized] = (normalizedDifficulty[normalized] || 0) + value
+  })
+
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-      <div className="max-w-7xl mx-auto p-6 space-y-6">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50/30 to-indigo-50/40">
+      {/* Animated Background Elements */}
+      <div className="fixed inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-purple-300/20 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-blue-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
+        <div className="absolute top-1/2 left-1/2 w-96 h-96 bg-cyan-300/20 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '2s' }}></div>
+      </div>
+
+      <div className="relative max-w-7xl mx-auto p-6 space-y-8">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Analytics Dashboard</h1>
-            <p className="text-gray-600">Track your quiz performance and engagement metrics</p>
+            <h1 className="text-5xl font-bold bg-gradient-to-r from-slate-900 via-purple-900 to-slate-900 bg-clip-text text-transparent mb-3">
+              Analytics Dashboard
+            </h1>
+            <p className="text-slate-600 text-lg font-medium">Track your quiz performance and engagement metrics</p>
           </div>
 
           {/* Time Range Selector */}
-          <div className="flex gap-2 bg-white rounded-lg p-1 shadow-sm border border-gray-200">
+          <div className="flex gap-2 bg-white/80 backdrop-blur-xl rounded-2xl p-2 shadow-lg border border-slate-200/60">
             {timeRangeOptions.map((option) => (
               <button
                 key={option.value}
                 onClick={() => setTimeRange(option.value as TimeRange)}
-                className={`px-4 py-2 rounded-md text-sm font-medium transition-all ${
+                className={`px-6 py-3 rounded-xl text-sm font-bold transition-all ${
                   timeRange === option.value
-                    ? 'bg-blue-600 text-white shadow-sm'
-                    : 'text-gray-600 hover:bg-gray-100'
+                    ? 'bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-lg shadow-purple-500/30'
+                    : 'text-slate-600 hover:bg-slate-100'
                 }`}
               >
                 {option.label}
@@ -267,7 +302,7 @@ export default function AnalyticsDashboard() {
             subtitle={`${stats.quizzesCreatedThisWeek} created this week`}
             trend="+12%"
             icon="📝"
-            color="bg-blue-100"
+            gradient="from-blue-500 to-cyan-600"
           />
           <StatCard
             title="Total Sessions"
@@ -275,7 +310,7 @@ export default function AnalyticsDashboard() {
             subtitle={`${stats.activeSessionsCount} currently active`}
             trend="+8%"
             icon="🎮"
-            color="bg-purple-100"
+            gradient="from-purple-500 to-pink-600"
           />
           <StatCard
             title="Total Participants"
@@ -283,14 +318,14 @@ export default function AnalyticsDashboard() {
             subtitle={`${Number(stats.averageParticipantsPerSession).toFixed(1)} avg per session`}
             trend="+15%"
             icon="👥"
-            color="bg-green-100"
+            gradient="from-emerald-500 to-teal-600"
           />
           <StatCard
             title="Completion Rate"
             value={`${stats.sessionCompletionRate}%`}
             subtitle="Session completion"
             icon="✅"
-            color="bg-orange-100"
+            gradient="from-orange-500 to-amber-600"
           />
         </div>
 
@@ -308,16 +343,16 @@ export default function AnalyticsDashboard() {
                   {
                     label: 'Quizzes Created',
                     data: stats.quizCreationTimeSeries.map((d) => d.count),
-                    borderColor: 'rgb(59, 130, 246)',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    borderColor: 'rgb(139, 92, 246)',
+                    backgroundColor: 'rgba(139, 92, 246, 0.1)',
                     tension: 0.4,
                     fill: true,
                     borderWidth: 3,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: 'rgb(59, 130, 246)',
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: 'rgb(139, 92, 246)',
                     pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
+                    pointBorderWidth: 3,
                   },
                 ],
               }}
@@ -327,21 +362,23 @@ export default function AnalyticsDashboard() {
                 plugins: {
                   legend: { display: false },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    cornerRadius: 8,
-                    titleFont: { size: 14, weight: 'bold' },
-                    bodyFont: { size: 13 }
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    padding: 16,
+                    cornerRadius: 12,
+                    titleFont: { size: 15, weight: 'bold' },
+                    bodyFont: { size: 14 },
+                    borderColor: 'rgba(139, 92, 246, 0.3)',
+                    borderWidth: 1
                   }
                 },
                 scales: {
                   x: {
                     grid: { display: false },
-                    ticks: { font: { size: 11 } }
+                    ticks: { font: { size: 12, weight: '500' }, color: '#64748b' }
                   },
                   y: {
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                    ticks: { font: { size: 11 } }
+                    grid: { color: 'rgba(0, 0, 0, 0.05)', lineWidth: 1 },
+                    ticks: { font: { size: 12, weight: '500' }, color: '#64748b' }
                   }
                 }
               }}
@@ -360,16 +397,16 @@ export default function AnalyticsDashboard() {
                   {
                     label: 'Sessions Started',
                     data: stats.sessionActivityTimeSeries.map((d) => d.count),
-                    borderColor: 'rgb(168, 85, 247)',
-                    backgroundColor: 'rgba(168, 85, 247, 0.1)',
+                    borderColor: 'rgb(59, 130, 246)',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
                     tension: 0.4,
                     fill: true,
                     borderWidth: 3,
-                    pointRadius: 4,
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: 'rgb(168, 85, 247)',
+                    pointRadius: 5,
+                    pointHoverRadius: 8,
+                    pointBackgroundColor: 'rgb(59, 130, 246)',
                     pointBorderColor: '#fff',
-                    pointBorderWidth: 2,
+                    pointBorderWidth: 3,
                   },
                 ],
               }}
@@ -379,21 +416,23 @@ export default function AnalyticsDashboard() {
                 plugins: {
                   legend: { display: false },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    cornerRadius: 8,
-                    titleFont: { size: 14, weight: 'bold' },
-                    bodyFont: { size: 13 }
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    padding: 16,
+                    cornerRadius: 12,
+                    titleFont: { size: 15, weight: 'bold' },
+                    bodyFont: { size: 14 },
+                    borderColor: 'rgba(59, 130, 246, 0.3)',
+                    borderWidth: 1
                   }
                 },
                 scales: {
                   x: {
                     grid: { display: false },
-                    ticks: { font: { size: 11 } }
+                    ticks: { font: { size: 12, weight: '500' }, color: '#64748b' }
                   },
                   y: {
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                    ticks: { font: { size: 11 } }
+                    grid: { color: 'rgba(0, 0, 0, 0.05)', lineWidth: 1 },
+                    ticks: { font: { size: 12, weight: '500' }, color: '#64748b' }
                   }
                 }
               }}
@@ -407,17 +446,18 @@ export default function AnalyticsDashboard() {
           >
             <Pie
               data={{
-                labels: Object.keys(stats.quizzesByDifficulty),
+                labels: Object.keys(normalizedDifficulty),
                 datasets: [
                   {
-                    data: Object.values(stats.quizzesByDifficulty),
+                    data: Object.values(normalizedDifficulty),
                     backgroundColor: [
-                      'rgba(34, 197, 94, 0.8)',
-                      'rgba(234, 179, 8, 0.8)',
-                      'rgba(239, 68, 68, 0.8)',
+                      'rgba(34, 197, 94, 0.85)',
+                      'rgba(250, 204, 21, 0.85)',
+                      'rgba(239, 68, 68, 0.85)',
                     ],
-                    borderWidth: 2,
+                    borderWidth: 4,
                     borderColor: '#fff',
+                    hoverOffset: 8,
                   },
                 ],
               }}
@@ -428,16 +468,19 @@ export default function AnalyticsDashboard() {
                   legend: {
                     position: 'bottom',
                     labels: {
-                      padding: 15,
-                      font: { size: 12 },
+                      padding: 20,
+                      font: { size: 13, weight: 'bold' },
                       usePointStyle: true,
-                      pointStyle: 'circle'
+                      pointStyle: 'circle',
+                      color: '#334155'
                     }
                   },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    cornerRadius: 8,
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    padding: 16,
+                    cornerRadius: 12,
+                    titleFont: { size: 15, weight: 'bold' },
+                    bodyFont: { size: 14 },
                   }
                 }
               }}
@@ -464,8 +507,16 @@ export default function AnalyticsDashboard() {
                       stats.activityByDayOfWeek.SATURDAY || 0,
                       stats.activityByDayOfWeek.SUNDAY || 0,
                     ],
-                    backgroundColor: 'rgba(59, 130, 246, 0.8)',
-                    borderRadius: 8,
+                    backgroundColor: [
+                      'rgba(139, 92, 246, 0.85)',
+                      'rgba(59, 130, 246, 0.85)',
+                      'rgba(14, 165, 233, 0.85)',
+                      'rgba(34, 197, 94, 0.85)',
+                      'rgba(250, 204, 21, 0.85)',
+                      'rgba(251, 146, 60, 0.85)',
+                      'rgba(239, 68, 68, 0.85)',
+                    ],
+                    borderRadius: 12,
                     borderSkipped: false,
                   },
                 ],
@@ -476,19 +527,21 @@ export default function AnalyticsDashboard() {
                 plugins: {
                   legend: { display: false },
                   tooltip: {
-                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                    padding: 12,
-                    cornerRadius: 8,
+                    backgroundColor: 'rgba(0, 0, 0, 0.9)',
+                    padding: 16,
+                    cornerRadius: 12,
+                    titleFont: { size: 15, weight: 'bold' },
+                    bodyFont: { size: 14 },
                   }
                 },
                 scales: {
                   x: {
                     grid: { display: false },
-                    ticks: { font: { size: 11 } }
+                    ticks: { font: { size: 12, weight: '500' }, color: '#64748b' }
                   },
                   y: {
-                    grid: { color: 'rgba(0, 0, 0, 0.05)' },
-                    ticks: { font: { size: 11 } }
+                    grid: { color: 'rgba(0, 0, 0, 0.05)', lineWidth: 1 },
+                    ticks: { font: { size: 12, weight: '500' }, color: '#64748b' }
                   }
                 }
               }}
@@ -498,23 +551,32 @@ export default function AnalyticsDashboard() {
 
         {/* Most Popular Quiz */}
         {stats.mostPopularQuiz && (
-          <div className="bg-gradient-to-r from-yellow-50 to-orange-50 rounded-xl shadow-sm border border-orange-200 p-6">
-            <div className="flex items-center gap-3 mb-4">
-              <span className="text-3xl">🏆</span>
-              <h2 className="text-xl font-bold text-gray-900">Most Popular Quiz</h2>
-            </div>
-            <div className="bg-white rounded-lg p-4 shadow-sm">
-              <p className="text-2xl font-bold text-gray-900 mb-3">{stats.mostPopularQuiz.title}</p>
-              <div className="flex flex-wrap gap-4">
-                <div className="flex items-center gap-2 text-gray-700">
-                  <span className="text-xl">📊</span>
-                  <span className="font-semibold">{stats.mostPopularQuiz.totalSessions}</span>
-                  <span className="text-sm">sessions</span>
+          <div className="relative bg-gradient-to-br from-amber-50 to-orange-50 rounded-3xl shadow-lg border border-orange-200/60 p-8 overflow-hidden">
+            <div className="absolute top-0 right-0 w-40 h-40 bg-yellow-300/20 rounded-full -mr-20 -mt-20"></div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-4 mb-6">
+                <div className="w-16 h-16 bg-gradient-to-br from-yellow-400 to-orange-500 rounded-2xl flex items-center justify-center text-3xl shadow-lg">
+                  🏆
                 </div>
-                <div className="flex items-center gap-2 text-gray-700">
-                  <span className="text-xl">👥</span>
-                  <span className="font-semibold">{stats.mostPopularQuiz.totalParticipants}</span>
-                  <span className="text-sm">participants</span>
+                <h2 className="text-2xl font-bold text-slate-900">Most Popular Quiz</h2>
+              </div>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-md">
+                <p className="text-2xl font-bold text-slate-900 mb-4">{stats.mostPopularQuiz.title}</p>
+                <div className="flex flex-wrap gap-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center text-xl">📊</div>
+                    <div>
+                      <span className="block text-2xl font-bold text-slate-900">{stats.mostPopularQuiz.totalSessions}</span>
+                      <span className="text-sm text-slate-600 font-medium">sessions</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center text-xl">👥</div>
+                    <div>
+                      <span className="block text-2xl font-bold text-slate-900">{stats.mostPopularQuiz.totalParticipants}</span>
+                      <span className="text-sm text-slate-600 font-medium">participants</span>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -522,17 +584,17 @@ export default function AnalyticsDashboard() {
         )}
 
         {/* Recent Activity */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Recent Activity</h2>
+        <div className="bg-white/80 backdrop-blur-xl rounded-3xl shadow-lg border border-slate-200/60 p-8">
+          <h2 className="text-2xl font-bold text-slate-900 mb-6">Recent Activity</h2>
           <div className="space-y-4">
             {stats.recentActivities.slice(0, 5).map((activity, index) => (
-              <div key={index} className="flex items-start gap-4 pb-4 border-b border-gray-100 last:border-0">
-                <div className="w-10 h-10 bg-blue-50 rounded-lg flex items-center justify-center text-xl flex-shrink-0">
+              <div key={index} className="flex items-start gap-4 p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-colors border border-slate-100">
+                <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center text-xl flex-shrink-0 shadow-md">
                   {getActivityIcon(activity.activityType)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="font-medium text-gray-900 mb-1">{activity.description}</p>
-                  <p className="text-sm text-gray-500">
+                  <p className="font-semibold text-slate-900 mb-1">{activity.description}</p>
+                  <p className="text-sm text-slate-500 font-medium">
                     {new Date(activity.timestamp).toLocaleString('en-US', {
                       month: 'short',
                       day: 'numeric',
@@ -541,7 +603,7 @@ export default function AnalyticsDashboard() {
                     })}
                   </p>
                 </div>
-                <span className="px-3 py-1 bg-blue-50 text-blue-700 rounded-full text-xs font-medium whitespace-nowrap">
+                <span className="px-4 py-2 bg-blue-50 text-blue-700 rounded-xl text-xs font-bold whitespace-nowrap border border-blue-200">
                   {activity.activityType.replace(/_/g, ' ')}
                 </span>
               </div>

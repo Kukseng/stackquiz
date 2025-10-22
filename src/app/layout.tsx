@@ -9,6 +9,7 @@ import { SessionProvider } from "next-auth/react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { useState } from "react";
 import "./globals.css";
+import { StoreProvider } from "@/providers/StoreProvider";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -16,35 +17,30 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
-// Note: Kantumruy Pro font was removed from next/font/google imports because
-// the Next font loader failed to fetch it from Google Fonts during build.
-// We keep a CSS fallback in `globals.css` where `--font-kantumruy` is defined.
-
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [queryClient] = useState(() => new QueryClient({
-    defaultOptions: {
-      queries: {
-        refetchOnWindowFocus: true,
-        refetchOnMount: true,
-        refetchOnReconnect: true,
-        staleTime: 0, // Always fetch fresh data
-        retry: 1,
-      },
-    },
-  }));
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: true,
+            refetchOnMount: true,
+            refetchOnReconnect: true,
+            staleTime: 0, // Always fetch fresh data
+            retry: 1,
+          },
+        },
+      })
+  );
 
   return (
     <html lang="en" className={`${dmSans.variable} antialiased`}>
       <body className="cosmic-bg overflow-hidden">
-        {/* Prevent React DevTools semver runtime error when an empty version string is registered.
-            Some devtools shims register a renderer with an empty version which breaks
-            a semver check in the devtools bundle. We sanitize entries early. */}
         <script
-          // eslint-disable-next-line react/no-danger
           dangerouslySetInnerHTML={{
             __html: `
               try {
@@ -66,9 +62,13 @@ export default function RootLayout({
         />
         <Provider store={store}>
           <SessionProvider>
-            <LanguageProvider>
-              <LayoutWrapper>{children}</LayoutWrapper>
-            </LanguageProvider>
+            <QueryClientProvider client={queryClient}>
+              <StoreProvider>
+                <LanguageProvider>
+                  <LayoutWrapper>{children}</LayoutWrapper>
+                </LanguageProvider>
+              </StoreProvider>
+            </QueryClientProvider>
           </SessionProvider>
         </Provider>
       </body>

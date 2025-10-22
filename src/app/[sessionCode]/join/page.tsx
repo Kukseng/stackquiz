@@ -160,6 +160,52 @@ function getRankSuffix(rank: number): string {
   return "th"
 }
 
+// ===== LEADERBOARD COMPONENT =====
+function Rank({ leaderboard }: { leaderboard: LeaderboardEntry[] }) {
+  return (
+    <div className="w-full max-w-4xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="bg-gray-800/80 backdrop-blur-md rounded-3xl p-8 shadow-2xl"
+      >
+        <h2 className="text-white text-3xl font-bold mb-6 text-center">Final Leaderboard</h2>
+        <div className="space-y-3">
+          {leaderboard.map((entry, index) => (
+            <motion.div
+              key={entry.participantId}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.1 }}
+              className={`flex items-center justify-between p-4 rounded-xl ${
+                index < 3 ? "bg-gradient-to-r from-yellow-500/20 to-orange-500/20" : "bg-white/10"
+              }`}
+            >
+              <div className="flex items-center gap-4">
+                <div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-bold ${
+                    index === 0
+                      ? "bg-yellow-400 text-yellow-900"
+                      : index === 1
+                        ? "bg-gray-300 text-gray-800"
+                        : index === 2
+                          ? "bg-orange-400 text-orange-900"
+                          : "bg-white/20 text-white"
+                  }`}
+                >
+                  {entry.position}
+                </div>
+                <span className="text-white font-semibold text-lg">{entry.nickname}</span>
+              </div>
+              <span className="text-white font-bold text-xl">{entry.totalScore.toLocaleString()}</span>
+            </motion.div>
+          ))}
+        </div>
+      </motion.div>
+    </div>
+  )
+}
+
 // ===== LIVE RANKING COMPONENT =====
 function LiveRankingPanel({
   personalScore,
@@ -536,8 +582,16 @@ export default function ParticipantQuizFixed() {
   const [streak, setStreak] = useState<number>(0)
   const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false)
 
+  // Feedback modal states
+  const [showFeedbackModal, setShowFeedbackModal] = useState(false)
+  const [feedbackText, setFeedbackText] = useState("")
+  const [satisfactionLevel, setSatisfactionLevel] = useState<string>("")
+  const [isSubmittingFeedback, setIsSubmittingFeedback] = useState(false)
+  const [feedbackSuccess, setFeedbackSuccess] = useState(false)
+  const [quizId, setQuizId] = useState<string>("")
+
   const handleNavigateToJoinRoom = () => {
-    router.push('/join-room')
+    router.push("/explore")
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -561,11 +615,74 @@ export default function ParticipantQuizFixed() {
 
       setParticipantId(res.data.id)
       setPersonalScore(res.data.totalScore || 0)
+
+      // Try to get quizId from the join response first
+      if (res.data.quizId) {
+        setQuizId(res.data.quizId)
+      } else if (res.data.sessionId) {
+        // If not in join response, try to fetch from session details
+        try {
+          const sessionRes = await axios.get(
+            `https://stackquiz-api.stackquiz.me/api/v1/sessions/${res.data.sessionId}`
+          )
+          if (sessionRes.data.quizId) {
+            setQuizId(sessionRes.data.quizId)
+          }
+        } catch (err) {
+          console.error("Failed to fetch quiz ID from session:", err)
+        }
+      }
+
       setJoined(true)
     } catch (err: any) {
       setError(err.response?.data?.message || "Failed to join session. Please try again.")
     } finally {
       setIsSubmitting(false)
+    }
+  }
+
+  async function handleSubmitFeedback() {
+    if (!satisfactionLevel) {
+      setError("Please select a satisfaction level")
+      return
+    }
+
+    if (!quizId) {
+      setError("Unable to identify the quiz. Please contact the organizer.")
+      return
+    }
+
+    setIsSubmittingFeedback(true)
+    setError("")
+
+    try {
+      const response = await axios.post(
+        `https://stackquiz-api.stackquiz.me/api/v1/quizzes/${quizId}/feedback`,
+        {
+          text: feedbackText.trim() || undefined,
+          satisfactionLevel: satisfactionLevel,
+        },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+
+      console.log("Feedback submitted successfully:", response.data)
+      setFeedbackSuccess(true)
+      setTimeout(() => {
+        setShowFeedbackModal(false)
+        setFeedbackSuccess(false)
+        setFeedbackText("")
+        setSatisfactionLevel("")
+      }, 2000)
+    } catch (err: any) {
+      console.error("Feedback submission error:", err)
+      const errorMessage = err.response?.data?.message || err.message || "Failed to submit feedback. Please try again."
+      setError(errorMessage)
+    } finally {
+      setIsSubmittingFeedback(false)
     }
   }
 
@@ -668,6 +785,11 @@ export default function ParticipantQuizFixed() {
   useEffect(() => {
     if (!gameState) return
 
+    // Try to extract quizId from gameState if we don't have it yet
+    if (!quizId && gameState.quizId) {
+      setQuizId(gameState.quizId)
+    }
+
     if (gameState.action === "SESSION_STARTED" || gameState.status === "IN_PROGRESS") {
       if (!currentQuestion && status !== "ANSWER_REVEAL") {
         setStatus("PLAY")
@@ -677,7 +799,7 @@ export default function ParticipantQuizFixed() {
     } else if (gameState.action === "SESSION_LOBBY" || gameState.status === "WAITING") {
       setStatus("LOBBY")
     }
-  }, [gameState, currentQuestion, status])
+  }, [gameState, currentQuestion, status, quizId])
 
   useEffect(() => {
     if (
@@ -855,7 +977,7 @@ export default function ParticipantQuizFixed() {
         {connectionIndicator}
 
         {/* Close button */}
-        <button 
+        <button
           onClick={handleNavigateToJoinRoom}
           className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
         >
@@ -986,7 +1108,10 @@ export default function ParticipantQuizFixed() {
 
             {/* Feedback and Report buttons */}
             <div className="grid grid-cols-2 gap-4 mt-6">
-              <button className="py-3 bg-purple-700/50 border-2 border-purple-400 rounded-xl text-white font-semibold hover:bg-purple-700/70 transition-colors flex items-center justify-center gap-2">
+              <button
+                onClick={() => setShowFeedbackModal(true)}
+                className="py-3 bg-purple-700/50 border-2 border-purple-400 rounded-xl text-white font-semibold hover:bg-purple-700/70 transition-colors flex items-center justify-center gap-2"
+              >
                 <span>💬</span> Feedback
               </button>
               <button className="py-3 bg-purple-700/50 border-2 border-purple-400 rounded-xl text-white font-semibold hover:bg-purple-700/70 transition-colors flex items-center justify-center gap-2">
@@ -1005,6 +1130,135 @@ export default function ParticipantQuizFixed() {
           isMinimized={false}
           streak={streak}
         />
+
+        {/* Feedback Modal */}
+        <AnimatePresence>
+          {showFeedbackModal && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+              onClick={() => !isSubmittingFeedback && !feedbackSuccess && setShowFeedbackModal(false)}
+            >
+              <motion.div
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                onClick={(e) => e.stopPropagation()}
+                className="bg-gray-800 rounded-3xl p-8 max-w-md w-full shadow-2xl border-2 border-purple-400"
+              >
+                {feedbackSuccess ? (
+                  <div className="text-center">
+                    <motion.div
+                      initial={{ scale: 0 }}
+                      animate={{ scale: 1 }}
+                      className="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-4"
+                    >
+                      <span className="text-4xl text-white">✓</span>
+                    </motion.div>
+                    <h3 className="text-white text-2xl font-bold mb-2">Thank You!</h3>
+                    <p className="text-white/80">Your feedback has been submitted successfully.</p>
+                    <p className="text-white/60 text-sm mt-2">The organizer will be notified.</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="flex justify-between items-center mb-6">
+                      <h3 className="text-white text-2xl font-bold">Share Your Feedback</h3>
+                      <button
+                        onClick={() => setShowFeedbackModal(false)}
+                        className="w-8 h-8 bg-white/10 hover:bg-white/20 rounded-full flex items-center justify-center transition-colors"
+                        disabled={isSubmittingFeedback}
+                      >
+                        <span className="text-white text-xl">✕</span>
+                      </button>
+                    </div>
+
+                    <div className="mb-6">
+                      <p className="text-white/90 text-sm mb-4">How satisfied are you with this quiz?</p>
+                      
+                      {/* Debug info - only show if quizId is missing */}
+                      {!quizId && (
+                        <div className="mb-3 p-2 bg-yellow-500/20 border border-yellow-400/50 rounded-lg">
+                          <p className="text-yellow-200 text-xs">⚠️ Quiz ID not available. Feedback may not work.</p>
+                        </div>
+                      )}
+                      
+                      <div className="grid grid-cols-5 gap-2">
+                        {[
+                          { value: "VERY_DISSATISFIED", emoji: "😞", label: "Very Bad" },
+                          { value: "DISSATISFIED", emoji: "😕", label: "Bad" },
+                          { value: "NEUTRAL", emoji: "😐", label: "Okay" },
+                          { value: "SATISFIED", emoji: "😊", label: "Good" },
+                          { value: "VERY_SATISFIED", emoji: "😍", label: "Excellent" },
+                        ].map((option) => (
+                          <button
+                            key={option.value}
+                            onClick={() => setSatisfactionLevel(option.value)}
+                            className={`flex flex-col items-center p-3 rounded-xl transition-all ${
+                              satisfactionLevel === option.value
+                                ? "bg-purple-600 border-2 border-purple-300 scale-110"
+                                : "bg-white/10 border-2 border-transparent hover:bg-white/20"
+                            }`}
+                            disabled={isSubmittingFeedback}
+                          >
+                            <span className="text-3xl mb-1">{option.emoji}</span>
+                            <span className="text-white text-xs">{option.label}</span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="mb-6">
+                      <label className="text-white/90 text-sm mb-2 block">
+                        Additional Comments (Optional)
+                      </label>
+                      <textarea
+                        value={feedbackText}
+                        onChange={(e) => setFeedbackText(e.target.value)}
+                        placeholder="Tell us more about your experience..."
+                        className="w-full px-4 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-purple-400 transition-colors resize-none"
+                        rows={4}
+                        maxLength={500}
+                        disabled={isSubmittingFeedback}
+                      />
+                      <p className="text-white/50 text-xs mt-1 text-right">
+                        {feedbackText.length}/500
+                      </p>
+                    </div>
+
+                    {error && (
+                      <motion.div
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mb-4 p-3 bg-red-500/20 border border-red-400 rounded-xl"
+                      >
+                        <p className="text-red-200 text-sm text-center">{error}</p>
+                      </motion.div>
+                    )}
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => setShowFeedbackModal(false)}
+                        className="flex-1 py-3 bg-white/10 border-2 border-white/20 rounded-xl text-white font-semibold hover:bg-white/20 transition-colors"
+                        disabled={isSubmittingFeedback}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        onClick={handleSubmitFeedback}
+                        disabled={!satisfactionLevel || isSubmittingFeedback}
+                        className="flex-1 py-3 bg-gradient-to-r from-purple-600 to-indigo-600 border-2 border-purple-400 rounded-xl text-white font-semibold hover:from-purple-700 hover:to-indigo-700 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        {isSubmittingFeedback ? "Submitting..." : "Submit"}
+                      </button>
+                    </div>
+                  </>
+                )}
+              </motion.div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     )
   }
@@ -1081,7 +1335,7 @@ export default function ParticipantQuizFixed() {
         <div className="text-center max-w-2xl px-6 z-10">
           <motion.div
             animate={{ scale: [1, 1.1, 1] }}
-            transition={{ duration: 1.5, repeat: Number.POSITIVE_INFINITY }}
+            transition={{ duration: 1.5, repeat: Infinity }}
             className="text-6xl mb-6"
           >
             🕐

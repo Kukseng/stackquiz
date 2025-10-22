@@ -40,6 +40,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
     deleteQuestion,
     duplicateQuestion,
     updateQuestionText,
+    updateQuestionImage,
     updateOptionText,
     toggleCorrectAnswer,
   } = useQuizStore();
@@ -73,6 +74,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
         type: questionType,
         question: q.text.replaceAll("_", " "),
         options: mappedOptions,
+        imageUrl: q.imageUrl || "",
         isNew: false,
       };
     });
@@ -96,6 +98,13 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
       prev.map((q) => ({ ...q, isNew: false }))
     );
     console.log("Selected question ID:", id);
+  };
+
+  const handlePublishSuccess = () => {
+    // Refetch quiz data to update cache
+    if (quizId) {
+      refetch();
+    }
   };
 
   const handleAIQuestionsGenerated = (generatedQuestions: any[]) => {
@@ -171,6 +180,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
       <QuizHeader
         questions={questions}
         onPublish={() => setShowPublishModal(true)}
+        quizId={quizId}
       />
 
       <div className="flex w-full">
@@ -185,6 +195,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
           questions={questions}
           activeQuestionId={activeQuestionId}
           onUpdateQuestionText={updateQuestionText}
+          onUpdateQuestionImage={updateQuestionImage}
           onUpdateOptionText={updateOptionText}
           onToggleCorrectAnswer={toggleCorrectAnswer}
           onDeleteQuestion={() => setShowDeleteModal(true)}
@@ -212,6 +223,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
           onClose={() => setShowPublishModal(false)}
           quizData={questions}
           quizId={quizId}
+          onPublishSuccess={handlePublishSuccess}
           defaultValues={
             quiz
               ? {
@@ -221,6 +233,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
                   difficulty: quiz.difficulty,
                   visibility: quiz.visibility,
                   thumbnailUrl: quiz.thumbnailUrl,
+                  questionTimeLimit: quiz.questionTimeLimit,
                 }
               : undefined
           }

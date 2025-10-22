@@ -1,9 +1,12 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { getSession } from "next-auth/react";
 import axios from "axios";
-import { Search, Calendar, Users, TrendingUp, Filter, MoreVertical, Award, Target } from "lucide-react";
+import { 
+  Search, Calendar, Users, TrendingUp, Filter, MoreVertical, 
+  Award, Target, Download, Play, Trash2 
+} from "lucide-react";
 
 // ===== INTERFACES =====
 interface SessionSummary {
@@ -45,6 +48,175 @@ const getAuthHeaders = async () => {
     throw error;
   }
 };
+
+// ===== ACTIONS DROPDOWN COMPONENT =====
+interface ActionsDropdownProps {
+  session: SessionSummary;
+  onPlayAgain: () => void;
+  onMoveToTrash: () => void;
+}
+
+function ActionsDropdown({ session, onPlayAgain, onMoveToTrash }: ActionsDropdownProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+
+    if (isOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // Close dropdown when scrolling
+  useEffect(() => {
+    const handleScroll = () => setIsOpen(false);
+    if (isOpen) {
+      window.addEventListener("scroll", handleScroll, true);
+    }
+    return () => window.removeEventListener("scroll", handleScroll, true);
+  }, [isOpen]);
+
+  const exportToCSV = () => {
+    // Create CSV content matching the spreadsheet format
+    const csvRows = [];
+    
+    // Header section
+    csvRows.push([session.quizTitle]);
+    csvRows.push(['Played on', session.startTime 
+      ? new Date(session.startTime).toLocaleDateString("en-US", {
+          day: "numeric",
+          month: "short",
+          year: "numeric"
+        })
+      : "Not started"
+    ]);
+    csvRows.push(['Hosted by', session.hostName]);
+    csvRows.push(['Played with', `${session.totalParticipants} player${session.totalParticipants !== 1 ? 's' : ''}`]);
+    csvRows.push(['Played', `${session.totalQuestions} of ${session.totalQuestions}`]);
+    csvRows.push(['']); // Empty row
+    
+    // Overall Performance
+    csvRows.push(['Overall Performance']);
+    csvRows.push(['Total correct answers (%)', `${session.averageAccuracy.toFixed(2)}%`]);
+    csvRows.push(['Total incorrect answers (%)', `${(100 - session.averageAccuracy).toFixed(2)}%`]);
+    csvRows.push(['Average score (points)', `${(session.averageAccuracy * 10).toFixed(2)} points`]);
+    csvRows.push(['']); // Empty row
+    
+    // Feedback section (placeholder - you may need to fetch this data from API)
+    csvRows.push(['Feedback']);
+    csvRows.push(['Number of responses', '0']);
+    csvRows.push(['How fun was it? (out of 5)', '0.00 out of 5']);
+    csvRows.push(['Did you learn something?', '0.00% Yes', '0.00% No']);
+    csvRows.push(['Do you recommend it?', '0.00% Yes', '0.00% No']);
+    csvRows.push(['How do you feel?', '0.00% Positive', '0.00% Neutral', '0.00% Negative']);
+    csvRows.push(['']); // Empty row
+    
+    csvRows.push(['Switch tabs/pages to view other result breakdown']);
+    
+    // Convert to CSV string
+    const csvContent = csvRows
+      .map(row => row.map(cell => `"${cell}"`).join(','))
+      .join('\n');
+    
+    // Create blob and download
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const fileName = `${session.sessionCode}_${session.quizTitle.replace(/[^a-z0-9]/gi, '_')}_${new Date().toISOString().split('T')[0]}.csv`;
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', fileName);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    setIsOpen(false);
+  };
+
+  const handlePlayAgain = () => {
+    onPlayAgain();
+    setIsOpen(false);
+  };
+
+  const handleMoveToTrash = () => {
+    onMoveToTrash();
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <button 
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-6 py-3.5 bg-white border-2 border-slate-200 hover:border-slate-300 rounded-2xl transition-all flex items-center justify-between group"
+      >
+        <span className="text-slate-700 font-medium">More Actions</span>
+        <MoreVertical className={`w-5 h-5 text-slate-600 transition-transform ${isOpen ? 'rotate-90' : ''}`} />
+      </button>
+
+      {isOpen && (
+        <div className="absolute z-50 mt-2 w-full bg-white rounded-2xl shadow-xl border-2 border-slate-200 overflow-hidden">
+          <div className="py-1">
+            {/* Play Again */}
+            <button
+              onClick={handlePlayAgain}
+              className="w-full px-6 py-4 flex items-center gap-3 hover:bg-blue-50 transition-colors text-left group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center group-hover:bg-blue-200 transition-colors">
+                <Play className="w-5 h-5 text-blue-600 fill-blue-600" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-slate-800">Play Again</div>
+                <div className="text-xs text-slate-500">Start a new session</div>
+              </div>
+            </button>
+
+            {/* Export Report - Only for completed sessions */}
+            {session.status === "COMPLETED" && (
+              <button
+                onClick={exportToCSV}
+                className="w-full px-6 py-4 flex items-center gap-3 hover:bg-emerald-50 transition-colors text-left group"
+              >
+                <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center group-hover:bg-emerald-200 transition-colors">
+                  <Download className="w-5 h-5 text-emerald-600" />
+                </div>
+                <div>
+                  <div className="text-sm font-semibold text-slate-800">Export Report</div>
+                  <div className="text-xs text-slate-500">Download as CSV file</div>
+                </div>
+              </button>
+            )}
+
+            {/* Move to Trash */}
+            <button
+              onClick={handleMoveToTrash}
+              className="w-full px-6 py-4 flex items-center gap-3 hover:bg-red-50 transition-colors text-left group"
+            >
+              <div className="w-10 h-10 rounded-xl bg-red-100 flex items-center justify-center group-hover:bg-red-200 transition-colors">
+                <Trash2 className="w-5 h-5 text-red-600" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-red-600">Move to Trash</div>
+                <div className="text-xs text-red-500">Delete this session</div>
+              </div>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
 
 // ===== MAIN COMPONENT =====
 export default function ReportsHistoryPage() {
@@ -135,7 +307,7 @@ export default function ReportsHistoryPage() {
   };
 
   const getStatusBadge = (status: string) => {
-    const styles = {
+    const styles: Record<string, string> = {
       COMPLETED: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20",
       IN_PROGRESS: "bg-blue-500/10 text-blue-600 border-blue-500/20 animate-pulse",
       SCHEDULED: "bg-purple-500/10 text-purple-600 border-purple-500/20",
@@ -143,7 +315,7 @@ export default function ReportsHistoryPage() {
       WAITING: "bg-gray-500/10 text-gray-600 border-gray-500/20",
       CANCELLED: "bg-red-500/10 text-red-600 border-red-500/20"
     };
-    const labels = {
+    const labels: Record<string, string> = {
       COMPLETED: "Completed",
       IN_PROGRESS: "Live Now",
       SCHEDULED: "Scheduled",
@@ -181,6 +353,32 @@ export default function ReportsHistoryPage() {
       console.log("Navigation pushed successfully");
     } catch (error) {
       console.error("Navigation failed:", error);
+    }
+  };
+
+  const handlePlayAgain = (session: SessionSummary) => {
+    console.log("Play again:", session.sessionCode);
+    // TODO: Implement play again logic - navigate to quiz setup or restart session
+    alert(`Play Again: ${session.quizTitle}`);
+  };
+
+  const handleMoveToTrash = async (session: SessionSummary) => {
+    if (confirm(`Are you sure you want to move "${session.quizTitle}" to trash?`)) {
+      try {
+        const headers = await getAuthHeaders();
+        // TODO: Replace with your actual delete/trash API endpoint
+        // await axios.delete(`https://stackquiz-api.stackquiz.me/api/v1/sessions/${session.sessionId}`, { headers });
+        
+        console.log("Moving to trash:", session.sessionCode);
+        
+        // Update local state to remove the session
+        setSessions(sessions.filter(s => s.sessionId !== session.sessionId));
+        
+        alert(`"${session.quizTitle}" has been moved to trash`);
+      } catch (err: any) {
+        console.error("Error moving to trash:", err);
+        alert("Failed to move session to trash");
+      }
     }
   };
 
@@ -413,11 +611,11 @@ export default function ReportsHistoryPage() {
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex gap-3">
+                      <div className="space-y-3">
                         <button
                           onClick={() => handleViewReport(session.sessionCode)}
                           disabled={session.status !== "COMPLETED"}
-                          className={`flex-1 px-6 py-3.5 rounded-2xl font-semibold transition-all ${
+                          className={`w-full px-6 py-3.5 rounded-2xl font-semibold transition-all ${
                             session.status === "COMPLETED"
                               ? "bg-gradient-to-r from-purple-600 to-blue-600 text-white hover:shadow-lg hover:shadow-purple-500/30 hover:scale-[1.02]"
                               : "bg-slate-100 text-slate-400 cursor-not-allowed"
@@ -425,9 +623,13 @@ export default function ReportsHistoryPage() {
                         >
                           {session.status === "COMPLETED" ? "View Full Report" : "Report Unavailable"}
                         </button>
-                        <button className="px-4 py-3.5 bg-slate-100 hover:bg-slate-200 rounded-2xl transition-all">
-                          <MoreVertical className="w-5 h-5 text-slate-600" />
-                        </button>
+                        
+                        {/* Actions Dropdown */}
+                        <ActionsDropdown
+                          session={session}
+                          onPlayAgain={() => handlePlayAgain(session)}
+                          onMoveToTrash={() => handleMoveToTrash(session)}
+                        />
                       </div>
                     </div>
                   </div>

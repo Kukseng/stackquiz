@@ -370,8 +370,8 @@ The questions have been added to your quiz! Would you like to generate more?`,
 
     // Extract number of questions
     const numberMatch = lowerInput.match(/(\d+)\s*(?:question|quiz|q\b)/i);
-    let numberOfQuestions = numberMatch ? parseInt(numberMatch[1]) : 5;
-    numberOfQuestions = Math.max(1, Math.min(20, numberOfQuestions)); // Clamp between 1-20
+    let numberOfQuestions = numberMatch ? parseInt(numberMatch[1]) : 10;
+    numberOfQuestions = Math.max(1, Math.min(20, numberOfQuestions)); 
 
     // Extract difficulty
     let difficulty = "MEDIUM";
@@ -541,7 +541,7 @@ The questions have been added to your quiz! Would you like to generate more?`,
               </div>
               <p className="text-xs text-gray-500 mt-2 flex items-center space-x-1">
                 <Sparkles className="w-3 h-3" />
-                <span>Try: "Generate 5 medium questions about React"</span>
+                <span>Try: Generate 5 medium questions about React</span>
               </p>
             </div>
           </motion.div>

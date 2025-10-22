@@ -104,7 +104,7 @@ const DashboardPage = () => {
         </div>
 
         {/* Filters */}
-        <div className=" flex gap-3 w-full md:w-auto px-4">
+        <div className="flex gap-3 w-full md:w-auto">
           {/* Category Dropdown */}
           <select
             value={selectedCategory}

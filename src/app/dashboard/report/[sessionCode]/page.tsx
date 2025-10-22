@@ -8,4 +8,3 @@ export default function SessionReportPage() {
 
   return <SessionReportUI sessionCode={sessionCode} />;
 }
-// host/[sessionCode]/report

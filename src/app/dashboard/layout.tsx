@@ -146,12 +146,12 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               href="/dashboard"
               className="flex items-center gap-2 sm:gap-3"
             >
-              <div className="w-10 h-10 sm:w-8 sm:h-8 flex items-center justify-center">
+              <div className="w-14 h-14 sm:w-8 sm:h-8 flex items-center justify-center">
                 <Image
                   src="/logo-stackquiz.png"
                   alt="Logo"
-                  width={44}
-                  height={44}
+                  width={64}
+                  height={64}
                   className="object-contain"
                 />
               </div>

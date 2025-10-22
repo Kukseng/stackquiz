@@ -17,13 +17,14 @@ interface QuizOption {
 interface QuizQuestion {
   id: string;
   text: string;
-  type: "MCQ" | "TF";
+  type: "MCQ" | "TF"| "FILL_THE_BLANK";
   questionOrder: number;
   timeLimit: number;
   points: number;
   imageUrl: string | null;
   options: QuizOption[];
 }
+
 
 interface QuizData {
   id: string;
@@ -32,9 +33,10 @@ interface QuizData {
   thumbnailUrl?: string;
   categories?: Category[];
   category?: string | { name: string };
+  categoryIds?: string[];
   visibility: "PUBLIC" | "PRIVATE" | "UNLISTED";
   status: "PUBLISHED" | "DRAFT";
-  questionTimeLimit: "FIVE" | "TEN" | "TWENTY";
+  questionTimeLimit: "FIVE"| "SIX"  |" SEVEN" | " EIGHT" | "NINE" |  "FIFTEEN" | "TWENTY" | "THIRTY";
   createdAt: string;
   difficulty: "EASY" | "MEDIUM" | "HARD";
   updatedAt: string;
@@ -127,6 +129,12 @@ export const quizApi = baseApi.injectEndpoints({
       providesTags: ["Quiz"],
     }),
 
+    // Get user's draft quizzes
+    getDraftQuizzes: builder.query<QuizData[], void>({
+      query: () => "/quizzes/draft",
+      providesTags: ["Quiz"],
+    }),
+
     // Create a new quiz
     createQuiz: builder.mutation<QuizData, Partial<QuizData>>({
       query: (quiz) => ({
@@ -167,6 +175,7 @@ export const {
   useToggleFavoriteMutation,
   useGetAllQuizzesQuery,
   useGetUserQuizzesQuery,
+  useGetDraftQuizzesQuery,
   useCreateQuizMutation,
   useUpdateQuizMutation,
   useDeleteQuizMutation,

@@ -1,6 +1,6 @@
-
 "use client"
 
+import { useState } from "react"
 import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6"
 import { IoTriangle } from "react-icons/io5"
 import { ImCheckmark2 } from "react-icons/im"
@@ -19,7 +19,7 @@ interface Question {
   type: string
   question: string
   options: Option[]
-  image?: string
+  imageUrl?: string 
   isNew?: boolean
 }
 
@@ -70,12 +70,20 @@ export default function QuizMainContent({
   theme,
 }: QuizMainContentProps) {
   const activeQuestion = questions?.find((q) => q.id === activeQuestionId)
+  const [previewImage, setPreviewImage] = useState<string | null>(null)
 
   const handleQuestionImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (!e.target.files || !activeQuestion) return
     const file = e.target.files[0]
     const previewUrl = URL.createObjectURL(file)
-    onUpdateQuestionImage(activeQuestion.id, previewUrl)
+    setPreviewImage(previewUrl)
+    onUpdateQuestionImage(activeQuestion.id, previewUrl) 
+  }
+
+  const handleRemoveImage = () => {
+    if (!activeQuestion) return
+    setPreviewImage(null)
+    onUpdateQuestionImage(activeQuestion.id, "")
   }
 
   return (
@@ -102,27 +110,46 @@ export default function QuizMainContent({
               className="w-full text-center text-2xl font-semibold p-4 mb-6 rounded-xl border-2 text-gray-900 bg-white border-yellow-400 placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
             />
 
-            {/* Question Image Section */}
+            {/* Image Upload + Preview */}
             <div className="mb-8 flex flex-col items-center">
-              {activeQuestion.image && (
-                <div className="relative w-80 h-48 mb-4 rounded-xl border-2 border-white/30 overflow-hidden shadow-lg">
-                  <Image
-                    src={activeQuestion.image}
-                    alt="Question"
-                    fill
-                    className="object-cover"
-                  />
+              {previewImage || activeQuestion.imageUrl ? (
+                <div className="relative w-full max-w-2xl rounded-2xl overflow-hidden group">
+                  <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-xl border-4 border-white/40">
+                    <Image
+                      src={previewImage || activeQuestion.imageUrl || ""}
+                      alt="Question"
+                      fill
+                      className="object-cover"
+                    />
+                  </div>
+                  <button
+                    onClick={handleRemoveImage}
+                    className="absolute top-4 right-4 bg-black/70 hover:bg-black text-white w-10 h-10 rounded-full flex items-center justify-center transition-all shadow-lg"
+                  >
+                    ✕
+                  </button>
                 </div>
+              ) : (
+                <label className="cursor-pointer w-full max-w-2xl">
+                  <div className="border-4 border-dashed border-white/50 hover:border-white/80 rounded-2xl p-12 bg-white/10 hover:bg-white/20 transition-all flex flex-col items-center justify-center gap-4">
+                    <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                      </svg>
+                    </div>
+                    <div className="text-center">
+                      <p className="text-xl font-semibold text-white mb-1">Add cover image</p>
+                      <p className="text-white/70 text-sm">JPG, PNG up to 5MB</p>
+                    </div>
+                  </div>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleQuestionImageUpload}
+                    className="hidden"
+                  />
+                </label>
               )}
-              <label className="cursor-pointer bg-white/20 hover:bg-white/30 text-white px-6 py-3 rounded-lg text-lg font-semibold transition-colors">
-                📸 Upload Image
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleQuestionImageUpload}
-                  className="hidden"
-                />
-              </label>
             </div>
 
             {/* Options */}

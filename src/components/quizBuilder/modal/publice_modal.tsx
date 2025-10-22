@@ -21,11 +21,7 @@ interface Question {
   type: string;
   question: string;
   options: Option[];
-}
-
-interface CategoryResponse {
-  id: string;
-  name: string;
+  imageUrl?: string;
 }
 
 interface PublishModalProps {
@@ -133,6 +129,7 @@ export default function PublishModal({
   const [isDragging, setIsDragging] = useState(false);
   const [isPublishing, setIsPublishing] = useState(false);
   const [publishError, setPublishError] = useState<string | null>(null);
+  const [uploadProgress, setUploadProgress] = useState<string>("");
 
   // Helper function to determine if question is new
   const isNewQuestion = (id: string | number): boolean => {
@@ -152,34 +149,130 @@ export default function PublishModal({
     return false;
   };
 
-  const uploadCoverImage = async (file: File): Promise<string> => {
-    try {
-      const imageFormData = new FormData();
-      imageFormData.append("file", file);
+  // ✅ FIXED: Convert File to base64 string (without data URL prefix)
+  const fileToBase64 = (file: File): Promise<string> => {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const result = reader.result as string;
+          // Remove the data URL prefix (e.g., "data:image/jpeg;base64,")
+          const base64Data = result.split(',')[1];
+          if (!base64Data) {
+            reject(new Error("Failed to convert image to base64"));
+            return;
+          }
+          resolve(base64Data);
+        } catch (error) {
+          reject(new Error("Error processing image data"));
+        }
+      };
+      reader.onerror = () => reject(new Error("Failed to read file"));
+      reader.readAsDataURL(file);
+    });
+  };
 
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/upload/image`, {
+  // ✅ FIXED: Upload image with proper error handling
+  const uploadImageToAPI = async (file: File): Promise<string> => {
+    try {
+      // Validate file type
+      if (!file.type.startsWith("image/")) {
+        throw new Error("File must be an image");
+      }
+
+      // Validate file size (5MB limit)
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error("Image size must be less than 5MB");
+      }
+
+      console.log(`📤 Uploading image: ${file.name} (${(file.size / 1024).toFixed(2)}KB)`);
+
+      // Convert file to base64
+      const base64String = await fileToBase64(file);
+
+      // Upload to API
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/medias/upload-single`, {
         method: "POST",
         headers: {
           Authorization: `Bearer ${(session as any)?.apiAccessToken}`,
+          "Content-Type": "application/json",
         },
-        body: imageFormData,
+        body: JSON.stringify({
+          file: base64String,
+        }),
       });
 
       if (!response.ok) {
-        console.warn("Image upload failed, continuing without image");
-        return "";
+        let errorMessage = `Upload failed with status ${response.status}`;
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.message || errorMessage;
+        } catch {
+          const errorText = await response.text();
+          if (errorText) errorMessage = errorText;
+        }
+        throw new Error(errorMessage);
       }
 
       const data = await response.json();
-      return data.imageUrl || data.url || data.thumbnailUrl || "";
+      console.log("✅ Upload response:", data);
+      
+      // Validate response has URI
+      if (!data.uri) {
+        throw new Error("Upload response missing URI");
+      }
+
+      console.log(`✅ Image uploaded successfully: ${data.uri}`);
+      return data.uri;
     } catch (error) {
-      console.warn("Image upload error:", error);
-      return "";
+      console.error("❌ Image upload error:", error);
+      throw error instanceof Error ? error : new Error("Failed to upload image");
+    }
+  };
+
+  // ✅ FIXED: Convert blob URL to file and upload
+  const uploadQuestionImage = async (imageUrl: string): Promise<string> => {
+    try {
+      // If it's already a URI from the API, return as is
+      if (imageUrl.startsWith('http') && !imageUrl.startsWith('blob:')) {
+        console.log("📌 Using existing image URL:", imageUrl);
+        return imageUrl;
+      }
+
+      // If it's empty, return empty
+      if (!imageUrl || imageUrl.trim() === "") {
+        return "";
+      }
+
+      console.log("🔄 Converting blob URL to file and uploading:", imageUrl);
+
+      // Fetch blob and convert to File
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error("Failed to fetch blob URL");
+      }
+
+      const blob = await response.blob();
+      
+      // Validate blob type
+      if (!blob.type.startsWith("image/")) {
+        throw new Error("Invalid image type");
+      }
+
+      // Create File object
+      const file = new File([blob], `question-${Date.now()}.jpg`, { type: blob.type });
+
+      // Upload using the main upload function
+      return await uploadImageToAPI(file);
+    } catch (error) {
+      console.error("❌ Question image upload error:", error);
+      throw error instanceof Error ? error : new Error("Failed to upload question image");
     }
   };
 
   const handleSubmit = async () => {
     setPublishError(null);
+    setUploadProgress("");
 
     // Validation
     if (!formData.tag.trim()) {
@@ -218,37 +311,47 @@ export default function PublishModal({
     try {
       let thumbnailUrl = defaultValues?.thumbnailUrl || "";
 
+      // ✅ Upload cover image if new file selected
       if (formData.coverImage) {
-        console.log("Uploading cover image...");
-        const uploadedUrl = await uploadCoverImage(formData.coverImage);
-        if (uploadedUrl) {
-          thumbnailUrl = uploadedUrl;
+        setUploadProgress("Uploading cover image...");
+        console.log("📤 Uploading cover image...");
+        try {
+          thumbnailUrl = await uploadImageToAPI(formData.coverImage);
+          console.log("✅ Cover image uploaded:", thumbnailUrl);
+        } catch (error) {
+          const errorMsg = error instanceof Error ? error.message : "Unknown error";
+          console.error("❌ Cover image upload failed:", errorMsg);
+          setPublishError(`Failed to upload cover image: ${errorMsg}`);
+          setIsPublishing(false);
+          setUploadProgress("");
+          return;
         }
-        console.log("Cover image uploaded:", thumbnailUrl);
       }
 
       const questionTimeLimit = convertSecondsToAPIFormat(formData.timeLimit);
 
       if (isEditMode && quizId) {
         // UPDATE EXISTING QUIZ
-        console.log("Updating quiz metadata...");
+        setUploadProgress("Updating quiz metadata...");
+        console.log("🔄 Updating quiz metadata...");
         await updateQuiz({
           quizId,
-          data: {
+          quiz: {
             title: formData.tag,
             description: formData.description,
-            thumbnailUrl: thumbnailUrl,
+            thumbnailUrl: thumbnailUrl || undefined,
             visibility: formData.visibility,
             status: "PUBLISHED",
-            questionTimeLimit: questionTimeLimit,
+            questionTimeLimit: questionTimeLimit as any,
             difficulty: formData.difficulty,
-            categoryIds: [formData.category],
+            category: formData.category,
           },
         }).unwrap();
 
         // Process all questions
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
+          setUploadProgress(`Processing question ${i + 1}/${quizData.length}...`);
 
           let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
           const typeUpper = q.type.toUpperCase();
@@ -260,19 +363,34 @@ export default function PublishModal({
             questionType = "FILL_THE_BLANK";
           }
 
+          // ✅ Upload question image if exists
+          let uploadedImageUrl = "";
+          if (q.imageUrl) {
+            setUploadProgress(`Uploading image for question ${i + 1}/${quizData.length}...`);
+            console.log(`📤 Uploading image for question ${i + 1}...`);
+            try {
+              uploadedImageUrl = await uploadQuestionImage(q.imageUrl);
+              console.log(`✅ Question ${i + 1} image uploaded:`, uploadedImageUrl);
+            } catch (error) {
+              console.warn(`⚠️ Failed to upload image for question ${i + 1}:`, error);
+              // Continue without image rather than failing
+              uploadedImageUrl = "";
+            }
+          }
+
           if (isNewQuestion(q.id)) {
             // CREATE NEW QUESTION
-            console.log(`Creating new question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
+            console.log(`➕ Creating new question ${i + 1}/${quizData.length}`);
 
             const createdQuestion = await createQuestion({
               text: q.question,
               type: questionType,
-              imageUrl: undefined,
+              imageUrl: uploadedImageUrl || undefined,
               quizId: quizId,
             }).unwrap();
 
             if (q.options && q.options.length > 0) {
-              console.log(`Adding ${q.options.length} options to new question ${createdQuestion.id}`);
+              console.log(`➕ Adding ${q.options.length} options to new question`);
               await addOptionsToQuestion({
                 questionId: createdQuestion.id,
                 data: q.options.map((opt) => ({
@@ -284,13 +402,14 @@ export default function PublishModal({
             }
           } else {
             // UPDATE EXISTING QUESTION
-            console.log(`Updating existing question ${i + 1}/${quizData.length}: "${q.question.substring(0, 50)}..."`);
-            
+            console.log(`🔄 Updating existing question ${i + 1}/${quizData.length}`);
+
             await updateQuestion({
               id: String(q.id),
               data: {
                 text: q.question,
                 type: questionType,
+                imageUrl: uploadedImageUrl || undefined,
               },
             }).unwrap();
 
@@ -299,7 +418,6 @@ export default function PublishModal({
               for (const opt of q.options) {
                 if (isNewOption(opt.id)) {
                   // CREATE NEW OPTION
-                  console.log(`Adding new option to question ${q.id}`);
                   await addOptionsToQuestion({
                     questionId: String(q.id),
                     data: [
@@ -312,7 +430,6 @@ export default function PublishModal({
                   }).unwrap();
                 } else {
                   // UPDATE EXISTING OPTION
-                  console.log(`Updating option ${opt.id} for question ${q.id}`);
                   await updateOption({
                     optionId: String(opt.id),
                     data: {
@@ -326,32 +443,37 @@ export default function PublishModal({
           }
         }
         
-        console.log("All questions and options updated successfully!");
+        console.log("✅ Quiz updated successfully!");
+        setUploadProgress("Quiz updated successfully!");
 
         if (onPublishSuccess) {
           onPublishSuccess();
         }
 
-        onClose();
-        router.push(`/quizDetail/${quizId}`);
+        setTimeout(() => {
+          onClose();
+          router.push(`/quizDetail/${quizId}`);
+        }, 500);
       } else {
         // CREATE NEW QUIZ
-        console.log("Creating new quiz...");
+        setUploadProgress("Creating new quiz...");
+        console.log("➕ Creating new quiz...");
         const createdQuiz = await createQuiz({
           title: formData.tag,
           description: formData.description,
-          thumbnailUrl: thumbnailUrl,
+          thumbnailUrl: thumbnailUrl || undefined,
           visibility: formData.visibility,
           status: "PUBLISHED",
-          questionTimeLimit: questionTimeLimit,
+          questionTimeLimit: questionTimeLimit as any,
           difficulty: formData.difficulty,
           categoryIds: [formData.category],
         }).unwrap();
 
-        console.log("Quiz created, now adding questions...");
+        console.log("✅ Quiz created, now adding questions...");
 
         for (let i = 0; i < quizData.length; i++) {
           const q = quizData[i];
+          setUploadProgress(`Processing question ${i + 1}/${quizData.length}...`);
 
           let questionType: "MCQ" | "TF" | "FILL_THE_BLANK" = "MCQ";
           const typeUpper = q.type.toUpperCase();
@@ -363,17 +485,32 @@ export default function PublishModal({
             questionType = "FILL_THE_BLANK";
           }
 
-          console.log(`Creating question ${i + 1}/${quizData.length}`);
+          // ✅ Upload question image if exists
+          let uploadedImageUrl = "";
+          if (q.imageUrl) {
+            setUploadProgress(`Uploading image for question ${i + 1}/${quizData.length}...`);
+            console.log(`📤 Uploading image for question ${i + 1}...`);
+            try {
+              uploadedImageUrl = await uploadQuestionImage(q.imageUrl);
+              console.log(`✅ Question ${i + 1} image uploaded:`, uploadedImageUrl);
+            } catch (error) {
+              console.warn(`⚠️ Failed to upload image for question ${i + 1}:`, error);
+              // Continue without image
+              uploadedImageUrl = "";
+            }
+          }
+
+          console.log(`➕ Creating question ${i + 1}/${quizData.length}`);
 
           const createdQuestion = await createQuestion({
             text: q.question,
             type: questionType,
-            imageUrl: undefined,
+            imageUrl: uploadedImageUrl || undefined,
             quizId: createdQuiz.id,
           }).unwrap();
 
           if (q.options && q.options.length > 0) {
-            console.log(`Adding ${q.options.length} options to question ${createdQuestion.id}`);
+            console.log(`➕ Adding ${q.options.length} options to question`);
             await addOptionsToQuestion({
               questionId: createdQuestion.id,
               data: q.options.map((opt) => ({
@@ -385,15 +522,20 @@ export default function PublishModal({
           }
         }
 
+        console.log("✅ Quiz published successfully!");
+        setUploadProgress("Quiz published successfully!");
+
         if (onPublishSuccess) {
           onPublishSuccess();
         }
 
-        onClose();
-        router.push("/dashboard");
+        setTimeout(() => {
+          onClose();
+          router.push("/dashboard");
+        }, 500);
       }
     } catch (error: any) {
-      console.error("Error publishing/updating quiz:", error);
+      console.error("❌ Error publishing/updating quiz:", error);
 
       const errorMessage =
         error?.data?.message ||
@@ -403,6 +545,7 @@ export default function PublishModal({
           : `Failed to ${isEditMode ? "update" : "publish"} quiz. Please try again.`);
 
       setPublishError(errorMessage);
+      setUploadProgress("");
     } finally {
       setIsPublishing(false);
     }
@@ -493,7 +636,6 @@ export default function PublishModal({
 
   return (
     <div className="fixed inset-0 bg-gradient-to-br from-pink-100/40 via-purple-100/30 to-blue-100/40 backdrop-blur-xl flex items-center justify-center z-50 p-4">
-      {/* Decorative background elements */}
       <div className="absolute top-0 left-0 w-96 h-96 bg-gradient-to-br from-purple-300/20 to-pink-300/20 rounded-full blur-3xl -z-10"></div>
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-gradient-to-tl from-blue-300/20 to-cyan-300/20 rounded-full blur-3xl -z-10"></div>
 
@@ -502,7 +644,7 @@ export default function PublishModal({
           {/* Left Section - Image Upload */}
           <div className="bg-gradient-to-br from-purple-50/80 via-pink-50/60 to-blue-50/40 p-8 md:p-10 border-b md:border-b-0 md:border-r border-white/40 flex flex-col justify-center">
             <div className="mb-8">
-              <h3 className="text-3xl md:text-4xl font-bold text-black bg-clip-text  mb-2">
+              <h3 className="text-3xl md:text-4xl font-bold text-black mb-2">
                 {isEditMode ? "Update Quiz" : "Adding the final touches"}
               </h3>
               <p className="text-gray-500 text-sm">
@@ -557,47 +699,43 @@ export default function PublishModal({
                 </div>
               )}
             </div>
-                         {/* Title */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">Title</label>
-                <input
-                  type="text"
-                  placeholder="Enter a title for your quiz"
-                  className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent disabled:opacity-50 transition-all placeholder:text-gray-400"
-                  value={formData.tag}
-                  onChange={(e) =>
-                    setFormData((prev) => ({ ...prev, tag: e.target.value }))
-                  }
-                  disabled={isLoading}
-                />
-              </div>
 
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-3">
-                  Description
-                </label>
-                <textarea
-                  placeholder="Describe your quiz..."
-                  className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none h-24 disabled:opacity-50 transition-all placeholder:text-gray-400"
-                  value={formData.description}
-                  onChange={(e) =>
-                    setFormData((prev) => ({
-                      ...prev,
-                      description: e.target.value,
-                    }))
-                  }
-                  disabled={isLoading}
-                />
-              </div>
+            <div className="mt-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">Title</label>
+              <input
+                type="text"
+                placeholder="Enter a title for your quiz"
+                className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent disabled:opacity-50 transition-all placeholder:text-gray-400"
+                value={formData.tag}
+                onChange={(e) =>
+                  setFormData((prev) => ({ ...prev, tag: e.target.value }))
+                }
+                disabled={isLoading}
+              />
+            </div>
 
+            <div className="mt-6">
+              <label className="block text-sm font-semibold text-gray-700 mb-3">
+                Description
+              </label>
+              <textarea
+                placeholder="Describe your quiz..."
+                className="w-full px-5 py-3 bg-white/60 border-2 border-purple-200/50 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent resize-none h-24 disabled:opacity-50 transition-all placeholder:text-gray-400"
+                value={formData.description}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    description: e.target.value,
+                  }))
+                }
+                disabled={isLoading}
+              />
+            </div>
           </div>
 
           {/* Right Section - Form Fields */}
           <div className="p-8 md:p-10 flex flex-col justify-between">
             <div className="space-y-6">
- 
-              {/* Category */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Category
@@ -630,7 +768,6 @@ export default function PublishModal({
                 </select>
               </div>
 
-              {/* Difficulty Level */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Difficulty Level
@@ -662,7 +799,6 @@ export default function PublishModal({
                 </div>
               </div>
 
-              {/* Time Limit */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Time Limit per Question
@@ -686,7 +822,6 @@ export default function PublishModal({
                 </select>
               </div>
 
-              {/* Visibility */}
               <div>
                 <label className="block text-sm font-semibold text-gray-700 mb-3">
                   Visibility
@@ -705,7 +840,6 @@ export default function PublishModal({
                       label: "Private",
                       desc: "Visible only to you",
                     },
-                   
                   ].map((option) => (
                     <button
                       key={option.value}
@@ -733,6 +867,16 @@ export default function PublishModal({
                 </div>
               </div>
 
+              {/* Upload Progress Indicator */}
+              {uploadProgress && (
+                <div className="p-4 bg-blue-50/80 border border-blue-200 rounded-xl">
+                  <div className="flex items-center gap-3">
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
+                    <p className="text-blue-700 text-sm font-medium">{uploadProgress}</p>
+                  </div>
+                </div>
+              )}
+
               {publishError && (
                 <div className="p-4 bg-red-50/80 border border-red-200 rounded-xl">
                   <p className="text-red-700 text-sm font-medium">{publishError}</p>
@@ -740,7 +884,6 @@ export default function PublishModal({
               )}
             </div>
 
-            {/* Buttons */}
             <div className="flex gap-4 mt-8 pt-6 border-t border-white/40">
               <button
                 className="flex-1 py-3 bg-red-600 hover:bg-red-600/80 text-white rounded-lg font-semibold transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed transform hover:scale-105 active:scale-95 shadow-lg"
@@ -756,7 +899,7 @@ export default function PublishModal({
               >
                 {isLoading ? (
                   <>
-                    <div className="animate-spin rounded-lg h-5 w-5 border-2 border-white border-t-transparent"></div>
+                    <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-950 border-t-transparent"></div>
                     {isEditMode ? "Updating..." : "Publishing..."}
                   </>
                 ) : isEditMode ? (

@@ -1,17 +1,16 @@
-
 "use client"
 import Image from "next/image"
 import { useState } from "react"
 
 interface Option {
-  id: number
+  id: number | string
   text: string
   correct: boolean
   color?: string
 }
 
 interface Question {
-  id: number
+  id: number | string
   type: string
   question: string
   options: Option[]
@@ -21,8 +20,8 @@ interface Question {
 
 interface QuizSidebarProps {
   questions: Question[]
-  activeQuestionId: number | null
-  onQuestionSelect: (id: number) => void
+  activeQuestionId: number | string | null
+  onQuestionSelect: (id: number | string) => void
   onAddQuestion: () => void
 }
 
@@ -33,19 +32,7 @@ export function QuizSidebar({
   onAddQuestion,
 }: QuizSidebarProps) {
   const [isMobileOpen, setIsMobileOpen] = useState(false)
-
-  const getQuestionTypeLabel = (type: string) => {
-    switch (type) {
-      case "mcq":
-        return "Quiz"
-      case "tf":
-        return "True/False"
-      case "fill_the_blank":
-        return "Type Answer"
-      default:
-        return "Quiz"
-    }
-  }
+  const [imageErrors, setImageErrors] = useState<Record<string, boolean>>({})
 
   const getQuestionTypeIcon = (type: string) => {
     switch (type) {
@@ -65,10 +52,14 @@ export function QuizSidebar({
     return text.substring(0, maxLength) + "..."
   }
 
+  const handleImageError = (questionId: string | number) => {
+    setImageErrors(prev => ({ ...prev, [questionId]: true }))
+  }
+
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden z-0 fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 p-4 flex items-center justify-between">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 p-4 flex items-center justify-between">
         <h2 className="text-lg font-bold text-gray-800">Quiz ({questions.length})</h2>
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -94,16 +85,12 @@ export function QuizSidebar({
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         } md:top-0 top-16 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100`}
       >
-        {/* Desktop Header */}
-        <div className="hidden md:block p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
+        {/* Header */}
+        <div className="p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
           <h2 className="text-lg font-bold text-gray-800">Quiz</h2>
-          <p className="text-sm text-gray-600">{questions.length} question{questions.length !== 1 ? "s" : ""}</p>
-        </div>
-
-        {/* Mobile Header (inside sidebar) */}
-        <div className="md:hidden p-4 border-b border-gray-200 bg-gradient-to-r from-purple-50 to-blue-50">
-          <h2 className="text-lg font-bold text-gray-800">Questions</h2>
-          <p className="text-sm text-gray-600">{questions.length} question{questions.length !== 1 ? "s" : ""}</p>
+          <p className="text-sm text-gray-600">
+            {questions.length} question{questions.length !== 1 ? "s" : ""}
+          </p>
         </div>
 
         {/* Questions List */}
@@ -121,31 +108,30 @@ export function QuizSidebar({
                   : "hover:shadow-md hover:ring-1 hover:ring-gray-300"
               }`}
             >
-              {/* Question Number Badge */}
+              {/* Question Number */}
               <div className="absolute top-2 left-2 z-10 bg-white px-2 py-1 rounded-full shadow-sm">
                 <span className="text-xs font-bold text-gray-700">{index + 1}</span>
               </div>
 
-              {/* Question Type Badge */}
+              {/* Type Icon */}
               <div className="absolute top-2 right-2 z-10 bg-white/90 backdrop-blur-sm px-2 py-1 rounded-full shadow-sm">
                 <span className="text-xs font-medium text-gray-600">
                   {getQuestionTypeIcon(question.type)}
                 </span>
               </div>
 
-              {/* Question Preview */}
-              <div
-                className={`h-24 md:h-32 relative ${
-                  question.imageUrl ? "bg-gray-100" : "bg-gradient-to-br from-purple-400 via-pink-400 to-blue-400"
-                }`}
-              >
-                {question.imageUrl ? (
-                  <Image
-                    src={question.imageUrl}
-                    alt="Question preview"
-                    fill
-                    className="object-cover"
-                  />
+              {/* Question Preview Image */}
+              <div className="h-24 md:h-32 relative bg-gradient-to-br from-purple-100 to-blue-100">
+                {question.imageUrl && !imageErrors[question.id] ? (
+                  <>
+                    {/* Using regular img tag for blob URLs */}
+                    <Image
+                      src={question.imageUrl}
+                      alt="Question preview"
+                      className="w-full h-full object-cover absolute inset-0"
+                      onError={() => handleImageError(question.id)}
+                    />
+                  </>
                 ) : (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <div className="text-3xl opacity-20">
@@ -154,8 +140,10 @@ export function QuizSidebar({
                   </div>
                 )}
 
+                {/* Gradient Overlay */}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
+                {/* Question Text */}
                 <div className="absolute bottom-0 left-0 right-0 p-2 md:p-3">
                   <p className="text-white text-xs md:text-sm font-medium line-clamp-2 drop-shadow-md">
                     {truncateText(question.question)}
@@ -176,7 +164,11 @@ export function QuizSidebar({
                           ? "text-white"
                           : "bg-gray-100 text-gray-600"
                       }`}
-                      style={option.color && !option.correct ? { backgroundColor: option.color } : {}}
+                      style={
+                        option.color && !option.correct
+                          ? { backgroundColor: option.color }
+                          : {}
+                      }
                     >
                       {option.text || `Opt ${optIndex + 1}`}
                     </div>
@@ -186,15 +178,28 @@ export function QuizSidebar({
                 {/* Question Info */}
                 <div className="flex items-center justify-between text-xs text-gray-500 mt-2 pt-2 border-t border-gray-100">
                   <span className="flex items-center gap-1">
-                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    <svg
+                      className="w-3 h-3"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                      />
                     </svg>
                     {question.timeLimit || 20}s
                   </span>
-                  <span>{index + 1}/{questions.length}</span>
+                  <span>
+                    {index + 1}/{questions.length}
+                  </span>
                 </div>
               </div>
 
+              {/* Blue Left Border for Active Question */}
               {activeQuestionId === question.id && (
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-blue-500"></div>
               )}
@@ -218,10 +223,11 @@ export function QuizSidebar({
 
         {/* Footer */}
         <div className="p-4 border-t border-gray-200 bg-gray-50">
-          <div className="text-xs text-gray-500 text-center">Click any question to edit</div>
+          <div className="text-xs text-gray-500 text-center">
+            Click any question to edit
+          </div>
         </div>
       </div>
     </>
   )
 }
-

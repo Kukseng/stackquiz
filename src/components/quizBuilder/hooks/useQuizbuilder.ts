@@ -18,7 +18,7 @@ export interface Question {
   type: string;
   question: string;
   options: QuizOption[];
-  isNew?: boolean; // Added for AI-generated question highlighting
+  isNew?: boolean; 
 }
 
 export function useQuizStore() {
@@ -53,7 +53,12 @@ export function useQuizStore() {
                   { id: crypto.randomUUID(), text: "True", correct: false, color: "#e21a3b", icon: "circle" },
                   { id: crypto.randomUUID(), text: "False", correct: true, color: "#27890d", icon: "diamond" },
                 ]
-              : [{ id: crypto.randomUUID(), text: "", correct: true, color: "#1355b4" }],
+              : [
+                  { id: crypto.randomUUID(), text: "", correct: false, color: "#e21a3b", icon: "circle" },
+                  { id: crypto.randomUUID(), text: "", correct: false, color: "#e77f42", icon: "triangle" },
+                  { id: crypto.randomUUID(), text: "", correct: false, color: "#1355b4", icon: "square" },
+                  { id: crypto.randomUUID(), text: "", correct: true, color: "#27890d", icon: "diamond" },
+                ],
           isNew: false,
         };
     setQuestions((prev) => [...prev, newQuestion]);

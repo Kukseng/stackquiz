@@ -10,7 +10,6 @@ import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
 import PublishModal from "./modal/publice_modal";
 import { useGetQuizByIdQuery } from "@/lib/api/quizApi";
-import { AIChatbot } from "./AIChatbot";
 
 interface QuizBuilderLayoutProps {
   quizId?: string;
@@ -40,6 +39,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
     deleteQuestion,
     duplicateQuestion,
     updateQuestionText,
+    updateQuestionImage,
     updateOptionText,
     toggleCorrectAnswer,
   } = useQuizStore();
@@ -61,7 +61,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
       const questionType = q.type === "TF" ? "truefalse" : q.type.toLowerCase();
       
       const mappedOptions = q.options.map((o: any, index: number) => ({
-        id: o.id || `${crypto.randomUUID()}-${index}`,
+        id: o.id,
         text: o.optionText.replaceAll("_", " "),
         correct: o.isCorrected,
         color: OPTION_COLORS[index as keyof typeof OPTION_COLORS] || "#1355b4",
@@ -69,65 +69,29 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
       }));
 
       return {
-        id: q.id || crypto.randomUUID(),
+        id: q.id,
         type: questionType,
         question: q.text.replaceAll("_", " "),
         options: mappedOptions,
-        isNew: false,
+        imageUrl: q.imageUrl || "",
       };
     });
 
-    console.log("Loaded questions from API:", formattedQuestions);
     setQuestions(formattedQuestions);
     setActiveQuestionId(formattedQuestions[0]?.id ?? null);
     setIsDataLoaded(true);
   }, [quiz, isDataLoaded, setQuestions, setActiveQuestionId]);
 
-  const handleDelete = (id: string) => {
+  const handleDelete = (id: number | string) => {
     const remaining = questions.filter((q) => q.id !== id);
-    deleteQuestion(id);
+    deleteQuestion(typeof id === "string" ? Number(id) : id);
     setActiveQuestionId(remaining.length ? remaining[0].id : null);
-    console.log("After delete, questions:", remaining);
   };
 
-  const handleQuestionSelect = (id: string) => {
-    setActiveQuestionId(id);
-    setQuestions((prev) =>
-      prev.map((q) => ({ ...q, isNew: false }))
-    );
-    console.log("Selected question ID:", id);
-  };
-
-  const handleAIQuestionsGenerated = (generatedQuestions: any[]) => {
-    console.log("AI generated questions:", generatedQuestions);
-    
-    const newQuestions = generatedQuestions.map((q, index) => {
-      const questionId = crypto.randomUUID();
-      
-      return {
-        id: questionId,
-        type: "multiplechoice",
-        question: q.questionText || "Untitled Question",
-        isNew: true,
-        options: (q.options || []).map((opt: any, optIndex: number) => ({
-          id: `${questionId}-${optIndex}`,
-          text: opt.optionText || "Option",
-          correct: opt.isCorrect || false,
-          color: OPTION_COLORS[optIndex as keyof typeof OPTION_COLORS] || "#1355b4",
-          icon: OPTION_ICONS[optIndex as keyof typeof OPTION_ICONS] || "circle",
-        })),
-      };
-    });
-
-    newQuestions.forEach((q) => {
-      addQuestion(q.type, q);
-    });
-
-    console.log("After adding AI questions, questions:", questions);
-
-    if (newQuestions.length > 0) {
-      setActiveQuestionId(newQuestions[0].id);
-      console.log("Set active question ID:", newQuestions[0].id);
+  const handlePublishSuccess = () => {
+    // Refetch quiz data to update cache
+    if (quizId) {
+      refetch();
     }
   };
 
@@ -171,20 +135,22 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
       <QuizHeader
         questions={questions}
         onPublish={() => setShowPublishModal(true)}
+        quizId={quizId}
       />
 
       <div className="flex w-full">
         <QuizSidebar
-          questions={questions}
-          activeQuestionId={activeQuestionId}
-          onQuestionSelect={handleQuestionSelect}
+          questions={questions as any}
+          activeQuestionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
+          onQuestionSelect={setActiveQuestionId}
           onAddQuestion={() => setShowAddQuestionModal(true)}
         />
 
         <QuizMainContent
-          questions={questions}
-          activeQuestionId={activeQuestionId}
+          questions={questions as any}
+          activeQuestionId={activeQuestionId as any}
           onUpdateQuestionText={updateQuestionText}
+          onUpdateQuestionImage={updateQuestionImage}
           onUpdateOptionText={updateOptionText}
           onToggleCorrectAnswer={toggleCorrectAnswer}
           onDeleteQuestion={() => setShowDeleteModal(true)}
@@ -201,7 +167,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
 
       {showDeleteModal && activeQuestionId && (
         <DeleteQuestionModal
-          questionId={activeQuestionId}
+          questionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
           onClose={() => setShowDeleteModal(false)}
           onDelete={handleDelete}
         />
@@ -212,6 +178,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
           onClose={() => setShowPublishModal(false)}
           quizData={questions}
           quizId={quizId}
+          onPublishSuccess={handlePublishSuccess}
           defaultValues={
             quiz
               ? {
@@ -221,13 +188,12 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
                   difficulty: quiz.difficulty,
                   visibility: quiz.visibility,
                   thumbnailUrl: quiz.thumbnailUrl,
+                  questionTimeLimit: quiz.questionTimeLimit,
                 }
               : undefined
           }
         />
       )}
-
-      <AIChatbot onQuestionsGenerated={handleAIQuestionsGenerated} />
     </div>
   );
 }

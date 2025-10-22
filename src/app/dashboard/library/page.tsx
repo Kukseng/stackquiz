@@ -5,6 +5,7 @@ import { Search, MoreHorizontal, Filter, Plus, Grid, List, ChevronDown, Heart, E
 import Image from 'next/image'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { useFavorites } from '@/components/hooks/useFavorites'
 
 interface Category {
   id: string
@@ -35,12 +36,12 @@ interface TabItem {
 const DataTable = () => {
   const { data: session, status } = useSession()
   const router = useRouter()
+  const { favoriteIds, toggleFavorite, isLoading: favoritesLoading } = useFavorites()
   const [activeTab, setActiveTab] = useState<'recent' | 'draft' | 'favorites'>('recent')
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedItems, setSelectedItems] = useState<string[]>([])
   const [viewMode, setViewMode] = useState<'table' | 'grid'>('table')
   const [quizzes, setQuizzes] = useState<Quiz[]>([])
-  const [favoriteIds, setFavoriteIds] = useState<Set<string>>(new Set())
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null)
@@ -50,7 +51,7 @@ const DataTable = () => {
 
   const isAuthed = status === "authenticated" && !!(session as any)?.apiAccessToken
 
-  // Fetch quizzes and favorites together
+  // Fetch quizzes
   useEffect(() => {
     const fetchData = async () => {
       if (status === 'loading') return
@@ -67,7 +68,7 @@ const DataTable = () => {
 
         const token = (session as any)?.apiAccessToken
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
-        
+
         // Fetch quizzes
         let response = await fetch(`${apiUrl}/quizzes/users/me`, {
           method: 'GET',
@@ -108,38 +109,9 @@ const DataTable = () => {
         const data = await response.json()
         const quizzesArray = Array.isArray(data) ? data : (data.quizzes || data.data || [])
 
-        // Fetch favorites
-        let favoriteQuizIds = new Set<string>()
-        try {
-          const favResponse = await fetch(`${apiUrl}/quizzes/favorites`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            cache: 'no-store'
-          })
-
-          if (favResponse.ok) {
-            const favData = await favResponse.json()
-            const favArray = Array.isArray(favData) ? favData : (favData.favorites || favData.data || [])
-            favoriteQuizIds = new Set(
-              favArray.map((fav: any) => {
-                // Handle different response formats
-                return fav.quizId || fav.id
-              })
-            )
-            setFavoriteIds(favoriteQuizIds)
-          }
-        } catch (favErr) {
-          console.error('Error fetching favorites:', favErr)
-          // Continue without favorites if fetch fails
-        }
-
-        // Map quizzes with favorite status
         const quizzesWithFavorites = quizzesArray.map((quiz: Quiz) => ({
           ...quiz,
-          isFavorite: favoriteQuizIds.has(quiz.id)
+          isFavorite: favoriteIds.has(quiz.id)
         }))
 
         setQuizzes(quizzesWithFavorites)
@@ -152,12 +124,19 @@ const DataTable = () => {
     }
 
     fetchData()
-  }, [session, status, isAuthed])
+  }, [session, status, isAuthed, favoriteIds])
 
-  const getCategoryNames = (categories?: Category[]): string => {
-    if (!categories || categories.length === 0) return 'Uncategorized'
-    return categories.map(c => c.name).join(', ')
-  }
+  // Auto-refresh quizzes when navigating back from quiz builder
+  useEffect(() => {
+    const handleFocus = () => {
+      if (isAuthed) {
+        refetch()
+      }
+    }
+
+    window.addEventListener('focus', handleFocus)
+    return () => window.removeEventListener('focus', handleFocus)
+  }, [isAuthed])
 
   const refetch = () => {
     const fetchData = async () => {
@@ -169,7 +148,7 @@ const DataTable = () => {
 
         const token = (session as any)?.apiAccessToken
         const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
-        
+
         const response = await fetch(`${apiUrl}/quizzes/users/me`, {
           method: 'GET',
           headers: {
@@ -184,33 +163,9 @@ const DataTable = () => {
         const data = await response.json()
         const quizzesArray = Array.isArray(data) ? data : (data.quizzes || data.data || [])
 
-        // Fetch favorites
-        let favoriteQuizIds = new Set<string>()
-        try {
-          const favResponse = await fetch(`${apiUrl}/quizzes/favorites`, {
-            method: 'GET',
-            headers: {
-              'Authorization': `Bearer ${token}`,
-              'Content-Type': 'application/json'
-            },
-            cache: 'no-store'
-          })
-
-          if (favResponse.ok) {
-            const favData = await favResponse.json()
-            const favArray = Array.isArray(favData) ? favData : (favData.favorites || favData.data || [])
-            favoriteQuizIds = new Set(
-              favArray.map((fav: any) => fav.quizId || fav.id)
-            )
-            setFavoriteIds(favoriteQuizIds)
-          }
-        } catch (favErr) {
-          console.error('Error fetching favorites:', favErr)
-        }
-
         const quizzesWithFavorites = quizzesArray.map((quiz: Quiz) => ({
           ...quiz,
-          isFavorite: favoriteQuizIds.has(quiz.id)
+          isFavorite: favoriteIds.has(quiz.id)
         }))
 
         setQuizzes(quizzesWithFavorites)
@@ -244,11 +199,9 @@ const DataTable = () => {
 
     if (searchQuery.trim()) {
       filtered = filtered.filter(quiz => {
-        const categoryNames = getCategoryNames(quiz.categories).toLowerCase()
         return (
           quiz.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          quiz.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          categoryNames.includes(searchQuery.toLowerCase())
+          quiz.description?.toLowerCase().includes(searchQuery.toLowerCase())
         )
       })
     }
@@ -276,32 +229,6 @@ const DataTable = () => {
     setSelectedItems(prev =>
       prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
     )
-  }
-
-  const getLevelBadgeColor = (level: string) => {
-    switch (level.toUpperCase()) {
-      case 'EASY':
-        return 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-      case 'MEDIUM':
-        return 'bg-amber-50 text-amber-700 border border-amber-200'
-      case 'HARD':
-        return 'bg-red-50 text-red-700 border border-red-200'
-      default:
-        return 'bg-gray-50 text-gray-700 border border-gray-200'
-    }
-  }
-
-  const getVisibilityBadge = (visibility: string) => {
-    switch (visibility) {
-      case 'PUBLIC':
-        return 'bg-blue-50 text-blue-700 border border-blue-200'
-      case 'PRIVATE':
-        return 'bg-gray-50 text-gray-700 border border-gray-200'
-      case 'UNLISTED':
-        return 'bg-purple-50 text-purple-700 border border-purple-200'
-      default:
-        return 'bg-gray-50 text-gray-700 border border-gray-200'
-    }
   }
 
   const getVisibilityIcon = (visibility: string) => {
@@ -402,52 +329,17 @@ const DataTable = () => {
   }, [openDropdownId])
 
   const handleToggleFavorite = async (quizId: string, isFavorite: boolean) => {
-  try {
-    const token = (session as any)?.apiAccessToken
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1'
-    const method = isFavorite ? 'DELETE' : 'POST'
-    
-    console.log(`${isFavorite ? 'Removing' : 'Adding'} favorite:`, quizId)
-    
-    const response = await fetch(`${apiUrl}/quizzes/${quizId}/favorite`, {
-      method,
-      headers: { 
-        'Authorization': `Bearer ${token}`, 
-        'Content-Type': 'application/json' 
-      }
-    })
-    
-    if (response.ok) {
-      // ✅ CRITICAL: Update both favoriteIds AND quizzes state
-      setFavoriteIds(prev => {
-        const newSet = new Set(prev)
-        if (isFavorite) {
-          newSet.delete(quizId)
-          console.log('✅ Removed from favorites')
-        } else {
-          newSet.add(quizId)
-          console.log('✅ Added to favorites')
-        }
-        return newSet
-      })
-      
-      // Update the quiz list to reflect favorite status
-      setQuizzes(prev => prev.map(q => 
+    const success = await toggleFavorite(quizId, isFavorite)
+    if (success) {
+      setQuizzes(prev => prev.map(q =>
         q.id === quizId ? { ...q, isFavorite: !isFavorite } : q
       ))
-      
-      console.log('✅ Favorite toggled successfully')
     } else {
-      console.error('❌ Failed to update favorite:', response.status, await response.text())
       alert('Failed to update favorite. Please try again.')
     }
-  } catch (err) {
-    console.error('❌ Error toggling favorite:', err)
-    alert('Failed to update favorite. Please try again.')
   }
-}
 
-  if (status === 'loading' || isLoading) {
+  if (status === 'loading' || isLoading || favoritesLoading) {
     return (
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12 flex items-center justify-center">
         <div className="text-center">
@@ -563,8 +455,6 @@ const DataTable = () => {
                 <Grid className="h-4 w-4" />
               </button>
             </div>
-
-        
           </div>
         </div>
       </div>
@@ -574,7 +464,7 @@ const DataTable = () => {
         <div className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
             {filteredData.map((quiz) => (
-              <div key={quiz.id} className="group bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-300">
+              <div key={quiz.id} className="group bg-white border border-gray-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-gray-300 transition-all duration-300">
                 {/* Card Header */}
                 <div className="relative">
                   <div className="aspect-video overflow-hidden bg-gray-100">
@@ -663,34 +553,28 @@ const DataTable = () => {
                       )}
                     </div>
                   </div>
+                  {/* Draft badge on thumbnail */}
+                  {quiz.status === 'DRAFT' && (
+                    <div className="absolute bottom-3 left-3">
+                      <span className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-red-500 text-white shadow-lg">
+                        Draft
+                      </span>
+                    </div>
+                  )}
                 </div>
 
                 {/* Card Content */}
                 <div className="p-5">
-                  <h3 className="font-semibold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">
+                  <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors">
                     {quiz.title}
                   </h3>
-                  <p className="text-sm text-gray-500 mb-4">
+                  <p className="text-sm text-gray-500 mb-3">
                     {(quiz.playCount || 0).toLocaleString()} plays
                   </p>
-                  
-                  <div className="flex flex-wrap gap-2 mb-4">
-                    {quiz.status === 'DRAFT' && (
-                      <span className="px-3 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
-                        DRAFT
-                      </span>
-                    )}
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(quiz.difficulty)}`}>
-                      {quiz.difficulty}
-                    </span>
-                    <span className={`px-3 py-1 rounded-full text-xs font-medium ${getVisibilityBadge(quiz.visibility)}`}>
-                      {getVisibilityIcon(quiz.visibility)} {quiz.visibility}
-                    </span>
-                  </div>
 
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{getCategoryNames(quiz.categories)}</span>
-                    <span>{formatTimeAgo(quiz.updatedAt)}</span>
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-gray-500">{getVisibilityIcon(quiz.visibility)} {quiz.visibility}</span>
+                    <span className="text-gray-400">{formatTimeAgo(quiz.updatedAt)}</span>
                   </div>
                 </div>
               </div>
@@ -716,9 +600,6 @@ const DataTable = () => {
                     />
                   </th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Category</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Level</th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Status</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Visibility</th>
                   <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">Last Modified</th>
                   <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">Actions</th>
@@ -743,6 +624,13 @@ const DataTable = () => {
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-400">📝</div>
                           )}
+                          {quiz.status === 'DRAFT' && (
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-500 text-white">
+                                DRAFT
+                              </span>
+                            </div>
+                          )}
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-semibold text-gray-900 group-hover:text-blue-600 transition-colors">{quiz.title}</div>
@@ -750,26 +638,10 @@ const DataTable = () => {
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-sm font-medium text-gray-700">{getCategoryNames(quiz.categories)}</td>
                     <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(quiz.difficulty)}`}>
-                        {quiz.difficulty}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4">
-                      {quiz.status === 'DRAFT' ? (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
-                          DRAFT
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700 border border-green-200">
-                          PUBLISHED
-                        </span>
-                      )}
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${getVisibilityBadge(quiz.visibility)}`}>
-                        {getVisibilityIcon(quiz.visibility)} {quiz.visibility}
+                      <span className="inline-flex items-center gap-1.5 text-sm font-medium text-gray-700">
+                        <span>{getVisibilityIcon(quiz.visibility)}</span>
+                        <span>{quiz.visibility}</span>
                       </span>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-500 font-medium">{formatTimeAgo(quiz.updatedAt)}</td>
@@ -875,6 +747,13 @@ const DataTable = () => {
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-gray-400">📝</div>
                       )}
+                      {quiz.status === 'DRAFT' && (
+                        <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-red-500 text-white">
+                            DRAFT
+                          </span>
+                        </div>
+                      )}
                     </div>
 
                     <div className="flex-1 min-w-0">
@@ -946,24 +825,15 @@ const DataTable = () => {
                       </div>
 
                       <p className="text-xs text-gray-500 mb-3">
-                        {(quiz.playCount || 0).toLocaleString()} plays • {getCategoryNames(quiz.categories)}
+                        {(quiz.playCount || 0).toLocaleString()} plays
                       </p>
 
-                      <div className="flex flex-wrap gap-2 mb-3">
-                        {quiz.status === 'DRAFT' && (
-                          <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-orange-50 text-orange-700 border border-orange-200">
-                            DRAFT
-                          </span>
-                        )}
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getLevelBadgeColor(quiz.difficulty)}`}>
-                          {quiz.difficulty}
-                        </span>
-                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getVisibilityBadge(quiz.visibility)}`}>
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-gray-600">
                           {getVisibilityIcon(quiz.visibility)} {quiz.visibility}
                         </span>
+                        <span className="text-xs text-gray-400">{formatTimeAgo(quiz.updatedAt)}</span>
                       </div>
-
-                      <p className="text-xs text-gray-500">Modified {formatTimeAgo(quiz.updatedAt)}</p>
                     </div>
                   </div>
                 </div>

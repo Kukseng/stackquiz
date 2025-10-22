@@ -52,7 +52,7 @@ export default function JoinRoomHero() {
           scale: { duration: 10, repeat: Infinity, repeatType: "reverse" },
         }}
       >
-        <Image src="/wavy.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
+        <Image src="/wavy.svg" alt="bg-wavy" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
       <motion.div
@@ -61,7 +61,7 @@ export default function JoinRoomHero() {
         animate={{ rotate: -360 }}
         transition={{ duration: 25, repeat: Infinity, ease: "linear" }}
       >
-        <Image src="/wavy.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
+        <Image src="/wavy.svg" alt="bg-wavy" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
       {/* Pulsing circles - hidden on mobile */}
@@ -70,7 +70,7 @@ export default function JoinRoomHero() {
         animate={{ scale: [1, 1.1, 1], opacity: [0.4, 0.6, 0.4] }}
         transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
       >
-        <Image src="/circle3d.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
+        <Image src="/circle3d.svg" alt="circle3d" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
       <motion.div
@@ -78,7 +78,7 @@ export default function JoinRoomHero() {
         animate={{ scale: [1, 1.2, 1], opacity: [0.4, 0.7, 0.4] }}
         transition={{ duration: 12, repeat: Infinity, ease: "easeInOut", delay: 2 }}
       >
-        <Image src="/circle3d.svg" alt="" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
+        <Image src="/circle3d.svg" alt="circle3d" aria-hidden="true" draggable={false} fill style={{ objectFit: "contain" }} />
       </motion.div>
 
       {/* Floating particles */}
@@ -186,7 +186,7 @@ export default function JoinRoomHero() {
             <div className="flex flex-wrap items-center justify-center  gap-6 text-white/90">
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-green-400 rounded-full animate-pulse" />
-                <span className="text-md">Live Quizzes</span>
+                <h2 className="text-md">Live Quizzes</h2>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-4 h-4 bg-blue-400 rounded-full animate-pulse" />
@@ -199,14 +199,14 @@ export default function JoinRoomHero() {
             </div>
 
             {/* Internal Links Section */}
-            <div className="mt-12 pt-8 border-t border-white/20">
+            {/* <div className="mt-12 pt-8 border-t border-white/20">
               <p className="text-sm text-white/70 mb-4">Explore more options:</p>
               <div className="flex flex-wrap items-center justify-center gap-4 text-white/90">
                 <Link
                   href="/explore"
                   className="text-sm hover:text-yellow-400 transition-colors underline"
                 >
-                  Browse Quizzes
+                 
                 </Link>
                 <span className="text-white/40">•</span>
                 <Link
@@ -230,10 +230,10 @@ export default function JoinRoomHero() {
                   About Us
                 </Link>
               </div>
-            </div>
+            </div> */}
 
             {/* External Links Section */}
-            <div className="mt-8 text-xs text-white/60">
+            {/* <div className="mt-8 text-xs text-white/60">
               <p className="mb-3">Learn more about online learning:</p>
               <div className="flex flex-wrap items-center justify-center gap-3">
                 <ExternalLink
@@ -260,7 +260,7 @@ export default function JoinRoomHero() {
                   EdX
                 </ExternalLink>
               </div>
-            </div>
+            </div> */}
           </motion.div>
         </motion.section>
       </main>

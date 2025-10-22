@@ -122,20 +122,30 @@ export default function Footer() {
     </div>
 
     <div className="flex justify-center md:justify-start space-x-2">
-      <Image
-        src="/social_media_icon/fb.svg"
-        width={28}
+      <Link
+      href="https://www.facebook.com/share/1B6kGrfhVy/"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Image
+          src="/social_media_icon/fb.svg"
+          width={28}
         height={30}
         alt="Facebook"
       />
-
-      <Image
-        src="/social_media_icon/github.svg"
-        width={28}
-        height={30}
-        alt="Github"
-      />
-
+</Link>
+      <Link
+        href="https://github.com/team-stackquiz"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        <Image
+          src="/social_media_icon/github.svg"
+          width={28}
+          height={30}
+          alt="Github"
+        />
+</Link>
       {/* ✅ Telegram link added here */}
       <Link
         href="https://t.me/stackquiz"

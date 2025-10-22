@@ -5,7 +5,7 @@ import React from "react";
 export const metadata = {
   title: "Join Live Quiz | StackQuiz - Real-Time Quiz Competition",
   description: "Join interactive real-time quizzes with unique codes. Compete with friends, test your knowledge, and get instant results on StackQuiz.",
-  keywords: "join quiz, live quiz code, real-time quiz, quiz competition, interactive quiz, online trivia",
+  keywords: "join quiz, live quiz code, real-time quiz, quiz competition, interactive quiz, online trivia, quiz platform, StackQuiz, stack quiz app",
   openGraph: {
     title: "Join Live Quiz | StackQuiz - Real-Time Quiz Competition",
     description: "Join interactive real-time quizzes with unique codes. Compete with friends, test your knowledge, and get instant results on StackQuiz.",
@@ -30,8 +30,7 @@ export const metadata = {
 export default function JoinRoomPage() {
   return (
     <main>
-      <h1>Join a Live Quiz on StackQuiz</h1>
-      <h2>Enter Your Quiz Code to Get Started</h2>
+  
       <JoinRoomHero />
     </main>
   );

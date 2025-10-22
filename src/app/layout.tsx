@@ -96,7 +96,7 @@ export default function RootLayout({
               "@type": "Organization",
               name: "StackQuiz",
               url: "https://stackquiz-two.vercel.app",
-              logo: "https://stackquiz-two.vercel.app/logo.png",
+              logo: "https://stackquiz-two.vercel.app/logo-sq.png",
               description: "Interactive Real-time Quiz Platform",
               sameAs: [
                 "https://www.facebook.com/stackquiz",

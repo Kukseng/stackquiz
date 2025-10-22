@@ -1,19 +1,15 @@
-import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import { baseApi } from "@/lib/api/baseApi";
 
-const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-
-export const authApi = createApi({
-  reducerPath: "authApi",
-  baseQuery: fetchBaseQuery({ baseUrl }), 
+export const authApi = baseApi.injectEndpoints({
   endpoints: (builder) => ({
     signup: builder.mutation({
       query: (data) => ({
-        url: "/signup",
+        url: "/auth/signup",
         method: "POST",
         body: data,
       }),
+      invalidatesTags: ["Auth"],
     }),
-    
   }),
 });
 

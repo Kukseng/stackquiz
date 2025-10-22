@@ -1,11 +1,13 @@
+
 "use client"
 import type React from "react"
 import { useEffect, useState, useCallback, useRef } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams } from "next/navigation"
 import axios from "axios"
 import { Client } from "@stomp/stompjs"
 import SockJS from "sockjs-client"
 import { motion, AnimatePresence } from "framer-motion"
+// import {QuestionAnalytics} from "@/components/ QuestionAnalytics/QuestionAnalytics"
 import Rank from "@/components/Poduim/rank"
 
 // ===== INTERFACES =====
@@ -92,9 +94,45 @@ interface AnswerFeedback {
   encouragementMessage?: string
 }
 
+interface QuestionAnalyticsData {
+  sessionCode: string
+  currentQuestionNumber: number
+  totalQuestions: number
+  questionId: string
+  questionText: string
+  correctOptionId: string
+  totalParticipants: number
+  participantsAnswered: number
+  participantsNotAnswered: number
+  participationRate: number
+  correctAnswers: number
+  incorrectAnswers: number
+  accuracyRate: number
+  optionStatistics: {
+    [key: string]: {
+      optionId: string
+      optionText: string
+      isCorrect: boolean
+      count: number
+      percentage: number
+    }
+  }
+  top3: Array<{
+    rank: number
+    participantId: string
+    nickname: string
+    avatarId: string | null
+    totalScore: number
+    correctAnswers: number
+    streak: number
+  }>
+  averageResponseTime: number
+  fastestResponseTime: number
+}
+
 // Configuration
 const WEBSOCKET_CONFIG = {
-  url: process.env.NEXT_PUBLIC_WEBSOCKET_URL || "https://stackquiz-api.stackquiz.me/ws",
+  url: process.env.NEXT_PUBLIC_WEBSOCKET_URL || "http://localhost:9999/ws",
   reconnectDelay: 3000,
   heartbeatIncoming: 4000,
   heartbeatOutgoing: 4000,
@@ -245,10 +283,373 @@ function QuestionTimer({
       {showWarning && isWarning && (
         <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="text-center">
           <p className={`text-sm font-semibold ${isCritical ? "text-red-400" : "text-yellow-400"}`}>
-            {isCritical ? "⚠️ Time almost up!" : "⏰ Hurry up!"}
+            {isCritical ? "⚠️ Time's almost up!" : "⏰ Hurry up!"}
           </p>
         </motion.div>
       )}
+    </div>
+  )
+}
+
+// ===== ENHANCED ANSWER REVEAL COMPONENT =====
+function AnswerRevealPanel({
+  question,
+  selectedOptionId,
+  correctOptionId,
+  answerFeedback,
+  questionStats,
+  onContinue,
+}: {
+  question: any
+  selectedOptionId: string | null
+  correctOptionId: string | null
+  answerFeedback: AnswerFeedback | null
+  questionStats: QuestionStats | null
+  onContinue: () => void
+}) {
+  const [showStats, setShowStats] = useState(false)
+
+  useEffect(() => {
+    // Show stats after a delay
+    const timer = setTimeout(() => setShowStats(true), 1000)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (!question || !answerFeedback) return null
+
+  const isCorrect = answerFeedback.isCorrect
+  const pointsEarned = answerFeedback.pointsEarned
+
+  return (
+    <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-4xl w-full space-y-6">
+      {/* Result Header */}
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0 }}
+        animate={{ scale: 1, opacity: 1 }}
+        transition={{ delay: 0.2 }}
+        className="text-center"
+      >
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1, rotate: 360 }}
+          transition={{ delay: 0.5, type: "spring", stiffness: 200 }}
+          className={`text-8xl mb-4 ${isCorrect ? "text-green-400" : "text-red-400"}`}
+        >
+          {isCorrect ? "✅" : "❌"}
+        </motion.div>
+
+        <motion.h1
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className={`text-4xl font-bold mb-2 ${isCorrect ? "text-green-400" : "text-red-400"}`}
+        >
+          {isCorrect ? "Correct!" : "Incorrect"}
+        </motion.h1>
+
+        {/* Points Earned */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.5 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.9, type: "spring", stiffness: 300 }}
+          className="text-white text-2xl font-bold"
+        >
+          {pointsEarned > 0 ? `+${pointsEarned} points` : "0 points"}
+          {answerFeedback.timeBonus && answerFeedback.timeBonus > 0 && (
+            <span className="text-yellow-400 ml-2">⚡ +{answerFeedback.timeBonus} speed bonus</span>
+          )}
+        </motion.div>
+
+        {/* Streak Display */}
+        {answerFeedback.streak && answerFeedback.streak > 1 && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.5 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 1.1, type: "spring", stiffness: 300 }}
+            className="text-orange-400 text-xl font-bold mt-2"
+          >
+            🔥 {answerFeedback.streak} answer streak!
+          </motion.div>
+        )}
+
+        {/* Encouragement Message */}
+        {answerFeedback.encouragementMessage && (
+          <motion.p
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 1.3 }}
+            className="text-white text-lg mt-2"
+          >
+            {answerFeedback.encouragementMessage}
+          </motion.p>
+        )}
+      </motion.div>
+
+      {/* Answer Options with Results */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 1.5 }}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        {(question.options || []).map((option: any, index: number) => {
+          const isSelected = selectedOptionId === option.id
+          const isCorrect = correctOptionId === option.id
+          const participantCount = questionStats?.optionStats?.[option.id] || 0
+          const totalParticipants = questionStats?.totalParticipants || 1
+          const percentage = Math.round((participantCount / totalParticipants) * 100)
+
+          return (
+            <motion.div
+              key={option.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 1.5 + index * 0.1 }}
+              className={`relative p-6 rounded-xl border-2 transition-all duration-500 ${
+                isCorrect
+                  ? "bg-green-100 border-green-500 text-green-800"
+                  : isSelected
+                    ? "bg-red-100 border-red-500 text-red-800"
+                    : "bg-gray-100 border-gray-300 text-gray-600"
+              }`}
+            >
+              <div className="flex items-center space-x-3 mb-2">
+                <span
+                  className={`w-8 h-8 rounded-full flex items-center justify-center font-bold ${
+                    isCorrect
+                      ? "bg-green-500 text-white"
+                      : isSelected
+                        ? "bg-red-500 text-white"
+                        : "bg-gray-300 text-gray-600"
+                  }`}
+                >
+                  {String.fromCharCode(65 + index)}
+                </span>
+                <span className="font-semibold text-lg">{option.text || option.optionText}</span>
+                {isSelected && <span className="text-sm font-bold">← Your answer</span>}
+                {isCorrect && <span className="text-sm font-bold">✓ Correct</span>}
+              </div>
+
+              {/* Answer Statistics */}
+              {showStats && (
+                <motion.div
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  transition={{ delay: 2 + index * 0.1 }}
+                  className="mt-3"
+                >
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-sm">Participants who chose this:</span>
+                    <span className="text-sm font-bold">
+                      {participantCount} ({percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full bg-gray-200 rounded-full h-2">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${percentage}%` }}
+                      transition={{ delay: 2.2 + index * 0.1, duration: 0.8 }}
+                      className={`h-2 rounded-full ${isCorrect ? "bg-green-500" : "bg-gray-400"}`}
+                    />
+                  </div>
+                </motion.div>
+              )}
+            </motion.div>
+          )
+        })}
+      </motion.div>
+
+      {/* Explanation */}
+      {answerFeedback.explanation && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 2.5 }}
+          className="bg-blue-100 border border-blue-300 rounded-xl p-6 text-center"
+        >
+          <h3 className="text-lg font-bold text-blue-800 mb-2">💡 Explanation</h3>
+          <p className="text-blue-700">{answerFeedback.explanation}</p>
+        </motion.div>
+      )}
+
+      {/* Continue Button */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 3 }}
+        className="text-center"
+      >
+        <button
+          onClick={onContinue}
+          className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-indigo-700 transition-all shadow-lg"
+        >
+          Continue ➡️
+        </button>
+      </motion.div>
+    </motion.div>
+  )
+}
+
+// ===== PARTICIPANT QUESTION ANALYTICS COMPONENT =====
+function ParticipantQuestionAnalytics({
+  analytics,
+  participantId,
+}: {
+  analytics: QuestionAnalyticsData | null
+  participantId: string
+}) {
+  const [showStats, setShowStats] = useState(false)
+
+  useEffect(() => {
+    const timer = setTimeout(() => setShowStats(true), 500)
+    return () => clearTimeout(timer)
+  }, [])
+
+  if (!analytics) return null
+
+  const sortedOptions = Object.values(analytics.optionStatistics).sort((a, b) => b.count - a.count)
+  const currentParticipant = analytics.top3.find((p) => p.participantId === participantId)
+
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
+      <div className="max-w-4xl w-full space-y-6">
+        {/* Header */}
+        <motion.div
+          initial={{ y: -30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          className="text-center mb-6"
+        >
+          <h1 className="text-3xl md:text-4xl font-bold text-white mb-2">
+            Question {analytics.currentQuestionNumber} Results
+          </h1>
+          <p className="text-lg md:text-xl text-blue-200">{analytics.questionText}</p>
+        </motion.div>
+
+        {/* Stats Grid */}
+        <div className="grid grid-cols-2 gap-4 mb-6">
+          {/* Participation */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.1 }}
+            className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20"
+          >
+            <p className="text-blue-200 text-sm mb-1">📊 Participation</p>
+            <p className="text-white text-3xl font-bold">{analytics.participationRate.toFixed(0)}%</p>
+            <p className="text-blue-300 text-xs mt-1">
+              {analytics.participantsAnswered}/{analytics.totalParticipants} answered
+            </p>
+          </motion.div>
+
+          {/* Accuracy */}
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="bg-white/10 backdrop-blur-sm rounded-xl p-4 text-center border border-white/20"
+          >
+            <p className="text-green-200 text-sm mb-1">🎯 Accuracy</p>
+            <p className="text-white text-3xl font-bold">{analytics.accuracyRate.toFixed(0)}%</p>
+            <p className="text-green-300 text-xs mt-1">
+              {analytics.correctAnswers} got it right
+            </p>
+          </motion.div>
+        </div>
+
+        {/* Answer Distribution */}
+        <motion.div
+          initial={{ y: 30, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.3 }}
+          className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+        >
+          <h3 className="text-xl font-bold text-white mb-4">📈 How Everyone Answered</h3>
+          <div className="space-y-3">
+            {sortedOptions.map((option, index) => (
+              <motion.div
+                key={option.optionId}
+                initial={{ x: -30, opacity: 0 }}
+                animate={{ x: 0, opacity: 1 }}
+                transition={{ delay: 0.4 + index * 0.1 }}
+              >
+                <div className="flex items-center justify-between mb-1">
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl">
+                      {option.isCorrect ? "✅" : "❌"}
+                    </span>
+                    <span className={`text-sm font-semibold ${
+                      option.isCorrect ? "text-green-300" : "text-white"
+                    }`}>
+                      {option.optionText}
+                    </span>
+                  </div>
+                  <span className="text-white text-sm font-bold">
+                    {option.count} ({option.percentage.toFixed(0)}%)
+                  </span>
+                </div>
+                <div className="h-6 bg-white/10 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ width: 0 }}
+                    animate={{ width: `${option.percentage}%` }}
+                    transition={{ duration: 0.8, delay: 0.5 + index * 0.1 }}
+                    className={`h-full rounded-full ${
+                      option.isCorrect
+                        ? "bg-gradient-to-r from-green-400 to-green-600"
+                        : "bg-gradient-to-r from-gray-400 to-gray-600"
+                    }`}
+                  />
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </motion.div>
+
+        {/* Top 3 */}
+        {analytics.top3.length > 0 && (
+          <motion.div
+            initial={{ y: 30, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            transition={{ delay: 0.6 }}
+            className="bg-white/10 backdrop-blur-sm rounded-xl p-6 border border-white/20"
+          >
+            <h3 className="text-xl font-bold text-white mb-4 text-center">🏆 Top 3</h3>
+            <div className="grid grid-cols-3 gap-3">
+              {analytics.top3.map((entry, index) => (
+                <motion.div
+                  key={entry.participantId}
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: 0.7 + index * 0.1, type: "spring" }}
+                  className={`p-4 rounded-lg text-center ${
+                    entry.participantId === participantId
+                      ? "bg-yellow-500/30 border-2 border-yellow-400"
+                      : "bg-white/5"
+                  }`}
+                >
+                  <div className="text-3xl mb-1">
+                    {index === 0 ? "🥇" : index === 1 ? "🥈" : "🥉"}
+                  </div>
+                  <p className="text-white font-bold text-sm truncate">{entry.nickname}</p>
+                  <p className="text-white text-lg font-bold">{entry.totalScore}</p>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        )}
+
+        {/* Waiting for Next Question */}
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: 1 }}
+          className="text-center pt-4"
+        >
+          <div className="px-8 py-4 bg-white/10 backdrop-blur-sm border-2 border-white/30 rounded-xl">
+            <p className="text-white font-semibold text-lg mb-2">⏳ Waiting for next question...</p>
+            <p className="text-blue-200 text-sm">The host will advance when ready</p>
+          </div>
+        </motion.div>
+      </div>
     </div>
   )
 }
@@ -285,6 +686,9 @@ function useParticipantWebSocket(
   const onPersonalScoreUpdateRef = useRef(onPersonalScoreUpdate)
   const onAnswerFeedbackRef = useRef(onAnswerFeedback)
 
+  // 
+
+  const [showAnalytics, setShowAnalytics] = useState(false)
   // Update refs when callbacks change
   useEffect(() => {
     onGameStateRef.current = onGameState
@@ -339,6 +743,7 @@ function useParticipantWebSocket(
             }
           }),
 
+          // Participant-specific question queue
           stomp.subscribe(`/user/queue/session/${quizCode}/question`, (msg) => {
             const message = safeJsonParse(msg.body)
             if (message) {
@@ -353,15 +758,27 @@ function useParticipantWebSocket(
             }
           }),
 
-          stomp.subscribe(`/topic/session/${quizCode}/question`, (msg) => {
-            const message = safeJsonParse(msg.body)
-            if (message) {
-              console.log("❓ Broadcast question received:", message)
-              questionStartTimeRef.current = Date.now()
-              onQuestionRef.current(message)
+          // Handle TIME_UP notifications from backend
+          stomp.subscribe(`/user/queue/session/${quizCode}/time-up`, (msg) => {
+            const timeUpMessage = safeJsonParse(msg.body)
+            if (timeUpMessage) {
+              console.log("⏰ TIME_UP notification received from server:", timeUpMessage)
+              // Show time-up warning but keep buttons enabled
+              setFeedback({ timeUp: true, canStillAnswer: true })
             }
           }),
 
+          // Broadcast questions for SYNC mode
+stomp.subscribe(`/topic/session/${quizCode}/questions`, (msg) => {
+  const message = safeJsonParse(msg.body)
+  if (message) {
+    console.log("❓ Broadcast question received:", message)
+    questionStartTimeRef.current = Date.now()
+    onQuestionRef.current(message)
+  }
+}),
+
+          // Enhanced leaderboard updates
           stomp.subscribe(`/topic/session/${quizCode}/leaderboard`, (msg) => {
             const data = safeJsonParse(msg.body)
             if (data) {
@@ -382,6 +799,7 @@ function useParticipantWebSocket(
             }
           }),
 
+          // Score celebrations
           stomp.subscribe(`/topic/session/${quizCode}/celebration`, (msg) => {
             const celebration = safeJsonParse(msg.body)
             if (celebration && celebration.participantId) {
@@ -390,6 +808,7 @@ function useParticipantWebSocket(
             }
           }),
 
+          // Personal rank updates
           stomp.subscribe(`/user/queue/session/${quizCode}/ranking`, (msg) => {
             const rankUpdate = safeJsonParse(msg.body)
             if (rankUpdate && rankUpdate.participantId) {
@@ -398,6 +817,7 @@ function useParticipantWebSocket(
             }
           }),
 
+          // Question statistics
           stomp.subscribe(`/topic/session/${quizCode}/live-stats`, (msg) => {
             const stats = safeJsonParse(msg.body)
             if (stats) {
@@ -406,6 +826,7 @@ function useParticipantWebSocket(
             }
           }),
 
+          // Personal score updates
           stomp.subscribe(`/user/queue/session/${quizCode}/score`, (msg) => {
             const scoreUpdate = safeJsonParse(msg.body)
             if (scoreUpdate && scoreUpdate.participantId) {
@@ -414,6 +835,7 @@ function useParticipantWebSocket(
             }
           }),
 
+          // Enhanced answer feedback - FIXED INTEGRATION
           stomp.subscribe(`/user/queue/session/${quizCode}/feedback`, (msg) => {
             const feedback = safeJsonParse(msg.body)
             if (feedback && feedback.participantId) {
@@ -430,6 +852,7 @@ function useParticipantWebSocket(
         console.error("❌ STOMP error:", frame.headers?.message || frame.body)
         setConnectionStatus("Error")
 
+        // Retry connection if not exceeded max attempts
         if (reconnectAttempts < WEBSOCKET_CONFIG.maxReconnectAttempts) {
           setTimeout(() => {
             setReconnectAttempts((prev) => prev + 1)
@@ -496,10 +919,10 @@ function useParticipantWebSocket(
   return { sendAnswer, connectionStatus }
 }
 
+
 // ===== MAIN COMPONENT =====
 export default function ParticipantQuizFixed() {
   const params = useParams()
-  const router = useRouter()
   const sessionCode = params?.sessionCode as string
 
   // Join form state
@@ -537,10 +960,24 @@ export default function ParticipantQuizFixed() {
   const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(null)
   const [streak, setStreak] = useState<number>(0)
   const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false)
+  const [questionAnalytics, setQuestionAnalytics] = useState<QuestionAnalyticsData | null>(null)
+  const [showAnalytics, setShowAnalytics] = useState(false)
 
-  // Handle navigation to join-room
-  const handleNavigateToJoinRoom = () => {
-    router.push('/join-room')
+  // Fetch question analytics
+  async function fetchQuestionAnalytics() {
+    try {
+      console.log("📊 Fetching question analytics for session:", sessionCode)
+      const response = await axios.get(
+        `http://localhost:9999/api/v1/participants/session/${sessionCode}/question-analytics`
+      )
+      console.log("✅ Analytics fetched:", response.data)
+      setQuestionAnalytics(response.data)
+      setShowAnalytics(true)
+    } catch (err: any) {
+      console.error("❌ Failed to fetch analytics:", err)
+      // If analytics fail, just continue to next question
+      setShowAnalytics(false)
+    }
   }
 
   // Handle join submission
@@ -557,7 +994,7 @@ export default function ParticipantQuizFixed() {
 
     setIsSubmitting(true)
     try {
-      const res = await axios.post("https://stackquiz-api.stackquiz.me/api/v1/participants/join", {
+      const res = await axios.post("http://localhost:9999/api/v1/participants/join", {
         quizCode: sessionCode,
         nickname: nickname.trim(),
         avatarId: avatarId.trim(),
@@ -601,17 +1038,21 @@ export default function ParticipantQuizFixed() {
       setFeedback(null)
       setShowFeedback(false)
       setAnswerFeedback(null)
-      setIsSubmittingAnswer(false)
+      setIsSubmittingAnswer(false) // FIXED: Reset submitting state for new question
+      setShowAnalytics(false) // Reset analytics state for new question
+      setQuestionAnalytics(null)
       setStatus("PLAY")
     },
     (cmsg) => {
       console.log("🎉 Completion message received:", cmsg)
       setStatus("COMPLETED")
     },
+    // Leaderboard update callback
     (leaderboardEntries) => {
       console.log("🏆 Updating leaderboard:", leaderboardEntries)
       setLeaderboard(leaderboardEntries)
 
+      // Update personal rank from leaderboard
       const currentParticipant = leaderboardEntries.find((entry) => entry.participantId === participantId)
       if (currentParticipant) {
         setPersonalRank(currentParticipant.position)
@@ -621,6 +1062,7 @@ export default function ParticipantQuizFixed() {
         }
       }
     },
+    // Score celebration callback
     (celebration) => {
       console.log("🎉 Score celebration:", celebration)
       setCelebrations((prev) => [...prev, celebration])
@@ -635,6 +1077,7 @@ export default function ParticipantQuizFixed() {
         setCelebrations((prev) => prev.filter((c) => c.participantId !== celebration.participantId))
       }, 3000)
     },
+    // Rank update callback
     (rankUpdate) => {
       console.log("📈 Rank update:", rankUpdate)
       if (rankUpdate.participantId === participantId) {
@@ -644,10 +1087,12 @@ export default function ParticipantQuizFixed() {
         setTimeout(() => setRankUpdate(null), 3000)
       }
     },
+    // Question stats callback
     (stats) => {
       console.log("📊 Question stats:", stats)
       setQuestionStats(stats)
     },
+    // Personal score update callback
     (scoreUpdate) => {
       console.log("💰 Personal score update:", scoreUpdate)
       if (scoreUpdate.participantId === participantId) {
@@ -664,6 +1109,7 @@ export default function ParticipantQuizFixed() {
         }
       }
     },
+    // FIXED: Answer feedback callback - now properly integrated
     (feedback) => {
       console.log("📝 Answer feedback received:", feedback)
       if (feedback.participantId === participantId) {
@@ -675,8 +1121,12 @@ export default function ParticipantQuizFixed() {
           setStreak(feedback.streak)
         }
 
+        // Transition to answer reveal phase
         setStatus("ANSWER_REVEAL")
         setIsSubmittingAnswer(false)
+
+        // Note: Analytics are already fetched in handleAnswer as a workaround
+        // This callback is kept for future backend compatibility when feedback is sent properly
       }
     },
   )
@@ -717,12 +1167,14 @@ export default function ParticipantQuizFixed() {
 
   // Handle time up
   function handleTimeUp() {
-    console.log("⏰ Time up! Participant can still answer for base points.")
+    console.log("⏰ Time's up! Participant can still answer for base points.")
+
     setFeedback({ timeUp: true, canStillAnswer: true })
   }
 
   // Enhanced answer handling
   function handleAnswer(optionId: string) {
+    // Only check if already answered or currently submitting
     if (!currentQuestion || answerSelected || isSubmittingAnswer) {
       console.warn("⚠️ Cannot answer: already answered or submitting")
       return
@@ -736,15 +1188,32 @@ export default function ParticipantQuizFixed() {
     if (success) {
       setShowFeedback(true)
       setFeedback({ submitted: true })
+      
+      // ✅ WORKAROUND: Since backend doesn't send feedback reliably, fetch analytics after delay
+      setTimeout(() => {
+        console.log("⏰ Timeout reached, fetching analytics...")
+        setIsSubmittingAnswer(false)
+        fetchQuestionAnalytics()
+      }, 2000) // Wait 2 seconds to show "Answer submitted" message
     } else {
       setAnswerSelected(null)
       setIsSubmittingAnswer(false)
       setError("Failed to submit answer. Please try again.")
     }
   }
-
   // Handle continue from answer reveal
   function handleContinueFromReveal() {
+    setStatus("PLAY")
+    setAnswerFeedback(null)
+    setAnswerSelected(null)
+    setShowFeedback(false)
+    setFeedback(null)
+  }
+
+  // Handle continue from analytics
+  function handleContinueFromAnalytics() {
+    setShowAnalytics(false)
+    setQuestionAnalytics(null)
     setStatus("PLAY")
     setAnswerFeedback(null)
     setAnswerSelected(null)
@@ -774,8 +1243,7 @@ export default function ParticipantQuizFixed() {
         <motion.button
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
-          onClick={handleNavigateToJoinRoom}
-          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
+          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors"
         >
           <span className="text-2xl">✕</span>
         </motion.button>
@@ -883,10 +1351,7 @@ export default function ParticipantQuizFixed() {
         {connectionIndicator}
 
         {/* Close button */}
-        <button 
-          onClick={handleNavigateToJoinRoom}
-          className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
-        >
+        <button className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors">
           <span className="text-2xl">✕</span>
         </button>
 
@@ -975,7 +1440,6 @@ export default function ParticipantQuizFixed() {
             <motion.button
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
-              onClick={handleNavigateToJoinRoom}
               className="w-full py-4 rounded-2xl font-bold text-xl text-blue-900 shadow-lg"
               style={{
                 background: "linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%)",
@@ -1140,7 +1604,7 @@ export default function ParticipantQuizFixed() {
     )
   }
 
-  // Answer reveal phase
+  // ENHANCED: Answer reveal phase - NEW KAHOOT-STYLE FEATURE
   if (status === "ANSWER_REVEAL" && answerFeedback) {
     const isCorrect = answerFeedback.isCorrect
 
@@ -1206,10 +1670,10 @@ export default function ParticipantQuizFixed() {
             transition={{ delay: 0.8 }}
             className="text-white text-xl mb-8"
           >
-            you on the podium!
+            you are on the podium!
           </motion.p>
 
-          {/* Continue button */}
+          {/* Continue button (auto-advance after delay) */}
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}>
             <button
               onClick={handleContinueFromReveal}
@@ -1230,6 +1694,16 @@ export default function ParticipantQuizFixed() {
           streak={streak}
         />
       </div>
+    )
+  }
+
+  // Show analytics after answer reveal
+  if (showAnalytics && questionAnalytics) {
+    return (
+      <ParticipantQuestionAnalytics
+        analytics={questionAnalytics}
+        participantId={participantId}
+      />
     )
   }
 
@@ -1327,7 +1801,7 @@ export default function ParticipantQuizFixed() {
               className="mt-6 p-4 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-2xl text-center"
             >
               <p className="text-white font-semibold">
-                {isSubmittingAnswer ? "📤 Submitting answer..." : "✅ Answer submitted!"}
+                {isSubmittingAnswer ? "📤 Submitting answer..." : "✅ Answer submitted! Loading results..."}
               </p>
             </motion.div>
           )}
@@ -1338,7 +1812,7 @@ export default function ParticipantQuizFixed() {
               animate={{ opacity: 1, y: 0 }}
               className="mt-6 p-4 bg-yellow-500/20 backdrop-blur-sm border-2 border-yellow-400/50 rounded-2xl text-center"
             >
-              <p className="text-white font-semibold">⏰ Time up!</p>
+              <p className="text-white font-semibold">⏰ Time is up!</p>
               <p className="text-white/80 text-sm mt-1">You can still answer for base points</p>
             </motion.div>
           )}
@@ -1369,4 +1843,9 @@ export default function ParticipantQuizFixed() {
   }
 
   return null
+} 
+
+function setFeedback(arg0: { timeUp: boolean; canStillAnswer: boolean }) {
+  throw new Error("Function not implemented.")
 }
+

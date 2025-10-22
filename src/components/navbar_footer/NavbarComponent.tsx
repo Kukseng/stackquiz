@@ -99,14 +99,15 @@ export function Navbar() {
           >
             {language === "en" ? (
               <>
-                <ReactCountryFlag
-                  countryCode="US"
-                  svg
-                  style={{ width: "1.5em", height: "1.5em" }}
-                  title="United States - English"
-                  aria-label="United States flag"
-                />{" "}
-                EN
+               <ReactCountryFlag
+  countryCode="US"
+  svg
+  style={{ width: "1.5em", height: "1.5em" }}
+  alt="flag-us"
+  title="United States flag - English language option on StackQuiz"
+  aria-label="United States flag - English language option on StackQuiz"
+/> EN
+
               </>
             ) : (
               <>

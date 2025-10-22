@@ -6,9 +6,7 @@ export const store = configureStore({
     [baseApi.reducerPath]: baseApi.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    getDefaultMiddleware({
-      serializableCheck: false, // Disable serializable check for NextAuth compatibility
-    }).concat(baseApi.middleware),
+    getDefaultMiddleware().concat(baseApi.middleware),
 });
 
 export type RootState = ReturnType<typeof store.getState>;

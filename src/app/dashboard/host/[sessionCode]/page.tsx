@@ -150,7 +150,7 @@ const getWebSocketUrl = () => {
 
     // Local development URLs
     if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "http://localhost:9999/ws"
+      return "https://stackquiz-api.stackquiz.me/ws"
     }
   }
 
@@ -169,7 +169,7 @@ const getWebSocketUrl = () => {
   }
 
   // Production fallback - use https:// not wss://
-  return "http://localhost:9999/ws"
+  return "https://stackquiz-api.stackquiz.me/ws"
 }
 
 // FIXED: API Base URL helper function
@@ -180,11 +180,11 @@ const getApiBaseUrl = () => {
 
     // Local development URLs
     if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "http://localhost:9999/api"
+      return "https://stackquiz-api.stackquiz.me/api"
     }
   }
 
-  const envUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9999/api"
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || "https://stackquiz-api.stackquiz.me/api"
   // Remove trailing /v1 if present since all endpoints already include /v1/
   return envUrl.replace(/\/v1\/?$/, "")
 }
@@ -1840,7 +1840,7 @@ export default function LocalhostHostUI() {
 
 //     // Local development URLs
 //     if (hostname === "localhost" || hostname === "127.0.0.1") {
-//       return "http://localhost:9999/ws"
+//       return "https://stackquiz-api.stackquiz.me/ws"
 //     }
 //   }
 
@@ -1859,7 +1859,7 @@ export default function LocalhostHostUI() {
 //   }
 
 //   // Production fallback - use https:// not wss://
-//   return "http://localhost:9999/ws"
+//   return "https://stackquiz-api.stackquiz.me/ws"
 // }
 
 // // FIXED: API Base URL helper function
@@ -1870,11 +1870,11 @@ export default function LocalhostHostUI() {
 
 //     // Local development URLs
 //     if (hostname === "localhost" || hostname === "127.0.0.1") {
-//       return "http://localhost:9999/api"
+//       return "https://stackquiz-api.stackquiz.me/api"
 //     }
 //   }
 
-//   const envUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:9999/api"
+//   const envUrl = process.env.NEXT_PUBLIC_API_URL || "https://stackquiz-api.stackquiz.me/api"
 //   // Remove trailing /v1 if present since all endpoints already include /v1/
 //   return envUrl.replace(/\/v1\/?$/, "")
 // }

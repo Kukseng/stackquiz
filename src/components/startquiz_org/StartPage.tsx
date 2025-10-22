@@ -98,7 +98,7 @@ const fetchQuizById = async (id: string): Promise<QuizData | null> => {
 const createQuizSession = async (request: CreateSessionRequest): Promise<CreateSessionResponse> => {
   try {
     const headers = await getAuthHeaders();
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:9999/api/v1';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://stackquiz-api.stackquiz.me/api/v1';
     
     console.log("📤 Creating quiz session...");
     console.log("   API URL:", `${apiUrl}/quiz-sessions`);

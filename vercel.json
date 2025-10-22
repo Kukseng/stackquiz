@@ -1,7 +1,7 @@
 {
   "redirects": [
     {
-      "source": "https://www.stackquiz-two.vercel.app/:path*",
+      "source": "/:path*",
       "destination": "https://stackquiz-two.vercel.app/:path*",
       "permanent": true
     }
@@ -17,7 +17,7 @@
       ]
     },
     {
-      "source": "/:path*(svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot)",
+      "source": "/:path*.(svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" },
         { "key": "Expires", "value": "Wed, 21 Oct 2026 07:28:00 GMT" }

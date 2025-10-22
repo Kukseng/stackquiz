@@ -1,11 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/:path*",
-      "destination": "https://stackquiz-two.vercel.app/:path*",
-      "permanent": true
-    }
-  ],
   "headers": [
     {
       "source": "/api/(.*)",

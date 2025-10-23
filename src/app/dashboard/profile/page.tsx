@@ -445,7 +445,7 @@ function ProfileContent() {
 
   return (
     <div className="bg-gray-50 min-h-screen flex justify-center items-start p-4 pt-20">
-      <div className="w-full max-w-5xl bg-white shadow-lg rounded-2xl overflow-hidden">
+      <div className="w-full max-w-7xl bg-white shadow-lg rounded-2xl overflow-hidden">
         
         {/* COVER IMAGE */}
         <div className="relative h-48 sm:h-64 bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500" />

@@ -655,7 +655,7 @@ export default function PublishModal({
           <div className="bg-gradient-to-br from-purple-50/80 via-pink-50/60 to-blue-50/40 p-8 md:p-10 border-b md:border-b-0 md:border-r border-white/40 flex flex-col justify-center">
             <div className="mb-8">
               <h3 className="text-3xl md:text-4xl font-bold text-black mb-2">
-                {isEditMode ? "Update Quiz" : "Final touches"}
+                {isEditMode ? "Update Quiz" : "Adding Final touches"}
               </h3>
               <p className="text-gray-500 text-sm">
                 {quizData.length} question{quizData.length !== 1 ? "s" : ""} ready

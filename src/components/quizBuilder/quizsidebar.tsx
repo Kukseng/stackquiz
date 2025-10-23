@@ -59,7 +59,7 @@ export function QuizSidebar({
   return (
     <>
       {/* Mobile Header */}
-      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 p-4 flex items-center justify-between">
+      <div className="md:hidden fixed top-0 left-0 right-0 bg-white border-b border-gray-200 z-40 p-4 flex items-center justify-between scroll-auto">
         <h2 className="text-lg font-bold text-gray-800">Quiz ({questions.length})</h2>
         <button
           onClick={() => setIsMobileOpen(!isMobileOpen)}
@@ -81,7 +81,7 @@ export function QuizSidebar({
 
       {/* Sidebar */}
       <div
-        className={`fixed md:relative md:w-72 w-72 h-screen bg-white overflow-y-auto border-r border-gray-200 z-40 transition-transform duration-300 md:translate-x-0 ${
+        className={`fixed md:relative md:w-62 w-full sm:w-70  bg-white overflow-y-auto border-r border-gray-200 z-40 transition-transform duration-300 md:translate-x-0 ${
           isMobileOpen ? "translate-x-0" : "-translate-x-full"
         } md:top-0 top-16 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100`}
       >
@@ -93,6 +93,19 @@ export function QuizSidebar({
           </p>
         </div>
 
+        {/* Mobile Close Button */}
+        <div className="md:hidden p-4 border-b border-gray-200">
+          <button
+            onClick={() => setIsMobileOpen(false)}
+            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            Close Sidebar
+          </button>
+        </div>
+
         {/* Questions List */}
         <div className="p-3 space-y-3">
           {questions.map((question, index) => (
@@ -102,7 +115,7 @@ export function QuizSidebar({
                 onQuestionSelect(question.id)
                 setIsMobileOpen(false)
               }}
-              className={`group relative rounded-lg md:rounded-xl cursor-pointer transition-all duration-200 overflow-hidden ${
+              className={`group relative rounded-lg cursor-pointer transition-all duration-200 overflow-hidden ${
                 activeQuestionId === question.id
                   ? "ring-2 ring-blue-500 shadow-lg"
                   : "hover:shadow-md hover:ring-1 hover:ring-gray-300"
@@ -121,7 +134,7 @@ export function QuizSidebar({
               </div>
 
               {/* Question Preview Image */}
-              <div className="h-24 md:h-32 relative bg-gradient-to-br from-purple-100 to-blue-100">
+              <div className="h-20 sm:h-24 md:h-32 relative bg-gradient-to-br from-purple-100 to-blue-100">
                 {question.imageUrl && !imageErrors[question.id] ? (
                   <>
                     {/* Using regular img tag for blob URLs */}
@@ -147,20 +160,20 @@ export function QuizSidebar({
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
 
                 {/* Question Text */}
-                <div className="absolute bottom-0 left-0 right-0 p-2 md:p-3">
-                  <p className="text-white text-xs md:text-sm font-medium line-clamp-2 drop-shadow-md">
+                <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3">
+                  <p className="text-white text-xs sm:text-sm font-medium line-clamp-2 drop-shadow-md">
                     {truncateText(question.question)}
                   </p>
                 </div>
               </div>
 
               {/* Answer Options Preview */}
-              <div className="bg-white p-2 md:p-3 border-t border-gray-100">
-                <div className="grid grid-cols-2 gap-1.5 md:gap-2">
+              <div className="bg-white p-2 sm:p-3 border-t border-gray-100">
+                <div className="grid grid-cols-2 gap-1.5 sm:gap-2">
                   {question.options?.slice(0, 4).map((option, optIndex) => (
                     <div
                       key={option.id}
-                      className={`text-xs py-1.5 md:py-2 px-2 rounded font-medium text-center truncate ${
+                      className={`text-[10px] py-1.5 sm:py-2 px-2 rounded font-medium text-center truncate ${
                         option.correct
                           ? "bg-green-600 text-white"
                           : option.color
@@ -194,7 +207,7 @@ export function QuizSidebar({
                         d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
                       />
                     </svg>
-                    {question.timeLimit || 20}s
+                    {question.timeLimit || 10}s
                   </span>
                   <span>
                     {index + 1}/{questions.length}
@@ -215,7 +228,7 @@ export function QuizSidebar({
               onAddQuestion()
               setIsMobileOpen(false)
             }}
-            className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 md:py-4 px-4 rounded-lg md:rounded-xl font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm md:text-base"
+            className="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-4 rounded-lg font-semibold transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 text-sm"
           >
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />

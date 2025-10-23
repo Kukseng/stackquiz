@@ -23,7 +23,7 @@ export type Quiz = {
 export type Question = {
   id: string
   text: string
-  type: "MCQ" | "TF" | "FB" // Multiple Choice, True/False, Fill Blank
+  type: "MCQ" | "TF" | "FILL_THE_BLANK" 
   questionOrder: number
   timeLimit: number
   points: number

@@ -9,9 +9,24 @@ interface QuestionTypeModalProps {
 
 export function QuestionTypeModal({ onClose, addQuestion }: QuestionTypeModalProps) {
   const questionTypes = [
-    { id: "mcq", label: "Multiple choice", icon: <FaCircle className="w-6 h-6 text-blue-500" /> },
-    { id: "tf", label: "True/false", icon: <FaCheck className="w-6 h-6 text-green-500" /> },
-    { id: "fill_the_blank", label: "Fill the blank", icon: <FaRegSquare className="w-6 h-6 text-purple-500" /> },
+    {
+      id: "mcq",
+      label: "Multiple choice",
+      icon: <FaCircle className="w-6 h-6 text-blue-500" />,
+      
+    },
+    {
+      id: "tf",
+      label: "True/false",
+      icon: <FaCheck className="w-6 h-6 text-green-500" />,
+
+    },
+    {
+      id: "fill_the_blank",
+      label: "Fill the blank",
+      icon: <FaRegSquare className="w-6 h-6 text-purple-500" />,
+  
+    },
   ]
 
   const handleAddQuestion = (type: string) => {
@@ -28,10 +43,13 @@ export function QuestionTypeModal({ onClose, addQuestion }: QuestionTypeModalPro
             <div
               key={type.id}
               onClick={() => handleAddQuestion(type.id)}
-              className="flex items-center p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 transition-all"
+              className="p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 hover:border-indigo-300 transition-all"
             >
-              <span className="mr-4">{type.icon}</span>
-              <span className="text-lg font-medium">{type.label}</span>
+              <div className="flex items-center mb-2">
+                <span className="mr-3">{type.icon}</span>
+                <span className="text-lg font-medium text-gray-900">{type.label}</span>
+              </div>
+              <p className="text-sm text-gray-600 ml-9">{type.description}</p>
             </div>
           ))}
         </div>

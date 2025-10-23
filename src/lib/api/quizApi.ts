@@ -176,6 +176,32 @@ export const quizApi = baseApi.injectEndpoints({
       }),
       invalidatesTags: ["Quiz"],
     }),
+
+    // Update a question
+    updateQuestion: builder.mutation<QuizQuestion, { questionId: string; question: Partial<QuizQuestion> }>({
+      query: ({ questionId, question }) => ({
+        url: `/questions/${questionId}`,
+        method: "PUT",
+        body: question,
+      }),
+      invalidatesTags: (result, error, { questionId }) => [
+        { type: "Question", id: questionId },
+        "Quiz",
+      ],
+    }),
+
+    // Update an option
+    updateOption: builder.mutation<QuizOption, { optionId: string; option: { optionText?: string; isCorrected?: boolean; optionOrder?: number } }>({
+      query: ({ optionId, option }) => ({
+        url: `/options/${optionId}`,
+        method: "PUT",
+        body: option,
+      }),
+      invalidatesTags: (result, error, { optionId }) => [
+        { type: "Option", id: optionId },
+        "Quiz",
+      ],
+    }),
   }),
 });
 
@@ -190,4 +216,6 @@ export const {
   useUpdateQuizMutation,
   useForkQuizMutation,
   useDeleteQuizMutation,
+  useUpdateQuestionMutation,
+  useUpdateOptionMutation,
 } = quizApi;

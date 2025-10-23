@@ -59,29 +59,31 @@ const DashboardPage = () => {
     selectedDifficulty !== "All";
 
   return (
-    <div className="p-4 sm:p-6 lg:p-8">
+    <div className="p-4 sm:p-6 lg:p-8 ">
       {/* Hero Section */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-6 sm:mb-8">
-        {/* Join Quiz Card */}
-        <div className="xl:col-span-2 bg-slate-200 flex justify-center items-center rounded-2xl p-6 sm:p-8">
-          <div className="w-full max-w-lg bg-white rounded-2xl flex items-center gap-3 p-2 border-2 border-yellow-300 shadow-xs">
-            <input
-              type="text"
-              value={joinCode}
-              onChange={(e) => setJoinCode(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && handleJoinQuiz()}
-              placeholder="Enter a join code"
-              className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-800 focus:outline-none text-base placeholder-gray-500 border-none"
-            />
-            <button
-              onClick={handleJoinQuiz}
-              disabled={isLoading}
-              className="btn-secondary btn-text px-6 py-3 rounded-2xl font-semibold text-white shadow hover:shadow-lg transition-all duration-200 disabled:opacity-50"
-            >
-              {isLoading ? "Joining..." : "Join"}
-            </button>
-          </div>
-        </div>
+ {/* Join Quiz Card */}
+<div className="col-span-full xl:col-span-2 bg-slate-200 flex justify-center items-center rounded-2xl p-4 sm:p-6 md:p-8">
+  <div className="w-full max-w-lg bg-white rounded-2xl flex flex-col sm:flex-row items-stretch sm:items-center gap-3 p-3 sm:p-4 border-2 border-yellow-400 shadow-sm">
+    <input
+      type="text"
+      value={joinCode}
+      onChange={(e) => setJoinCode(e.target.value)}
+      onKeyDown={(e) => e.key === 'Enter' && handleJoinQuiz()}
+      placeholder="Enter a join code"
+      className="flex-1 px-4 py-3 rounded-xl bg-white text-gray-800 focus:outline-none text-base placeholder-gray-500 border border-gray-200 sm:border-none"
+    />
+
+    <button
+      onClick={handleJoinQuiz}
+      disabled={isLoading}
+      className="w-full sm:w-auto px-5 py-3 rounded-xl font-semibold text-blue-900 btn-secondary hover:bg-yellow-500 transition-all duration-200 shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+    >
+      {isLoading ? "Joining..." : "Join"}
+    </button>
+  </div>
+</div>
+
 
         {/* Welcome Card */}
         <div className="bg-sky-100 rounded-2xl p-6 flex items-center gap-2">

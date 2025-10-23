@@ -253,35 +253,36 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
   );
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div className="flex h-screen bg-gray-50 overflow-hidden max-w-8xl  mx-auto">
       <Sidebar isOpen={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
       <div className="flex-1 overflow-hidden flex flex-col min-w-0">
         <header className="bg-white border-b px-4 sm:px-6 lg:px-8 py-2 sm:py-4 flex-shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 sm:gap-4">
-              <button
-                onClick={() => setSidebarOpen(true)}
-                className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
-              >
-                <Menu className="w-5 h-5 text-gray-600" />
-              </button>
-              <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
-                {pathname === "/dashboard"
-                  ? "Dashboard"
-                  : pathname === "/dashboard/library"
-                  ? "Library"
-                  : pathname === "/dashboard/report"
-                  ? "Report"
-                  : pathname === "/dashboard/activity"
-                  ? "Activity"
-                  : pathname === "/dashboard/profile"
-                  ? "Profile"
-                  : pathname === "/dashboard/notifications"
-                  ? "Notifications"
-                  : "Dashboard"}
-              </h1>
-            </div>
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3 sm:gap-4">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="lg:hidden p-2 rounded-lg hover:bg-gray-100"
+                >
+                  <Menu className="w-5 h-5 text-gray-600" />
+                </button>
+                <h1 className="text-xl sm:text-2xl font-bold text-gray-800">
+                  {pathname === "/dashboard"
+                    ? "Dashboard"
+                    : pathname === "/dashboard/library"
+                    ? "Library"
+                    : pathname === "/dashboard/report"
+                    ? "Report"
+                    : pathname === "/dashboard/activity"
+                    ? "Activity"
+                    : pathname === "/dashboard/profile"
+                    ? "Profile"
+                    : pathname === "/dashboard/notifications"
+                    ? "Notifications"
+                    : "Dashboard"}
+                </h1>
+              </div>
 
             <div className="flex items-center gap-2 sm:gap-4">
               <div className="relative hidden md:block">
@@ -358,9 +359,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
             </div>
           </div>
+          </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto">{children}</main>
+        <main className="flex-1 overflow-y-auto">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            {children}
+          </div>
+        </main>
       </div>
     </div>
   );

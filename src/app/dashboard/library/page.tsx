@@ -461,7 +461,7 @@ const DataTable = () => {
   }
 
   return (
-    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+    <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden max-w-7xl mx-auto">
       {/* Header */}
       <div className="bg-gradient-to-r from-slate-50 to-gray-50 border-b border-gray-200 px-6 py-6">
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">

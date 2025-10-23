@@ -38,9 +38,9 @@ export default function ThemeSelector({
   }
 
   return (
-    <div className="w-80 h-screen bg-white/90 backdrop-blur-sm border-l border-gray-200 flex flex-col p-6 overflow-y-auto">
+    <div className="w-60 h-screen bg-white/90 backdrop-blur-sm border-l border-gray-200 flex flex-col p-6 overflow-y-auto">
       {/* Header */}
-      <h3 className="text-2xl font-bold text-gray-800 mb-6">Themes</h3>
+      <h3 className="text-1xl font-bold text-gray-800 mb-6">Themes</h3>
 
       {/* Scrollable Themes */}
       <div className="space-y-4 overflow-y-auto flex-grow pr-2 scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-gray-100 mb-6">
@@ -54,7 +54,7 @@ export default function ThemeSelector({
                 : "hover:shadow-lg hover:ring-2 hover:ring-gray-300"
             }`}
           >
-            <div className="relative w-full h-44">
+            <div className="relative w-full h-24">
               <Image
                 src={theme.image}
                 alt={theme.name}
@@ -64,7 +64,7 @@ export default function ThemeSelector({
               />
             </div>
             <div className="p-4 bg-white">
-              <p className="font-bold text-gray-800 text-lg text-center">
+              <p className="font-bold text-gray-800 text-[12px] text-center">
                 {theme.name}
               </p>
             </div>

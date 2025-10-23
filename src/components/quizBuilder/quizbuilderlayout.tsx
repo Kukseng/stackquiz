@@ -9,6 +9,7 @@ import ThemeSidebar from "./themeSidebar";
 import { QuestionTypeModal } from "./modal/question_type";
 import DeleteQuestionModal from "./modal/deleteqquestion";
 import PublishModal from "./modal/publice_modal";
+import { AIChatbot } from "./AIChatbot";
 import { useGetQuizByIdQuery } from "@/lib/api/quizApi";
 
 interface QuizBuilderLayoutProps {
@@ -37,6 +38,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
     setActiveQuestionId,
     thumbnailUrl,
     setThumbnailUrl,
+    setQuizId,
     addQuestion,
     deleteQuestion,
     duplicateQuestion,
@@ -49,7 +51,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
   const [showAddQuestionModal, setShowAddQuestionModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [showPublishModal, setShowPublishModal] = useState(false);
-  const [selectedTheme, setSelectedTheme] = useState("pink");
+  const [selectedTheme, setSelectedTheme] = useState("blue");
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
   const { data: quiz, isLoading, error, refetch } = useGetQuizByIdQuery(quizId!, {
@@ -61,7 +63,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
 
     const formattedQuestions = quiz.questions.map((q: any) => {
       const questionType = q.type === "TF" ? "truefalse" : q.type.toLowerCase();
-      
+
       const mappedOptions = q.options.map((o: any, index: number) => ({
         id: o.id,
         text: o.optionText.replaceAll("_", " "),
@@ -81,8 +83,9 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
 
     setQuestions(formattedQuestions);
     setActiveQuestionId(formattedQuestions[0]?.id ?? null);
+    setQuizId(quizId!); // Set the quiz ID for API updates
     setIsDataLoaded(true);
-  }, [quiz, isDataLoaded, setQuestions, setActiveQuestionId]);
+  }, [quiz, isDataLoaded, setQuestions, setActiveQuestionId, setQuizId, quizId]);
 
   const handleDelete = (id: number | string) => {
     const remaining = questions.filter((q) => q.id !== id);
@@ -95,6 +98,29 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
     if (quizId) {
       refetch();
     }
+  };
+
+  const handleQuestionsGenerated = (generatedQuestions: any[]) => {
+    // Transform AI-generated questions to match the store format
+    const transformedQuestions = generatedQuestions.map((q, index) => ({
+      id: `ai-${Date.now()}-${index}`,
+      type: q.questionType === "MULTIPLE_CHOICE" ? "mcq" : q.questionType.toLowerCase(),
+      question: q.questionText,
+      options: q.options.map((opt: any, optIndex: number) => ({
+        id: `ai-opt-${Date.now()}-${index}-${optIndex}`,
+        text: opt.optionText,
+        correct: opt.isCorrect,
+        color: OPTION_COLORS[optIndex as keyof typeof OPTION_COLORS] || "#1355b4",
+        icon: OPTION_ICONS[optIndex as keyof typeof OPTION_ICONS] || "circle",
+      })),
+      imageUrl: "",
+      isNew: true,
+    }));
+
+    // Add all generated questions to the store
+    transformedQuestions.forEach(q => addQuestion(q.type, q));
+
+    console.log("✅ Added AI-generated questions to quiz:", transformedQuestions.length);
   };
 
   const themeGradients: Record<string, string> = {
@@ -140,7 +166,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
         quizId={quizId}
       />
 
-      <div className="flex w-full">
+      <div className="flex flex-col lg:flex-row w-full max-w-8xl mx-auto">
         <QuizSidebar
           questions={questions as any}
           activeQuestionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
@@ -198,6 +224,9 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
           }
         />
       )}
+
+      {/* AI Chatbot */}
+      <AIChatbot onQuestionsGenerated={handleQuestionsGenerated} />
     </div>
   );
 }

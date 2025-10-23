@@ -266,22 +266,22 @@ export default function QuizMainContent({
   }, [])
 
   return (
-    <div className="w-full flex-1 flex items-center justify-center bg-gray-50 p-3 min-h-screen">
+    <div className="w-full flex-1 h-[100vh] flex items-start justify-center bg-gray-50 p-14 sm:p-6 ">
       <div
-        className="w-full max-w-5xl rounded-2xl p-8 flex flex-col justify-center shadow-2xl bg-cover bg-center min-h-96"
+        className="w-full max-w-7xl rounded-2xl p-4 sm:p-6 lg:p-8 flex flex-col justify-center shadow-2xl bg-cover bg-center min-h-96"
         style={{ backgroundImage: `url(${themeCardImages[theme]})` }}
       >
         {!activeQuestion ? (
           <div className="flex flex-col items-center justify-center text-center text-white py-8">
-            <h2 className="text-3xl font-bold mb-3">Quiz Thumbnail</h2>
-            <p className="text-lg text-white/90 mb-8">
+            <h2 className="text-2xl font-bold mb-1">Quiz Thumbnail</h2>
+            <p className="text-sm text-white/90 mb-4">
               Upload a cover image for your quiz
             </p>
 
             {/* Thumbnail Upload */}
-            <div className="mb-8 flex flex-col items-center">
+            <div className="mb-4 flex flex-col items-center">
               {isUploadingThumbnail && (
-                <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl">
+                <div className="mb-2 p-3 bg-blue-50/80 border border-blue-200 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
                     <p className="text-blue-700 text-sm font-medium">Uploading thumbnail...</p>
@@ -290,7 +290,7 @@ export default function QuizMainContent({
               )}
               {thumbnailPreview || thumbnailUrl ? (
                 <div className="relative w-full max-w-md rounded-2xl overflow-hidden group">
-                  <div className="relative w-full h-48 rounded-2xl overflow-hidden shadow-xl border-4 border-white/40">
+                  <div className="relative w-50 h-38 rounded-2xl overflow-hidden shadow-xl border-4 border-white/40">
                     <Image
                       src={thumbnailPreview || thumbnailUrl || ""}
                       alt="Quiz Thumbnail"
@@ -308,16 +308,16 @@ export default function QuizMainContent({
                   </button>
                 </div>
               ) : (
-                <label className="cursor-pointer w-full max-w-md">
-                  <div className="border-4 border-dashed border-white/50 hover:border-white/80 rounded-2xl p-8 bg-white/10 hover:bg-white/20 transition-all flex flex-col items-center justify-center gap-4">
-                    <div className="w-16 h-16 rounded-full bg-white/20 flex items-center justify-center">
-                      <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <label className="cursor-pointer w-full max-w-[400px]">
+                  <div className="border-2 border-dashed border-white/50 hover:border-white/80 rounded-2xl p-4 bg-white/10 hover:bg-white/20 transition-all flex flex-col items-center justify-center gap-2">
+                    <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
                     </div>
                     <div className="text-center">
-                      <p className="text-lg font-semibold text-white mb-1">Add quiz thumbnail</p>
-                      <p className="text-white/70 text-sm">JPG, PNG up to 5MB</p>
+                      <p className="text-[12px] font-semibold text-white mb-1">Add quiz thumbnail</p>
+                      <p className="text-white/70 text-[10px]">JPG, PNG up to 5MB</p>
                     </div>
                   </div>
                   <input
@@ -332,8 +332,8 @@ export default function QuizMainContent({
             </div>
 
             <div className="text-center">
-              <h3 className="text-xl font-bold mb-2">No question selected</h3>
-              <p className="text-white/90">
+              <h3 className="text-lg font-bold mb-1">No question selected</h3>
+              <p className="text-white/90 text-sm">
                 Please select a question from the sidebar or add a new one.
               </p>
             </div>
@@ -346,22 +346,22 @@ export default function QuizMainContent({
               value={activeQuestion.question}
               onChange={(e) => onUpdateQuestionText(activeQuestion.id, e.target.value)}
               placeholder="Enter your question..."
-              className="w-full text-center text-2xl font-semibold p-4 mb-6 rounded-xl border-2 text-gray-900 bg-white border-yellow-400 placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
+              className="w-full text-center text-xl sm:text-2xl font-semibold p-3 sm:p-4 mb-4 sm:mb-6 rounded-xl border-2 text-gray-900 bg-white border-yellow-400 placeholder-black/40 focus:outline-none focus:ring-2 focus:ring-yellow-500"
             />
 
             {/* Image Upload + Preview */}
-            <div className="mb-8 flex flex-col items-center">
+            <div className="mb-6 sm:mb-8 flex flex-col items-center">
               {isUploading && (
                 <div className="mb-4 p-3 bg-blue-50/80 border border-blue-200 rounded-xl">
                   <div className="flex items-center gap-3">
                     <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent"></div>
-                    <p className="text-blue-700 text-sm font-medium">Uploading image...</p>
+                    <p className="text-blue-800 text-sm font-medium">Uploading image...</p>
                   </div>
                 </div>
               )}
               {previewImage || activeQuestion.imageUrl ? (
                 <div className="relative w-full max-w-2xl rounded-2xl overflow-hidden group">
-                  <div className="relative w-full h-64 rounded-2xl overflow-hidden shadow-xl border-4 border-white/40">
+                  <div className="relative w-full h-48 sm:h-64 rounded-2xl overflow-hidden shadow-xl border-4 border-white/40">
                     <Image
                       src={previewImage || activeQuestion.imageUrl || ""}
                       alt="Question"
@@ -380,15 +380,15 @@ export default function QuizMainContent({
                 </div>
               ) : (
                 <label className="cursor-pointer w-full max-w-2xl">
-                  <div className="border-4 border-dashed border-white/50 hover:border-white/80 rounded-2xl p-12 bg-white/10 hover:bg-white/20 transition-all flex flex-col items-center justify-center gap-4">
-                    <div className="w-20 h-20 rounded-full bg-white/20 flex items-center justify-center">
-                      <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="border-4 border-dashed borer-white/50 hover:border-white/80 rounded-2xl p-8 sm:p-12 bg-white/10 hover:bg-white/20 transition-all flex flex-col items-center justify-center gap-4">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-white/20 flex items-center justify-center">
+                      <svg className="w-7 h-7 sm:w-6 sm:h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
                       </svg>
                     </div>
                     <div className="text-center">
-                      <p className="text-xl font-semibold text-white mb-1">Add cover image</p>
-                      <p className="text-white/70 text-sm">JPG, PNG up to 5MB</p>
+                      <p className="text-sm sm:text-xl font-semibold text-white mb-1">Add cover image</p>
+                      <p className="text-white/70 text-[12px]">JPG, PNG up to 5MB</p>
                     </div>
                   </div>
                   <input
@@ -403,48 +403,60 @@ export default function QuizMainContent({
             </div>
 
             {/* Options */}
-            <div className="space-y-4 mb-8">
-              {activeQuestion.options.map((option) => (
-                <div
-                  key={option.id}
-                  className="flex items-center justify-between p-5 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-all hover:scale-102"
-                  style={{ backgroundColor: option.color || "#3B82F6" }}
-                >
-                  <div className="flex items-center w-full gap-3">
-                    {renderIcon(option.icon)}
-                    <input
-                      placeholder="Option"
-                      type="text"
-                      value={option.text}
-                      onChange={(e) =>
-                        onUpdateOptionText(activeQuestion.id, option.id, e.target.value)
-                      }
-                      className="bg-transparent w-full text-white text-lg font-semibold placeholder-white/70 border-none outline-none"
-                    />
-                  </div>
+            <div className="space-y-3 sm:space-y-4 mb-6 sm:mb-8">
+              {activeQuestion.options.map((option) => {
+                const isMultipleChoice = activeQuestion.type === "mcq";
+                const isTrueFalse = activeQuestion.type === "truefalse";
+                const isFillBlank = activeQuestion.type === "fill_the_blank";
+
+                return (
                   <div
-                    className={`w-12 h-12 rounded-full flex-shrink-0 flex items-center justify-center border-3 transition-all hover:scale-110 ${
-                      option.correct ? "bg-green-500 border-green-600 shadow-lg" : "bg-white/30 border-white"
-                    } cursor-pointer`}
-                    onClick={() => onToggleCorrectAnswer(activeQuestion.id, option.id)}
+                    key={option.id}
+                    className="flex items-center justify-between p-3 sm:p-5 rounded-xl shadow-lg cursor-pointer hover:shadow-xl transition-all hover:scale-102"
+                    style={{ backgroundColor: option.color || "#3B82F6" }}
                   >
-                    {option.correct && <ImCheckmark2 className="text-white w-6 h-6" />}
+                    <div className="flex items-center w-full gap-2 sm:gap-3">
+                      {renderIcon(option.icon)}
+                      <input
+                        placeholder="Option"
+                        type="text"
+                        value={option.text}
+                        onChange={(e) =>
+                          onUpdateOptionText(activeQuestion.id, option.id, e.target.value)
+                        }
+                        className="bg-transparent w-full text-white text-base sm:text-lg font-semibold placeholder-white/70 border-none outline-none"
+                      />
+                    </div>
+                    <div
+                      className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex-shrink-0 flex items-center justify-center border-3 transition-all hover:scale-110 ${
+                        option.correct ? "bg-green-500 border-white shadow-lg" : "bg-white/30 border-white"
+                      } cursor-pointer`}
+                      onClick={() => onToggleCorrectAnswer(activeQuestion.id, option.id)}
+                      title={
+                        isMultipleChoice
+                          ? "Click to toggle correct answer (multiple allowed)"
+                          : "Click to select correct answer (only one allowed)"
+                      }
+                    >
+                      {option.correct && <ImCheckmark2 className="text-white w-5 h-5 sm:w-6 sm:h-6" />}
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
 
+
             {/* Action Buttons */}
-            <div className="flex justify-end gap-4 mt-8">
+            <div className="flex flex-col sm:flex-row justify-center sm:justify-end gap-3 sm:gap-4 mt-6 sm:mt-8">
               <button
                 onClick={() => onDeleteQuestion(activeQuestion.id)}
-                className="bg-red-500 hover:bg-red-600 text-white px-8 py-3 rounded-lg font-semibold shadow-lg text-lg transition-all hover:shadow-xl active:scale-95"
+                className="bg-red-500 hover:bg-red-600 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold shadow-lg text-base sm:text-lg transition-all hover:shadow-xl active:scale-95"
               >
                 Delete
               </button>
               <button
                 onClick={() => onDuplicateQuestion(activeQuestion)}
-                className="bg-yellow-500 hover:bg-yellow-600 text-white px-8 py-3 rounded-lg font-semibold shadow-lg text-lg transition-all hover:shadow-xl active:scale-95"
+                className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 sm:px-8 py-3 rounded-lg font-semibold shadow-lg text-base sm:text-lg transition-all hover:shadow-xl active:scale-95"
               >
                 Duplicate
               </button>

@@ -305,21 +305,22 @@ export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
   };
 
   return (
-    <div className="fixed top-0 left-0 right-0 z-90 flex justify-between items-center p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-      <div className="flex items-center gap-2">
-        <Image src="/logo-sq.png" width={45} height={45} alt="Logo" />
-        <span className="hidden md:inline text-2xl font-extrabold">
-          <span className="text-blue-950">STACK</span>
-          <span className="text-yellow-400">QUIZ</span>
-        </span>
-      </div>
+    <div className="fixed top-0 left-0 right-0 z-90 flex justify-between items-center p-2 sm:p-4 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+      <div className="max-w-8xl mx-auto w-full flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <Image src="/logo-sq.png" width={35} height={35} alt="Logo" className="sm:w-[45px] sm:h-[45px]" />
+          <span className="hidden lg:inline text-xl sm:text-2xl font-extrabold">
+            <span className="text-blue-950">STACK</span>
+            <span className="text-yellow-400">QUIZ</span>
+          </span>
+        </div>
 
-      <div className="flex items-center space-x-4">
+        <div className="flex items-center space-x-2 sm:space-x-4">
 
         <button
           onClick={onPublish}
           disabled={isSaving || questions.length === 0}
-          className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-purple-600 hover:bg-purple-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
         >
           Publish
         </button>
@@ -327,10 +328,11 @@ export function QuizHeader({ questions, onPublish, quizId }: QuizHeaderProps) {
         <button
           onClick={handleExit}
           disabled={isSaving}
-          className="bg-gray-600 hover:bg-gray-700 text-white px-6 py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          className="bg-gray-600 hover:bg-gray-700 text-white px-4 sm:px-6 py-2 sm:py-3 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm sm:text-base"
         >
           {isSaving ? "Saving..." : "Exit"}
         </button>
+        </div>
       </div>
     </div>
   );

@@ -1,4 +1,5 @@
 import { create } from "zustand";
+import { useUpdateQuestionMutation, useUpdateOptionMutation } from "@/lib/api/quizApi";
 
 interface Option {
   id: string | number;
@@ -21,9 +22,11 @@ interface QuizState {
   questions: Question[];
   activeQuestionId: string | number | null;
   thumbnailUrl: string;
+  quizId?: string;
   setQuestions: (questions: Question[]) => void;
   setActiveQuestionId: (id: string | number | null) => void;
   setThumbnailUrl: (url: string) => void;
+  setQuizId: (id: string) => void;
   addQuestion: (type: string, questionData?: Partial<Question>) => void;
   deleteQuestion: (id: string | number) => void;
   duplicateQuestion: (question: Question) => void;
@@ -73,12 +76,15 @@ export const useQuizStore = create<QuizState>((set, get) => ({
   questions: [],
   activeQuestionId: null,
   thumbnailUrl: "",
+  quizId: undefined,
 
   setQuestions: (questions) => set({ questions }),
 
   setActiveQuestionId: (id) => set({ activeQuestionId: id }),
 
   setThumbnailUrl: (url) => set({ thumbnailUrl: url }),
+
+  setQuizId: (id) => set({ quizId: id }),
 
   addQuestion: (type, questionData) => {
     const newQuestion: Question = {
@@ -129,23 +135,58 @@ export const useQuizStore = create<QuizState>((set, get) => ({
     }));
   },
 
-  updateQuestionText: (questionId, text) => {
+  updateQuestionText: async (questionId, text) => {
+    // Update local state immediately
     set((state) => ({
       questions: state.questions.map((q) =>
         q.id === questionId ? { ...q, question: text } : q
       ),
     }));
+
+    // If we have a quizId, update via API
+    const state = get();
+    if (state.quizId && typeof questionId === 'string') {
+      try {
+        const [updateQuestion] = useUpdateQuestionMutation();
+        await updateQuestion({
+          questionId,
+          question: { text }
+        }).unwrap();
+        console.log('✅ Question text updated via API');
+      } catch (error) {
+        console.error('❌ Failed to update question text via API:', error);
+        // Local state is already updated, so user sees the change
+      }
+    }
   },
 
-  updateQuestionImage: (questionId, imageUrl) => {
+  updateQuestionImage: async (questionId, imageUrl) => {
+    // Update local state immediately
     set((state) => ({
       questions: state.questions.map((q) =>
         q.id === questionId ? { ...q, imageUrl } : q
       ),
     }));
+
+    // If we have a quizId, update via API
+    const state = get();
+    if (state.quizId && typeof questionId === 'string') {
+      try {
+        const [updateQuestion] = useUpdateQuestionMutation();
+        await updateQuestion({
+          questionId,
+          question: { imageUrl }
+        }).unwrap();
+        console.log('✅ Question image updated via API');
+      } catch (error) {
+        console.error('❌ Failed to update question image via API:', error);
+        // Local state is already updated, so user sees the change
+      }
+    }
   },
 
-  updateOptionText: (questionId, optionId, text) => {
+  updateOptionText: async (questionId, optionId, text) => {
+    // Update local state immediately
     set((state) => ({
       questions: state.questions.map((q) =>
         q.id === questionId
@@ -158,15 +199,32 @@ export const useQuizStore = create<QuizState>((set, get) => ({
           : q
       ),
     }));
+
+    // If we have a quizId, update via API
+    const state = get();
+    if (state.quizId && typeof optionId === 'string') {
+      try {
+        const [updateOption] = useUpdateOptionMutation();
+        await updateOption({
+          optionId,
+          option: { optionText: text }
+        }).unwrap();
+        console.log('✅ Option text updated via API');
+      } catch (error) {
+        console.error('❌ Failed to update option text via API:', error);
+        // Local state is already updated, so user sees the change
+      }
+    }
   },
 
-  toggleCorrectAnswer: (questionId, optionId) => {
+  toggleCorrectAnswer: async (questionId, optionId) => {
+    // Update local state immediately
     set((state) => ({
       questions: state.questions.map((q) => {
         if (q.id !== questionId) return q;
 
-        // For true/false questions, only one can be correct
-        if (q.type === "truefalse") {
+        // For true/false and fill_the_blank questions, only one can be correct
+        if (q.type === "truefalse" || q.type === "fill_the_blank") {
           return {
             ...q,
             options: q.options.map((opt) => ({
@@ -176,7 +234,7 @@ export const useQuizStore = create<QuizState>((set, get) => ({
           };
         }
 
-
+        // For multiple choice questions, multiple answers can be correct
         return {
           ...q,
           options: q.options.map((opt) =>
@@ -185,5 +243,27 @@ export const useQuizStore = create<QuizState>((set, get) => ({
         };
       }),
     }));
+
+    // If we have a quizId, update via API
+    const state = get();
+    if (state.quizId && typeof optionId === 'string') {
+      try {
+        const [updateOption] = useUpdateOptionMutation();
+        // Find the current option to determine the new correct state
+        const question = state.questions.find(q => q.id === questionId);
+        const option = question?.options.find(opt => opt.id === optionId);
+        if (option) {
+          const newCorrectState = !option.correct;
+          await updateOption({
+            optionId,
+            option: { isCorrected: newCorrectState }
+          }).unwrap();
+          console.log('✅ Option correctness updated via API');
+        }
+      } catch (error) {
+        console.error('❌ Failed to update option correctness via API:', error);
+        // Local state is already updated, so user sees the change
+      }
+    }
   },
 }));

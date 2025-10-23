@@ -8,9 +8,8 @@ import { NicknameEntry } from "@/components/play-quiz/nickname_entry";
 import { WebSocketProvider } from "@/context/websocket-context";
 import { useParams } from "next/navigation";
 
-// 🆕 Import audio provider + mute button
-import AudioProvider, { useAudio } from "@/providers/AudioProvider";
 import { MuteButton } from "@/components/play-quiz/mute_button";
+import AudioProvider from "@/providers/AudioProvider";
 
 export type Quiz = {
   id: string;
@@ -61,17 +60,19 @@ export type GameResults = {
 export type GameState = "selection" | "playing" | "results" | "nickname";
 
 export default function QuizApp() {
-  const { id } = useParams() as { id: string }; // Quiz room ID from URL
+  const { id } = useParams() as { id: string };
   const [gameState, setGameState] = useState<GameState>("nickname");
   const [selectedQuiz, setSelectedQuiz] = useState<Quiz | null>(null);
   const [gameResults, setGameResults] = useState<GameResults | null>(null);
   const [playerNickname, setPlayerNickname] = useState<string>("");
 
+  /**
+   * 🧑‍🎓 Nickname → Start Quiz → Unlock Audio + Fetch Quiz
+   */
   const handleNicknameSet = async (nickname: string) => {
     setPlayerNickname(nickname);
 
     try {
-      console.log("Fetching quiz for id:", id);
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_API_URL}/quizzes/${id}`
       );
@@ -89,16 +90,25 @@ export default function QuizApp() {
     }
   };
 
+  /**
+   * 🧭 Quiz selection handler
+   */
   const handleQuizSelect = (quiz: Quiz) => {
     setSelectedQuiz(quiz);
     setGameState("playing");
   };
 
+  /**
+   * 🏁 Game completed
+   */
   const handleGameComplete = (results: GameResults) => {
     setGameResults(results);
     setGameState("results");
   };
 
+  /**
+   * 🔁 Play again handler
+   */
   const handlePlayAgain = () => {
     setGameState("selection");
     setSelectedQuiz(null);
@@ -107,20 +117,23 @@ export default function QuizApp() {
 
   return (
     <WebSocketProvider roomId={id}>
-      {/* 🆕 Wrap the entire quiz with AudioProvider */}
+      {/* 🎧 AudioProvider wraps the entire flow so background & SFX persist */}
       <AudioProvider>
-        <div className="min-h-screen relative">
-          {/* 🔇 Mute/unmute floating button */}
+        <div className="min-h-screen relative bg-gradient-to-b from-blue-600 to-indigo-900">
+          {/* 🔇 Global Mute/Unmute control */}
           <MuteButton />
 
+          {/* 🧑 Nickname Entry */}
           {gameState === "nickname" && (
             <NicknameEntry onNicknameSet={handleNicknameSet} />
           )}
 
+          {/* 🧭 Quiz Selection */}
           {gameState === "selection" && (
             <QuizSelection onQuizSelect={handleQuizSelect} />
           )}
 
+          {/* 🕹️ Game Engine */}
           {gameState === "playing" && selectedQuiz && (
             <GameEngine
               quiz={selectedQuiz}
@@ -129,6 +142,7 @@ export default function QuizApp() {
             />
           )}
 
+          {/* 🏆 Results Screen */}
           {gameState === "results" && gameResults && selectedQuiz && (
             <ResultsSystem
               results={gameResults}

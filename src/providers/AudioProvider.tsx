@@ -13,8 +13,11 @@ type AudioCtx = {
   unlockAudio: () => void;
   playClick: () => void;
   playWrong: () => void;
+  playCorrect: () => void;
+  playTimeUp: () => void;
   pauseMusic: () => void;
   resumeMusic: () => void;
+  nextBackground: () => void;
   toggleMute: () => void;
   muted: boolean;
 };
@@ -28,25 +31,65 @@ export const useAudio = () => {
 };
 
 export default function AudioProvider({ children }: { children: ReactNode }) {
-  const backgroundRef = useRef<HTMLAudioElement | null>(null);
+  const backgroundRefs = useRef<HTMLAudioElement[]>([]);
   const clickRef = useRef<HTMLAudioElement | null>(null);
   const wrongRef = useRef<HTMLAudioElement | null>(null);
+  const correctRef = useRef<HTMLAudioElement | null>(null);
+  const timeupRef = useRef<HTMLAudioElement | null>(null);
+
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
   const [muted, setMuted] = useState(false);
+  const [initialized, setInitialized] = useState(false);
 
   useEffect(() => {
-    backgroundRef.current = new Audio("/audio/background.mp3");
-    backgroundRef.current.loop = true;
-    backgroundRef.current.volume = 0.35;
+    if (initialized) return;
 
-    clickRef.current = new Audio("/audio/click.mp3");
-    wrongRef.current = new Audio("/audio/wrong.mp3");
-  }, []);
+    backgroundRefs.current = [
+      new Audio("/sound/background01.mp3"),
+      new Audio("/sound/background.mp3"),
+      new Audio("/sound/background02.mp3"),
+    ];
+
+    backgroundRefs.current.forEach((bg) => {
+      bg.loop = true;
+      bg.volume = 0.3;
+      bg.muted = false;
+    });
+
+    clickRef.current = new Audio("/sound/click.wav");
+    wrongRef.current = new Audio("/sound/wrong.wav");
+    correctRef.current = new Audio("/sound/correct.wav");
+    timeupRef.current = new Audio("/sound/timeup.wav");
+
+    setInitialized(true);
+  }, [initialized]);
+
+  const getCurrentTrack = () => backgroundRefs.current[currentTrackIndex];
 
   const unlockAudio = () => {
     if (unlocked) return;
-    const sounds = [backgroundRef.current, clickRef.current, wrongRef.current];
-    sounds.forEach((a) => {
+    const bg = getCurrentTrack();
+    if (!bg) return;
+
+    console.log("🎧 Trying to unlock audio...");
+
+    // must be called inside a user gesture
+    bg.play()
+      .then(() => {
+        console.log("✅ Background music playing");
+      })
+      .catch((err) => {
+        console.error("🚨 Autoplay blocked:", err);
+      });
+
+    // preload other sounds silently
+    [
+      clickRef.current,
+      wrongRef.current,
+      correctRef.current,
+      timeupRef.current,
+    ].forEach((a) => {
       if (a) {
         a.play()
           .then(() => {
@@ -56,34 +99,64 @@ export default function AudioProvider({ children }: { children: ReactNode }) {
           .catch(() => {});
       }
     });
+
     setUnlocked(true);
-    backgroundRef.current?.play().catch(() => {});
   };
 
   const playClick = () => {
-    if (clickRef.current && !muted) {
+    if (!muted && clickRef.current) {
       clickRef.current.currentTime = 0;
       clickRef.current.play();
     }
   };
 
   const playWrong = () => {
-    if (wrongRef.current && !muted) {
+    if (!muted && wrongRef.current) {
+      // ✅ ensure no click overlaps
+      clickRef.current?.pause();
+      clickRef.current!.currentTime = 0;
+
       wrongRef.current.currentTime = 0;
       wrongRef.current.play();
     }
   };
 
-  const pauseMusic = () => backgroundRef.current?.pause();
-  const resumeMusic = () => {
-    if (!muted) backgroundRef.current?.play();
+  const playCorrect = () => {
+    if (!muted && correctRef.current) {
+      correctRef.current.currentTime = 0;
+      correctRef.current.play();
+    }
   };
+
+  const playTimeUp = () => {
+    if (!muted && timeupRef.current) {
+      timeupRef.current.currentTime = 0;
+      timeupRef.current.play();
+    }
+  };
+
+  const pauseMusic = () => getCurrentTrack()?.pause();
+
+  const resumeMusic = () => {
+    const bg = getCurrentTrack();
+    if (!muted && bg) {
+      bg.play().catch((err) => console.warn("⚠️ resume failed:", err));
+    }
+  };
+
+  const nextBackground = () => {
+    const current = getCurrentTrack();
+    current?.pause();
+    const nextIndex = (currentTrackIndex + 1) % backgroundRefs.current.length;
+    setCurrentTrackIndex(nextIndex);
+    const next = backgroundRefs.current[nextIndex];
+    if (next && !muted) next.play();
+  };
+
   const toggleMute = () => {
     setMuted((prev) => {
       const newVal = !prev;
-      if (backgroundRef.current) {
-        backgroundRef.current.muted = newVal;
-      }
+      backgroundRefs.current.forEach((bg) => (bg.muted = newVal));
       return newVal;
     });
   };
@@ -94,8 +167,11 @@ export default function AudioProvider({ children }: { children: ReactNode }) {
         unlockAudio,
         playClick,
         playWrong,
+        playCorrect,
+        playTimeUp,
         pauseMusic,
         resumeMusic,
+        nextBackground,
         toggleMute,
         muted,
       }}

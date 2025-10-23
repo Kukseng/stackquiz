@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -55,6 +55,8 @@ export function GameEngine({
   const [isTimeUp, setIsTimeUp] = useState(false);
   const [correctAnswer, setCorrectAnswer] = useState<string>("");
   const [isMounted, setIsMounted] = useState(false);
+  // guard to avoid handling same question multiple times (timer + click races)
+  const hasAnsweredRef = useRef(false);
 
   const { playClick, playCorrect, playWrong, playTimeUp } = useAudio();
 
@@ -172,6 +174,10 @@ export function GameEngine({
 
   const handleAnswer = useCallback(
     (userAnswer: string | number) => {
+      // prevent double handling when timer and click both fire
+      if (hasAnsweredRef.current) return;
+      hasAnsweredRef.current = true;
+
       // 🖱️ Click sound when choosing an answer
       playClick();
 
@@ -246,6 +252,8 @@ export function GameEngine({
           setShowFeedback(false);
           setIsTimeUp(false);
           setQuestionStartTime(Date.now());
+          // allow next question to be answered
+          hasAnsweredRef.current = false;
         }
       }, 1500);
     },

@@ -46,14 +46,14 @@ export default function AudioProvider({ children }: { children: ReactNode }) {
     if (initialized) return;
 
     backgroundRefs.current = [
-      new Audio("/sound/background01.mp3"),
       new Audio("/sound/background.mp3"),
+      new Audio("/sound/background01.mp3"),
       new Audio("/sound/background02.mp3"),
     ];
 
     backgroundRefs.current.forEach((bg) => {
       bg.loop = true;
-      bg.volume = 0.3;
+      bg.volume = 0.2;
       bg.muted = false;
     });
 

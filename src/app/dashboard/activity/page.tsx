@@ -197,10 +197,10 @@ export default function AnalyticsDashboard() {
   }
 
   const timeRangeOptions = [
-    { value: '7days', label: '7D' },
-    { value: '30days', label: '30D' },
-    { value: '90days', label: '90D' },
-    { value: '1year', label: '1Y' },
+    { value: '7days', label: '7days' },
+    { value: '30days', label: '30days' },
+    { value: '90days', label: '90days' },
+    { value: '1year', label: '1year' },
     { value: 'all', label: 'All' }
   ]
 

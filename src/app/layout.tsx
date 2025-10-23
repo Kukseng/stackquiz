@@ -1,15 +1,12 @@
-"use client";
+/**
+ * Root Layout for StackQuiz
+ * Handles metadata, SEO, structured data, and global styles.
+ */
 
+import type { Metadata, Viewport } from "next";
 import { DM_Sans } from "next/font/google";
-import LayoutWrapper from "./LayoutWrapper";
-import { LanguageProvider } from "../context/LanguageContext";
-import { Provider } from "react-redux";
-import { store } from "../lib/store";
-import { SessionProvider } from "next-auth/react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { useState } from "react";
 import "./globals.css";
-import { StoreProvider } from "@/providers/StoreProvider";
+import ClientProviders from "./ClientProviders";
 
 const dmSans = DM_Sans({
   subsets: ["latin"],
@@ -17,101 +14,168 @@ const dmSans = DM_Sans({
   variable: "--font-dm-sans",
 });
 
+export const metadata: Metadata = {
+  title: "StackQuiz | Live | StackQuiz",
+  description:
+    "Engage with organizers in real-time StackQuiz. Compete in live quizzes and test your knowledge!",
+  metadataBase: new URL("https://stackquiz-two.vercel.app"),
+  openGraph: {
+    title: "StackQuiz | Real-time Quiz Platform",
+    description:
+      "Join live quizzes and compete with others instantly on StackQuiz.",
+    url: "https://stackquiz-two.vercel.app",
+    siteName: "StackQuiz",
+    images: [
+      {
+        url: "https://stackquiz-two.vercel.app/logo-sq.png",
+        width: 512,
+        height: 512,
+        alt: "StackQuiz Logo",
+      },
+    ],
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    site: "@stackquiz",
+    title: "StackQuiz | Live Quiz Platform",
+    description:
+      "Play, compete, and learn in real-time quizzes with StackQuiz.",
+    images: ["https://stackquiz-two.vercel.app/logo-sq.png"],
+  },
+  icons: {
+    icon: "/logo-sq.png",
+    apple: "/logo-sq.png",
+  },
+  alternates: {
+    canonical: "https://stackquiz-two.vercel.app",
+    languages: {
+      en: "https://stackquiz-two.vercel.app",
+      km: "https://stackquiz-two.vercel.app/km",
+    },
+  },
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: "#000000",
+};
+
 export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [queryClient] = useState(
-    () =>
-      new QueryClient({
-        defaultOptions: {
-          queries: {
-            refetchOnWindowFocus: true,
-            refetchOnMount: true,
-            refetchOnReconnect: true,
-            staleTime: 0, // Always fetch fresh data
-            retry: 1,
-          },
-        },
-      })
-  );
-
   return (
     <html lang="en" className={`${dmSans.variable} antialiased`}>
+     <head>
+  {/* Favicon & App Icons */}
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/logo-sq.png" />
+  <link rel="manifest" href="/manifest.json" />
+
+  {/* Canonical URL */}
+  <link rel="canonical" href="https://stackquiz-two.vercel.app" />
+
+  {/* Verification Tags */}
+  <meta
+    name="google-site-verification"
+    content="5LoLB2EkdDEg96hS9avM9OuqJX8E_hVpLCma3rAD77A"
+  />
+  <meta name="msvalidate.01" content="36597519DA34BDEA185B033DA0C5FD3A" />
+
+  {/* Open Graph (Facebook, LinkedIn) */}
+  <meta property="og:title" content="StackQuiz | Live Real-time Quiz Platform" />
+  <meta
+    property="og:description"
+    content="Compete in live quizzes, test your knowledge, and see your score in real-time on StackQuiz."
+  />
+  <meta property="og:url" content="https://stackquiz-two.vercel.app" />
+  <meta property="og:site_name" content="StackQuiz" />
+  <meta property="og:type" content="website" />
+  <meta
+    property="og:image"
+    content="https://stackquiz-two.vercel.app/logo-sq.png"
+  />
+
+  {/* Twitter Meta */}
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="StackQuiz | Live Real-time Quiz Platform" />
+  <meta
+    name="twitter:description"
+    content="Join real-time quizzes and compete instantly on StackQuiz."
+  />
+  <meta
+    name="twitter:image"
+    content="https://stackquiz-two.vercel.app/logo-sq.png"
+  />
+
+  {/* Structured Data - Organization */}
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        name: "StackQuiz",
+        url: "https://stackquiz-two.vercel.app",
+        logo: "https://stackquiz-two.vercel.app/logo-sq.png",
+        sameAs: [
+          "https://www.facebook.com/stackquiz",
+          "https://twitter.com/stackquiz",
+          "https://www.linkedin.com/company/stackquiz",
+        ],
+      }),
+    }}
+  />
+
+  {/* Structured Data - Website */}
+  <script
+    type="application/ld+json"
+    dangerouslySetInnerHTML={{
+      __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "StackQuiz",
+        url: "https://stackquiz-two.vercel.app",
+        potentialAction: {
+          "@type": "SearchAction",
+          target: {
+            "@type": "EntryPoint",
+            urlTemplate:
+              "https://stackquiz-two.vercel.app/explore?q={search_term_string}",
+          },
+          "query-input": "required name=search_term_string",
+        },
+      }),
+    }}
+  />
+
+  {/* Google Analytics */}
+  <script
+    async
+    src="https://www.googletagmanager.com/gtag/js?id=G-8680NV1H0J"
+  />
+  <script
+    dangerouslySetInnerHTML={{
+      __html: `
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-8680NV1H0J', {
+          page_path: window.location.pathname,
+        });
+      `,
+    }}
+  />
+</head>
+
+
       <body className="cosmic-bg overflow-hidden">
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              try {
-                const hook = window.__REACT_DEVTOOLS_GLOBAL_HOOK__;
-                if (hook && typeof hook.registerRendererInterface === 'function') {
-                  const original = hook.registerRendererInterface;
-                  hook.registerRendererInterface = function (id, renderer) {
-                    try {
-                      if (renderer && typeof renderer.version === 'string' && renderer.version.trim() === '') {
-                        renderer = { ...renderer, version: '0.0.0' };
-                      }
-                    } catch (e) {}
-                    return original.call(this, id, renderer);
-                  };
-                }
-              } catch (e) {}
-            `,
-          }}
-        />
-        <Provider store={store}>
-          <SessionProvider>
-            <QueryClientProvider client={queryClient}>
-              <StoreProvider>
-                <LanguageProvider>
-                  <LayoutWrapper>{children}</LayoutWrapper>
-                </LanguageProvider>
-              </StoreProvider>
-            </QueryClientProvider>
-          </SessionProvider>
-        </Provider>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   );
 }
-
-
-
-// import type { Metadata } from "next"
-// import { DM_Sans, Kantumruy_Pro } from "next/font/google"
-// import "./globals.css"
-// import Providers from "./Providers"   // new file
-// import { Toaster } from "@/components/ui/toaster"
-
-// const dmSans = DM_Sans({
-//   subsets: ["latin"],
-//   display: "swap",
-//   variable: "--font-dm-sans",
-// })
-
-// const kantumruyPro = Kantumruy_Pro({
-//   subsets: ["khmer"],
-//   display: "swap",
-//   variable: "--font-kantumruy",
-// })
-
-// export const metadata: Metadata = {
-//   title: "StackQuiz - Interactive Real-time Quiz Platform",
-//   description:
-//     "Create and participate in engaging real-time quizzes with live leaderboards and instant feedback",
-// }
-
-// export default function RootLayout({
-//   children,
-// }: {
-//   children: React.ReactNode
-// }) {
-//   return (
-//     <html lang="en" className={`${dmSans.variable} ${kantumruyPro.variable} antialiased`}>
-//       <body className="cosmic-bg overflow-hidden">
-//         <Providers>{children}</Providers>
-//       </body>
-//     </html>
-//   )
-// }

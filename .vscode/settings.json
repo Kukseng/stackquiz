@@ -13,8 +13,5 @@
         "menu.background": "#2A2F37",
         "menu.selectionBackground": "#0E629D"
     },
-    "i18n-ally.localesPaths": [
-        "src/locales",
-        "src/app/(auth)/login/locales"
-    ]
+    "java.project.explorer.showNonJavaResources": false
 }

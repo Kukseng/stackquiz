@@ -43,7 +43,7 @@ const themeCardImages: Record<string, string> = {
   gray: "/background/6.png",
 }
 
-const renderIcon = (icon?: string) => {
+const renderIcon = (icon?: IconType) => {
   switch (icon) {
     case "circle":
       return <FaCircle size={32} className="text-white mr-3 flex-shrink-0" />

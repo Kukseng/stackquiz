@@ -539,9 +539,8 @@ The questions have been added to your quiz! Would you like to generate more?`,
                   <Send className="w-5 h-5" />
                 </button>
               </div>
-              <p className="text-xs text-gray-500 mt-2 flex items-center space-x-1">
-                <Sparkles className="w-3 h-3" />
-                <span>Try: Generate 5 medium questions about React</span>
+              <p className="text-xs text-gray-500 mt-2">
+                💡 Try: Generate 5 medium questions about React
               </p>
             </div>
           </motion.div>

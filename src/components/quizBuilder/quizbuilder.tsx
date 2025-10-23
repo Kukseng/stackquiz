@@ -81,9 +81,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
   }, [quiz, isDataLoaded, setQuestions, setActiveQuestionId]);
 
   const handleDelete = (id: number | string) => {
-    const remaining = questions.filter((q) => q.id !== id);
-    deleteQuestion(typeof id === "string" ? Number(id) : id);
-    setActiveQuestionId(remaining.length ? remaining[0].id : null);
+    deleteQuestion(typeof id === "number" ? String(id) : id);
   };
 
   const handlePublishSuccess = () => {
@@ -164,7 +162,7 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
 
       {showDeleteModal && activeQuestionId && (
         <DeleteQuestionModal
-          questionId={typeof activeQuestionId === "string" ? Number(activeQuestionId) : activeQuestionId}
+          questionId={activeQuestionId}
           onClose={() => setShowDeleteModal(false)}
           onDelete={handleDelete}
         />

@@ -1,0 +1,22 @@
+# Default rules for all bots
+User-agent: *
+Allow: /
+Disallow: /(test)/
+Disallow: /api/
+Disallow: /admin/
+Disallow: /_next/
+Disallow: /private/
+Disallow: /*?*sort=
+Disallow: /*?*filter=
+Disallow: /dashboard/private/
+
+# Google Bot - no restrictions
+User-agent: Googlebot
+Allow: /
+
+# Bing Bot - no restrictions
+User-agent: Bingbot
+Allow: /
+
+# Sitemap location (must be at end)
+Sitemap: https://stackquiz-two.vercel.app/sitemap.xml

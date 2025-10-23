@@ -352,7 +352,7 @@ const DataTable = () => {
 
   if (error) {
     return (
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-12">
+      <div className="bg-white rounded-2xl shadow-sm border  border-gray-100 p-12">
         <div className="text-center max-w-md mx-auto">
           <div className="mx-auto h-16 w-16 bg-red-100 rounded-full flex items-center justify-center mb-4">
             <svg className="h-8 w-8 text-red-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -430,7 +430,7 @@ const DataTable = () => {
           </div>
 
           {/* Actions */}
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-3 bottom-full">
             <button className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
               <Filter className="h-4 w-4" />
               Filter

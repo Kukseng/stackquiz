@@ -1,121 +1,123 @@
-"use client"
-import type React from "react"
-import { useEffect, useState, useCallback, useRef } from "react"
-import { useParams, useRouter } from "next/navigation"
-import axios from "axios"
-import { Client } from "@stomp/stompjs"
-import SockJS from "sockjs-client"
-import { motion, AnimatePresence } from "framer-motion"
-import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6"
-import { IoTriangle } from "react-icons/io5"
+"use client";
+import type React from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { useParams, useRouter } from "next/navigation";
+import axios from "axios";
+import { Client } from "@stomp/stompjs";
+import SockJS from "sockjs-client";
+import { motion, AnimatePresence } from "framer-motion";
+import { FaCircle, FaSquare, FaDiamond } from "react-icons/fa6";
+import { IoTriangle } from "react-icons/io5";
 
 // ===== INTERFACES =====
 interface LeaderboardEntry {
-  participantId: string
-  nickname: string
-  totalScore: number
-  position: number
-  rank: number
-  isCurrentUser?: boolean
-  avatarId?: string
-  questionsAnswered?: number
-  correctAnswers?: number
-  streak?: number
-  positionChange?: number
-  isOnline?: boolean
-  lastActivity?: string
-  status?: string
+  participantId: string;
+  nickname: string;
+  totalScore: number;
+  position: number;
+  rank: number;
+  isCurrentUser?: boolean;
+  avatarId?: string;
+  questionsAnswered?: number;
+  correctAnswers?: number;
+  streak?: number;
+  positionChange?: number;
+  isOnline?: boolean;
+  lastActivity?: string;
+  status?: string;
 }
 
 interface ScoreCelebration {
-  participantId: string
-  nickname: string
-  pointsEarned: number
-  newTotalScore: number
-  newRank: number
-  isCorrect: boolean
-  celebrationType: string
-  animationType: string
+  participantId: string;
+  nickname: string;
+  pointsEarned: number;
+  newTotalScore: number;
+  newRank: number;
+  isCorrect: boolean;
+  celebrationType: string;
+  animationType: string;
 }
 
 interface ParticipantRankUpdate {
-  participantId: string
-  nickname: string
-  currentRank: number
-  previousRank: number
-  currentScore: number
-  scoreChange: number
-  updateType: string
+  participantId: string;
+  nickname: string;
+  currentRank: number;
+  previousRank: number;
+  currentScore: number;
+  scoreChange: number;
+  updateType: string;
 }
 
 interface QuestionStats {
-  sessionId: string
-  questionNumber: number
-  totalQuestions: number
-  totalParticipants: number
-  participantsAnswered: number
-  participantsRemaining: number
-  averageResponseTime: number
-  correctAnswers: number
-  incorrectAnswers: number
-  accuracyRate: number
-  isQuestionComplete: boolean
-  optionStats?: { [optionId: string]: number }
+  sessionId: string;
+  questionNumber: number;
+  totalQuestions: number;
+  totalParticipants: number;
+  participantsAnswered: number;
+  participantsRemaining: number;
+  averageResponseTime: number;
+  correctAnswers: number;
+  incorrectAnswers: number;
+  accuracyRate: number;
+  isQuestionComplete: boolean;
+  optionStats?: { [optionId: string]: number };
 }
 
 interface PersonalScoreUpdate {
-  participantId: string
-  participantNickname: string
-  previousScore: number
-  newScore: number
-  pointsEarned: number
-  currentRank: number
-  previousRank: number
-  isCorrect: boolean
-  questionId: string
-  streak?: number
-  timeBonus?: number
+  participantId: string;
+  participantNickname: string;
+  previousScore: number;
+  newScore: number;
+  pointsEarned: number;
+  currentRank: number;
+  previousRank: number;
+  isCorrect: boolean;
+  questionId: string;
+  streak?: number;
+  timeBonus?: number;
 }
 
 interface AnswerFeedback {
-  participantId: string
-  questionId: string
-  selectedOptionId: string
-  correctOptionId: string
-  isCorrect: boolean
-  pointsEarned: number
-  timeTaken: number
-  newTotalScore: number
-  currentRank: number
-  explanation: string
-  timeBonus?: number
-  streak?: number
-  encouragementMessage?: string
+  participantId: string;
+  questionId: string;
+  selectedOptionId: string;
+  correctOptionId: string;
+  isCorrect: boolean;
+  pointsEarned: number;
+  timeTaken: number;
+  newTotalScore: number;
+  currentRank: number;
+  explanation: string;
+  timeBonus?: number;
+  streak?: number;
+  encouragementMessage?: string;
 }
 
 interface Option {
-  id: string
-  text: string
-  correct: boolean
-  color?: string
-  icon?: string
+  id: string;
+  text: string;
+  correct: boolean;
+  color?: string;
+  icon?: string;
 }
 
 interface Question {
-  id: string
-  text: string
-  questionText?: string
-  options: Option[]
+  id: string;
+  text: string;
+  questionText?: string;
+  options: Option[];
 }
 
 // Configuration
 const WEBSOCKET_CONFIG = {
-  url: process.env.NEXT_PUBLIC_WEBSOCKET_URL || "https://stackquiz-api.stackquiz.me/ws",
+  url:
+    process.env.NEXT_PUBLIC_WEBSOCKET_URL ||
+    "https://stackquiz-api.stackquiz.me/api/v1/ws",
   reconnectDelay: 3000,
   heartbeatIncoming: 4000,
   heartbeatOutgoing: 4000,
   maxReconnectAttempts: 5,
-}
+};
 
 // Icon colors for options
 const OPTION_COLORS = [
@@ -123,41 +125,41 @@ const OPTION_COLORS = [
   "#E74C3C", // Red
   "#3498DB", // Blue
   "#2ECC71", // Green
-]
+];
 
-const OPTION_ICONS = ["circle", "triangle", "square", "diamond"]
+const OPTION_ICONS = ["circle", "triangle", "square", "diamond"];
 
 // Utility function
 const safeJsonParse = (jsonString: string, fallback: any = null) => {
   try {
-    return JSON.parse(jsonString)
+    return JSON.parse(jsonString);
   } catch (error) {
-    console.error("JSON parse error:", error)
-    return fallback
+    console.error("JSON parse error:", error);
+    return fallback;
   }
-}
+};
 
 const renderIcon = (icon?: string, size = 24) => {
-  const iconProps = { size, className: "text-white" }
+  const iconProps = { size, className: "text-white" };
   switch (icon) {
     case "circle":
-      return <FaCircle {...iconProps} />
+      return <FaCircle {...iconProps} />;
     case "triangle":
-      return <IoTriangle {...iconProps} />
+      return <IoTriangle {...iconProps} />;
     case "square":
-      return <FaSquare {...iconProps} />
+      return <FaSquare {...iconProps} />;
     case "diamond":
-      return <FaDiamond {...iconProps} />
+      return <FaDiamond {...iconProps} />;
     default:
-      return <FaCircle {...iconProps} />
+      return <FaCircle {...iconProps} />;
   }
-}
+};
 
 function getRankSuffix(rank: number): string {
-  if (rank === 1) return "st"
-  if (rank === 2) return "nd"
-  if (rank === 3) return "rd"
-  return "th"
+  if (rank === 1) return "st";
+  if (rank === 2) return "nd";
+  if (rank === 3) return "rd";
+  return "th";
 }
 
 // ===== LIVE RANKING COMPONENT =====
@@ -166,13 +168,13 @@ function LiveRankingPanel({
   personalRank,
   streak = 0,
 }: {
-  personalScore: number
-  personalRank: number
-  nickname: string
-  leaderboard: LeaderboardEntry[]
-  currentParticipantId: string
-  isMinimized?: boolean
-  streak?: number
+  personalScore: number;
+  personalRank: number;
+  nickname: string;
+  leaderboard: LeaderboardEntry[];
+  currentParticipantId: string;
+  isMinimized?: boolean;
+  streak?: number;
 }) {
   return (
     <>
@@ -184,7 +186,9 @@ function LiveRankingPanel({
         >
           <span className="text-3xl">🏆</span>
           <span className="text-white font-black text-2xl">
-            {personalRank > 0 ? `${personalRank}${getRankSuffix(personalRank)}` : "-"}
+            {personalRank > 0
+              ? `${personalRank}${getRankSuffix(personalRank)}`
+              : "-"}
           </span>
         </motion.div>
 
@@ -206,10 +210,12 @@ function LiveRankingPanel({
         className="fixed top-4 right-4 z-50 bg-gradient-to-br from-purple-600 to-indigo-700 backdrop-blur-md border-4 border-purple-300 rounded-2xl px-6 py-3 shadow-2xl"
       >
         <div className="text-white/80 text-sm font-bold mb-1">Score</div>
-        <div className="text-white font-black text-3xl">{personalScore.toLocaleString()}</div>
+        <div className="text-white font-black text-3xl">
+          {personalScore.toLocaleString()}
+        </div>
       </motion.div>
     </>
-  )
+  );
 }
 
 // ===== QUESTION TIMER COMPONENT =====
@@ -219,20 +225,20 @@ function QuestionTimer({
   isActive,
   onTimeUp,
 }: {
-  timeRemaining: number
-  timeLimit: number
-  isActive: boolean
-  onTimeUp: () => void
+  timeRemaining: number;
+  timeLimit: number;
+  isActive: boolean;
+  onTimeUp: () => void;
 }) {
-  const percentage = (timeRemaining / timeLimit) * 100
-  const isWarning = timeRemaining <= 5
-  const isCritical = timeRemaining <= 3
+  const percentage = (timeRemaining / timeLimit) * 100;
+  const isWarning = timeRemaining <= 5;
+  const isCritical = timeRemaining <= 3;
 
   useEffect(() => {
     if (timeRemaining === 0 && isActive) {
-      onTimeUp()
+      onTimeUp();
     }
-  }, [timeRemaining, isActive, onTimeUp])
+  }, [timeRemaining, isActive, onTimeUp]);
 
   return (
     <motion.div
@@ -245,7 +251,14 @@ function QuestionTimer({
       className="relative w-24 h-24 mx-auto mb-4"
     >
       <svg className="w-24 h-24 transform -rotate-90" viewBox="0 0 100 100">
-        <circle cx="50" cy="50" r="45" stroke="rgba(255,255,255,0.2)" strokeWidth="8" fill="transparent" />
+        <circle
+          cx="50"
+          cy="50"
+          r="45"
+          stroke="rgba(255,255,255,0.2)"
+          strokeWidth="8"
+          fill="transparent"
+        />
         <motion.circle
           cx="50"
           cy="50"
@@ -256,7 +269,9 @@ function QuestionTimer({
           strokeLinecap="round"
           strokeDasharray={`${2 * Math.PI * 45}`}
           strokeDashoffset={`${2 * Math.PI * 45 * (1 - percentage / 100)}`}
-          animate={{ strokeDashoffset: 2 * Math.PI * 45 * (1 - percentage / 100) }}
+          animate={{
+            strokeDashoffset: 2 * Math.PI * 45 * (1 - percentage / 100),
+          }}
           transition={{ duration: 0.5 }}
         />
       </svg>
@@ -266,14 +281,18 @@ function QuestionTimer({
           initial={{ scale: 1.2 }}
           animate={{ scale: 1 }}
           className={`text-3xl font-black ${
-            isCritical ? "text-red-400" : isWarning ? "text-yellow-400" : "text-white"
+            isCritical
+              ? "text-red-400"
+              : isWarning
+              ? "text-yellow-400"
+              : "text-white"
           }`}
         >
           {timeRemaining}
         </motion.span>
       </div>
     </motion.div>
-  )
+  );
 }
 
 // ===== ENHANCED WEBSOCKET HOOK =====
@@ -290,33 +309,33 @@ function useParticipantWebSocket(
   onRankUpdate: (rankUpdate: ParticipantRankUpdate) => void,
   onQuestionStats: (stats: QuestionStats) => void,
   onPersonalScoreUpdate: (scoreUpdate: PersonalScoreUpdate) => void,
-  onAnswerFeedback: (feedback: AnswerFeedback) => void,
+  onAnswerFeedback: (feedback: AnswerFeedback) => void
 ) {
-  const stompRef = useRef<Client | null>(null)
-  const questionStartTimeRef = useRef<number>(0)
-  const [connectionStatus, setConnectionStatus] = useState("Connecting...")
-  const [reconnectAttempts, setReconnectAttempts] = useState(0)
+  const stompRef = useRef<Client | null>(null);
+  const questionStartTimeRef = useRef<number>(0);
+  const [connectionStatus, setConnectionStatus] = useState("Connecting...");
+  const [reconnectAttempts, setReconnectAttempts] = useState(0);
 
-  const onGameStateRef = useRef(onGameState)
-  const onQuestionRef = useRef(onQuestion)
-  const onCompletionRef = useRef(onCompletion)
-  const onLeaderboardUpdateRef = useRef(onLeaderboardUpdate)
-  const onScoreCelebrationRef = useRef(onScoreCelebration)
-  const onRankUpdateRef = useRef(onRankUpdate)
-  const onQuestionStatsRef = useRef(onQuestionStats)
-  const onPersonalScoreUpdateRef = useRef(onPersonalScoreUpdate)
-  const onAnswerFeedbackRef = useRef(onAnswerFeedback)
+  const onGameStateRef = useRef(onGameState);
+  const onQuestionRef = useRef(onQuestion);
+  const onCompletionRef = useRef(onCompletion);
+  const onLeaderboardUpdateRef = useRef(onLeaderboardUpdate);
+  const onScoreCelebrationRef = useRef(onScoreCelebration);
+  const onRankUpdateRef = useRef(onRankUpdate);
+  const onQuestionStatsRef = useRef(onQuestionStats);
+  const onPersonalScoreUpdateRef = useRef(onPersonalScoreUpdate);
+  const onAnswerFeedbackRef = useRef(onAnswerFeedback);
 
   useEffect(() => {
-    onGameStateRef.current = onGameState
-    onQuestionRef.current = onQuestion
-    onCompletionRef.current = onCompletion
-    onLeaderboardUpdateRef.current = onLeaderboardUpdate
-    onScoreCelebrationRef.current = onScoreCelebration
-    onRankUpdateRef.current = onRankUpdate
-    onQuestionStatsRef.current = onQuestionStats
-    onPersonalScoreUpdateRef.current = onPersonalScoreUpdate
-    onAnswerFeedbackRef.current = onAnswerFeedback
+    onGameStateRef.current = onGameState;
+    onQuestionRef.current = onQuestion;
+    onCompletionRef.current = onCompletion;
+    onLeaderboardUpdateRef.current = onLeaderboardUpdate;
+    onScoreCelebrationRef.current = onScoreCelebration;
+    onRankUpdateRef.current = onRankUpdate;
+    onQuestionStatsRef.current = onQuestionStats;
+    onPersonalScoreUpdateRef.current = onPersonalScoreUpdate;
+    onAnswerFeedbackRef.current = onAnswerFeedback;
   }, [
     onGameState,
     onQuestion,
@@ -327,13 +346,13 @@ function useParticipantWebSocket(
     onQuestionStats,
     onPersonalScoreUpdate,
     onAnswerFeedback,
-  ])
+  ]);
 
   const connect = useCallback(() => {
-    if (!quizCode || !nickname || !participantId) return
+    if (!quizCode || !nickname || !participantId) return;
 
     try {
-      const sock = new SockJS(WEBSOCKET_CONFIG.url)
+      const sock = new SockJS(WEBSOCKET_CONFIG.url);
       const stomp = new Client({
         webSocketFactory: () => sock,
         reconnectDelay: WEBSOCKET_CONFIG.reconnectDelay,
@@ -343,229 +362,250 @@ function useParticipantWebSocket(
         connectHeaders: {
           participantId: participantId,
         },
-      })
+      });
 
       stomp.onConnect = () => {
-        console.log("✅ WebSocket connected")
-        setConnectionStatus("Connected")
-        setReconnectAttempts(0)
+        console.log("✅ WebSocket connected");
+        setConnectionStatus("Connected");
+        setReconnectAttempts(0);
 
         const subscriptions = [
           stomp.subscribe(`/topic/session/${quizCode}/game-state`, (msg) => {
-            const data = safeJsonParse(msg.body)
-            if (data) onGameStateRef.current(data)
+            const data = safeJsonParse(msg.body);
+            if (data) onGameStateRef.current(data);
           }),
 
           stomp.subscribe(`/user/queue/session/${quizCode}/question`, (msg) => {
-            const message = safeJsonParse(msg.body)
+            const message = safeJsonParse(msg.body);
             if (message) {
               if (message.action === "NEXT_QUESTION" || message.question) {
-                questionStartTimeRef.current = Date.now()
-                onQuestionRef.current(message)
+                questionStartTimeRef.current = Date.now();
+                onQuestionRef.current(message);
               } else if (message.action === "PARTICIPANT_COMPLETED") {
-                onCompletionRef.current(message)
+                onCompletionRef.current(message);
               }
             }
           }),
 
           stomp.subscribe(`/topic/session/${quizCode}/question`, (msg) => {
-            const message = safeJsonParse(msg.body)
+            const message = safeJsonParse(msg.body);
             if (message) {
-              questionStartTimeRef.current = Date.now()
-              onQuestionRef.current(message)
+              questionStartTimeRef.current = Date.now();
+              onQuestionRef.current(message);
             }
           }),
 
           stomp.subscribe(`/topic/session/${quizCode}/leaderboard`, (msg) => {
-            const data = safeJsonParse(msg.body)
+            const data = safeJsonParse(msg.body);
             if (data) {
-              let entries: LeaderboardEntry[] = []
+              let entries: LeaderboardEntry[] = [];
               if (data.leaderboard?.entries) {
-                entries = data.leaderboard.entries
+                entries = data.leaderboard.entries;
               } else if (data.entries) {
-                entries = data.entries
+                entries = data.entries;
               } else if (Array.isArray(data)) {
-                entries = data
+                entries = data;
               }
 
               if (Array.isArray(entries)) {
-                onLeaderboardUpdateRef.current(entries)
+                onLeaderboardUpdateRef.current(entries);
               }
             }
           }),
 
           stomp.subscribe(`/topic/session/${quizCode}/celebration`, (msg) => {
-            const celebration = safeJsonParse(msg.body)
+            const celebration = safeJsonParse(msg.body);
             if (celebration && celebration.participantId) {
-              onScoreCelebrationRef.current(celebration)
+              onScoreCelebrationRef.current(celebration);
             }
           }),
 
           stomp.subscribe(`/user/queue/session/${quizCode}/ranking`, (msg) => {
-            const rankUpdate = safeJsonParse(msg.body)
+            const rankUpdate = safeJsonParse(msg.body);
             if (rankUpdate && rankUpdate.participantId) {
-              onRankUpdateRef.current(rankUpdate)
+              onRankUpdateRef.current(rankUpdate);
             }
           }),
 
           stomp.subscribe(`/topic/session/${quizCode}/live-stats`, (msg) => {
-            const stats = safeJsonParse(msg.body)
+            const stats = safeJsonParse(msg.body);
             if (stats) {
-              onQuestionStatsRef.current(stats)
+              onQuestionStatsRef.current(stats);
             }
           }),
 
           stomp.subscribe(`/user/queue/session/${quizCode}/score`, (msg) => {
-            const scoreUpdate = safeJsonParse(msg.body)
+            const scoreUpdate = safeJsonParse(msg.body);
             if (scoreUpdate && scoreUpdate.participantId) {
-              onPersonalScoreUpdateRef.current(scoreUpdate)
+              onPersonalScoreUpdateRef.current(scoreUpdate);
             }
           }),
 
           stomp.subscribe(`/user/queue/session/${quizCode}/feedback`, (msg) => {
-            const feedback = safeJsonParse(msg.body)
+            const feedback = safeJsonParse(msg.body);
             if (feedback && feedback.participantId) {
-              onAnswerFeedbackRef.current(feedback)
+              onAnswerFeedbackRef.current(feedback);
             }
           }),
-        ]
-      }
+        ];
+      };
 
       stomp.onStompError = (frame) => {
-        console.error("❌ STOMP error:", frame.headers?.message || frame.body)
-        setConnectionStatus("Error")
+        console.error("❌ STOMP error:", frame.headers?.message || frame.body);
+        setConnectionStatus("Error");
 
         if (reconnectAttempts < WEBSOCKET_CONFIG.maxReconnectAttempts) {
           setTimeout(() => {
-            setReconnectAttempts((prev) => prev + 1)
-            connect()
-          }, WEBSOCKET_CONFIG.reconnectDelay)
+            setReconnectAttempts((prev) => prev + 1);
+            connect();
+          }, WEBSOCKET_CONFIG.reconnectDelay);
         }
-      }
+      };
 
       stomp.onDisconnect = () => {
-        console.warn("⚠️ WebSocket disconnected")
-        setConnectionStatus("Disconnected")
-      }
+        console.warn("⚠️ WebSocket disconnected");
+        setConnectionStatus("Disconnected");
+      };
 
-      stomp.activate()
-      stompRef.current = stomp
+      stomp.activate();
+      stompRef.current = stomp;
     } catch (error) {
-      console.error("❌ WebSocket setup error:", error)
-      setConnectionStatus("Error")
+      console.error("❌ WebSocket setup error:", error);
+      setConnectionStatus("Error");
     }
-  }, [quizCode, participantId, nickname, avatarId, reconnectAttempts])
+  }, [quizCode, participantId, nickname, avatarId, reconnectAttempts]);
 
   useEffect(() => {
-    connect()
+    connect();
 
     return () => {
-      stompRef.current?.deactivate()
-    }
-  }, [connect])
+      stompRef.current?.deactivate();
+    };
+  }, [connect]);
 
   const sendAnswer = useCallback(
     (optionId: string, questionId: string) => {
       if (!stompRef.current?.connected) {
-        console.error("⚠️ WebSocket not connected")
-        return false
+        console.error("⚠️ WebSocket not connected");
+        return false;
       }
 
-      const responseTime = Math.floor((Date.now() - questionStartTimeRef.current) / 1000)
+      const responseTime = Math.floor(
+        (Date.now() - questionStartTimeRef.current) / 1000
+      );
 
       const answerPayload = {
         participantId,
         questionId,
         selectedOptionId: optionId,
         responseTime,
-      }
+      };
 
       try {
         stompRef.current.publish({
           destination: `/app/session/${quizCode}/answer`,
           headers: { "content-type": "application/json" },
           body: JSON.stringify(answerPayload),
-        })
-        return true
+        });
+        return true;
       } catch (error) {
-        console.error("❌ Failed to send answer:", error)
-        return false
+        console.error("❌ Failed to send answer:", error);
+        return false;
       }
     },
-    [quizCode, participantId],
-  )
+    [quizCode, participantId]
+  );
 
-  return { sendAnswer, connectionStatus }
+  return { sendAnswer, connectionStatus };
 }
 
 // ===== MAIN COMPONENT =====
 export default function ParticipantQuizFixed() {
-  const params = useParams()
-  const router = useRouter()
-  const sessionCode = params?.sessionCode as string
+  const params = useParams();
+  const router = useRouter();
+  const sessionCode = params?.sessionCode as string;
 
-  const [joined, setJoined] = useState(false)
-  const [nickname, setNickname] = useState("")
-  const [avatarId, setAvatarId] = useState("")
-  const [participantId, setParticipantId] = useState("")
-  const [isSubmitting, setIsSubmitting] = useState(false)
-  const [error, setError] = useState("")
+  const [joined, setJoined] = useState(false);
+  const [nickname, setNickname] = useState("");
+  const [avatarId, setAvatarId] = useState("");
+  const [participantId, setParticipantId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState("");
 
-  const [gameState, setGameState] = useState<any>(null)
+  const [gameState, setGameState] = useState<any>(null);
   const [status, setStatus] = useState<
-    "LOBBY" | "COUNTDOWN" | "PLAY" | "ANSWER_REVEAL" | "RESULTS" | "COMPLETED" | "END"
-  >("LOBBY")
-  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null)
-  const [questionNumber, setQuestionNumber] = useState<number>(0)
-  const [totalQuestions, setTotalQuestions] = useState<number>(0)
-  const [timeLeft, setTimeLeft] = useState<number>(30)
-  const [answerSelected, setAnswerSelected] = useState<string | null>(null)
-  const [showFeedback, setShowFeedback] = useState(false)
-  const [feedback, setFeedback] = useState<any>(null)
+    | "LOBBY"
+    | "COUNTDOWN"
+    | "PLAY"
+    | "ANSWER_REVEAL"
+    | "RESULTS"
+    | "COMPLETED"
+    | "END"
+  >("LOBBY");
+  const [currentQuestion, setCurrentQuestion] = useState<Question | null>(null);
+  const [questionNumber, setQuestionNumber] = useState<number>(0);
+  const [totalQuestions, setTotalQuestions] = useState<number>(0);
+  const [timeLeft, setTimeLeft] = useState<number>(30);
+  const [answerSelected, setAnswerSelected] = useState<string | null>(null);
+  const [showFeedback, setShowFeedback] = useState(false);
+  const [feedback, setFeedback] = useState<any>(null);
 
-  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
-  const [celebrations, setCelebrations] = useState<ScoreCelebration[]>([])
-  const [currentCelebration, setCurrentCelebration] = useState<ScoreCelebration | null>(null)
-  const [rankUpdate, setRankUpdate] = useState<ParticipantRankUpdate | null>(null)
-  const [questionStats, setQuestionStats] = useState<QuestionStats | null>(null)
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [celebrations, setCelebrations] = useState<ScoreCelebration[]>([]);
+  const [currentCelebration, setCurrentCelebration] =
+    useState<ScoreCelebration | null>(null);
+  const [rankUpdate, setRankUpdate] = useState<ParticipantRankUpdate | null>(
+    null
+  );
+  const [questionStats, setQuestionStats] = useState<QuestionStats | null>(
+    null
+  );
 
-  const [personalScore, setPersonalScore] = useState<number>(0)
-  const [personalRank, setPersonalRank] = useState<number>(0)
-  const [scoreChange, setScoreChange] = useState<number | undefined>(undefined)
-  const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(null)
-  const [streak, setStreak] = useState<number>(0)
-  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false)
+  const [personalScore, setPersonalScore] = useState<number>(0);
+  const [personalRank, setPersonalRank] = useState<number>(0);
+  const [scoreChange, setScoreChange] = useState<number | undefined>(undefined);
+  const [answerFeedback, setAnswerFeedback] = useState<AnswerFeedback | null>(
+    null
+  );
+  const [streak, setStreak] = useState<number>(0);
+  const [isSubmittingAnswer, setIsSubmittingAnswer] = useState(false);
 
   const handleNavigateToJoinRoom = () => {
-    router.push('/join-room')
-  }
+    router.push("/join-room");
+  };
 
   async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault()
-    setError("")
+    e.preventDefault();
+    setError("");
 
     if (!nickname.trim()) {
-      return setError("Nickname is required")
+      return setError("Nickname is required");
     }
     if (!avatarId.trim()) {
-      return setError("Avatar ID is required")
+      return setError("Avatar ID is required");
     }
 
-    setIsSubmitting(true)
+    setIsSubmitting(true);
     try {
-      const res = await axios.post("https://stackquiz-api.stackquiz.me/api/v1/participants/join", {
-        quizCode: sessionCode,
-        nickname: nickname.trim(),
-        avatarId: avatarId.trim(),
-      })
+      const res = await axios.post(
+        "https://stackquiz-api.stackquiz.me/api/v1/participants/join",
+        {
+          quizCode: sessionCode,
+          nickname: nickname.trim(),
+          avatarId: avatarId.trim(),
+        }
+      );
 
-      setParticipantId(res.data.id)
-      setPersonalScore(res.data.totalScore || 0)
-      setJoined(true)
+      setParticipantId(res.data.id);
+      setPersonalScore(res.data.totalScore || 0);
+      setJoined(true);
     } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to join session. Please try again.")
+      setError(
+        err.response?.data?.message ||
+          "Failed to join session. Please try again."
+      );
     } finally {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
     }
   }
 
@@ -576,108 +616,123 @@ export default function ParticipantQuizFixed() {
     joined ? avatarId : "",
     (msg) => setGameState(msg),
     (qmsg) => {
-      const question = qmsg.question || qmsg
-      const qNumber = qmsg.questionNumber || qmsg.currentQuestion || 0
-      const total = qmsg.totalQuestions || 0
-      const timeLimit = qmsg.timeLimit || 30
+      const question = qmsg.question || qmsg;
+      const qNumber = qmsg.questionNumber || qmsg.currentQuestion || 0;
+      const total = qmsg.totalQuestions || 0;
+      const timeLimit = qmsg.timeLimit || 30;
 
       // Assign colors and icons to options
-      const optionsWithStyle = (question.options || []).map((opt: any, idx: number) => ({
-        ...opt,
-        color: OPTION_COLORS[idx % OPTION_COLORS.length],
-        icon: OPTION_ICONS[idx % OPTION_ICONS.length],
-      }))
+      const optionsWithStyle = (question.options || []).map(
+        (opt: any, idx: number) => ({
+          ...opt,
+          color: OPTION_COLORS[idx % OPTION_COLORS.length],
+          icon: OPTION_ICONS[idx % OPTION_ICONS.length],
+        })
+      );
 
-      setCurrentQuestion({ ...question, options: optionsWithStyle })
-      setQuestionNumber(qNumber)
-      setTotalQuestions(total)
-      setTimeLeft(timeLimit)
-      setAnswerSelected(null)
-      setFeedback(null)
-      setShowFeedback(false)
-      setAnswerFeedback(null)
-      setIsSubmittingAnswer(false)
-      setStatus("PLAY")
+      setCurrentQuestion({ ...question, options: optionsWithStyle });
+      setQuestionNumber(qNumber);
+      setTotalQuestions(total);
+      setTimeLeft(timeLimit);
+      setAnswerSelected(null);
+      setFeedback(null);
+      setShowFeedback(false);
+      setAnswerFeedback(null);
+      setIsSubmittingAnswer(false);
+      setStatus("PLAY");
     },
     (cmsg) => setStatus("COMPLETED"),
     (leaderboardEntries) => {
-      setLeaderboard(leaderboardEntries)
+      setLeaderboard(leaderboardEntries);
 
-      const currentParticipant = leaderboardEntries.find((entry) => entry.participantId === participantId)
+      const currentParticipant = leaderboardEntries.find(
+        (entry) => entry.participantId === participantId
+      );
       if (currentParticipant) {
-        setPersonalRank(currentParticipant.position)
-        setPersonalScore(currentParticipant.totalScore)
+        setPersonalRank(currentParticipant.position);
+        setPersonalScore(currentParticipant.totalScore);
         if (currentParticipant.streak) {
-          setStreak(currentParticipant.streak)
+          setStreak(currentParticipant.streak);
         }
       }
     },
     (celebration) => {
-      setCelebrations((prev) => [...prev, celebration])
+      setCelebrations((prev) => [...prev, celebration]);
 
       if (celebration.participantId === participantId) {
-        setCurrentCelebration(celebration)
-        setPersonalScore(celebration.newTotalScore)
-        setPersonalRank(celebration.newRank)
+        setCurrentCelebration(celebration);
+        setPersonalScore(celebration.newTotalScore);
+        setPersonalRank(celebration.newRank);
       }
 
       setTimeout(() => {
-        setCelebrations((prev) => prev.filter((c) => c.participantId !== celebration.participantId))
-      }, 3000)
+        setCelebrations((prev) =>
+          prev.filter((c) => c.participantId !== celebration.participantId)
+        );
+      }, 3000);
     },
     (rankUpdate) => {
       if (rankUpdate.participantId === participantId) {
-        setRankUpdate(rankUpdate)
-        setPersonalRank(rankUpdate.currentRank)
-        setPersonalScore(rankUpdate.currentScore)
-        setTimeout(() => setRankUpdate(null), 3000)
+        setRankUpdate(rankUpdate);
+        setPersonalRank(rankUpdate.currentRank);
+        setPersonalScore(rankUpdate.currentScore);
+        setTimeout(() => setRankUpdate(null), 3000);
       }
     },
     (stats) => setQuestionStats(stats),
     (scoreUpdate) => {
       if (scoreUpdate.participantId === participantId) {
-        setPersonalScore(scoreUpdate.newScore)
-        setPersonalRank(scoreUpdate.currentRank)
+        setPersonalScore(scoreUpdate.newScore);
+        setPersonalRank(scoreUpdate.currentRank);
 
         if (scoreUpdate.pointsEarned !== 0) {
-          setScoreChange(scoreUpdate.pointsEarned)
-          setTimeout(() => setScoreChange(undefined), 2000)
+          setScoreChange(scoreUpdate.pointsEarned);
+          setTimeout(() => setScoreChange(undefined), 2000);
         }
 
         if (scoreUpdate.streak) {
-          setStreak(scoreUpdate.streak)
+          setStreak(scoreUpdate.streak);
         }
       }
     },
     (feedback) => {
       if (feedback.participantId === participantId) {
-        setAnswerFeedback(feedback)
-        setPersonalScore(feedback.newTotalScore)
-        setPersonalRank(feedback.currentRank)
+        setAnswerFeedback(feedback);
+        setPersonalScore(feedback.newTotalScore);
+        setPersonalRank(feedback.currentRank);
 
         if (feedback.streak) {
-          setStreak(feedback.streak)
+          setStreak(feedback.streak);
         }
 
-        setStatus("ANSWER_REVEAL")
-        setIsSubmittingAnswer(false)
+        setStatus("ANSWER_REVEAL");
+        setIsSubmittingAnswer(false);
       }
-    },
-  )
+    }
+  );
 
   useEffect(() => {
-    if (!gameState) return
+    if (!gameState) return;
 
-    if (gameState.action === "SESSION_STARTED" || gameState.status === "IN_PROGRESS") {
+    if (
+      gameState.action === "SESSION_STARTED" ||
+      gameState.status === "IN_PROGRESS"
+    ) {
       if (!currentQuestion && status !== "ANSWER_REVEAL") {
-        setStatus("PLAY")
+        setStatus("PLAY");
       }
-    } else if (gameState.action === "SESSION_ENDED" || gameState.status === "ENDED") {
-      setStatus("END")
-    } else if (gameState.action === "SESSION_LOBBY" || gameState.status === "WAITING") {
-      setStatus("LOBBY")
+    } else if (
+      gameState.action === "SESSION_ENDED" ||
+      gameState.status === "ENDED"
+    ) {
+      setStatus("END");
+    } else if (
+      gameState.action === "SESSION_LOBBY" ||
+      gameState.status === "WAITING"
+    ) {
+      setStatus("LOBBY");
     }
-  }, [gameState, currentQuestion, status])
+  }, [gameState, currentQuestion, status]);
 
   useEffect(() => {
     if (
@@ -688,42 +743,54 @@ export default function ParticipantQuizFixed() {
       !showFeedback &&
       !isSubmittingAnswer
     ) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-      return () => clearTimeout(timer)
-    } else if (timeLeft === 0 && status === "PLAY" && !answerSelected && !isSubmittingAnswer) {
-      handleTimeUp()
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (
+      timeLeft === 0 &&
+      status === "PLAY" &&
+      !answerSelected &&
+      !isSubmittingAnswer
+    ) {
+      handleTimeUp();
     }
-  }, [timeLeft, status, currentQuestion, answerSelected, showFeedback, isSubmittingAnswer])
+  }, [
+    timeLeft,
+    status,
+    currentQuestion,
+    answerSelected,
+    showFeedback,
+    isSubmittingAnswer,
+  ]);
 
   function handleTimeUp() {
-    setFeedback({ timeUp: true, canStillAnswer: true })
+    setFeedback({ timeUp: true, canStillAnswer: true });
   }
 
   function handleAnswer(optionId: string) {
     if (!currentQuestion || answerSelected || isSubmittingAnswer) {
-      return
+      return;
     }
 
-    setAnswerSelected(optionId)
-    setIsSubmittingAnswer(true)
+    setAnswerSelected(optionId);
+    setIsSubmittingAnswer(true);
 
-    const success = sendAnswer(optionId, currentQuestion.id)
+    const success = sendAnswer(optionId, currentQuestion.id);
     if (success) {
-      setShowFeedback(true)
-      setFeedback({ submitted: true })
+      setShowFeedback(true);
+      setFeedback({ submitted: true });
     } else {
-      setAnswerSelected(null)
-      setIsSubmittingAnswer(false)
-      setError("Failed to submit answer. Please try again.")
+      setAnswerSelected(null);
+      setIsSubmittingAnswer(false);
+      setError("Failed to submit answer. Please try again.");
     }
   }
 
   function handleContinueFromReveal() {
-    setStatus("PLAY")
-    setAnswerFeedback(null)
-    setAnswerSelected(null)
-    setShowFeedback(false)
-    setFeedback(null)
+    setStatus("PLAY");
+    setAnswerFeedback(null);
+    setAnswerSelected(null);
+    setShowFeedback(false);
+    setFeedback(null);
   }
 
   // Join form UI
@@ -758,7 +825,9 @@ export default function ParticipantQuizFixed() {
           className="bg-gray-700/80 backdrop-blur-md rounded-3xl shadow-2xl p-8 w-full max-w-md"
         >
           <div className="text-center mb-6">
-            <h2 className="text-white text-2xl font-semibold mb-2">Your nickname is ...</h2>
+            <h2 className="text-white text-2xl font-semibold mb-2">
+              Your nickname is ...
+            </h2>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -804,7 +873,7 @@ export default function ParticipantQuizFixed() {
           </form>
         </motion.div>
       </div>
-    )
+    );
   }
 
   // Connection status indicator
@@ -816,15 +885,16 @@ export default function ParticipantQuizFixed() {
         connectionStatus === "Connecting..."
           ? "bg-yellow-600"
           : connectionStatus === "Disconnected"
-            ? "bg-red-600"
-            : "bg-red-700"
+          ? "bg-red-600"
+          : "bg-red-700"
       }`}
     >
       {connectionStatus === "Connecting..." && "🔄 Connecting..."}
-      {connectionStatus === "Disconnected" && "⚠️ Connection lost - Reconnecting..."}
+      {connectionStatus === "Disconnected" &&
+        "⚠️ Connection lost - Reconnecting..."}
       {connectionStatus === "Error" && "❌ Connection error - Please refresh"}
     </motion.div>
-  )
+  );
 
   // Quiz ended
   if (status === "END") {
@@ -840,7 +910,7 @@ export default function ParticipantQuizFixed() {
           <Rank leaderboard={leaderboard} />
         </div>
       </div>
-    )
+    );
   }
 
   // Participant completed
@@ -855,7 +925,7 @@ export default function ParticipantQuizFixed() {
         {connectionIndicator}
 
         {/* Close button */}
-        <button 
+        <button
           onClick={handleNavigateToJoinRoom}
           className="absolute top-6 left-6 w-12 h-12 bg-white rounded-full flex items-center justify-center shadow-lg hover:bg-gray-100 transition-colors cursor-pointer"
         >
@@ -936,7 +1006,9 @@ export default function ParticipantQuizFixed() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-white/70 text-sm mb-1">Score</p>
-                    <p className="text-white text-3xl font-bold">{personalScore}</p>
+                    <p className="text-white text-3xl font-bold">
+                      {personalScore}
+                    </p>
                   </div>
                   <span className="text-4xl">🪙</span>
                 </div>
@@ -957,10 +1029,14 @@ export default function ParticipantQuizFixed() {
             </motion.button>
 
             {/* Performance stats */}
-            <div className="text-white text-lg font-semibold mb-4">Performance stats</div>
+            <div className="text-white text-lg font-semibold mb-4">
+              Performance stats
+            </div>
             <div className="grid grid-cols-3 gap-3">
               <div className="bg-black/40 rounded-xl p-4 text-center">
-                <p className="text-3xl font-bold text-white mb-1">{totalQuestions - 1}</p>
+                <p className="text-3xl font-bold text-white mb-1">
+                  {totalQuestions - 1}
+                </p>
                 <p className="text-white/70 text-sm">Correct</p>
               </div>
               <div className="bg-black/40 rounded-xl p-4 text-center">
@@ -1006,7 +1082,7 @@ export default function ParticipantQuizFixed() {
           streak={streak}
         />
       </div>
-    )
+    );
   }
 
   // Waiting in lobby
@@ -1070,7 +1146,7 @@ export default function ParticipantQuizFixed() {
           </motion.div>
         </div>
       </div>
-    )
+    );
   }
 
   // Playing - waiting for question
@@ -1086,7 +1162,11 @@ export default function ParticipantQuizFixed() {
           >
             🕐
           </motion.div>
-          <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="text-3xl font-bold mb-4">
+          <motion.h2
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-3xl font-bold mb-4"
+          >
             Get Ready!
           </motion.h2>
           <motion.p
@@ -1109,12 +1189,12 @@ export default function ParticipantQuizFixed() {
           streak={streak}
         />
       </div>
-    )
+    );
   }
 
   // Answer reveal phase
   if (status === "ANSWER_REVEAL" && answerFeedback) {
-    const isCorrect = answerFeedback.isCorrect
+    const isCorrect = answerFeedback.isCorrect;
 
     return (
       <div
@@ -1127,7 +1207,9 @@ export default function ParticipantQuizFixed() {
 
         {/* Question number indicator */}
         <div className="absolute top-6 left-6 w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-gray-800 font-bold text-xl">{questionNumber}</span>
+          <span className="text-gray-800 font-bold text-xl">
+            {questionNumber}
+          </span>
         </div>
 
         <div className="text-center max-w-2xl px-6 z-10">
@@ -1143,7 +1225,9 @@ export default function ParticipantQuizFixed() {
                 isCorrect ? "bg-green-500" : "bg-red-400"
               } shadow-2xl`}
             >
-              <span className="text-white text-6xl">{isCorrect ? "✓" : "✕"}</span>
+              <span className="text-white text-6xl">
+                {isCorrect ? "✓" : "✕"}
+              </span>
             </div>
           </motion.div>
 
@@ -1166,7 +1250,9 @@ export default function ParticipantQuizFixed() {
               className="mb-6"
             >
               <div className="inline-block bg-gray-700/80 backdrop-blur-sm rounded-2xl px-8 py-4 shadow-xl">
-                <span className="text-white text-4xl font-bold">+{answerFeedback.pointsEarned}</span>
+                <span className="text-white text-4xl font-bold">
+                  +{answerFeedback.pointsEarned}
+                </span>
               </div>
             </motion.div>
           )}
@@ -1182,7 +1268,11 @@ export default function ParticipantQuizFixed() {
           </motion.p>
 
           {/* Continue button */}
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2 }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 2 }}
+          >
             <button
               onClick={handleContinueFromReveal}
               className="px-8 py-4 bg-white/20 backdrop-blur-sm border-2 border-white/30 text-white rounded-2xl font-semibold text-lg hover:bg-white/30 transition-all"
@@ -1202,7 +1292,7 @@ export default function ParticipantQuizFixed() {
           streak={streak}
         />
       </div>
-    )
+    );
   }
 
   // Playing - showing question
@@ -1228,7 +1318,9 @@ export default function ParticipantQuizFixed() {
 
         {/* Question number indicator */}
         <div className="absolute top-6 left-6 w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-lg">
-          <span className="text-gray-800 font-bold text-xl">{questionNumber}</span>
+          <span className="text-gray-800 font-bold text-xl">
+            {questionNumber}
+          </span>
         </div>
 
         <div className="max-w-4xl w-full space-y-6 z-10">
@@ -1253,42 +1345,50 @@ export default function ParticipantQuizFixed() {
 
           {/* Answer Options */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {(currentQuestion.options || []).map((option: any, index: number) => {
-              const isSelected = answerSelected === option.id
-              const isDisabled =
-                answerSelected !== null || (showFeedback && !feedback?.canStillAnswer) || isSubmittingAnswer
+            {(currentQuestion.options || []).map(
+              (option: any, index: number) => {
+                const isSelected = answerSelected === option.id;
+                const isDisabled =
+                  answerSelected !== null ||
+                  (showFeedback && !feedback?.canStillAnswer) ||
+                  isSubmittingAnswer;
 
-              return (
-                <motion.button
-                  key={option.id}
-                  initial={{ opacity: 0, scale: 0.9 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  transition={{ delay: index * 0.1 }}
-                  whileHover={!isDisabled ? { scale: 1.02 } : {}}
-                  whileTap={!isDisabled ? { scale: 0.98 } : {}}
-                  onClick={() => handleAnswer(option.id)}
-                  disabled={isDisabled}
-                  className={`p-6 rounded-2xl text-left font-semibold text-lg transition-all duration-200 ${
-                    isSelected
-                      ? "bg-white text-gray-800 shadow-2xl transform scale-105"
-                      : isDisabled
+                return (
+                  <motion.button
+                    key={option.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={!isDisabled ? { scale: 1.02 } : {}}
+                    whileTap={!isDisabled ? { scale: 0.98 } : {}}
+                    onClick={() => handleAnswer(option.id)}
+                    disabled={isDisabled}
+                    className={`p-6 rounded-2xl text-left font-semibold text-lg transition-all duration-200 ${
+                      isSelected
+                        ? "bg-white text-gray-800 shadow-2xl transform scale-105"
+                        : isDisabled
                         ? "bg-gray-600/40 text-gray-400 cursor-not-allowed"
                         : "bg-gray-700/60 backdrop-blur-sm text-white hover:bg-gray-600/60 shadow-lg"
-                  }`}
-                >
-                  <div className="flex items-center space-x-3">
-                    <span
-                      className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${
-                        isSelected ? "bg-gray-800 text-white" : "bg-white/20 text-white"
-                      }`}
-                    >
-                      {String.fromCharCode(65 + index)}
-                    </span>
-                    <span className="flex-1">{option.text || option.optionText}</span>
-                  </div>
-                </motion.button>
-              )
-            })}
+                    }`}
+                  >
+                    <div className="flex items-center space-x-3">
+                      <span
+                        className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xl ${
+                          isSelected
+                            ? "bg-gray-800 text-white"
+                            : "bg-white/20 text-white"
+                        }`}
+                      >
+                        {String.fromCharCode(65 + index)}
+                      </span>
+                      <span className="flex-1">
+                        {option.text || option.optionText}
+                      </span>
+                    </div>
+                  </motion.button>
+                );
+              }
+            )}
           </div>
 
           {/* Feedback messages */}
@@ -1299,7 +1399,9 @@ export default function ParticipantQuizFixed() {
               className="mt-6 p-4 bg-white/20 backdrop-blur-sm border-2 border-white/30 rounded-2xl text-center"
             >
               <p className="text-white font-semibold">
-                {isSubmittingAnswer ? "📤 Submitting answer..." : "✅ Answer submitted!"}
+                {isSubmittingAnswer
+                  ? "📤 Submitting answer..."
+                  : "✅ Answer submitted!"}
               </p>
             </motion.div>
           )}
@@ -1311,7 +1413,9 @@ export default function ParticipantQuizFixed() {
               className="mt-6 p-4 bg-yellow-500/20 backdrop-blur-sm border-2 border-yellow-400/50 rounded-2xl text-center"
             >
               <p className="text-white font-semibold">⏰ Time's up!</p>
-              <p className="text-white/80 text-sm mt-1">You can still answer for base points</p>
+              <p className="text-white/80 text-sm mt-1">
+                You can still answer for base points
+              </p>
             </motion.div>
           )}
         </div>
@@ -1337,8 +1441,8 @@ export default function ParticipantQuizFixed() {
           )}
         </AnimatePresence>
       </div>
-    )
+    );
   }
 
-  return null
+  return null;
 }

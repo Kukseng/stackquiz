@@ -80,10 +80,10 @@ curl -I https://stackquiz-two.vercel.app
 curl -s https://stackquiz-two.vercel.app | grep -A 2 '<meta name="description"'
 
 # Check robots.txt
-curl https://stackquiz-two.vercel.app/robots.txt
+curl https://www.stackquiz.me/robots.txt
 
 # Check sitemap.xml
-curl https://stackquiz-two.vercel.app/sitemap.xml
+curl https://www.stackquiz.me/sitemap.xml
 ```
 
 ---
@@ -112,9 +112,9 @@ document.querySelectorAll('script[type="application/ld+json"]')
 ```
 
 ### 3. Check SEO Files
-- [ ] Robots.txt: https://stackquiz-two.vercel.app/robots.txt
-- [ ] Sitemap: https://stackquiz-two.vercel.app/sitemap.xml
-- [ ] Favicon: https://stackquiz-two.vercel.app/favicon.ico
+- [ ] Robots.txt: https://www.stackquiz.me/robots.txt
+- [ ] Sitemap: https://www.stackquiz.me/sitemap.xml
+- [ ] Favicon: https://www.stackquiz.me/favicon.ico
 
 ### 4. Validate Metadata
 - [ ] Use Google Rich Results Test: https://search.google.com/test/rich-results?url=https://stackquiz-two.vercel.app
@@ -152,7 +152,7 @@ document.querySelectorAll('script[type="application/ld+json"]')
 ### 3. Submit Sitemap
 1. After verification, go to Sitemaps section
 2. Click "Add/test sitemap"
-3. Enter: `https://stackquiz-two.vercel.app/sitemap.xml`
+3. Enter: `https://www.stackquiz.me/sitemap.xml`
 4. Click "Submit"
 
 ### 4. Request Indexing
@@ -179,7 +179,7 @@ document.querySelectorAll('script[type="application/ld+json"]')
 ### 3. Submit Sitemap
 1. Go to Sitemaps section
 2. Click "Submit sitemap"
-3. Enter: `https://stackquiz-two.vercel.app/sitemap.xml`
+3. Enter: `https://www.stackquiz.me/sitemap.xml`
 
 ---
 

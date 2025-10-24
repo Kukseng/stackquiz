@@ -18,16 +18,16 @@ export const metadata: Metadata = {
   title: "StackQuiz | Live | StackQuiz",
   description:
     "Engage with organizers in real-time StackQuiz. Compete in live quizzes and test your knowledge!",
-  metadataBase: new URL("https://stackquiz-two.vercel.app"),
+  metadataBase: new URL("https://www.stackquiz.me"),
   openGraph: {
     title: "StackQuiz | Real-time Quiz Platform",
     description:
       "Join live quizzes and compete with others instantly on StackQuiz.",
-    url: "https://stackquiz-two.vercel.app",
+    url: "https://www.stackquiz.me",
     siteName: "StackQuiz",
     images: [
       {
-        url: "https://stackquiz-two.vercel.app/logo-sq.png",
+        url: "https://www.stackquiz.me/logo-sq.png",
         width: 512,
         height: 512,
         alt: "StackQuiz Logo",
@@ -42,17 +42,17 @@ export const metadata: Metadata = {
     title: "StackQuiz | Live Quiz Platform",
     description:
       "Play, compete, and learn in real-time quizzes with StackQuiz.",
-    images: ["https://stackquiz-two.vercel.app/logo-sq.png"],
+    images: ["https://www.stackquiz.me/logo-sq.png"],
   },
   icons: {
     icon: "/logo-sq.png",
     apple: "/logo-sq.png",
   },
   alternates: {
-    canonical: "https://stackquiz-two.vercel.app",
+    canonical: "https://www.stackquiz.me",
     languages: {
-      en: "https://stackquiz-two.vercel.app",
-      km: "https://stackquiz-two.vercel.app/km",
+      en: "https://www.stackquiz.me",
+      km: "https://www.stackquiz.me/km",
     },
   },
 };
@@ -77,7 +77,7 @@ export default function RootLayout({
   <link rel="manifest" href="/manifest.json" />
 
   {/* Canonical URL */}
-  <link rel="canonical" href="https://stackquiz-two.vercel.app" />
+  <link rel="canonical" href="https://www.stackquiz.me" />
 
   {/* Verification Tags */}
   <meta
@@ -92,12 +92,12 @@ export default function RootLayout({
     property="og:description"
     content="Compete in live quizzes, test your knowledge, and see your score in real-time on StackQuiz."
   />
-  <meta property="og:url" content="https://stackquiz-two.vercel.app" />
+  <meta property="og:url" content="https://www.stackquiz.me" />
   <meta property="og:site_name" content="StackQuiz" />
   <meta property="og:type" content="website" />
   <meta
     property="og:image"
-    content="https://stackquiz-two.vercel.app/logo-sq.png"
+    content="https://www.stackquiz.me/logo-sq.png"
   />
 
   {/* Twitter Meta */}
@@ -109,7 +109,7 @@ export default function RootLayout({
   />
   <meta
     name="twitter:image"
-    content="https://stackquiz-two.vercel.app/logo-sq.png"
+    content="https://www.stackquiz.me/logo-sq.png"
   />
 
   {/* Structured Data - Organization */}
@@ -117,11 +117,11 @@ export default function RootLayout({
     type="application/ld+json"
     dangerouslySetInnerHTML={{
       __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "Organization",
-        name: "StackQuiz",
-        url: "https://stackquiz-two.vercel.app",
-        logo: "https://stackquiz-two.vercel.app/logo-sq.png",
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: "StackQuiz",
+  url: "https://www.stackquiz.me",
+  logo: "https://www.stackquiz.me/logo-sq.png",
         sameAs: [
           "https://www.facebook.com/stackquiz",
           "https://twitter.com/stackquiz",
@@ -136,16 +136,16 @@ export default function RootLayout({
     type="application/ld+json"
     dangerouslySetInnerHTML={{
       __html: JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: "StackQuiz",
-        url: "https://stackquiz-two.vercel.app",
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  name: "StackQuiz",
+  url: "https://www.stackquiz.me",
         potentialAction: {
           "@type": "SearchAction",
           target: {
             "@type": "EntryPoint",
             urlTemplate:
-              "https://stackquiz-two.vercel.app/explore?q={search_term_string}",
+              "https://www.stackquiz.me/explore?q={search_term_string}",
           },
           "query-input": "required name=search_term_string",
         },

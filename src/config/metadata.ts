@@ -10,11 +10,13 @@ import type { Metadata } from "next";
 /**
  * Constants for SEO configuration
  */
-const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://stackquiz-two.vercel.app';
+// Default to the public site domain; allow override via NEXT_PUBLIC_APP_URL
+const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://www.stackquiz.me';
 const brandName = 'StackQuiz';
 const brandTagline = 'Interactive Real-time Quiz Platform';
 const description = 'Interactive Real-time Quiz Platform';
-const defaultImage = "https://stackquiz.me/bg-meta.png";
+// Use the canonical site logo as the default metadata image so structured data is consistent
+const defaultImage = `${baseUrl.replace(/\/+$/, "")}/logo-sq.png`;
 const defaultLanguage = "en";
 
 /**
@@ -35,7 +37,7 @@ export const baseMetadata: Metadata = {
     "live quiz",
     "quiz platform",
     "online quiz",
-    "quiz game",
+    "stackquiz",
     "quiz maker",
     "leaderboard",
     "education platform",

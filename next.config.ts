@@ -19,7 +19,7 @@ const nextConfig = {
             value: 'www.stackquiz-two.vercel.app',
           },
         ],
-        destination: 'https://stackquiz-two.vercel.app/:path*',
+        destination: 'https://www.stackquiz.me/:path*',
         permanent: true, // 301 permanent redirect
       },
       // Redirect root to join-room (temporary 307)

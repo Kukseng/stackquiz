@@ -19,4 +19,4 @@ User-agent: Bingbot
 Allow: /
 
 # Sitemap location (must be at end)
-Sitemap: https://stackquiz-two.vercel.app/sitemap.xml
+Sitemap: https://www.stackquiz.me/sitemap.xml

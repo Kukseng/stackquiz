@@ -1,0 +1,15 @@
+[
+  {
+    "id": 2,
+    "avatarNo": 1,
+    "name": "Default",
+    "modelUrl": "/models/spider-dance.glb"
+  },
+  {
+    "id": 3,
+    "avatarNo": 2,
+    "name": "Fox",
+    "modelUrl": "/models/boxing-girl.glb"
+  }
+ 
+]

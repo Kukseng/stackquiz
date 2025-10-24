@@ -1,1037 +1,42 @@
+// ============================================================================
+// FILE: components/host-dashboard/index.tsx
+// Host Dashboard with Kahoot-style flow
+// ============================================================================
+
 "use client"
-import type React from "react"
-import { useCallback, useState, useEffect, useRef } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { useParams } from "next/navigation"
-import { Client } from "@stomp/stompjs"
-import SockJS from "sockjs-client"
-import { QRCodeCanvas } from "qrcode.react"
-import { motion, AnimatePresence } from "framer-motion"
-import { getSession } from "next-auth/react"
-import { Link } from "lucide-react"
+import { AnimatePresence, motion } from "framer-motion"
+
+// Components
+import { SessionCodeInput } from "@/components/host-dashboard/components/SessionCodeInput"
+import { QuizSettingsModal } from "@/components/host-dashboard/components/QuizSettingsModal"
+import { QRCodeSection } from "@/components/host-dashboard/components/QRCodeSection"
+import { EnhancedLeaderboard } from "@/components/host-dashboard/components/EnhancedLeaderboard"
+
+// Hooks
+import { useAuth } from "@/components/host-dashboard/hooks/useAuth"
+import { useWebSocket } from "@/components/host-dashboard/hooks/useWebSocket"
+import { useHostCommands } from "@/components/host-dashboard/hooks/useHostCommands"
+import { useParticipantProgress } from "@/components/host-dashboard/hooks/useParticipantProgress"
+import { useDashboardData } from "@/components/host-dashboard/hooks/useDashboardData"
+
+// Types
+import type {
+  HostDashboardData,
+  LeaderboardEntry,
+  ScoreCelebration,
+  QuestionStats,
+} from "./types"
+
+// View types for the flow
+type HostView = "lobby" | "question" | "leaderboard" | "final-results"
 
-// Enhanced interfaces for better type safety - Updated to match backend DTOs
-interface LeaderboardEntry {
-  participantId: string
-  nickname: string
-  totalScore: number
-  position: number
-  rank: number
-  currentRank?: number
-  isCurrentUser?: boolean
-  avatarId?: string
-  questionsAnswered?: number
-  averageResponseTime?: number
-  correctAnswers?: number
-  streak?: number
-  isOnline?: boolean
-  lastActivity?: string
-  status?: string
-  positionChange?: number
-}
-
-interface EnhancedLeaderboard {
-  sessionId: string
-  entries: LeaderboardEntry[]
-  totalParticipants: number
-  lastUpdated: number
-  status: string
-}
-
-interface ScoreCelebration {
-  participantId: string
-  nickname: string
-  pointsEarned: number
-  newTotalScore: number
-  newRank: number
-  isCorrect: boolean
-  celebrationType: string
-  animationType: string
-}
-
-interface QuestionStats {
-  sessionId: string
-  questionNumber: number
-  totalQuestions: number
-  totalParticipants: number
-  participantsAnswered: number
-  participantsRemaining: number
-  averageResponseTime: number
-  correctAnswers: number
-  incorrectAnswers: number
-  accuracyRate: number
-  isQuestionComplete: boolean
-}
-
-// NEW: Host Dashboard Response interface matching backend
-interface HostDashboardData {
-  sessionId: string
-  sessionCode: string
-  sessionName: string
-  sessionStatus: string
-  currentQuestion: number
-  totalQuestions: number
-  totalParticipants: number
-  activeParticipants: number
-  participantsAnswered: number
-  participantsPending: number
-  currentTimer?: {
-    timerType: string
-    timerStatus: string
-    remainingSeconds: number
-    totalSeconds: number
-  }
-  canStart: boolean
-  canPause: boolean
-  canResume: boolean
-  canEnd: boolean
-  canAdvanceQuestion: boolean
-}
-
-// Participant Progress Interfaces
-interface ParticipantAnswer {
-  questionNumber: number
-  isCorrect: boolean
-  answered: boolean
-  pointsEarned: number
-  timeSpent?: number
-}
-
-interface DetailedParticipantProgress {
-  participantId: string
-  nickname: string
-  avatarId: string
-  totalScore: number
-  currentQuestionNumber: number
-  answeredCount: number
-  correctCount: number
-  accuracy: number
-  answers: ParticipantAnswer[]
-  status: "active" | "idle" | "completed"
-  lastActivityTime?: string
-}
-
-// FIXED: NextAuth authentication helper functions
-const getAuthHeaders = async () => {
-  try {
-    const session = await getSession()
-    const token = (session as any)?.apiAccessToken
-
-    if (!token) {
-      console.warn("⚠️ No authentication token found in session. Please login first.")
-      return {}
-    }
-
-    return {
-      Authorization: `Bearer ${token}`,
-      "Content-Type": "application/json",
-    }
-  } catch (error) {
-    console.error("❌ Error getting session:", error)
-    return {}
-  }
-}
-
-const checkAuthToken = async () => {
-  try {
-    const session = await getSession()
-    const token = (session as any)?.apiAccessToken
-    return !!token
-  } catch (error) {
-    console.error("❌ Error checking auth token:", error)
-    return false
-  }
-}
-
-// FIXED: WebSocket URL helper function
-const getWebSocketUrl = () => {
-  // For local development
-  if (typeof window !== "undefined") {
-    const hostname = window.location.hostname
-
-    // Local development URLs
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "https://stackquiz-api.stackquiz.me/ws"
-    }
-  }
-
-  // Use environment variable or fallback to production
-  const apiUrl = process.env.NEXT_PUBLIC_API_URL
-  if (apiUrl) {
-    // Remove /api/v1 or /api and replace with /ws
-    // Ensure we use https:// not wss://
-    const wsUrl = apiUrl
-      .replace(/\/api\/v1\/?$/, "") // Remove /api/v1 or /api/v1/
-      .replace(/\/api\/?$/, "") // Remove /api or /api/
-      .replace(/\/v1\/?$/, "") // Remove any trailing /v1 or /v1/
-
-    // Append /ws (not /ws/v1)
-    return `${wsUrl}/ws`
-  }
-
-  // Production fallback - use https:// not wss://
-  return "https://stackquiz-api.stackquiz.me/ws"
-}
-
-// FIXED: API Base URL helper function
-const getApiBaseUrl = () => {
-  // For local development
-  if (typeof window !== "undefined") {
-    const hostname = window.location.hostname
-
-    // Local development URLs
-    if (hostname === "localhost" || hostname === "127.0.0.1") {
-      return "https://stackquiz-api.stackquiz.me/api"
-    }
-  }
-
-  const envUrl = process.env.NEXT_PUBLIC_API_URL || "https://stackquiz-api.stackquiz.me/api"
-  // Remove trailing /v1 if present since all endpoints already include /v1/
-  return envUrl.replace(/\/v1\/?$/, "")
-}
-
-// Session Code Input Component
-function SessionCodeInput({
-  sessionCode,
-  setSessionCode,
-  onConnect,
-}: {
-  sessionCode: string
-  setSessionCode: (code: string) => void
-  onConnect: () => void
-}) {
-  const [inputCode, setInputCode] = useState(sessionCode)
-  const [isConnecting, setIsConnecting] = useState(false)
-  const [authWarning, setAuthWarning] = useState(false)
-
-  useEffect(() => {
-    // Check if user is authenticated
-    const checkAuth = async () => {
-      const hasToken = await checkAuthToken()
-      if (!hasToken) {
-        setAuthWarning(true)
-      }
-    }
-    checkAuth()
-  }, [])
-
-  const handleConnect = async () => {
-    if (!inputCode.trim()) {
-      alert("Please enter a session code")
-      return
-    }
-
-    const hasToken = await checkAuthToken()
-    if (!hasToken) {
-      alert("Please login first to access the host dashboard")
-      return
-    }
-
-    setIsConnecting(true)
-    setSessionCode(inputCode.trim().toUpperCase())
-
-    // Simulate connection delay
-    setTimeout(() => {
-      setIsConnecting(false)
-      onConnect()
-    }, 1000)
-  }
-
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter") {
-      handleConnect()
-    }
-  }
-
-  return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-auto"
-    >
-      <div className="text-center mb-6">
-        <div className="text-6xl mb-4">🎮</div>
-        <h2 className="text-2xl font-bold text-gray-800 mb-2">Host Quiz Dashboard</h2>
-        <p className="text-gray-600">Enter your session code from the database</p>
-      </div>
-
-      {/* Authentication Warning */}
-      {authWarning && (
-        <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
-          <div className="flex items-center space-x-2">
-            <span className="text-yellow-600">⚠️</span>
-            <span className="text-sm text-yellow-800">Please make sure you&apos;re logged in before connecting</span>
-          </div>
-        </div>
-      )}
-
-      {/* Connection Info */}
-      <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
-        <div className="text-sm text-blue-800">
-          <div className="font-medium mb-1">🔗 Connection Info:</div>
-          <div className="text-xs space-y-1">
-            <div>WebSocket: {getWebSocketUrl()}</div>
-            <div>API: {getApiBaseUrl()}</div>
-          </div>
-        </div>
-      </div>
-
-      <div className="space-y-4">
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">Session Code</label>
-          <input
-            type="text"
-            value={inputCode}
-            onChange={(e) => setInputCode(e.target.value.toUpperCase())}
-            onKeyPress={handleKeyPress}
-            placeholder="Enter session code (e.g., E20E84)"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent font-mono text-lg text-center tracking-wider"
-            maxLength={10}
-            disabled={isConnecting}
-          />
-          <p className="text-xs text-gray-500 mt-1">Copy the session code from your database</p>
-        </div>
-
-        <motion.button
-          onClick={handleConnect}
-          disabled={isConnecting || !inputCode.trim()}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
-          className="w-full bg-gradient-to-r from-purple-600 to-indigo-600 text-white py-3 rounded-lg font-semibold text-lg hover:from-purple-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg"
-        >
-          {isConnecting ? (
-            <div className="flex items-center justify-center space-x-2">
-              <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-              <span>Connecting...</span>
-            </div>
-          ) : (
-            "🚀 Connect to Session"
-          )}
-        </motion.button>
-
-        <div className="text-center">
-          <p className="text-xs text-gray-500">
-            Make sure the session exists in your database and you&apos;re logged in
-          </p>
-        </div>
-      </div>
-    </motion.div>
-  )
-}
-
-// Enhanced Quiz Settings Modal - Updated to use backend SessionTimingRequest
-function QuizSettingsModal({ isOpen, onClose, onStart }: any) {
-  const [settings, setSettings] = useState({
-    mode: "SYNC",
-    scheduledStartTime: "",
-    scheduledEndTime: "",
-    defaultQuestionTimeLimit: 30,
-    autoAdvanceQuestions: false,
-    allowLateJoining: true,
-    shuffleQuestions: false,
-    showCorrectAnswers: true,
-    showTimer: true,
-    maxParticipants: 100,
-  })
-
-  if (!isOpen) return null
-
-  const handleStart = () => {
-  const timingRequest = {
-  scheduledStartTime: settings.scheduledStartTime ? new Date(settings.scheduledStartTime).toISOString() : null,
-  scheduledEndTime: settings.scheduledEndTime ? new Date(settings.scheduledEndTime).toISOString() : null,
-  defaultQuestionTimeLimit: settings.defaultQuestionTimeLimit,
-  autoAdvanceQuestions: settings.autoAdvanceQuestions,
-  allowLateJoining: settings.allowLateJoining,
-  showTimer: settings.showTimer,
-  
-  // ✅ ADD THESE:
-  mode: settings.mode,  // ← REQUIRED!
-  maxParticipants: settings.maxParticipants,
-  shuffleQuestions: settings.shuffleQuestions,
-  showCorrectAnswers: settings.showCorrectAnswers,
-}
-
-
-  onStart(timingRequest)
-  onClose()
-}
-
-
-  return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      exit={{ opacity: 0 }}
-      className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-    >
-      <motion.div
-        initial={{ scale: 0.9, opacity: 0 }}
-        animate={{ scale: 1, opacity: 1 }}
-        exit={{ scale: 0.9, opacity: 0 }}
-        className="bg-white rounded-xl p-8 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto"
-      >
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">🎮 Quiz Settings</h2>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Quiz Mode */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Quiz Mode</label>
-            <select
-              value={settings.mode}
-              onChange={(e) => setSettings({ ...settings, mode: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-            >
-              <option value="SYNC">🎯 Synchronous (Real-time)</option>
-              <option value="ASYNC">⏱️ Asynchronous (Self-paced)</option>
-            </select>
-            <p className="text-xs text-gray-500 mt-1">
-              {settings.mode === "SYNC"
-                ? "Host controls question progression - best for real-time engagement"
-                : "Participants progress at their own pace"}
-            </p>
-          </div>
-
-          {/* Time Settings */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Question Time Limit (seconds)</label>
-            <input
-              type="number"
-              min="5"
-              max="300"
-              value={settings.defaultQuestionTimeLimit}
-              onChange={(e) => setSettings({ ...settings, defaultQuestionTimeLimit: Number.parseInt(e.target.value) })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              Recommended: 30s for multiple choice, 60s for complex questions
-            </p>
-          </div>
-
-          {/* Scheduled Start Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Scheduled Start Time (Optional)</label>
-            <input
-              type="datetime-local"
-              value={settings.scheduledStartTime}
-              onChange={(e) => setSettings({ ...settings, scheduledStartTime: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-
-          {/* Scheduled End Time */}
-          <div>
-            <label className="block text-sm font-medium text-gray-600 mb-1">Scheduled End Time (Optional)</label>
-            <input
-              type="datetime-local"
-              value={settings.scheduledEndTime}
-              onChange={(e) => setSettings({ ...settings, scheduledEndTime: e.target.value })}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-purple-500"
-            />
-          </div>
-        </div>
-
-        {/* Enhanced Checkboxes */}
-        <div className="mt-6 space-y-3">
-          <label className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.allowLateJoining}
-              onChange={(e) => setSettings({ ...settings, allowLateJoining: e.target.checked })}
-              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
-            />
-            <div>
-              <span className="text-sm font-medium text-gray-700">Allow late joins</span>
-              <p className="text-xs text-gray-500">Participants can join after the quiz starts</p>
-            </div>
-          </label>
-
-          <label className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.autoAdvanceQuestions}
-              onChange={(e) => setSettings({ ...settings, autoAdvanceQuestions: e.target.checked })}
-              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
-            />
-            <div>
-              <span className="text-sm font-medium text-gray-700">Auto-advance questions</span>
-              <p className="text-xs text-gray-500">Automatically move to next question when time expires</p>
-            </div>
-          </label>
-
-          <label className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.showTimer}
-              onChange={(e) => setSettings({ ...settings, showTimer: e.target.checked })}
-              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
-            />
-            <div>
-              <span className="text-sm font-medium text-gray-700">Show timer</span>
-              <p className="text-xs text-gray-500">Display countdown timer to participants</p>
-            </div>
-          </label>
-
-          <label className="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition cursor-pointer">
-            <input
-              type="checkbox"
-              checked={settings.showCorrectAnswers}
-              onChange={(e) => setSettings({ ...settings, showCorrectAnswers: e.target.checked })}
-              className="w-4 h-4 text-purple-600 rounded focus:ring-purple-500"
-            />
-            <div>
-              <span className="text-sm font-medium text-gray-700">Show correct answers</span>
-              <p className="text-xs text-gray-500">Display correct answers after each question</p>
-            </div>
-          </label>
-        </div>
-
-        {/* Buttons */}
-        <div className="mt-8 flex justify-end space-x-4">
-          <button
-            onClick={onClose}
-            className="px-6 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleStart}
-            className="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition shadow-lg"
-          >
-            🚀 Start Quiz
-          </button>
-        </div>
-      </motion.div>
-    </motion.div>
-  )
-}
-
-// Enhanced Leaderboard Component with Real-time Animations
-function EnhancedLeaderboard({
-  leaderboard,
-  celebrations,
-  questionStats,
-}: {
-  leaderboard: LeaderboardEntry[]
-  celebrations: ScoreCelebration[]
-  questionStats: QuestionStats | null
-}) {
-  const [previousPositions, setPreviousPositions] = useState<Map<string, number>>(new Map())
-
-  useEffect(() => {
-    // Track position changes for animations
-    const newPositions = new Map()
-    leaderboard.forEach((entry, index) => {
-      newPositions.set(entry.participantId, index + 1)
-    })
-    setPreviousPositions(newPositions)
-  }, [leaderboard])
-
-  const getPositionChange = (participantId: string, currentPosition: number) => {
-    const previousPosition = previousPositions.get(participantId)
-    if (!previousPosition) return 0
-    return previousPosition - currentPosition
-  }
-
-  return (
-    <div className="bg-white rounded-2xl p-6 shadow-xl">
-      <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-gray-800 flex items-center">
-          <span className="mr-2">🏆</span>
-          Live Leaderboard
-        </h2>
-        <div className="text-right">
-          <div className="text-sm text-gray-500">
-            {leaderboard.length} participant{leaderboard.length !== 1 ? "s" : ""}
-          </div>
-          {questionStats && (
-            <div className="text-xs text-purple-600">
-              Q{questionStats.questionNumber}: {questionStats.participantsAnswered}/{questionStats.totalParticipants}{" "}
-              answered
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Question Progress Bar */}
-      {questionStats && (
-        <div className="mb-4 p-3 bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg">
-          <div className="flex justify-between items-center mb-2">
-            <span className="text-sm font-medium text-purple-800">
-              Question {questionStats.questionNumber} Progress
-            </span>
-            <span className="text-sm text-purple-600">
-              {questionStats.participantsAnswered}/{questionStats.totalParticipants}
-            </span>
-          </div>
-          <div className="w-full bg-purple-200 rounded-full h-2">
-            <motion.div
-              className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full"
-              initial={{ width: 0 }}
-              animate={{
-                width: `${(questionStats.participantsAnswered / questionStats.totalParticipants) * 100}%`,
-              }}
-              transition={{ duration: 0.5, ease: "easeOut" }}
-            />
-          </div>
-          <div className="flex justify-between text-xs text-purple-600 mt-1">
-            <span>Accuracy: {questionStats.accuracyRate.toFixed(1)}%</span>
-            <span>Avg Time: {questionStats.averageResponseTime.toFixed(1)}s</span>
-          </div>
-        </div>
-      )}
-
-      {/* Leaderboard Entries */}
-      <div className="space-y-2 max-h-96 overflow-y-auto">
-        <AnimatePresence>
-          {leaderboard.length > 0 ? (
-            leaderboard.map((entry, index) => {
-              const positionChange = getPositionChange(entry.participantId, index + 1)
-              const isTop3 = index < 3
-              const celebration = celebrations.find((c) => c.participantId === entry.participantId)
-
-              return (
-                <motion.div
-                  key={entry.participantId}
-                  layout
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }}
-                  className={`relative p-4 rounded-lg transition-all duration-300 ${
-                    isTop3
-                      ? "bg-gradient-to-r from-purple-100 via-indigo-100 to-purple-100 border-2 border-purple-300 shadow-md"
-                      : "bg-gray-50 hover:bg-gray-100"
-                  } ${celebration ? "ring-2 ring-yellow-400 ring-opacity-75" : ""}`}
-                >
-                  {/* Celebration Effect */}
-                  {celebration && (
-                    <motion.div
-                      initial={{ scale: 0, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0, opacity: 0 }}
-                      className="absolute inset-0 bg-gradient-to-r from-yellow-200 to-orange-200 rounded-lg opacity-30 pointer-events-none"
-                    />
-                  )}
-
-                  <div className="flex justify-between items-center relative z-10">
-                    <div className="flex items-center space-x-4">
-                      {/* Position with Medal */}
-                      <div className="flex items-center space-x-2">
-                        <span
-                          className={`text-xl font-bold ${
-                            index === 0
-                              ? "text-yellow-600"
-                              : index === 1
-                                ? "text-gray-600"
-                                : index === 2
-                                  ? "text-orange-600"
-                                  : "text-gray-500"
-                          }`}
-                        >
-                          {index + 1}
-                        </span>
-                        {index === 0 && <span className="text-xl">🥇</span>}
-                        {index === 1 && <span className="text-xl">🥈</span>}
-                        {index === 2 && <span className="text-xl">🥉</span>}
-                      </div>
-
-                      {/* Participant Info */}
-                      <div>
-                        <div className="flex items-center space-x-2">
-                          <span className="font-bold text-gray-800">{entry.nickname}</span>
-                          {entry.streak && entry.streak > 2 && (
-                            <span className="text-xs bg-orange-100 text-orange-600 px-2 py-1 rounded-full">
-                              🔥 {entry.streak}
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-gray-500">
-                          {entry.questionsAnswered || 0} answered • {entry.correctAnswers || 0} correct
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Score and Position Change */}
-                    <div className="text-right">
-                      <div className="flex items-center space-x-2">
-                        <span className="text-xl font-bold text-purple-600">{entry.totalScore}</span>
-                        {positionChange > 0 && (
-                          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-green-500 text-sm">
-                            ↗️ +{positionChange}
-                          </motion.span>
-                        )}
-                        {positionChange < 0 && (
-                          <motion.span initial={{ scale: 0 }} animate={{ scale: 1 }} className="text-red-500 text-sm">
-                            ↘️ {positionChange}
-                          </motion.span>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Activity Indicator */}
-                  <div className="flex justify-between items-center mt-2">
-                    <div className="flex items-center space-x-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          entry.status === "ACTIVE"
-                            ? "bg-green-500"
-                            : entry.status === "ANSWERING"
-                              ? "bg-blue-500"
-                              : entry.status === "WAITING"
-                                ? "bg-yellow-500"
-                                : "bg-gray-400"
-                        }`}
-                      />
-                      <span className="text-xs text-gray-500">
-                        {entry.status === "ACTIVE"
-                          ? "🟢 Active"
-                          : entry.status === "ANSWERING"
-                            ? "🔵 Answering"
-                            : entry.status === "WAITING"
-                              ? "🟡 Waiting"
-                              : "⚪ Idle"}
-                      </span>
-                    </div>
-                    {entry.averageResponseTime && (
-                      <span className="text-xs text-gray-500">Avg: {entry.averageResponseTime.toFixed(1)}s</span>
-                    )}
-                  </div>
-                </motion.div>
-              )
-            })
-          ) : (
-            <div className="text-center py-12">
-              <div className="text-6xl mb-4">👋</div>
-              <p className="text-gray-400 text-lg">Waiting for participants...</p>
-              <p className="text-gray-400 text-sm mt-2">Share the session code or QR code to get started</p>
-            </div>
-          )}
-        </AnimatePresence>
-      </div>
-    </div>
-  )
-}
-
-// Enhanced Participant Progress Component with Visual Indicators
-function ParticipantProgress({
-  participants,
-  detailedProgress,
-  totalQuestions,
-}: {
-  participants: any[]
-  detailedProgress: DetailedParticipantProgress[]
-  totalQuestions: number
-}) {
-  const [sortBy, setSortBy] = useState<"score" | "progress" | "accuracy">("score")
-
-  // Merge basic participants with detailed progress
-  const enrichedParticipants = participants.map((p) => {
-    const details = detailedProgress.find((d) => d.participantId === p.id)
-    return {
-      ...p,
-      ...details,
-    }
-  })
-
-  // Sort participants
-  const sortedParticipants = [...enrichedParticipants].sort((a, b) => {
-    switch (sortBy) {
-      case "score":
-        return (b.totalScore || 0) - (a.totalScore || 0)
-      case "progress":
-        return (b.answeredCount || 0) - (a.answeredCount || 0)
-      case "accuracy":
-        return (b.accuracy || 0) - (a.accuracy || 0)
-      default:
-        return 0
-    }
-  })
-
-  const getStatusColor = (status?: string) => {
-    switch (status) {
-      case "active":
-        return "bg-green-500"
-      case "completed":
-        return "bg-blue-500"
-      default:
-        return "bg-gray-400"
-    }
-  }
-
-  return (
-    <div className="bg-white rounded-2xl p-6 shadow-xl">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-gray-800 flex items-center">
-          <span className="mr-2">👥</span>
-          Participants ({participants.length})
-        </h3>
-
-        <select
-          value={sortBy}
-          onChange={(e) => setSortBy(e.target.value as any)}
-          className="text-xs px-2 py-1 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-indigo-500"
-        >
-          <option value="score">Score</option>
-          <option value="progress">Progress</option>
-          <option value="accuracy">Accuracy</option>
-        </select>
-      </div>
-
-      {/* Legend */}
-      <div className="flex items-center gap-3 mb-3 text-xs">
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-green-500 rounded"></div>
-          <span>Correct</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-red-500 rounded"></div>
-          <span>Wrong</span>
-        </div>
-        <div className="flex items-center gap-1">
-          <div className="w-3 h-3 bg-gray-300 rounded"></div>
-          <span>Pending</span>
-        </div>
-      </div>
-
-      <div className="space-y-3 max-h-[500px] overflow-y-auto">
-        {sortedParticipants.length > 0 ? (
-          sortedParticipants.map((participant, index) => (
-            <motion.div
-              key={participant.id}
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: index * 0.05 }}
-              className="border border-gray-200 rounded-lg p-3"
-            >
-              {/* Header */}
-              <div className="flex items-center justify-between mb-2">
-                <div className="flex items-center space-x-2">
-                  <div
-                    className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-white text-sm ${
-                      index === 0
-                        ? "bg-yellow-500"
-                        : index === 1
-                          ? "bg-gray-400"
-                          : index === 2
-                            ? "bg-orange-600"
-                            : "bg-indigo-500"
-                    }`}
-                  >
-                    {index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : index + 1}
-                  </div>
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-gray-800 text-sm">{participant.nickname}</span>
-                      <div className={`w-2 h-2 rounded-full ${getStatusColor(participant.status)}`}></div>
-                    </div>
-                    <div className="text-xs text-gray-500">
-                      {participant.answeredCount || 0}/{totalQuestions} •{participant.correctCount || 0} correct •
-                      {Math.round(participant.accuracy || 0)}% accuracy
-                    </div>
-                  </div>
-                </div>
-
-                <div className="text-right">
-                  <div className="text-lg font-bold text-indigo-600">{participant.totalScore || 0}</div>
-                  <div className="text-xs text-gray-500">points</div>
-                </div>
-              </div>
-
-              {/* Progress Bar */}
-              {participant.answers && participant.answers.length > 0 && (
-                <div className="flex gap-0.5">
-                  {Array.from({ length: totalQuestions }, (_, i) => {
-                    const questionNum = i + 1
-                    const answer = participant.answers.find((a: ParticipantAnswer) => a.questionNumber === questionNum)
-
-                    let bgColor = "bg-gray-300"
-                    let tooltip = `Q${questionNum}: Not attempted`
-
-                    if (answer && answer.answered) {
-                      if (answer.isCorrect) {
-                        bgColor = "bg-green-500"
-                        tooltip = `Q${questionNum}: Correct (+${answer.pointsEarned})`
-                      } else {
-                        bgColor = "bg-red-500"
-                        tooltip = `Q${questionNum}: Incorrect`
-                      }
-                    }
-
-                    const isCurrent = questionNum === participant.currentQuestionNumber
-
-                    return (
-                      <div
-                        key={questionNum}
-                        title={tooltip}
-                        className={`flex-1 h-6 rounded ${bgColor} ${
-                          isCurrent ? "ring-2 ring-blue-500" : ""
-                        } transition-all cursor-pointer hover:scale-105`}
-                      >
-                        {isCurrent && (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <div className="w-1.5 h-1.5 bg-white rounded-full animate-pulse"></div>
-                          </div>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-              )}
-            </motion.div>
-          ))
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            <p className="text-lg">No participants yet</p>
-            <p className="text-sm">Share the session code to get started!</p>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// NEW: Host Controls Component
-function HostControls({
-  hostDashboard,
-  sessionCode,
-  onStartSession,
-  onPauseSession,
-  onResumeSession,
-  onEndSession,
-  onNextQuestion,
-  onSetQuestionTimeLimit,
-}: {
-  hostDashboard: HostDashboardData | null
-  sessionCode: string
-  onStartSession: () => void
-  onPauseSession: () => void
-  onResumeSession: () => void
-  onEndSession: () => void
-  onNextQuestion: () => void
-  onSetQuestionTimeLimit: (timeLimit: number) => void
-}) {
-  const [customTimeLimit, setCustomTimeLimit] = useState(30)
-
-  if (!hostDashboard) return null
-
-  return (
-    <div className="bg-white rounded-2xl p-6 shadow-xl">
-      <h3 className="text-lg font-bold text-gray-800 mb-4 flex items-center">
-        <span className="mr-2">🎮</span>
-        Host Controls
-      </h3>
-
-      <div className="space-y-3">
-        {/* Session Controls */}
-        <div className="grid grid-cols-2 gap-2">
-          {hostDashboard.canStart && (
-            <button
-              onClick={onStartSession}
-              className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition text-sm"
-            >
-              🚀 Start
-            </button>
-          )}
-
-          {hostDashboard.canPause && (
-            <button
-              onClick={onPauseSession}
-              className="px-4 py-2 bg-gradient-to-r from-yellow-600 to-yellow-700 text-white rounded-lg hover:from-yellow-700 hover:to-yellow-800 transition text-sm"
-            >
-              ⏸️ Pause
-            </button>
-          )}
-
-          {hostDashboard.canResume && (
-            <button
-              onClick={onResumeSession}
-              className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition text-sm"
-            >
-              ▶️ Resume
-            </button>
-          )}
-
-          {hostDashboard.canAdvanceQuestion && (
-            <button
-              onClick={onNextQuestion}
-              className="px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white rounded-lg hover:from-purple-700 hover:to-purple-800 transition text-sm"
-            >
-              ➡️ Next Q
-            </button>
-          )}
-
-          {hostDashboard.canEnd && (
-            <button
-              onClick={onEndSession}
-              className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition text-sm col-span-2"
-            >
-              🛑 End Session
-            </button>
-          )}
-
-          {/* veiw report */}
-{hostDashboard?.sessionStatus === "COMPLETED" && (
-  <div className="text-center mt-6">
-    <Link href={`/host/${sessionCode}/report`}>
-      <button className="px-8 py-4 bg-gradient-to-r from-purple-600 to-indigo-600 text-white rounded-xl font-bold text-lg hover:from-purple-700 hover:to-indigo-700 shadow-lg">
-        📊 View Session Report
-      </button>
-    </Link>
-  </div>
-)}
-          
-        </div>
-
-        {/* Timer Controls */}
-        {hostDashboard.currentTimer && (
-          <div className="p-3 bg-gray-50 rounded-lg">
-            <div className="text-sm font-medium text-gray-700 mb-2">
-              Current Timer: {hostDashboard.currentTimer.timerType}
-            </div>
-            <div className="text-lg font-bold text-purple-600">
-              {Math.floor(hostDashboard.currentTimer.remainingSeconds / 60)}:
-              {(hostDashboard.currentTimer.remainingSeconds % 60).toString().padStart(2, "0")}
-            </div>
-            <div className="text-xs text-gray-500">Status: {hostDashboard.currentTimer.timerStatus}</div>
-          </div>
-        )}
-
-        {/* Custom Time Limit */}
-        <div className="p-3 bg-gray-50 rounded-lg">
-          <label className="block text-sm font-medium text-gray-700 mb-2">Set Question Time Limit</label>
-          <div className="flex space-x-2">
-            <input
-              type="number"
-              min="5"
-              max="300"
-              value={customTimeLimit}
-              onChange={(e) => setCustomTimeLimit(Number.parseInt(e.target.value))}
-              className="flex-1 px-3 py-1 border rounded text-sm"
-            />
-            <button
-              onClick={() => onSetQuestionTimeLimit(customTimeLimit)}
-              className="px-3 py-1 bg-indigo-600 text-white rounded text-sm hover:bg-indigo-700"
-            >
-              Set
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// Main Enhanced Host Dashboard
 export default function LocalhostHostUI() {
-  // Extract session code from URL
   const params = useParams()
   const urlSessionCode = params?.sessionCode as string
 
-  console.log("🔍 URL params:", params)
-  console.log("🔍 Session code from URL:", urlSessionCode)
-// Connection state
+  // Connection state
   const [isConnected, setIsConnected] = useState(false)
   const [sessionCode, setSessionCode] = useState(urlSessionCode || "")
   const [sessionId, setSessionId] = useState<string>("")
@@ -1040,37 +45,46 @@ export default function LocalhostHostUI() {
   // Dashboard state
   const [hostDashboard, setHostDashboard] = useState<HostDashboardData | null>(null)
   const [participants, setParticipants] = useState<any[]>([])
-  const [participantProgress, setParticipantProgress] = useState<Map<string, any>>(new Map())
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
   const [celebrations, setCelebrations] = useState<ScoreCelebration[]>([])
   const [questionStats, setQuestionStats] = useState<QuestionStats | null>(null)
   const [currentQuestion, setCurrentQuestion] = useState<any>(null)
   const [joinUrl, setJoinUrl] = useState<string>("")
-  const [detailedProgress, setDetailedProgress] = useState<DetailedParticipantProgress[]>([])
 
-  // UI state
+  // UI state - Kahoot flow
+  const [currentView, setCurrentView] = useState<HostView>("lobby")
   const [showSettings, setShowSettings] = useState(false)
-  const [authError, setAuthError] = useState<string>("")
 
-  const stompRef = useRef<Client | null>(null)
+  // Auth hook
+  const { authError, setAuthError, validateAuth } = useAuth()
 
-  // Handle connection to session
+  // Dashboard data hook
+  const { fetchHostDashboard } = useDashboardData(
+    sessionCode,
+    setHostDashboard,
+    setAuthError,
+    setSessionId,
+  )
+
+  // Participant progress hook
+  const { detailedProgress } = useParticipantProgress(sessionCode, hostDashboard?.sessionStatus)
+
+  // Handle connection
   const handleConnect = useCallback(async () => {
-    const hasToken = await checkAuthToken()
-    if (!hasToken) {
+    const isValid = await validateAuth()
+    if (!isValid) {
       setAuthError("Please login first to access the host dashboard")
       return
     }
     setIsConnected(true)
     setConnectionStatus("Connecting...")
     setAuthError("")
-  }, [])
+  }, [validateAuth, setAuthError])
 
-  // Auto-connect if session code is available (from URL or prop)
+  // Auto-connect if session code is available
   useEffect(() => {
     if (urlSessionCode && !isConnected && sessionCode) {
       console.log("🔌 Auto-connecting to session:", sessionCode)
-      // Small delay to ensure component is mounted
       const timer = setTimeout(() => {
         handleConnect()
       }, 500)
@@ -1078,18 +92,37 @@ export default function LocalhostHostUI() {
     }
   }, [urlSessionCode, sessionCode, isConnected, handleConnect])
 
-  // Set join URL only on client side
+  // Set join URL
   useEffect(() => {
     if (typeof window !== "undefined" && isConnected) {
       setJoinUrl(`${window.location.origin}/${sessionCode}/join`)
     }
   }, [sessionCode, isConnected])
 
+  // Update view based on session status (but don't override manual changes immediately)
+  useEffect(() => {
+    if (!hostDashboard) return
+
+    const status = hostDashboard.sessionStatus
+
+    // Only update view based on status after a small delay to allow manual transitions
+    const timer = setTimeout(() => {
+      if (status === "waiting" || status === "not_started") {
+        setCurrentView("lobby")
+      } else if (status === "in_progress" || status === "question_active") {
+        setCurrentView("question")
+      } else if (status === "showing_leaderboard") {
+        setCurrentView("leaderboard")
+      } else if (status === "completed") {
+        setCurrentView("final-results")
+      }
+    }, 500)
+
+    return () => clearTimeout(timer)
+  }, [hostDashboard?.sessionStatus])
+
   // Handle disconnect
   const handleDisconnect = useCallback(() => {
-    if (stompRef.current) {
-      stompRef.current.deactivate()
-    }
     setIsConnected(false)
     setConnectionStatus("Disconnected")
     setHostDashboard(null)
@@ -1099,576 +132,424 @@ export default function LocalhostHostUI() {
     setQuestionStats(null)
     setCurrentQuestion(null)
     setAuthError("")
+    setCurrentView("lobby")
+  }, [setAuthError])
+
+  // WebSocket callbacks
+  const handleDashboardUpdate = useCallback((data: HostDashboardData) => {
+    setHostDashboard(data)
   }, [])
 
-  // FIXED: Fetch host dashboard using correct API URL
-  const fetchHostDashboardByCode = useCallback(async () => {
-    if (!sessionCode) return
+  const handleLeaderboardUpdate = useCallback((entries: LeaderboardEntry[]) => {
+    setLeaderboard(entries)
+  }, [])
 
-    try {
-      const headers = await getAuthHeaders()
-      if (!headers.Authorization) {
-        setAuthError("No authentication token found. Please login first.")
-        return
-      }
+  const handleStatsUpdate = useCallback((stats: QuestionStats) => {
+    setQuestionStats(stats)
+  }, [])
 
-      const baseUrl = getApiBaseUrl()
-      console.log("📊 Fetching host dashboard for session:", sessionCode)
+  const handleParticipantsUpdate = useCallback((participants: any[]) => {
+    setParticipants(participants)
+  }, [])
 
-      // Use the correct host dashboard endpoint directly
-      const response = await fetch(`${baseUrl}/v1/host/dashboard/${sessionCode}`, {
-        headers,
-      })
+  const handleScoreUpdate = useCallback((celebration: ScoreCelebration) => {
+    setCelebrations((prev) => [...prev, celebration])
+    setTimeout(() => {
+      setCelebrations((prev) => prev.filter((c) => c.participantId !== celebration.participantId))
+    }, 3000)
+  }, [])
 
-      if (response.ok) {
-        const dashboardData = await response.json()
-        console.log("📊 Host dashboard data:", dashboardData)
-        setHostDashboard(dashboardData)
-
-        // Update session ID if available
-        if (dashboardData.sessionId) {
-          setSessionId(dashboardData.sessionId)
-        }
-      } else if (response.status === 404) {
-        console.error("❌ Session not found:", sessionCode)
-        setAuthError(`Session ${sessionCode} not found`)
-      } else {
-        console.error("❌ Failed to fetch host dashboard:", response.statusText)
-        const errorDetails = await response.text().catch(() => "No details available")
-        setAuthError(`Failed to load dashboard: ${response.status} ${response.statusText} - ${errorDetails}`)
-      }
-    } catch (error) {
-      console.error("❌ Failed to fetch host dashboard:", error)
-      setAuthError(`An error occurred: ${error instanceof Error ? error.message : String(error)}`)
-    }
-  }, [sessionCode])
-
-  // FIXED: Enhanced WebSocket setup with correct localhost URL
-  useEffect(() => {
-    if (!isConnected || !sessionCode) return
-
-    const setupWebSocket = async () => {
-      const hasToken = await checkAuthToken()
-      if (!hasToken) {
-        setAuthError("Authentication token not found. Please login first.")
-        setConnectionStatus("Authentication Error")
-        return
-      }
-
-      try {
-        const session = await getSession()
-        const token = (session as any)?.apiAccessToken
-
-        // FIXED: Use the correct WebSocket URL
-        const wsUrl = getWebSocketUrl()
-        console.log("🔌 Connecting to WebSocket:", wsUrl)
-
-        const sock = new SockJS(wsUrl)
-        const stomp = new Client({
-          webSocketFactory: () => sock,
-          reconnectDelay: 3000,
-          heartbeatIncoming: 4000,
-          heartbeatOutgoing: 4000,
-          connectHeaders: {
-            nickname: "__HOST__",
-            // Add auth token to WebSocket connection if your backend supports it
-            Authorization: `Bearer ${token}`,
-          },
-          debug: (str) => console.log("[STOMP]", str),
-        })
-
-        stomp.onConnect = () => {
-          console.log("🔌 WebSocket connected to session:", sessionCode)
-          setConnectionStatus("Connected")
-
-          // CORRECTED: Subscribe to proper backend WebSocket topics
-
-          // Enhanced leaderboard subscription - matches EnhancedLeaderboardService
-          stomp.subscribe(`/topic/session/${sessionCode}/enhanced-leaderboard`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("📊 Enhanced leaderboard update:", data)
-
-            if (data.entries) {
-              setLeaderboard(data.entries)
-            }
-          })
-
-          // FIXED: Use existing leaderboard topic since enhanced one might not be implemented yet
-          stomp.subscribe(`/topic/session/${sessionCode}/leaderboard`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("📊 Leaderboard update:", data)
-
-            // Handle both possible data structures
-            let entries: LeaderboardEntry[] = []
-            if (data.leaderboard?.entries) {
-              entries = data.leaderboard.entries
-            } else if (data.entries) {
-              entries = data.entries
-            } else if (Array.isArray(data)) {
-              entries = data
-            }
-
-            setLeaderboard(entries)
-          })
-
-          // Host dashboard updates - matches HostDashboardService
-          stomp.subscribe(`/topic/session/${sessionCode}/host/dashboard`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("🎯 Host dashboard update:", data)
-            setHostDashboard(data)
-          })
-
-          // Host progress updates - matches HostProgressMessage
-          stomp.subscribe(`/topic/session/${sessionCode}/host/progress`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("📈 Host progress update:", data)
-
-            if (data.participantProgress) {
-              setParticipants(data.participantProgress)
-            }
-          })
-
-          // Live statistics - matches LiveStatsMessage
-          stomp.subscribe(`/topic/session/${sessionCode}/live-stats`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("📊 Live stats update:", data)
-
-            // Convert to QuestionStats format
-            setQuestionStats({
-              sessionId: data.sessionId || sessionCode,
-              questionNumber: data.currentQuestion || 1,
-              totalQuestions: data.totalQuestions || 10,
-              totalParticipants: data.totalParticipants || 0,
-              participantsAnswered: data.participantsAnswered || 0,
-              participantsRemaining: data.participantsRemaining || 0,
-              averageResponseTime: data.averageResponseTime || 0,
-              correctAnswers: data.correctAnswers || 0,
-              incorrectAnswers: data.incorrectAnswers || 0,
-              accuracyRate: data.accuracyRate || 0,
-              isQuestionComplete: data.isQuestionComplete || false,
-            })
-          })
-
-          // Score celebrations - matches ScoreUpdateMessage/AnswerFeedbackMessage
-          stomp.subscribe(`/topic/session/${sessionCode}/score-updates`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("🎉 Score update:", data)
-
-            if (data.isCorrect && data.pointsEarned > 0) {
-              const celebration: ScoreCelebration = {
-                participantId: data.participantId,
-                nickname: data.participantNickname,
-                pointsEarned: data.pointsEarned,
-                newTotalScore: data.newScore,
-                newRank: data.currentRank || 0,
-                isCorrect: data.isCorrect,
-                celebrationType: "SCORE_GAIN",
-                animationType: "BOUNCE",
-              }
-
-              setCelebrations((prev) => [...prev, celebration])
-
-              // Remove celebration after animation
-              setTimeout(() => {
-                setCelebrations((prev) => prev.filter((c) => c.participantId !== celebration.participantId))
-              }, 3000)
-            }
-          })
-
-          // Session timer updates - matches SessionTimerMessage
-          stomp.subscribe(`/topic/session/${sessionCode}/timer`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("⏰ Timer update:", data)
-
-            setHostDashboard((prev) =>
-              prev
-                ? {
-                    ...prev,
-                    currentTimer: {
-                      timerType: data.timerType,
-                      timerStatus: data.timerStatus,
-                      remainingSeconds: data.remainingSeconds,
-                      totalSeconds: data.totalSeconds,
-                    },
-                  }
-                : null,
-            )
-          })
-
-          // Participant updates - matches ParticipantMessage
-          stomp.subscribe(`/topic/session/${sessionCode}/participants`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("👥 Participants update:", data)
-            setParticipants(data.participants || [])
-          })
-
-          // Question updates
-          stomp.subscribe(`/topic/session/${sessionCode}/question`, (msg) => {
-            const data = JSON.parse(msg.body)
-            console.log("❓ Question update:", data)
-            setCurrentQuestion(data.question || data)
-          })
-
-          // FIXED: Fetch initial host dashboard data using session code lookup
-          fetchHostDashboardByCode()
-        }
-
-        stomp.onDisconnect = () => {
-          console.warn("⚠️ WebSocket disconnected")
-          setConnectionStatus("Disconnected")
-        }
-
-        stomp.onStompError = (frame) => {
-          console.error("❌ STOMP error:", frame)
-          setConnectionStatus("Error")
-
-          // Check if it's an auth error
-          if (frame.headers && frame.headers.message && frame.headers.message.includes("401")) {
-            setAuthError("Authentication failed. Please login again.")
+  const handleTimerUpdate = useCallback((timer: any) => {
+    setHostDashboard((prev) =>
+      prev
+        ? {
+            ...prev,
+            currentTimer: {
+              timerType: timer.timerType,
+              timerStatus: timer.timerStatus,
+              remainingSeconds: timer.remainingSeconds,
+              totalSeconds: timer.totalSeconds,
+            },
           }
-        }
+        : null,
+    )
+  }, [])
 
-        stomp.activate()
-        stompRef.current = stomp
+  const handleQuestionUpdate = useCallback((question: any) => {
+    setCurrentQuestion(question)
+  }, [])
 
-        return () => {
-          console.log("🔌 Disconnecting WebSocket")
-          stompRef.current?.deactivate()
-        }
-      } catch (error) {
-        console.error("❌ WebSocket setup error:", error)
-        setConnectionStatus("Error")
-      }
-    }
+  // WebSocket hook
+  useWebSocket({
+    sessionCode,
+    isConnected,
+    onDashboardUpdate: handleDashboardUpdate,
+    onLeaderboardUpdate: handleLeaderboardUpdate,
+    onStatsUpdate: handleStatsUpdate,
+    onParticipantsUpdate: handleParticipantsUpdate,
+    onScoreUpdate: handleScoreUpdate,
+    onTimerUpdate: handleTimerUpdate,
+    onQuestionUpdate: handleQuestionUpdate,
+    setConnectionStatus,
+    setAuthError,
+  })
 
-    setupWebSocket()
-  }, [isConnected, sessionCode, fetchHostDashboardByCode])
-
-  // Fetch detailed participant progress
-  const fetchDetailedProgress = useCallback(async () => {
-    if (!sessionCode) return
-
-    try {
-      const headers = await getAuthHeaders()
-      if (!headers.Authorization) return
-
-      const baseUrl = getApiBaseUrl()
-      const response = await fetch(`${baseUrl}/v1/host/session/${sessionCode}/participant-progress`, { headers })
-
-      if (response.ok) {
-        const data = await response.json()
-        setDetailedProgress(data)
-        console.log("📊 Detailed progress updated:", data)
-      } else {
-        console.error("❌ Failed to fetch detailed progress:", response.statusText)
-      }
-    } catch (error) {
-      console.error("❌ Failed to fetch detailed progress:", error)
-    }
-  }, [sessionCode])
-
-  // Auto-refresh detailed progress during quiz
-  useEffect(() => {
-    if (hostDashboard?.sessionStatus === "IN_PROGRESS" && sessionCode) {
-      // Fetch immediately
-      fetchDetailedProgress()
-
-      // Then refresh every 3 seconds
-      const interval = setInterval(fetchDetailedProgress, 3000)
-      return () => clearInterval(interval)
-    }
-  }, [hostDashboard?.sessionStatus, sessionCode, fetchDetailedProgress])
-
-  // FIXED: Enhanced host command sender with correct API URL
-  const handleSendHostCommand = useCallback(
-    async (command: string, data?: any) => {
-      // FIXED: Always use sessionCode, not sessionId
-      if (!sessionCode) {
-        console.error("❌ Cannot send command: No session code")
-        return
-      }
-
-      const headers = await getAuthHeaders()
-      if (!headers.Authorization) {
-        setAuthError("No authentication token found. Please login first.")
-        return
-      }
-
-      const baseUrl = getApiBaseUrl()
-
-      try {
-        let endpoint = ""
-        let method = "POST"
-        let body = null
-
-        switch (command) {
-          case "START_SESSION":
-  // First, update session timing settings if provided
-  if (data) {
-    const timingEndpoint = `/v1/host/session/${sessionCode}/timing`
-    const timingResponse = await fetch(`${baseUrl}${timingEndpoint}`, {
-      method: "PUT",
-      headers,
-      body: JSON.stringify(data),
-    })
-    if (!timingResponse.ok) {
-      console.error("❌ Failed to update session timing:", timingResponse.statusText)
-      return
-    }
-    console.log("✅ Session timing updated successfully")
-  }
-
-  endpoint = `/v1/quiz-sessions/${sessionCode}/start`
-  method = "PUT"
-  body = JSON.stringify(data)  // ← ADD THIS LINE!
-  break
-          case "PAUSE_SESSION":
-            // FIXED: Use sessionCode
-            endpoint = `/v1/host/session/${sessionCode}/timer/pause`
-            break
-          case "RESUME_SESSION":
-            // FIXED: Use sessionCode
-            endpoint = `/v1/host/session/${sessionCode}/timer/resume`
-            break
-          case "END_SESSION":
-            // FIXED: Use correct session end endpoint
-            endpoint = `/v1/quiz-sessions/${sessionCode}/end`
-            method = "PUT"
-            break
-          case "NEXT_QUESTION":
-            // FIXED: Use sessionCode
-            endpoint = `/v1/host/session/${sessionCode}/force-advance`
-            break
-          case "SET_QUESTION_TIME_LIMIT":
-            // FIXED: Use sessionCode
-            endpoint = `/v1/host/session/${sessionCode}/question-time-limit?timeLimit=${data}`
-            break
-          default:
-            console.warn("Unknown command:", command)
-            return
-        }
-
-        const response = await fetch(`${baseUrl}${endpoint}`, {
-          method,
-          headers,
-          body,
-        })
-
-        if (response.ok) {
-          console.log(`✅ Command ${command} executed successfully`)
-
-          // REMOVED: Redundant timer start - backend handles this automatically
-          // The startSession endpoint should start the timer internally
-
-          // Refresh dashboard data
-          fetchHostDashboardByCode()
-        } else if (response.status === 401) {
-          setAuthError("Authentication failed. Please login again.")
-          console.error(`❌ Command ${command} failed: Authentication error`)
-        } else {
-          const errorText = await response.text().catch(() => response.statusText)
-          console.error(`❌ Command ${command} failed:`, errorText)
-          setAuthError(`Failed to execute command ${command}: ${response.status} ${response.statusText} - ${errorText}`)
-        }
-      } catch (error) {
-        console.error(`❌ Error executing command ${command}:`, error)
-        setAuthError(
-          `An error occurred while executing ${command}: ${error instanceof Error ? error.message : String(error)}`,
-        )
-      }
-    },
-    [sessionCode, fetchHostDashboardByCode],
-  )
-
-  // Host control handlers
-  const handleStartSession = useCallback(
-    (settings: any) => {
-      console.log("🚀 Starting session with settings:", settings)
-      handleSendHostCommand("START_SESSION", settings)
-    },
-    [handleSendHostCommand],
-  )
-
-  const handlePauseSession = useCallback(() => {
-    handleSendHostCommand("PAUSE_SESSION")
-  }, [handleSendHostCommand])
-
-  const handleResumeSession = useCallback(() => {
-    handleSendHostCommand("RESUME_SESSION")
-  }, [handleSendHostCommand])
-
-  const handleEndSession = useCallback(() => {
-    handleSendHostCommand("END_SESSION")
-  }, [handleSendHostCommand])
-
-  const handleNextQuestion = useCallback(() => {
-    handleSendHostCommand("NEXT_QUESTION")
-  }, [handleSendHostCommand])
-
-  const handleSetQuestionTimeLimit = useCallback(
-    (timeLimit: number) => {
-      handleSendHostCommand("SET_QUESTION_TIME_LIMIT", timeLimit)
-    },
-    [handleSendHostCommand],
-  )
+  // Host commands hook
+  const {
+    startSession,
+    pauseSession,
+    resumeSession,
+    endSession,
+    nextQuestion,
+    setQuestionTimeLimit,
+  } = useHostCommands({
+    sessionCode,
+    onRefresh: fetchHostDashboard,
+    setAuthError,
+  })
 
   // Show session code input if not connected
   if (!isConnected) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900 flex items-center justify-center p-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="bg-white rounded-2xl p-8 shadow-2xl max-w-md mx-auto text-center"
-        >
-          <div className="text-6xl mb-4">🎮</div>
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">Host Quiz Dashboard</h2>
-          <p className="text-gray-600 mb-6">Connecting to session...</p>
-
-          <div className="mb-6 p-4 bg-purple-50 border border-purple-200 rounded-lg">
-            <div className="text-sm text-purple-800">
-              <div className="font-medium mb-2">📋 Session Code:</div>
-              <div className="text-2xl font-mono font-bold text-purple-900 tracking-wider">
-                {sessionCode || "Loading..."}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-center space-x-2 text-gray-600">
-            <div className="w-5 h-5 border-2 border-purple-600 border-t-transparent rounded-full animate-spin"></div>
-            <span>Connecting to WebSocket...</span>
-          </div>
-
-          {authError && (
-            <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
-              <div className="text-sm text-red-800">
-                <div className="font-medium mb-1">⚠️ Authentication Error</div>
-                <div>{authError}</div>
-              </div>
-            </div>
-          )}
-        </motion.div>
+        <SessionCodeInput sessionCode={sessionCode} setSessionCode={setSessionCode} onConnect={handleConnect} />
       </div>
     )
   }
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900">
-      {/* Enhanced Header */}
-      <div className="bg-white shadow-lg p-4">
-        <div className="flex justify-between items-center">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-800 flex items-center">
-              <span className="mr-2">🎮</span>
-              Quiz Host Dashboard
-            </h1>
-            <div className="flex items-center space-x-4 mt-2">
-              <div className="flex items-center space-x-2">
-                <div
-                  className={`w-3 h-3 rounded-full ${
-                    connectionStatus === "Connected"
-                      ? "bg-green-500 animate-pulse"
-                      : connectionStatus === "Connecting..."
-                        ? "bg-yellow-500 animate-pulse"
-                        : connectionStatus === "Authentication Error"
-                          ? "bg-red-500"
-                          : "bg-red-500"
-                  }`}
-                />
-                <span className="text-sm text-gray-600 font-medium">{connectionStatus}</span>
-              </div>
+  // ========================================================================
+  // LOBBY VIEW - QR Code, Session Code, Participants
+  // ========================================================================
+  const renderLobbyView = () => (
+    <motion.div
+      key="lobby"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900 flex flex-col items-center justify-center p-6"
+    >
+      <div className="max-w-4xl w-full space-y-8">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 text-center">
+          <h1 className="text-4xl font-bold text-gray-800 mb-4">
+            {hostDashboard?.quizTitle || "Quiz Session"}
+          </h1>
+          
+          {/* Session Code */}
+          <div className="mb-8">
+            <p className="text-gray-600 text-lg mb-2">Join at:</p>
+            <div className="bg-gradient-to-r from-purple-500 to-indigo-600 text-white rounded-2xl p-6 mb-4">
+              <p className="text-sm mb-2">{joinUrl}</p>
+              <p className="text-5xl font-black tracking-wider">{sessionCode}</p>
+            </div>
+          </div>
 
-              {hostDashboard && (
-                <div className="text-sm text-purple-600 bg-purple-50 px-3 py-1 rounded-full">
-                  Q{hostDashboard.currentQuestion}/{hostDashboard.totalQuestions} •{hostDashboard.participantsAnswered}/
-                  {hostDashboard.totalParticipants} answered
-                </div>
+          {/* QR Code */}
+          <div className="mb-8">
+            <QRCodeSection joinUrl={joinUrl} />
+          </div>
+
+          {/* Participant Count */}
+          <div className="mb-6">
+            <div className="inline-block bg-green-100 text-green-700 px-8 py-4 rounded-full">
+              <span className="text-3xl font-bold">{participants.length}</span>
+              <span className="text-xl ml-2">participants joined</span>
+            </div>
+          </div>
+
+          {/* Participant List */}
+          {participants.length > 0 && (
+            <div className="mb-8 max-h-64 overflow-y-auto">
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                {participants.map((p) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ scale: 0 }}
+                    animate={{ scale: 1 }}
+                    className="bg-gray-100 rounded-lg p-3 text-gray-800 font-semibold"
+                  >
+                    {p.nickname || p.name}
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Start Button */}
+          <button
+            onClick={() => setShowSettings(true)}
+            disabled={participants.length === 0}
+            className={`px-12 py-5 rounded-2xl font-bold text-2xl transition-all shadow-lg ${
+              participants.length === 0
+                ? "bg-gray-300 text-gray-500 cursor-not-allowed"
+                : "bg-gradient-to-r from-green-500 to-green-600 text-white hover:from-green-600 hover:to-green-700 hover:scale-105 active:scale-95"
+            }`}
+          >
+            Start Quiz
+          </button>
+        </div>
+      </div>
+    </motion.div>
+  )
+
+  // ========================================================================
+  // QUESTION VIEW - Full Kahoot-style Display
+  // ========================================================================
+  const renderQuestionView = () => {
+    const timerSeconds = hostDashboard?.currentTimer?.remainingSeconds || 0
+    const totalSeconds = hostDashboard?.currentTimer?.totalSeconds || 30
+    const timerPercentage = (timerSeconds / totalSeconds) * 100
+
+    return (
+      <motion.div
+        key="question"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex flex-col"
+      >
+        {/* Top Bar - Question Number & Timer */}
+        <div className="p-4 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="bg-white rounded-full w-16 h-16 flex items-center justify-center shadow-lg">
+              <span className="text-gray-800 font-bold text-2xl">
+                {hostDashboard?.currentQuestionNumber || 1}
+              </span>
+            </div>
+            <div className="text-white">
+              <p className="text-sm opacity-80">Question</p>
+              <p className="font-bold text-lg">
+                {hostDashboard?.currentQuestionNumber || 1} of {hostDashboard?.totalQuestions || 10}
+              </p>
+            </div>
+          </div>
+
+          {/* Timer Circle */}
+          <div className="relative w-24 h-24">
+            <svg className="transform -rotate-90 w-24 h-24">
+              <circle
+                cx="48"
+                cy="48"
+                r="40"
+                stroke="rgba(255,255,255,0.2)"
+                strokeWidth="8"
+                fill="none"
+              />
+              <circle
+                cx="48"
+                cy="48"
+                r="40"
+                stroke={timerSeconds <= 5 ? "#EF4444" : "#10B981"}
+                strokeWidth="8"
+                fill="none"
+                strokeDasharray={`${2 * Math.PI * 40}`}
+                strokeDashoffset={`${2 * Math.PI * 40 * (1 - timerPercentage / 100)}`}
+                className="transition-all duration-1000"
+              />
+            </svg>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className={`text-3xl font-bold ${timerSeconds <= 5 ? 'text-red-400 animate-pulse' : 'text-white'}`}>
+                {timerSeconds}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <button
+              onClick={handleDisconnect}
+              className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg font-semibold transition-all"
+            >
+              End Quiz
+            </button>
+          </div>
+        </div>
+
+        {/* Main Question Display */}
+        <div className="flex-1 flex items-center justify-center p-8">
+          <div className="max-w-6xl w-full">
+            {/* Question Text */}
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              className="bg-white/95 backdrop-blur-sm rounded-3xl p-12 mb-8 shadow-2xl"
+            >
+              <h1 className="text-4xl md:text-5xl font-bold text-gray-800 text-center leading-tight">
+                {currentQuestion?.text?.replace(/_/g, ' ') || 
+                 currentQuestion?.questionText?.replace(/_/g, ' ') || 
+                 'Loading question...'}
+              </h1>
+            </motion.div>
+
+            {/* Answer Options Display */}
+            {currentQuestion?.options && (
+              <div className="grid grid-cols-2 gap-6 mb-8">
+                {currentQuestion.options.map((option: any, index: number) => {
+                  const colors = [
+                    'bg-red-500',
+                    'bg-blue-500',
+                    'bg-yellow-500',
+                    'bg-green-500'
+                  ]
+                  const icons = ['△', '◆', '○', '□']
+                  
+                  return (
+                    <motion.div
+                      key={option.id || index}
+                      initial={{ scale: 0, rotate: -10 }}
+                      animate={{ scale: 1, rotate: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className={`${colors[index % 4]} rounded-2xl p-6 shadow-xl`}
+                    >
+                      <div className="flex items-center gap-4">
+                        <div className="w-14 h-14 bg-white/20 rounded-lg flex items-center justify-center">
+                          <span className="text-white text-3xl font-bold">{icons[index % 4]}</span>
+                        </div>
+                        <span className="text-white font-bold text-xl flex-1">
+                          {option.text?.replace(/_/g, ' ') || option.optionText?.replace(/_/g, ' ')}
+                        </span>
+                      </div>
+                    </motion.div>
+                  )
+                })}
+              </div>
+            )}
+
+            {/* Stats Bar */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="bg-white/90 rounded-2xl p-6 text-center shadow-lg">
+                <p className="text-gray-600 text-sm mb-1">Answered</p>
+                <p className="text-3xl font-bold text-gray-800">
+                  {questionStats?.answeredCount || 0}/{participants.length}
+                </p>
+              </div>
+              <div className="bg-white/90 rounded-2xl p-6 text-center shadow-lg">
+                <p className="text-gray-600 text-sm mb-1">Correct</p>
+                <p className="text-3xl font-bold text-green-600">
+                  {questionStats?.correctCount || 0}
+                </p>
+              </div>
+              <div className="bg-white/90 rounded-2xl p-6 text-center shadow-lg">
+                <p className="text-gray-600 text-sm mb-1">Incorrect</p>
+                <p className="text-3xl font-bold text-red-600">
+                  {(questionStats?.answeredCount || 0) - (questionStats?.correctCount || 0)}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Bottom Control Bar */}
+        <div className="p-6 bg-black/20 backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto flex items-center justify-between">
+            <div className="flex gap-3">
+              {hostDashboard?.currentTimer?.timerStatus === 'running' ? (
+                <button
+                  onClick={pauseSession}
+                  className="bg-yellow-500 hover:bg-yellow-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg"
+                >
+                  ⏸ Pause
+                </button>
+              ) : (
+                <button
+                  onClick={resumeSession}
+                  className="bg-green-500 hover:bg-green-600 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all shadow-lg"
+                >
+                  ▶ Resume
+                </button>
               )}
             </div>
 
-            {/* Authentication Error Display */}
-            {authError && (
-              <div className="mt-2 p-2 bg-red-50 border border-red-200 rounded text-sm text-red-700">⚠️ {authError}</div>
-            )}
+            <button
+              onClick={nextQuestion}
+              className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white px-12 py-4 rounded-xl font-bold text-xl transition-all shadow-lg hover:scale-105"
+            >
+              Next Question →
+            </button>
           </div>
+        </div>
+      </motion.div>
+    )
+  }
 
-          <div className="flex items-center space-x-4">
-            <div className="bg-gradient-to-r from-purple-100 to-indigo-100 px-6 py-4 rounded-xl border border-purple-200">
-              <p className="text-xs text-gray-600 mb-1">Session Code</p>
-              <p className="text-2xl font-bold text-purple-800">{sessionCode}</p>
-            </div>
+  // ========================================================================
+  // LEADERBOARD VIEW - After Each Question
+  // ========================================================================
+  const renderLeaderboardView = () => (
+    <motion.div
+      key="leaderboard"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900 p-6"
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-5xl font-bold text-white mb-4">Leaderboard</h1>
+          <p className="text-white/80 text-xl">
+            Question {hostDashboard?.currentQuestionNumber || 1} of {hostDashboard?.totalQuestions || 10}
+          </p>
+        </div>
 
-            <div className="flex flex-col space-y-2">
-              <button
-                onClick={() => setShowSettings(true)}
-                className="px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition shadow-lg"
-                disabled={!!authError}
-              >
-                🚀 Start Quiz
-              </button>
+        <EnhancedLeaderboard 
+          leaderboard={leaderboard} 
+          celebrations={celebrations} 
+          questionStats={questionStats} 
+        />
 
-              <button
-                onClick={handleNextQuestion}
-                className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition"
-                disabled={connectionStatus !== "Connected" || !!authError}
-              >
-                ➡️ Next Question
-              </button>
-
-              <button
-                onClick={handleDisconnect}
-                className="px-4 py-2 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition text-sm"
-              >
-                🔌 Disconnect
-              </button>
-            </div>
-          </div>
+        <div className="text-center mt-8">
+          <button
+            onClick={nextQuestion}
+            className="px-12 py-5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-2xl font-bold text-2xl hover:from-green-600 hover:to-green-700 hover:scale-105 active:scale-95 transition-all shadow-lg"
+          >
+            Next Question →
+          </button>
         </div>
       </div>
+    </motion.div>
+  )
 
-      {/* Main Content */}
-      <div className="p-6 grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column - Session Info & Controls */}
-        <div className="space-y-6">
-          {/* QR Code */}
-          <div className="bg-white rounded-2xl p-6 shadow-xl text-center">
-            <h3 className="text-lg font-bold text-gray-800 mb-4">📱 Join Quiz</h3>
-            {joinUrl && (
-              <div className="bg-white p-4 rounded-lg inline-block border-2 border-gray-200">
-                <QRCodeCanvas value={joinUrl} size={150} />
-              </div>
-            )}
-            <p className="text-sm text-gray-600 mt-4">
-              Scan QR code or visit: <br />
-              <span className="font-mono text-purple-600">{joinUrl}</span>
-            </p>
-          </div>
-          <HostControls
-            hostDashboard={hostDashboard}
-            sessionCode={sessionCode}
-            onStartSession={() => setShowSettings(true)}
-            onPauseSession={handlePauseSession}
-            onResumeSession={handleResumeSession}
-            onEndSession={handleEndSession}
-            onNextQuestion={handleNextQuestion}
-            onSetQuestionTimeLimit={handleSetQuestionTimeLimit}
-         
-            // onSetQuestionTimeLimit={handleSetQuestionTimeLimit}
-          />
-
-          {/* Participant Progress */}
-          <ParticipantProgress
-            participants={participants}
-            detailedProgress={detailedProgress}
-            totalQuestions={hostDashboard?.totalQuestions || 10}
-          />
+  // ========================================================================
+  // FINAL RESULTS VIEW
+  // ========================================================================
+  const renderFinalResultsView = () => (
+    <motion.div
+      key="final-results"
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      exit={{ opacity: 0, scale: 0.95 }}
+      className="min-h-screen bg-gradient-to-br from-purple-600 via-indigo-700 to-indigo-900 p-6"
+    >
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="text-6xl font-bold text-white mb-4">🏆 Final Results 🏆</h1>
+          <p className="text-white/80 text-2xl">Quiz Complete!</p>
         </div>
 
-        {/* Right Columns - Leaderboard */}
-        <div className="lg:col-span-2">
-          <EnhancedLeaderboard leaderboard={leaderboard} celebrations={celebrations} questionStats={questionStats} />
+        <EnhancedLeaderboard 
+          leaderboard={leaderboard} 
+          celebrations={celebrations} 
+          questionStats={questionStats} 
+        />
+
+        <div className="text-center mt-8 space-x-4">
+          <button
+            onClick={handleDisconnect}
+            className="px-12 py-5 bg-white text-purple-600 rounded-2xl font-bold text-2xl hover:bg-gray-100 transition-all shadow-lg"
+          >
+            End Session
+          </button>
         </div>
       </div>
+    </motion.div>
+  )
+
+  return (
+    <>
+      <AnimatePresence mode="wait">
+        {currentView === "lobby" && renderLobbyView()}
+        {currentView === "question" && renderQuestionView()}
+        {currentView === "leaderboard" && renderLeaderboardView()}
+        {currentView === "final-results" && renderFinalResultsView()}
+      </AnimatePresence>
 
       {/* Quiz Settings Modal */}
       <AnimatePresence>
@@ -1676,10 +557,20 @@ export default function LocalhostHostUI() {
           <QuizSettingsModal
             isOpen={showSettings}
             onClose={() => setShowSettings(false)}
-            onStart={handleStartSession}
+            onStart={async (settings) => {
+              setShowSettings(false)
+              // Start the session
+              await startSession(settings)
+              // Manually trigger view change to question view
+              setCurrentView("question")
+              // Refresh dashboard data
+              setTimeout(() => {
+                fetchHostDashboard()
+              }, 1000)
+            }}
           />
         )}
       </AnimatePresence>
-    </div>
+    </>
   )
 }

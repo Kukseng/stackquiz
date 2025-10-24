@@ -53,7 +53,7 @@ export function PlatformSection() {
           >
             <div className="mb-12">
               {/* Section Title */}
-              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[58px] font-bold text-white">
+              <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-[56px] font-bold text-white">
                 <span className="text-yellow text-underline">
                   {t.platform.title}
                 </span>

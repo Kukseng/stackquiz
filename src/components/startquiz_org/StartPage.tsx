@@ -8,7 +8,13 @@ import Card from "./Card";
 import { Button } from "@/components/ui/button";
 import ChallengeGrid from "../GridCardComponent";
 import { getSession } from "next-auth/react";
-import { ArrowLeft, ArrowRight,ClipboardList, Clock, AlertTriangle } from "lucide-react";
+import {
+  ArrowLeft,
+  ArrowRight,
+  ClipboardList,
+  Clock,
+  AlertTriangle,
+} from "lucide-react";
 
 // Types
 interface QuizData {
@@ -18,6 +24,7 @@ interface QuizData {
   thumbnailUrl?: string;
   questions: string[];
   category?: string;
+  difficulty?: string;
 }
 
 interface CreateSessionRequest {
@@ -247,7 +254,7 @@ export default function StartPage() {
         "🎉 Session created successfully! Navigating to host dashboard..."
       );
 
-      router.push(`/host/${sessionData.sessionCode}`);
+      router.push(`/startquiz_org/host/${sessionData.sessionCode}`);
     } catch (err) {
       console.error("❌ Failed to create session:", err);
       const errorMessage =
@@ -380,15 +387,49 @@ export default function StartPage() {
     );
   }
 
-  const getDifficulty = (questionCount: number) => {
-    if (questionCount <= 10)
-      return { label: "Easy", color: "bg-emerald-500", icon: "○" };
-    if (questionCount <= 20)
-      return { label: "Medium", color: "bg-amber-500", icon: "◐" };
-    return { label: "Hard", color: "bg-rose-500", icon: "●" };
-  };
+  const getDifficultyInfo = (difficulty?: string) => {
+    const level = difficulty?.toUpperCase() || "MEDIUM";
 
-  const difficulty = getDifficulty(quizData?.questions?.length || 0);
+    switch (level) {
+      case "EASY":
+        return {
+          label: "Easy",
+          icon: "○",
+          color: "from-emerald-400 to-emerald-600",
+          textColor: "text-emerald-600",
+          bgColor: "bg-emerald-50",
+          borderColor: "border-emerald-200",
+        };
+      case "MEDIUM":
+        return {
+          label: "Medium",
+          icon: "◐",
+          color: "from-yellow-400 to-yellow-600",
+          textColor: "text-yellow-600",
+          bgColor: "bg-yellow-50",
+          borderColor: "border-yellow-200",
+        };
+      case "HARD":
+        return {
+          label: "Hard",
+          icon: "●",
+          color: "from-red-400 to-red-600",
+          textColor: "text-red-600",
+          bgColor: "bg-red-50",
+          borderColor: "border-red-200",
+        };
+      default:
+        return {
+          label: "Medium",
+          icon: "◐",
+          color: "from-blue-400 to-blue-600",
+          textColor: "text-blue-600",
+          bgColor: "bg-blue-50",
+          borderColor: "border-blue-200",
+        };
+    }
+  };
+  const difficulty = getDifficultyInfo(quizData?.difficulty);
   const estimatedTime = Math.ceil((quizData?.questions?.length || 0) * 1.5);
 
   return (
@@ -432,88 +473,88 @@ export default function StartPage() {
 
           {/* Info Card */}
           <div className="lg:col-span-3">
-  <Card className="p-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl h-full flex flex-col">
-    {/* Category Badge */}
-    {quizData?.category && (
-      <div className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-200 bg-white/10 px-3 py-1.5 rounded-full w-fit mb-4 backdrop-blur-sm">
-        <span className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></span>
-        {quizData.category}
-      </div>
-    )}
+            <Card className="p-8 bg-white/10 backdrop-blur-md border border-white/20 rounded-xl shadow-xl h-full flex flex-col">
+              {/* Category Badge */}
+              {quizData?.category && (
+                <div className="inline-flex items-center gap-2 text-xs font-semibold text-indigo-200 bg-white/10 px-3 py-1.5 rounded-full w-fit mb-4 backdrop-blur-sm">
+                  <span className="w-1.5 h-1.5 bg-indigo-300 rounded-full"></span>
+                  {quizData.category}
+                </div>
+              )}
 
-    {/* Title and Description */}
-    <div className="flex-1 space-y-4">
-      <h1 className="text-white font-bold text-3xl lg:text-4xl leading-tight">
-        {quizData?.title}
-      </h1>
-      <p className="text-indigo-100 text-base leading-relaxed max-w-2xl">
-        {quizData?.description}
-      </p>
+              {/* Title and Description */}
+              <div className="flex-1 space-y-4">
+                <h1 className="text-white font-bold text-3xl lg:text-4xl leading-tight">
+                  {quizData?.title}
+                </h1>
+                <p className="text-indigo-100 text-base leading-relaxed max-w-2xl">
+                  {quizData?.description}
+                </p>
 
-      {/* Stats */}
-      <div className="flex flex-wrap items-center gap-3 pt-2">
-        <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
-          <ClipboardList className="w-5 h-5" />
-          <span className="font-semibold">
-            {quizData?.questions?.length || 0}
-          </span>
-          <span className="text-indigo-200">Questions</span>
-        </div>
+                {/* Stats */}
+                <div className="flex flex-wrap items-center gap-3 pt-2">
+                  <div className="flex items-center gap-2 bg-white/15 backdrop-blur-sm text-white px-4 py-2 rounded-lg">
+                    <ClipboardList className="w-5 h-5" />
+                    <span className="font-semibold">
+                      {quizData?.questions?.length || 0}
+                    </span>
+                    <span className="text-indigo-200">Questions</span>
+                  </div>
 
-        <div
-          className={`flex items-center gap-2 ${difficulty.color} text-white px-4 py-2 rounded-lg font-semibold shadow-lg`}
-        >
-          <span>{difficulty.icon}</span>
-          {difficulty.label}
-        </div>
-      </div>
-    </div>
+                  <div
+                    className={`flex items-center gap-2 bg-gradient-to-r ${difficulty.color} text-white px-4 py-2 rounded-lg font-semibold shadow-lg`}
+                  >
+                    <span>{difficulty.icon}</span>
+                    {difficulty.label}
+                  </div>
+                </div>
+              </div>
 
-    {/* Error Alert */}
-    {error && quizData && (
-      <div className="mt-4 p-4 bg-red-500/20 border border-red-400/50 rounded-xl backdrop-blur-sm">
-        <div className="flex items-start gap-3">
-          <AlertTriangle className="w-5 h-5 text-red-200 flex-shrink-0 mt-0.5" />
-          <div className="flex-1">
-            <p className="text-red-200 font-semibold text-sm mb-1">
-              Unable to Start Quiz
-            </p>
-            <p className="text-red-100 text-sm">{error}</p>
+              {/* Error Alert */}
+              {error && quizData && (
+                <div className="mt-4 p-4 bg-red-500/20 border border-red-400/50 rounded-xl backdrop-blur-sm">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-red-200 flex-shrink-0 mt-0.5" />
+                    <div className="flex-1">
+                      <p className="text-red-200 font-semibold text-sm mb-1">
+                        Unable to Start Quiz
+                      </p>
+                      <p className="text-red-100 text-sm">{error}</p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Action Section */}
+              <div className="mt-6 pt-6 border-t border-white/20">
+                <div className="flex items-center justify-between gap-4">
+                  <div className="flex-1">
+                    <p className="text-indigo-200 text-lg font-medium mb-1">
+                      Ready to begin?
+                    </p>
+                    <p className="text-white/90 text-md">
+                      Start your quiz session and invite participants
+                    </p>
+                  </div>
+                  <Button
+                    size="lg"
+                    onClick={handleStartQuiz}
+                    disabled={isCreatingSession}
+                    className="flex items-center rounded-xl gap-2 btn-text btn-secondary transition group"
+                  >
+                    {isCreatingSession ? (
+                      <span>Creating Session...</span>
+                    ) : (
+                      <>
+                        <span className="text-lg">Start Quiz</span>
+                        <ArrowRight className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-200" />
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </Card>
           </div>
-        </div>
-      </div>
-    )}
-
-    {/* Action Section */}
-    <div className="mt-6 pt-6 border-t border-white/20">
-      <div className="flex items-center justify-between gap-4">
-        <div className="flex-1">
-          <p className="text-indigo-200 text-lg font-medium mb-1">
-            Ready to begin?
-          </p>
-          <p className="text-white/90 text-md">
-            Start your quiz session and invite participants
-          </p>
-        </div>
-        <Button
-          size="lg"
-          onClick={handleStartQuiz}
-          disabled={isCreatingSession}
-          className="flex items-center rounded-xl gap-2 btn-text btn-secondary transition group"
-        >
-          {isCreatingSession ? (
-            <span>Creating Session...</span>
-          ) : (
-            <>
-              <span className="text-lg">Start Quiz</span>
-              <ArrowRight className="w-6 h-6 transform group-hover:translate-x-1 transition-transform duration-200" />
-            </>
-          )}
-        </Button>
-      </div>
-    </div>
-  </Card>
-</div>
         </div>
 
         {/* Bottom Grid */}

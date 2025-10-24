@@ -1,88 +1,17 @@
-
-export interface User {
-  id: string
-  profileUser: string
-  username: string
-  email: string
-  firstName: string
-  lastName: string
-  avatarUrl: string
-  isActive: boolean
-  createdAt: string
-}
-
-export interface QuizSession {
-  id: string
-  quiz: string
-  sessionName: string
-  hostName: string
-  sessionCode: string
-  status: "WAITING" | "ACTIVE" | "ENDED"
-  totalQuestions: number
-  totalParticipants: number
-  currentQuestion: number
-  startTime: string
-  endTime: string
-  createdAt: string
-  participants: string[]
-  host: string
-  leaderboardData: string
-}
-export interface FillBlankQuestionProps {
-  question: Omit<Question, "options"> & { options: Option[] | string[] }
-  onAnswer: (answer: string | number) => void
-  timeLeft: number
-}
 export interface Question {
   id: string
-  text: string
-  type: "TF" | "FB"|"MCQ"
-  questionOrder: number
-  timeLimit: number
-  points: number
-  imageUrl?: string
-  createdAt: string
-  updatedAt: string
-  options: string[]
-}
-
-export interface Option {
-  id: string
-  optionText: string
-  optionOrder: number
-  createdAt: string
-  isCorrected: boolean
-}
-
-export interface Participant {
-  id: string
-  nickname: string
-  sessionCode: string
-  sessionName: string
-  totalScore: number
-  joinedAt: string
-  isActive: boolean
-  isConnected: boolean
-  avatar?: {
-    id: number
-    name: string
-  }
-}
-
-export interface ParticipantAnswer {
-  answerId: string
-  participantId: string
-  participantNickname: string
-  questionId: string
   questionText: string
-  optionId: string
-  optionText: string
-  answerText: string
+  options: QuestionOption[]
+  correctOptionId: string
+  timeLimit?: number
+  points?: number
+}
+
+export interface QuestionOption {
+  id: string
+  text: string
+  optionText?: string
   isCorrect: boolean
-  timeTaken: number
-  pointsEarned: number
-  answeredAt: string
-  sessionId: string
 }
 
 export interface LeaderboardEntry {
@@ -91,38 +20,117 @@ export interface LeaderboardEntry {
   totalScore: number
   position: number
   rank: number
-  isCurrentUser: boolean
+  currentRank?: number
+  isCurrentUser?: boolean
+  avatarId?: string
+  questionsAnswered?: number
+  averageResponseTime?: number
+  correctAnswers?: number
+  streak?: number
+  isOnline?: boolean
+  lastActivity?: string
+  status?: string
+  positionChange?: number
 }
 
-export interface Leaderboard {
+export interface QuestionStats {
   sessionId: string
-  entries: LeaderboardEntry[]
+  questionNumber: number
+  totalQuestions: number
   totalParticipants: number
-  lastUpdated: number
-  status: string
-}
-export interface Quiz{
-  id: string
-  title: string
-  description: string
-  category: string
-  difficulty: "EASY" | "MEDIUM" | "HARD"
-  createdBy: string
-  createdAt: string
-  updatedAt: string
-  questions: string[]
+  participantsAnswered: number
+  participantsRemaining: number
+  averageResponseTime: number
+  correctAnswers: number
+  incorrectAnswers: number
+  accuracyRate: number
+  isQuestionComplete: boolean
+  optionStats?: { [optionId: string]: number }
 }
 
-// WebSocket Message Types
-export type WebSocketMessage =
-  | { type: "session_started"; data: QuizSession }
-  | { type: "session_ended"; data: QuizSession }
-  | { type: "question_started"; data: { question: Question; timeLimit: number } }
-  | { type: "question_ended"; data: { questionId: string; correctAnswer: string } }
-  | { type: "participant_joined"; data: Participant }
-  | { type: "participant_left"; data: { participantId: string } }
-  | { type: "answer_submitted"; data: ParticipantAnswer }
-  | { type: "leaderboard_updated"; data: Leaderboard }
-  | { type: "timer_update"; data: { timeRemaining: number } }
-  | { type: "connection_status"; data: { status: "connected" | "disconnected" | "reconnecting" } }
-  | { type: "error"; data: { message: string; code?: string } }
+export interface HostDashboardData {
+  sessionId: string
+  sessionCode: string
+  sessionName: string
+  sessionStatus: string
+  currentQuestion: number
+  totalQuestions: number
+  totalParticipants: number
+  activeParticipants: number
+  participantsAnswered: number
+  participantsPending: number
+  currentTimer?: {
+    timerType: string
+    timerStatus: string
+    remainingSeconds: number
+    totalSeconds: number
+  }
+  canStart: boolean
+  canPause: boolean
+  canResume: boolean
+  canEnd: boolean
+  canAdvanceQuestion: boolean
+}
+
+export interface AnswerFeedback {
+  participantId: string
+  questionId: string
+  selectedOptionId: string
+  correctOptionId: string
+  isCorrect: boolean
+  pointsEarned: number
+  timeTaken: number
+  newTotalScore: number
+  currentRank: number
+  explanation: string
+  timeBonus?: number
+  streak?: number
+  encouragementMessage?: string
+}
+
+export interface ScoreCelebration {
+  participantId: string
+  nickname: string
+  pointsEarned: number
+  newTotalScore: number
+  newRank: number
+  isCorrect: boolean
+  celebrationType: string
+  animationType: string
+}
+
+export interface QuestionAnalyticsData {
+  sessionCode: string
+  currentQuestionNumber: number
+  totalQuestions: number
+  questionId: string
+  questionText: string
+  correctOptionId: string
+  totalParticipants: number
+  participantsAnswered: number
+  participantsNotAnswered: number
+  participationRate: number
+  correctAnswers: number
+  incorrectAnswers: number
+  accuracyRate: number
+  optionStatistics: {
+    [key: string]: {
+      optionId: string
+      optionText: string
+      isCorrect: boolean
+      count: number
+      percentage: number
+    }
+  }
+  top3: Array<{
+    rank: number
+    participantId: string
+    nickname: string
+    avatarId: string | null
+    totalScore: number
+    correctAnswers: number
+    streak: number
+  }>
+  averageResponseTime: number
+  fastestResponseTime: number
+}

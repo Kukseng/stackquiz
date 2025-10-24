@@ -90,7 +90,7 @@ export default function AvatarSelector({ userId, onSelect }: { userId: string, o
               <Canvas camera={{ position: [0, 0, 3] }}>
                 <ambientLight intensity={0.6} />
                 <directionalLight position={[2, 2, 2]} />
-                {/* @ts-ignore */}
+              
                 <OrbitControls enableZoom={false} />
                 <AvatarModel url={a.modelUrl} />
               </Canvas>

@@ -64,8 +64,47 @@ async function post(path: string, body: unknown) {
   }
 }
 
+async function refreshAccessToken(refreshToken: string): Promise<any> {
+  try {
+    const base = resolveApiBase();
+    const url = `${base}/auth/refresh`;
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "User-Agent": "NextAuth-Client/1.0",
+      },
+      cache: "no-store",
+      body: JSON.stringify({ refreshToken }),
+    });
+
+    if (!res.ok) {
+      console.error(
+        `[NextAuth] Token refresh failed: ${res.status} ${res.statusText}`
+      );
+      return null;
+    }
+
+    const data = await res.json();
+    const payload = data.data ?? data;
+    return {
+      accessToken: payload.accessToken ?? payload.access_token,
+      refreshToken:
+        payload.refreshToken ?? payload.refresh_token ?? refreshToken,
+      expiresIn: payload.expiresIn ?? payload.expires_in ?? 3600,
+    };
+  } catch (error) {
+    console.error("[NextAuth] Token refresh error:", error);
+    return null;
+  }
+}
+
 const authOptions: NextAuthOptions = {
-  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET,
+  session: {
+    strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 days
+  },
   providers: [
     GoogleProvider({
       clientId: process.env.GOOGLE_CLIENT_ID!,

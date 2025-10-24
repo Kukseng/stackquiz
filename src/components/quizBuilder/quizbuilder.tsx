@@ -123,6 +123,8 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
       </div>
     );
   }
+    deleteQuestion(typeof id === "number" ? String(id) : id);
+  };
 
   return (
     <div
@@ -141,6 +143,19 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
           onQuestionSelect={setActiveQuestionId}
           onAddQuestion={() => setShowAddQuestionModal(true)}
         />
+      className={`min-h-screen flex relative transition-colors duration-500 ${
+        theme === "light"
+          ? "bg-gradient-to-br from-pink-50 to-purple-50"
+          : "bg-gradient-to-br from-gray-800 to-gray-900 text-white"
+      }`}
+    >
+      {/* Sidebar */}
+      <QuizSidebar
+        questions={questions}
+        activeQuestionId={activeQuestionId}
+        onQuestionSelect={setActiveQuestionId}
+        onAddQuestion={() => setShowAddQuestionModal(true)}
+      />
 
         <QuizMainContent
           questions={questions as any}
@@ -152,6 +167,17 @@ export function QuizBuilderLayout({ quizId }: QuizBuilderLayoutProps) {
           onDuplicateQuestion={duplicateQuestion}
           theme={selectedTheme}
         />
+      {/* Main Content */}
+      <QuizMainContent
+        questions={questions}
+        activeQuestionId={activeQuestionId}
+        onUpdateQuestionText={updateQuestionText}
+        onUpdateOptionText={updateOptionText}
+        onToggleCorrectAnswer={toggleCorrectAnswer}
+        onDeleteQuestion={handleDelete}
+        onDuplicateQuestion={duplicateQuestion}
+        theme={theme} 
+      />
 
         <ThemeSidebar selectedTheme={selectedTheme} onThemeChange={setSelectedTheme} />
       </div>

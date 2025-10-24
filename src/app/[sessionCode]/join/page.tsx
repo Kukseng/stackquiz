@@ -130,12 +130,24 @@ export default function ParticipantQuiz() {
       !showFeedback &&
       !isSubmittingAnswer
     ) {
-      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000)
-      return () => clearTimeout(timer)
-    } else if (timeLeft === 0 && status === "PLAY" && !answerSelected && !isSubmittingAnswer) {
-      handleTimeUp()
+      const timer = setTimeout(() => setTimeLeft(timeLeft - 1), 1000);
+      return () => clearTimeout(timer);
+    } else if (
+      timeLeft === 0 &&
+      status === "PLAY" &&
+      !answerSelected &&
+      !isSubmittingAnswer
+    ) {
+      handleTimeUp();
     }
-  }, [timeLeft, status, currentQuestion, answerSelected, showFeedback, isSubmittingAnswer])
+  }, [
+    timeLeft,
+    status,
+    currentQuestion,
+    answerSelected,
+    showFeedback,
+    isSubmittingAnswer,
+  ]);
 
   // Handle time up
   const handleTimeUp = () => {
@@ -146,10 +158,10 @@ export default function ParticipantQuiz() {
   const handleAnswer = (optionId: string) => {
     if (!currentQuestion || answerSelected || isSubmittingAnswer) return
 
-    setAnswerSelected(optionId)
-    setIsSubmittingAnswer(true)
+    setAnswerSelected(optionId);
+    setIsSubmittingAnswer(true);
 
-    const success = sendAnswer(optionId, currentQuestion.id)
+    const success = sendAnswer(optionId, currentQuestion.id);
     if (success) {
       setShowFeedback(true)
       setFeedback({ submitted: true })

@@ -2,7 +2,14 @@
 
 import { useState, useRef, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { MessageCircle, X, Send, Sparkles, Loader2, AlertCircle } from "lucide-react";
+import {
+  MessageCircle,
+  X,
+  Send,
+  Sparkles,
+  Loader2,
+  AlertCircle,
+} from "lucide-react";
 
 interface Message {
   id: string;
@@ -35,15 +42,16 @@ const getAuthHeaders = async (): Promise<Record<string, string>> => {
     // Import getSession dynamically to avoid SSR issues
     const { getSession } = await import("next-auth/react");
     const session = await getSession();
-    
+
     const headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
     // Check for API access token
     if (session) {
-      const token = (session as any)?.apiAccessToken || (session as any)?.accessToken;
-      
+      const token =
+        (session as any)?.apiAccessToken || (session as any)?.accessToken;
+
       if (token) {
         headers["Authorization"] = `Bearer ${token}`;
         console.log("✅ Auth token added to headers");
@@ -67,7 +75,8 @@ export function AIChatbot({ onQuestionsGenerated }: AIChatbotProps) {
     {
       id: "1",
       role: "assistant",
-      content: "👋 Hi! I'm your AI quiz assistant. I can help you generate questions for your quiz. Just tell me what you need!\n\n💡 **Quick examples:**\n• \"Generate 5 easy questions about JavaScript\"\n• \"Create 3 hard questions on World War 2\"\n• \"Make 10 medium Python questions\"",
+      content:
+        '👋 Hi! I\'m your AI quiz assistant. I can help you generate questions for your quiz. Just tell me what you need!\n\n💡 **Quick examples:**\n• "Generate 5 easy questions about JavaScript"\n• "Create 3 hard questions on World War 2"\n• "Make 10 medium Python questions"',
       timestamp: new Date(),
     },
   ]);
@@ -100,11 +109,11 @@ export function AIChatbot({ onQuestionsGenerated }: AIChatbotProps) {
 
     try {
       const lowerInput = input.toLowerCase();
-      
+
       // Check if user wants to generate questions
       if (
-        lowerInput.includes("generate") || 
-        lowerInput.includes("create") || 
+        lowerInput.includes("generate") ||
+        lowerInput.includes("create") ||
         lowerInput.includes("make") ||
         /\d+\s*(question|quiz)/i.test(lowerInput)
       ) {
@@ -126,7 +135,8 @@ export function AIChatbot({ onQuestionsGenerated }: AIChatbotProps) {
       const errorMessage: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "❌ Sorry, I encountered an error. Please try again or rephrase your request.",
+        content:
+          "❌ Sorry, I encountered an error. Please try again or rephrase your request.",
         timestamp: new Date(),
         isError: true,
       };
@@ -136,10 +146,16 @@ export function AIChatbot({ onQuestionsGenerated }: AIChatbotProps) {
     }
   };
 
-  const getConversationalResponse = async (userInput: string): Promise<string> => {
+  const getConversationalResponse = async (
+    userInput: string
+  ): Promise<string> => {
     const lowerInput = userInput.toLowerCase();
 
-    if (lowerInput.includes("hello") || lowerInput.includes("hi") || lowerInput.includes("hey")) {
+    if (
+      lowerInput.includes("hello") ||
+      lowerInput.includes("hi") ||
+      lowerInput.includes("hey")
+    ) {
       return "👋 Hello! I'm ready to help you create quiz questions. What topic interests you today?";
     }
 
@@ -164,7 +180,11 @@ export function AIChatbot({ onQuestionsGenerated }: AIChatbotProps) {
 Try it now! 🚀`;
     }
 
-    if (lowerInput.includes("topic") || lowerInput.includes("subject") || lowerInput.includes("about what")) {
+    if (
+      lowerInput.includes("topic") ||
+      lowerInput.includes("subject") ||
+      lowerInput.includes("about what")
+    ) {
       return `📚 I can create questions about almost any topic!
 
 **Popular topics:**
@@ -188,7 +208,7 @@ Just mention "easy", "medium", or "hard" in your request!`;
     }
 
     if (lowerInput.includes("how many")) {
-      return "You can generate anywhere from **1 to 20 questions** at a time. Just tell me the number you'd like!\n\nExample: \"Generate 7 questions about React\"";
+      return 'You can generate anywhere from **1 to 20 questions** at a time. Just tell me the number you\'d like!\n\nExample: "Generate 7 questions about React"';
     }
 
     // Default response with suggestion
@@ -207,7 +227,8 @@ Or just tell me more about what you need! 😊`;
       const errorMsg: Message = {
         id: crypto.randomUUID(),
         role: "assistant",
-        content: "🤔 I couldn't identify a clear topic. Please try again with something like:\n\n\"Generate 5 questions about [your topic]\"",
+        content:
+          '🤔 I couldn\'t identify a clear topic. Please try again with something like:\n\n"Generate 5 questions about [your topic]"',
         timestamp: new Date(),
         isError: true,
       };
@@ -230,30 +251,40 @@ Or just tell me more about what you need! 😊`;
     const assistantMessage: Message = {
       id: crypto.randomUUID(),
       role: "assistant",
-      content: `🎯 Generating **${params.numberOfQuestions}** ${params.difficulty.toLowerCase()} difficulty questions about **"${params.topic}"**...\n\n⏳ This may take a few moments...`,
+      content: `🎯 Generating **${
+        params.numberOfQuestions
+      }** ${params.difficulty.toLowerCase()} difficulty questions about **"${
+        params.topic
+      }"**...\n\n⏳ This may take a few moments...`,
       timestamp: new Date(),
     };
     setMessages((prev) => [...prev, assistantMessage]);
 
     try {
       const headers = await getAuthHeaders();
-      console.log("🔐 Request headers:", { ...headers, Authorization: headers.Authorization ? "Bearer ***" : "none" });
-
-      const response = await fetch("https://stackquiz-api.stackquiz.me/api/v1/ai/quiz/chatbot/generate", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          topic: params.topic,
-          numberOfQuestions: params.numberOfQuestions,
-          difficulty: params.difficulty,
-          questionType: "MULTIPLE_CHOICE",
-          numberOfOptions: 4,
-          timeLimit: 30,
-          points: 100,
-          language: "English",
-          includeExplanations: true,
-        }),
+      console.log("🔐 Request headers:", {
+        ...headers,
+        Authorization: headers.Authorization ? "Bearer ***" : "none",
       });
+
+      const response = await fetch(
+        "https://stackquiz-api.stackquiz.me/api/v1/ai/quiz/chatbot/generate",
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify({
+            topic: params.topic,
+            numberOfQuestions: params.numberOfQuestions,
+            difficulty: params.difficulty,
+            questionType: "MULTIPLE_CHOICE",
+            numberOfOptions: 4,
+            timeLimit: 30,
+            points: 100,
+            language: "English",
+            includeExplanations: true,
+          }),
+        }
+      );
 
       const responseText = await response.text();
       console.log("API Response Status:", response.status);
@@ -266,20 +297,27 @@ Or just tell me more about what you need! 😊`;
         } catch {
           // Handle 401 specifically
           if (response.status === 401) {
-            throw new Error("🔒 Authentication failed. Please log in again to use the AI assistant.");
+            throw new Error(
+              "🔒 Authentication failed. Please log in again to use the AI assistant."
+            );
           }
-          throw new Error(`API Error: ${response.status} - ${responseText.substring(0, 200)}`);
+          throw new Error(
+            `API Error: ${response.status} - ${responseText.substring(0, 200)}`
+          );
         }
 
         // Handle specific error messages from backend
-        const errorMsg = errorData.message || errorData.error || "Unknown error occurred";
+        const errorMsg =
+          errorData.message || errorData.error || "Unknown error occurred";
         const suggestion = errorData.suggestion || "";
-        
+
         // Add auth-specific message for 401
         if (response.status === 401) {
-          throw new Error("🔒 Authentication required. Please log in to use the AI quiz generator.");
+          throw new Error(
+            "🔒 Authentication required. Please log in to use the AI quiz generator."
+          );
         }
-        
+
         throw new Error(`${errorMsg}\n${suggestion}`);
       }
 
@@ -288,26 +326,33 @@ Or just tell me more about what you need! 😊`;
         data = JSON.parse(responseText);
       } catch (parseError) {
         console.error("JSON Parse Error:", parseError);
-        throw new Error("Failed to parse response from server. The AI may have returned invalid data.");
+        throw new Error(
+          "Failed to parse response from server. The AI may have returned invalid data."
+        );
       }
 
       if (data.success && data.data?.questions) {
         const questions = data.data.questions;
-        
+
         if (questions.length === 0) {
-          throw new Error("No questions were generated. Please try a different topic or reduce the number of questions.");
+          throw new Error(
+            "No questions were generated. Please try a different topic or reduce the number of questions."
+          );
         }
 
         // Validate question structure
-        const validQuestions = questions.filter((q: any) => 
-          q.questionText && 
-          q.options && 
-          Array.isArray(q.options) && 
-          q.options.length >= 2
+        const validQuestions = questions.filter(
+          (q: any) =>
+            q.questionText &&
+            q.options &&
+            Array.isArray(q.options) &&
+            q.options.length >= 2
         );
 
         if (validQuestions.length === 0) {
-          throw new Error("Generated questions are invalid. Please try again with a simpler topic.");
+          throw new Error(
+            "Generated questions are invalid. Please try again with a simpler topic."
+          );
         }
 
         if (onQuestionsGenerated) {
@@ -317,19 +362,26 @@ Or just tell me more about what you need! 😊`;
         const successMessage: Message = {
           id: crypto.randomUUID(),
           role: "assistant",
-          content: `✅ **Success!** Generated ${validQuestions.length} question${validQuestions.length > 1 ? 's' : ''}!
+          content: `✅ **Success!** Generated ${
+            validQuestions.length
+          } question${validQuestions.length > 1 ? "s" : ""}!
 
 📝 **Preview of first question:**
 
 **Q: ${validQuestions[0].questionText}**
 
 ${validQuestions[0].options
-  .map((opt: any, i: number) => 
-    `${String.fromCharCode(65 + i)}. ${opt.optionText} ${opt.isCorrect ? '✅' : ''}`
+  .map(
+    (opt: any, i: number) =>
+      `${String.fromCharCode(65 + i)}. ${opt.optionText} ${
+        opt.isCorrect ? "✅" : ""
+      }`
   )
-  .join('\n')}
+  .join("\n")}
 
-${validQuestions[0].explanation ? `\n💡 *${validQuestions[0].explanation}*` : ''}
+${
+  validQuestions[0].explanation ? `\n💡 *${validQuestions[0].explanation}*` : ""
+}
 
 ---
 
@@ -338,20 +390,28 @@ The questions have been added to your quiz! Would you like to generate more?`,
         };
         setMessages((prev) => [...prev, successMessage]);
       } else {
-        throw new Error(data.message || "Failed to generate questions - invalid response format");
+        throw new Error(
+          data.message ||
+            "Failed to generate questions - invalid response format"
+        );
       }
     } catch (error) {
       console.error("Generation error:", error);
-      
-      const errorMessage = error instanceof Error ? error.message : "Unknown error";
-      const isServerError = errorMessage.includes("500") || errorMessage.includes("parse");
-      
+
+      const errorMessage =
+        error instanceof Error ? error.message : "Unknown error";
+      const isServerError =
+        errorMessage.includes("500") || errorMessage.includes("parse");
+
       let troubleshootingMsg = "";
       if (isServerError) {
         troubleshootingMsg = `\n\n🔧 **Troubleshooting:**\n• The AI service may be overloaded\n• Try a simpler topic\n• Reduce the number of questions\n• Wait a moment and try again`;
       }
 
-      const retryMsg = retryCount < 2 ? `\n\n🔄 You can try again with a different request.` : "";
+      const retryMsg =
+        retryCount < 2
+          ? `\n\n🔄 You can try again with a different request.`
+          : "";
 
       const errorMsg: Message = {
         id: crypto.randomUUID(),
@@ -361,7 +421,7 @@ The questions have been added to your quiz! Would you like to generate more?`,
         isError: true,
       };
       setMessages((prev) => [...prev, errorMsg]);
-      setRetryCount(prev => prev + 1);
+      setRetryCount((prev) => prev + 1);
     }
   };
 
@@ -375,17 +435,28 @@ The questions have been added to your quiz! Would you like to generate more?`,
 
     // Extract difficulty
     let difficulty = "MEDIUM";
-    if (lowerInput.includes("easy") || lowerInput.includes("beginner") || lowerInput.includes("simple")) {
+    if (
+      lowerInput.includes("easy") ||
+      lowerInput.includes("beginner") ||
+      lowerInput.includes("simple")
+    ) {
       difficulty = "EASY";
-    } else if (lowerInput.includes("hard") || lowerInput.includes("difficult") || lowerInput.includes("advanced")) {
+    } else if (
+      lowerInput.includes("hard") ||
+      lowerInput.includes("difficult") ||
+      lowerInput.includes("advanced")
+    ) {
       difficulty = "HARD";
-    } else if (lowerInput.includes("medium") || lowerInput.includes("intermediate")) {
+    } else if (
+      lowerInput.includes("medium") ||
+      lowerInput.includes("intermediate")
+    ) {
       difficulty = "MEDIUM";
     }
 
     // Extract topic (more sophisticated extraction)
     let topic = input;
-    
+
     // Remove common command words
     const patterns = [
       /(?:generate|create|make|give me|i want|can you)\s+/gi,
@@ -394,15 +465,15 @@ The questions have been added to your quiz! Would you like to generate more?`,
       /(?:easy|medium|hard|difficult|simple|beginner|advanced|intermediate)\s*/gi,
     ];
 
-    patterns.forEach(pattern => {
-      topic = topic.replace(pattern, ' ');
+    patterns.forEach((pattern) => {
+      topic = topic.replace(pattern, " ");
     });
 
     // Clean up the topic
     topic = topic
       .trim()
-      .replace(/\s+/g, ' ') // Collapse multiple spaces
-      .replace(/^[^\w]+|[^\w]+$/g, ''); // Remove leading/trailing non-word chars
+      .replace(/\s+/g, " ") // Collapse multiple spaces
+      .replace(/^[^\w]+|[^\w]+$/g, ""); // Remove leading/trailing non-word chars
 
     // If topic is still too generic or empty, try to extract from original input
     if (!topic || topic.length < 2) {
@@ -475,7 +546,9 @@ The questions have been added to your quiz! Would you like to generate more?`,
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.2 }}
-                  className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                  className={`flex ${
+                    message.role === "user" ? "justify-end" : "justify-start"
+                  }`}
                 >
                   <div
                     className={`max-w-[85%] rounded-2xl px-4 py-2.5 ${
@@ -491,13 +564,20 @@ The questions have been added to your quiz! Would you like to generate more?`,
                         <AlertCircle className="w-4 h-4 text-red-600" />
                       </div>
                     )}
-                    <p className="text-sm whitespace-pre-wrap leading-relaxed">{message.content}</p>
+                    <p className="text-sm whitespace-pre-wrap leading-relaxed">
+                      {message.content}
+                    </p>
                     <p
                       className={`text-xs mt-1.5 ${
-                        message.role === "user" ? "text-white/70" : "text-gray-500"
+                        message.role === "user"
+                          ? "text-white/70"
+                          : "text-gray-500"
                       }`}
                     >
-                      {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      {message.timestamp.toLocaleTimeString([], {
+                        hour: "2-digit",
+                        minute: "2-digit",
+                      })}
                     </p>
                   </div>
                 </motion.div>
@@ -526,7 +606,9 @@ The questions have been added to your quiz! Would you like to generate more?`,
                   type="text"
                   value={input}
                   onChange={(e) => setInput(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && !e.shiftKey && handleSend()}
+                  onKeyPress={(e) =>
+                    e.key === "Enter" && !e.shiftKey && handleSend()
+                  }
                   placeholder="Type your message..."
                   className="flex-1 px-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500 focus:border-transparent text-sm transition-shadow"
                   disabled={isLoading}
